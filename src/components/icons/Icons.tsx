@@ -29,6 +29,22 @@ export function IconDNA({ size = 48, className = "" }: IconProps) {
     );
 }
 
+// Home icon for navigation
+export function IconHome({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <path d="M32 10L8 32H16V54H28V40H36V54H48V32H56L32 10Z" fill="url(#home-grad)" />
+            <rect x="28" y="28" width="8" height="8" rx="1" fill="#FFD93D" />
+            <defs>
+                <linearGradient id="home-grad" x1="8" y1="10" x2="56" y2="54" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#a855f7" />
+                    <stop offset="1" stopColor="#6366f1" />
+                </linearGradient>
+            </defs>
+        </svg>
+    );
+}
+
 // Playground/Game icon
 export function IconPlayground({ size = 48, className = "" }: IconProps) {
     return (
@@ -276,6 +292,7 @@ export function IconCycleDaily({ size = 48, className = "" }: IconProps) {
 // Icon map for dynamic usage
 export const iconMap = {
     dna: IconDNA,
+    home: IconHome,
     playground: IconPlayground,
     game: IconPlayground,
     changelog: IconChangelog,
