@@ -1,8 +1,7 @@
 import ClickerGame from "@/components/playground/ClickerGame";
 import Image from "next/image";
-import { AdBanner } from "@/components/ads/AdBanner";
 
-export default function GamePage() {
+export default function PlaygroundPage() {
     return (
         <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-16">
             <div className="max-w-2xl w-full">
@@ -16,23 +15,13 @@ export default function GamePage() {
                     </div>
                 </div>
 
-                {/* Ad Banner - Top */}
-                <div className="mb-6">
-                    <AdBanner slot="1234567890" format="horizontal" />
-                </div>
-
-                {/* Game Container */}
+                {/* Playground Container */}
                 <div className="glass-card p-8">
                     <div className="flex items-center justify-center gap-3 mb-8">
-                        <Image src="/icons/game.png" alt="Game" width={48} height={48} />
+                        <Image src="/icons/game.png" alt="Playground" width={48} height={48} />
                         <h1 className="text-3xl font-bold gradient-text">実験場</h1>
                     </div>
                     <ClickerGame />
-                </div>
-
-                {/* Ad Banner - Bottom */}
-                <div className="mt-6">
-                    <AdBanner slot="0987654321" format="rectangle" />
                 </div>
             </div>
         </div>
