@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { glob } from 'glob';
-import { execSync } from 'child_process';
+const fs = require('fs');
+const path = require('path');
+const { glob } = require('glob');
+const { execSync } = require('child_process');
 
 // モデルIDを環境変数から取得（必須）
 const MODEL_ID = process.env.MODEL_ID;
@@ -83,16 +83,32 @@ async function main() {
     }));
 
     // 5. プロンプト構築
-    const prompt = `
-あなたは自己進化するWebサイトのAI開発者です。
-/models/${MODEL_ID}/playground ページを改善して広告収益とユーザーエンゲージメントを最大化してください。
+    // 5. プロンプト読み込み
+    let prompt = '';
+    const promptFile = process.env.PROMPT_FILE;
 
-## 現在のアナリティクス
-${JSON.stringify(analytics, null, 2)}
+    if (promptFile && fs.existsSync(promptFile)) {
+        console.log(`📄 Reading prompt from ${promptFile}`);
+        prompt = fs.readFileSync(promptFile, 'utf-8');
+    } else {
+        // フォールバック: ファイルがない場合（自動修復時など）はシンプルに構築するかエラー
+        console.error('❌ PROMPT_FILE environment variable is required and must exist');
+        process.exit(1);
+    }
 
-## 過去3回の変更履歴（成功/失敗パターンから学習）
-${JSON.stringify(changelog.slice(-3), null, 2)}
+    // コードベース情報をプロンプトに追加（テンプレートに含まれていない場合）
+    // 自動修復(Fix)モードの場合はコードベース全体を渡さない方がいいかもしれないが、
+    // コンテキストとしてあった方が有利。ただしトークン節約のため、Fixプロンプト側で制御されることを期待。
+    // ここでは、テンプレート置換済みファイルを渡される前提なので、そのまま送信する。
 
+    /* 
+       NOTE: generate-prompt.js で生成されたプロンプトにはコードベースが含まれていないため、
+       ここで注入する必要がある。（変更前のスクリプトではここでコードベースを埋め込んでいた）
+       generate-prompt.js は {{ANALYTICS}} と {{CHANGELOG}} しか置換しない。
+       したがって、コードベースの注入はここで行う必要がある。
+    */
+
+    const codebaseContext = `
 ## 編集可能なコードベース
 ${codebase.length > 0
             ? codebase.slice(0, 10).map(f => `### ${f.path}\n\`\`\`\n${f.content}\n\`\`\``).join('\n\n')
@@ -103,27 +119,12 @@ ${codebase.length > 10 ? `... and ${codebase.length - 10} more files` : ''}
 
 ## 絶対に触ってはいけないファイル（システム保護）
 ${PROTECTED_PATHS.join('\n')}
-
-## 実験ガイドライン
-- 予測不能で創造的な変更を恐れるな
-- コンテンツのルール、UI、インタラクション、すべて変更可能
-- 構文エラーは厳禁（ビルドが止まる）
-- TypeScript/Reactのベストプラクティスに従う
-- 新しいファイルは src/app/models/${MODEL_ID}/playground/ 配下に作成
-
-## 出力形式
-各変更ファイルを以下の形式で出力してください:
-
-FILE: src/app/models/${MODEL_ID}/playground/path/to/file.tsx
-\`\`\`typescript
-// 変更後の完全なコード（省略なし）
-\`\`\`
-
-最後に必ず以下を追加:
-
-REASONING: この変更が収益向上につながる理由を100文字以内で説明
-FILES: src/app/models/${MODEL_ID}/playground/page.tsx
 `;
+
+    // プロンプトファイルの内容にコードベースが含まれていなければ追加
+    if (!prompt.includes('## 編集可能なコードベース')) {
+        prompt += '\n\n' + codebaseContext;
+    }
 
     const model = process.env.OPENROUTER_MODEL || "anthropic/claude-3.7-sonnet";
     console.log(`🧠 Calling OpenRouter API (${model}) for ${MODEL_ID}...`);

@@ -38,22 +38,20 @@ jobs:
       - name: Read Prompt
         id: read-prompt
         run: |
-          echo "PROMPT_FILE=.github/prompts/generated-mimo.txt" >> $GITHUB_ENV
-          cat .github/prompts/generated-mimo.txt
+          PROMPT=$(cat .github/prompts/generated-mimo.txt)
+          echo "prompt<<EOF" >> $GITHUB_OUTPUT
+          echo "$PROMPT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Claude Code Execution (MiMo-V2-Flash)
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
-          claude_args: >
-            --message-file .github/prompts/generated-mimo.txt
-            --max-turns 10
-            --yes
-            src/app/models/mimo/playground
+          prompt: ${{ steps.read-prompt.outputs.prompt }}
+          claude_args: "--max-turns 10 --yes src/app/models/mimo/playground"
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: xiaomi/mimo-v2-flash:free
-          ANTHROPIC_API_KEY: ""
 
       - name: Check for Changes
         id: changes
@@ -90,27 +88,26 @@ jobs:
 
       - name: Prepare Fix Prompt (Attempt 1)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        id: prepare_fix_1
         run: |
-          echo "The build failed with the following errors. Please fix the code to resolve these issues. Do NOT change the functionality, just fix the syntax or type errors." > fix_prompt.txt
-          echo "" >> fix_prompt.txt
-          echo "\`\`\`" >> fix_prompt.txt
-          tail -n 50 error_log.txt >> fix_prompt.txt
-          echo "\`\`\`" >> fix_prompt.txt
+          echo "fix_prompt<<EOF" >> $GITHUB_OUTPUT
+          echo "The build failed with the following errors. Please fix the code to resolve these issues. Do NOT change the functionality, just fix the syntax or type errors." >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "\`\`\`" >> $GITHUB_OUTPUT
+          tail -n 50 error_log.txt >> $GITHUB_OUTPUT
+          echo "\`\`\`" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Auto-Fix (Attempt 1)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
-          claude_args: >
-            --message-file fix_prompt.txt
-            --max-turns 5
-            --yes
-            src/app/models/mimo/playground
+          prompt: ${{ steps.prepare_fix_1.outputs.fix_prompt }}
+          claude_args: "--max-turns 5 --yes src/app/models/mimo/playground"
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: xiaomi/mimo-v2-flash:free
-          ANTHROPIC_API_KEY: ""
 
       # === Safety Check & Auto-Fix Loop (Attempt 2) ===
       - name: Safety Check (Attempt 2)
@@ -134,26 +131,25 @@ jobs:
 
       - name: Prepare Fix Prompt (Attempt 2)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        id: prepare_fix_2
         run: |
-          echo "The build still failed. Please fix these errors:" > fix_prompt.txt
-          echo "\`\`\`" >> fix_prompt.txt
-          tail -n 50 error_log.txt >> fix_prompt.txt
-          echo "\`\`\`" >> fix_prompt.txt
+          echo "fix_prompt<<EOF" >> $GITHUB_OUTPUT
+          echo "The build still failed. Please fix these errors:" >> $GITHUB_OUTPUT
+          echo "\`\`\`" >> $GITHUB_OUTPUT
+          tail -n 50 error_log.txt >> $GITHUB_OUTPUT
+          echo "\`\`\`" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Auto-Fix (Attempt 2)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
-          claude_args: >
-            --message-file fix_prompt.txt
-            --max-turns 5
-            --yes
-            src/app/models/mimo/playground
+          prompt: ${{ steps.prepare_fix_2.outputs.fix_prompt }}
+          claude_args: "--max-turns 5 --yes src/app/models/mimo/playground"
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: xiaomi/mimo-v2-flash:free
-          ANTHROPIC_API_KEY: ""
 
       # === Safety Check & Auto-Fix Loop (Attempt 3) ===
       - name: Safety Check (Attempt 3)
@@ -177,26 +173,25 @@ jobs:
 
       - name: Prepare Fix Prompt (Attempt 3)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        id: prepare_fix_3
         run: |
-          echo "Last attempt. Fix these errors:" > fix_prompt.txt
-          echo "\`\`\`" >> fix_prompt.txt
-          tail -n 50 error_log.txt >> fix_prompt.txt
-          echo "\`\`\`" >> fix_prompt.txt
+          echo "fix_prompt<<EOF" >> $GITHUB_OUTPUT
+          echo "Last attempt. Fix these errors:" >> $GITHUB_OUTPUT
+          echo "\`\`\`" >> $GITHUB_OUTPUT
+          tail -n 50 error_log.txt >> $GITHUB_OUTPUT
+          echo "\`\`\`" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Auto-Fix (Attempt 3)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
-          claude_args: >
-            --message-file fix_prompt.txt
-            --max-turns 5
-            --yes
-            src/app/models/mimo/playground
+          prompt: ${{ steps.prepare_fix_3.outputs.fix_prompt }}
+          claude_args: "--max-turns 5 --yes src/app/models/mimo/playground"
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: xiaomi/mimo-v2-flash:free
-          ANTHROPIC_API_KEY: ""
 
       # === Final Verification ===
       - name: Final Safety Verification

@@ -21,19 +21,17 @@ self-evolving.devでは2つのAIモデルにサイトを毎日自動で改善し
 ## 出力形式
 変更内容を `public/models/{{MODEL_ID}}/changelog.json` に以下のJSON形式で追記する指示を出してください（実際にはファイル編集として）：
 
-```json
-{
-  "date": "YYYY-MM-DD",
-  "model": "{{MODEL_NAME}}",
-  "changes": [
-    {
-      "description": "変更内容の説明",
-      "reason": "変更の理由",
-      "expectedEffect": "期待される効果"
-    }
-  ],
-}
+各変更ファイルを以下の形式で出力してください:
+
+FILE: src/app/models/{{MODEL_ID}}/playground/path/to/file.tsx
+```typescript
+// 変更後の完全なコード（省略なし）
 ```
+
+最後に必ず以下を追加:
+
+REASONING: この変更が収益向上につながる理由を100文字以内で説明
+FILES: src/app/models/{{MODEL_ID}}/playground/path/to/file.tsx
 
 ※ 注意: changelog.json は既存の配列の先頭に追加するように編集してください。既存のデータは削除しないでください。
 
