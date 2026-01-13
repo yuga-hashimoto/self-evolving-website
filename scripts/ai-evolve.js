@@ -94,7 +94,7 @@ REASONING: この変更が収益向上につながる理由を100文字以内で
 FILES: src/app/playground/page.tsx,src/components/playground/ClickerGame.tsx
 `;
 
-    const model = process.env.NEXT_PUBLIC_OPENROUTER_MODEL || "anthropic/claude-3.7-sonnet";
+    const model = process.env.OPENROUTER_MODEL || "anthropic/claude-3.7-sonnet";
     console.log(`🧠 Calling OpenRouter API (${model})...`);
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {

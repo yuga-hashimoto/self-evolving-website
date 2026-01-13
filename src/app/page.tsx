@@ -32,7 +32,7 @@ export default async function Home() {
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <span className="text-xs text-gray-400">Current Architect:</span>
           <span className="text-xs font-mono text-purple-300">
-            {latestEntry?.model || process.env.NEXT_PUBLIC_OPENROUTER_MODEL || "anthropic/claude-3.7-sonnet"}
+            {latestEntry?.model || "anthropic/claude-3.7-sonnet"}
           </span>
         </div>
 
