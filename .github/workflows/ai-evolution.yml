@@ -1,0 +1,70 @@
+name: AI Evolution Loop
+
+on:
+  # 定期実行は一旦無効化（本番セットアップ完了後に有効化する）
+  # schedule:
+  #   - cron: '0 15 * * *'  # 毎日00:00 JST
+  workflow_dispatch:  # 手動実行のみ有効
+
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Configure Git
+        run: |
+          git config user.name "AI Evolution Bot"
+          git config user.email "ai-bot@github-actions"
+      
+      - name: Fetch Analytics Data
+        run: node scripts/fetch-analytics.js
+        env:
+          GA4_API_KEY: ${{ secrets.GA4_API_KEY }}
+          ADSENSE_API_KEY: ${{ secrets.ADSENSE_API_KEY }}
+      
+      - name: AI Code Generation
+        id: ai
+        run: node scripts/ai-evolve.js
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      
+      - name: Build Test
+        run: npm run build
+      
+      - name: Safety Check
+        id: safety
+        run: node scripts/safety-check.js
+      
+      - name: Update Changelog
+        if: steps.safety.outputs.safe == 'true'
+        run: node scripts/update-changelog.js
+        env:
+          AI_REASONING: ${{ steps.ai.outputs.reasoning }}
+          CHANGED_FILES: ${{ steps.ai.outputs.files }}
+      
+      - name: Commit and Push to Main
+        if: steps.safety.outputs.safe == 'true'
+        run: |
+          git add .
+          git commit -m "🤖 AI Evolution #${{ github.run_number }}: ${{ steps.ai.outputs.reasoning }}" || echo "No changes to commit"
+          git push origin main
+      
+      - name: Rollback on Failure
+        if: failure()
+        run: |
+          git reset --hard HEAD~1 || true
+          git push --force origin main || true
