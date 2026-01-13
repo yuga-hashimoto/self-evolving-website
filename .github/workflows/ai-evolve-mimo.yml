@@ -39,8 +39,13 @@ jobs:
         id: read-prompt
         run: |
           PROMPT=$(cat .github/prompts/generated-mimo.txt)
+          # プロンプトの先頭に作業ディレクトリの指示を追加
+          FULL_PROMPT="作業ディレクトリ: src/app/models/mimo/playground
+          このディレクトリ内のファイルのみを編集してください。
+
+          $PROMPT"
           echo "prompt<<EOF" >> $GITHUB_OUTPUT
-          echo "$PROMPT" >> $GITHUB_OUTPUT
+          echo "$FULL_PROMPT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Claude Code Execution (MiMo-V2-Flash)
@@ -48,9 +53,11 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           prompt: ${{ steps.read-prompt.outputs.prompt }}
-          claude_args: "--max-turns 10 --yes src/app/models/mimo/playground"
+          claude_args: "--max-turns 10"
+          show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           ANTHROPIC_DEFAULT_SONNET_MODEL: xiaomi/mimo-v2-flash:free
 
       - name: Check for Changes
