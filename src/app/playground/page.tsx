@@ -1,4 +1,3 @@
-import ClickerGame from "@/components/playground/ClickerGame";
 import { IconPlayground, IconWarning } from "@/components/icons/Icons";
 
 export default function PlaygroundPage() {
@@ -21,7 +20,11 @@ export default function PlaygroundPage() {
                         <IconPlayground size={48} />
                         <h1 className="text-3xl font-bold gradient-text">実験場</h1>
                     </div>
-                    <ClickerGame />
+
+                    {/* Empty - AI will add content here */}
+                    <div className="text-center text-gray-400 py-12">
+                        <p>AIによる実験コンテンツがここに表示されます</p>
+                    </div>
                 </div>
             </div>
         </div>
