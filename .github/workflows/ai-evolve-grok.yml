@@ -53,7 +53,6 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           prompt: ${{ steps.read-prompt.outputs.prompt }}
-          claude_args: "--max-turns 10"
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
@@ -110,7 +109,6 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           prompt: ${{ steps.prepare_fix_1.outputs.fix_prompt }}
-          claude_args: "--max-turns 5 --yes src/app/models/grok/playground"
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: xai/grok-code-fast-1
@@ -152,7 +150,6 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           prompt: ${{ steps.prepare_fix_2.outputs.fix_prompt }}
-          claude_args: "--max-turns 5 --yes src/app/models/grok/playground"
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: xai/grok-code-fast-1
@@ -194,7 +191,6 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           prompt: ${{ steps.prepare_fix_3.outputs.fix_prompt }}
-          claude_args: "--max-turns 5 --yes src/app/models/grok/playground"
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: xai/grok-code-fast-1
