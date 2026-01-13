@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { IconChangelog, IconEmpty } from "@/components/icons/Icons";
 
 interface ChangelogEntry {
     id: number;
@@ -51,7 +51,7 @@ export default async function ChangelogPage() {
                 {/* Header */}
                 <div className="text-center mb-12">
                     <div className="flex items-center justify-center gap-3 mb-4">
-                        <Image src="/icons/changelog.png" alt="Changelog" width={48} height={48} />
+                        <IconChangelog size={48} />
                         <h1 className="text-4xl font-bold gradient-text">更新履歴</h1>
                     </div>
                     <p className="text-gray-400">
@@ -63,7 +63,7 @@ export default async function ChangelogPage() {
                 {sortedChangelog.length === 0 ? (
                     <div className="glass-card p-12 text-center">
                         <div className="flex justify-center mb-4">
-                            <Image src="/icons/empty.png" alt="Empty" width={80} height={80} />
+                            <IconEmpty size={80} />
                         </div>
                         <p className="text-gray-400 text-lg">まだ変更履歴がありません</p>
                         <p className="text-gray-500 text-sm mt-2">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import {
     LineChart,
     Line,
@@ -12,6 +11,7 @@ import {
     ResponsiveContainer,
     Legend,
 } from "recharts";
+import { IconAnalytics, IconClick, IconLoading, IconWarning, IconEmpty } from "@/components/icons/Icons";
 import { getDisplayAnalytics, resetAnalytics } from "@/lib/analytics";
 
 interface DisplayAnalytics {
@@ -23,19 +23,17 @@ interface DisplayAnalytics {
     ctr: string;
 }
 
-function StatCard({
-    label,
-    value,
-    icon,
-}: {
+interface StatCardProps {
     label: string;
     value: string | number;
-    icon: string;
-}) {
+    icon: React.ReactNode;
+}
+
+function StatCard({ label, value, icon }: StatCardProps) {
     return (
         <div className="glass-card p-6 text-center">
             <div className="flex justify-center mb-2">
-                <Image src={`/icons/${icon}.png`} alt={label} width={40} height={40} />
+                {icon}
             </div>
             <p className="text-2xl sm:text-3xl font-bold gradient-text">{value}</p>
             <p className="text-sm text-gray-400 mt-1">{label}</p>
@@ -48,12 +46,10 @@ export default function AnalyticsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // ローカルアナリティクスから読み込み
         const data = getDisplayAnalytics();
         setAnalytics(data);
         setLoading(false);
 
-        // 5秒ごとに更新
         const interval = setInterval(() => {
             setAnalytics(getDisplayAnalytics());
         }, 5000);
@@ -73,7 +69,7 @@ export default function AnalyticsPage() {
             <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
                 <div className="text-center">
                     <div className="flex justify-center mb-4 animate-spin">
-                        <Image src="/icons/loading.png" alt="Loading" width={64} height={64} />
+                        <IconLoading size={64} />
                     </div>
                     <p className="text-gray-400">データ読み込み中...</p>
                 </div>
@@ -86,7 +82,7 @@ export default function AnalyticsPage() {
             <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4">
                 <div className="glass-card p-12 text-center max-w-md">
                     <div className="flex justify-center mb-4">
-                        <Image src="/icons/analytics.png" alt="Analytics" width={80} height={80} />
+                        <IconAnalytics size={80} />
                     </div>
                     <p className="text-gray-400 text-lg">データ収集中...</p>
                     <p className="text-gray-500 text-sm mt-2">
@@ -103,7 +99,7 @@ export default function AnalyticsPage() {
                 {/* Header */}
                 <div className="text-center mb-12">
                     <div className="flex items-center justify-center gap-3 mb-4">
-                        <Image src="/icons/analytics.png" alt="Analytics" width={48} height={48} />
+                        <IconAnalytics size={48} />
                         <h1 className="text-4xl font-bold gradient-text">アナリティクス</h1>
                     </div>
                     <p className="text-gray-400">リアルタイムパフォーマンス指標（ローカル）</p>
@@ -116,12 +112,12 @@ export default function AnalyticsPage() {
                 <div className="mb-12">
                     <h2 className="text-xl font-bold mb-6 text-center">現在の数値</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                        <StatCard label="PV" value={analytics.pageviews} icon="analytics" />
-                        <StatCard label="推定収益" value={`$${analytics.revenue}`} icon="analytics" />
-                        <StatCard label="RPM" value={`$${analytics.rpm}`} icon="analytics" />
-                        <StatCard label="CTR" value={`${analytics.ctr}%`} icon="click" />
-                        <StatCard label="平均滞在" value={`${analytics.avgSessionDuration}秒`} icon="loading" />
-                        <StatCard label="直帰率" value={`${analytics.bounceRate}%`} icon="warning" />
+                        <StatCard label="PV" value={analytics.pageviews} icon={<IconAnalytics size={40} />} />
+                        <StatCard label="推定収益" value={`$${analytics.revenue}`} icon={<IconAnalytics size={40} />} />
+                        <StatCard label="RPM" value={`$${analytics.rpm}`} icon={<IconAnalytics size={40} />} />
+                        <StatCard label="CTR" value={`${analytics.ctr}%`} icon={<IconClick size={40} />} />
+                        <StatCard label="平均滞在" value={`${analytics.avgSessionDuration}秒`} icon={<IconLoading size={40} />} />
+                        <StatCard label="直帰率" value={`${analytics.bounceRate}%`} icon={<IconWarning size={40} />} />
                     </div>
                 </div>
 

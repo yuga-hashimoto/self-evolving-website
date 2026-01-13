@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { IconDNA, IconPlayground, IconChangelog, IconAnalytics } from "@/components/icons/Icons";
 
 export default function Home() {
   return (
@@ -7,7 +7,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="text-center max-w-4xl mx-auto mb-16">
         <div className="inline-block mb-6 animate-float">
-          <Image src="/icons/dna.png" alt="DNA" width={96} height={96} />
+          <IconDNA size={96} />
         </div>
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 gradient-text">
           Self-Evolving Website Experiment
@@ -29,7 +29,7 @@ export default function Home() {
         <Link href="/playground" className="group">
           <div className="glass-card p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 animate-pulse-glow">
             <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Image src="/icons/game.png" alt="Game" width={64} height={64} />
+              <IconPlayground size={64} />
             </div>
             <h2 className="text-xl font-bold mb-2">実験場を見る</h2>
             <p className="text-gray-400 text-sm">
@@ -41,7 +41,7 @@ export default function Home() {
         <Link href="/changelog" className="group">
           <div className="glass-card p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105">
             <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Image src="/icons/changelog.png" alt="Changelog" width={64} height={64} />
+              <IconChangelog size={64} />
             </div>
             <h2 className="text-xl font-bold mb-2">更新履歴</h2>
             <p className="text-gray-400 text-sm">
@@ -53,7 +53,7 @@ export default function Home() {
         <Link href="/analytics" className="group">
           <div className="glass-card p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105">
             <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Image src="/icons/analytics.png" alt="Analytics" width={64} height={64} />
+              <IconAnalytics size={64} />
             </div>
             <h2 className="text-xl font-bold mb-2">アナリティクス</h2>
             <p className="text-gray-400 text-sm">

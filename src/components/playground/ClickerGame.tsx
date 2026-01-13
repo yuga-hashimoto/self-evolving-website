@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { IconClick, IconCelebration, IconFire, IconCrown } from "@/components/icons/Icons";
 import { useAnalytics } from "@/lib/analytics";
 
 export default function ClickerGame() {
@@ -12,7 +12,7 @@ export default function ClickerGame() {
     const handleClick = () => {
         setScore((prev) => prev + 1);
         setClickEffect(true);
-        trackClick(); // Track for analytics/ad revenue simulation
+        trackClick();
         setTimeout(() => setClickEffect(false), 150);
     };
 
@@ -34,7 +34,7 @@ export default function ClickerGame() {
           active:scale-95 transition-all duration-150
           ${clickEffect ? "scale-110 shadow-purple-400/70" : ""}`}
             >
-                <Image src="/icons/click.png" alt="Click" width={80} height={80} />
+                <IconClick size={80} />
             </button>
 
             {/* Instructions */}
@@ -45,19 +45,19 @@ export default function ClickerGame() {
             {/* Milestone Messages */}
             {score >= 100 && score < 500 && (
                 <div className="flex items-center gap-2 text-green-400 animate-bounce">
-                    <Image src="/icons/celebration.png" alt="Celebration" width={32} height={32} />
+                    <IconCelebration size={32} />
                     <span>100達成！</span>
                 </div>
             )}
             {score >= 500 && score < 1000 && (
                 <div className="flex items-center gap-2 text-yellow-400 animate-bounce">
-                    <Image src="/icons/fire.png" alt="Fire" width={32} height={32} />
+                    <IconFire size={32} />
                     <span>500達成！すごい！</span>
                 </div>
             )}
             {score >= 1000 && (
                 <div className="flex items-center gap-2 text-purple-400 animate-bounce">
-                    <Image src="/icons/crown.png" alt="Crown" width={32} height={32} />
+                    <IconCrown size={32} />
                     <span>1000達成！マスタークリッカー！</span>
                 </div>
             )}
