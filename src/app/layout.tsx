@@ -4,6 +4,7 @@ import Header from "@/components/protected/Header";
 import Footer from "@/components/protected/Footer";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import { AdSenseAutoAds, AdDevNotice } from "@/components/ads/AdBanner";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
 export const metadata: Metadata = {
   title: "Self-Evolving Website Experiment",
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="ja">
       <head>
         <AdSenseAutoAds />
+        <GoogleAnalytics />
       </head>
       <body className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white antialiased">
         <AnalyticsProvider>

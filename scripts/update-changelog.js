@@ -32,6 +32,7 @@ try {
 const entry = {
     id: changelog.length + 1,
     date: new Date().toISOString(),
+    model: process.env.AI_MODEL || 'anthropic/claude-3.7-sonnet',
     reasoning: reasoning,
     files: changedFiles.filter(f => f.length > 0),
     results: {

@@ -1,7 +1,18 @@
 import Link from "next/link";
 import { IconDNA, IconPlayground, IconChangelog, IconAnalytics, IconBrain, IconCodeSpark, IconCycleDaily } from "@/components/icons/Icons";
 
-export default function Home() {
+async function getLatestChangelog() {
+  try {
+    const changelog = await import("../../public/changelog.json");
+    const entries = changelog.default as any[];
+    return entries[entries.length - 1];
+  } catch {
+    return null;
+  }
+}
+
+export default async function Home() {
+  const latestEntry = await getLatestChangelog();
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-16">
       {/* Hero Section */}
@@ -15,6 +26,16 @@ export default function Home() {
         <p className="text-xl sm:text-2xl text-purple-300 mb-4">
           AIが毎日自動で改善を続ける実験的プロジェクト
         </p>
+
+        {/* Current Model Badge */}
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 mb-8 animate-pulse-glow">
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <span className="text-xs text-gray-400">Current Architect:</span>
+          <span className="text-xs font-mono text-purple-300">
+            {latestEntry?.model || process.env.NEXT_PUBLIC_OPENROUTER_MODEL || "anthropic/claude-3.7-sonnet"}
+          </span>
+        </div>
+
         <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
           このサイトのコードは、AIが毎日分析・改善し、自動的にデプロイされます。
           <br />

@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
 import fs from 'fs';
 import { glob } from 'glob';
 import { execSync } from 'child_process';
@@ -22,12 +21,8 @@ const PROTECTED_PATHS = [
     'package-lock.json'
 ];
 
-const anthropic = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 async function main() {
-    console.log('🤖 Starting AI Evolution...');
+    console.log('🤖 Starting AI Evolution (via OpenRouter)...');
 
     // 1. 変更可能なファイル一覧取得
     const allFiles = await glob('src/**/*.{ts,tsx,css}');
@@ -100,19 +95,37 @@ REASONING: この変更が収益向上につながる理由を100文字以内で
 FILES: src/app/playground/page.tsx,src/components/playground/ClickerGame.tsx
 `;
 
-    console.log('🧠 Calling Claude API...');
+    const model = process.env.OPENROUTER_MODEL || "anthropic/claude-3.7-sonnet";
+    console.log(`🧠 Calling OpenRouter API (${model})...`);
 
-    const message = await anthropic.messages.create({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 16000,
-        messages: [{ role: "user", content: prompt }]
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${process.env.ANTHROPIC_API_KEY}`,
+            "HTTP-Referer": "https://self-evolving.dev", // Optional, for including your app on openrouter.ai rankings.
+            "X-Title": "Self-Evolving Website", // Optional. Shows in rankings on openrouter.ai.
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "model": model, // Use env var or default
+            "messages": [
+                { "role": "user", "content": prompt }
+            ],
+            "max_tokens": 16000
+        })
     });
 
-    const response = message.content[0].text;
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`OpenRouter API Error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    const resultText = data.choices[0].message.content;
     console.log('✅ AI Response received');
 
     // 6. レスポンスをパースして保存
-    const result = parseAndSave(response);
+    const result = parseAndSave(resultText);
 
     if (result.changes.length === 0) {
         console.log('⚠️  No changes made');
@@ -124,9 +137,11 @@ FILES: src/app/playground/page.tsx,src/components/playground/ClickerGame.tsx
     // 7. GitHub Actions の output に設定
     execSync(`echo "reasoning=${result.reasoning}" >> $GITHUB_OUTPUT`);
     execSync(`echo "files=${result.files}" >> $GITHUB_OUTPUT`);
+    execSync(`echo "model=${model}" >> $GITHUB_OUTPUT`); // モデル名を出力
 
     console.log('✨ Changes applied successfully');
     console.log('💡 Reasoning:', result.reasoning);
+    console.log('🤖 Model:', model);
     console.log('📝 Changed files:', result.files);
 }
 

@@ -3,6 +3,7 @@ import { IconChangelog, IconEmpty } from "@/components/icons/Icons";
 interface ChangelogEntry {
     id: number;
     date: string;
+    model?: string;
     reasoning: string;
     files: string[];
     results: {
@@ -84,8 +85,15 @@ export default async function ChangelogPage() {
                                     <div className="absolute -left-12 top-6 w-4 h-4 rounded-full bg-purple-500 border-4 border-slate-900" />
 
                                     {/* Date */}
-                                    <div className="text-sm text-purple-300 mb-2">
-                                        #{entry.id} · {formatDate(entry.date)}
+                                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                                        <div className="text-sm text-purple-300">
+                                            #{entry.id} · {formatDate(entry.date)}
+                                        </div>
+                                        {entry.model && (
+                                            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-gray-400">
+                                                {entry.model}
+                                            </span>
+                                        )}
                                     </div>
 
                                     {/* Reasoning */}
