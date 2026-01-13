@@ -52,7 +52,6 @@ jobs:
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: xai/grok-code-fast-1
-          ANTHROPIC_API_KEY: ""
 
       - name: Check for Changes
         id: changes
@@ -108,7 +107,6 @@ jobs:
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: xai/grok-code-fast-1
-          ANTHROPIC_API_KEY: ""
 
       # === Safety Check & Auto-Fix Loop (Attempt 2) ===
       - name: Safety Check (Attempt 2)
@@ -151,7 +149,6 @@ jobs:
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: xai/grok-code-fast-1
-          ANTHROPIC_API_KEY: ""
 
       # === Safety Check & Auto-Fix Loop (Attempt 3) ===
       - name: Safety Check (Attempt 3)
@@ -194,7 +191,6 @@ jobs:
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: xai/grok-code-fast-1
-          ANTHROPIC_API_KEY: ""
 
       # === Final Verification ===
       - name: Final Safety Verification
