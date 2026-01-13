@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import { IconMegaphone } from "@/components/icons/Icons";
 
 // AdSense Publisher ID - 環境変数から取得
 const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "";
@@ -28,8 +29,9 @@ export function AdDevNotice() {
     if (ADSENSE_CLIENT) return null;
 
     return (
-        <div className="fixed bottom-4 right-4 glass-card px-4 py-2 text-xs text-gray-400 z-50">
-            📢 Auto Ads: 本番では Google が自動配置
+        <div className="fixed bottom-4 right-4 glass-card px-4 py-2 text-xs text-gray-400 z-50 flex items-center gap-2">
+            <IconMegaphone size={16} />
+            <span>Auto Ads: 本番では Google が自動配置</span>
         </div>
     );
 }

@@ -11,7 +11,7 @@ import {
     ResponsiveContainer,
     Legend,
 } from "recharts";
-import { IconAnalytics, IconClick, IconLoading, IconWarning, IconEmpty } from "@/components/icons/Icons";
+import { IconAnalytics, IconClick, IconLoading, IconWarning, IconEmpty, IconInfo, IconTrash } from "@/components/icons/Icons";
 import { getDisplayAnalytics, resetAnalytics } from "@/lib/analytics";
 
 interface DisplayAnalytics {
@@ -123,7 +123,7 @@ export default function AnalyticsPage() {
 
                 {/* Info Card */}
                 <div className="glass-card p-6 mb-8">
-                    <h3 className="font-bold mb-4">📊 アナリティクスの仕組み</h3>
+                    <h3 className="font-bold mb-4 flex items-center gap-2"><IconAnalytics size={24} /> アナリティクスの仕組み</h3>
                     <ul className="text-gray-400 text-sm space-y-2">
                         <li>• <strong>PV:</strong> ページビュー数 (ローカルで計測)</li>
                         <li>• <strong>推定収益:</strong> クリック数 × $0.02 (デモ用)</li>
@@ -134,7 +134,7 @@ export default function AnalyticsPage() {
                     </ul>
                     <div className="mt-4 pt-4 border-t border-white/10">
                         <p className="text-gray-500 text-xs">
-                            💡 本番環境では Google Analytics 4 と AdSense API からデータを取得します
+                            <span className="inline-flex items-center gap-1"><IconInfo size={16} /> 本番環境では Google Analytics 4 と AdSense API からデータを取得します</span>
                         </p>
                     </div>
                 </div>
@@ -145,7 +145,7 @@ export default function AnalyticsPage() {
                         onClick={handleReset}
                         className="text-gray-500 text-sm hover:text-red-400 transition-colors"
                     >
-                        🗑️ アナリティクスをリセット
+                        <span className="inline-flex items-center gap-1"><IconTrash size={16} /> アナリティクスをリセット</span>
                     </button>
                 </div>
             </div>

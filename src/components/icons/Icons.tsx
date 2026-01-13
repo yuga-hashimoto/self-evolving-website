@@ -178,6 +178,55 @@ export function IconLoading({ size = 48, className = "" }: IconProps) {
     );
 }
 
+// Info/Lightbulb icon
+export function IconInfo({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <ellipse cx="32" cy="38" rx="14" ry="16" fill="#FFD93D" />
+            <ellipse cx="28" cy="34" rx="2" ry="3" fill="#1a1a2e" />
+            <ellipse cx="36" cy="34" rx="2" ry="3" fill="#1a1a2e" />
+            <path d="M28 44C30 46 34 46 36 44" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="32" cy="14" r="8" fill="#fbbf24" />
+            <path d="M32 10V18" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" />
+            <path d="M28 6L32 10L36 6" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+// Trash/Delete icon
+export function IconTrash({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <ellipse cx="32" cy="44" rx="12" ry="14" fill="#FFD93D" />
+            <ellipse cx="28" cy="40" rx="2" ry="3" fill="#1a1a2e" />
+            <ellipse cx="36" cy="40" rx="2" ry="3" fill="#1a1a2e" />
+            <path d="M28 50C30 48 34 48 36 50" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" />
+            <rect x="22" y="10" width="20" height="24" rx="2" fill="#ef4444" />
+            <rect x="18" y="8" width="28" height="4" rx="1" fill="#dc2626" />
+            <rect x="28" y="4" width="8" height="4" rx="1" fill="#b91c1c" />
+            <rect x="26" y="16" width="2" height="12" rx="1" fill="#1a1a2e" />
+            <rect x="31" y="16" width="2" height="12" rx="1" fill="#1a1a2e" />
+            <rect x="36" y="16" width="2" height="12" rx="1" fill="#1a1a2e" />
+        </svg>
+    );
+}
+
+// Megaphone/Announcement icon
+export function IconMegaphone({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <ellipse cx="24" cy="40" rx="12" ry="14" fill="#FFD93D" />
+            <ellipse cx="20" cy="36" rx="2" ry="3" fill="#1a1a2e" />
+            <ellipse cx="28" cy="36" rx="2" ry="3" fill="#1a1a2e" />
+            <path d="M20 46C22 48 26 48 28 46" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" />
+            <path d="M36 20L52 12V40L36 32V20Z" fill="#a855f7" />
+            <rect x="32" y="20" width="6" height="14" rx="2" fill="#6366f1" />
+            <circle cx="52" cy="26" r="4" fill="#f472b6" />
+            <path d="M56 20L60 16M56 26L62 26M56 32L60 36" stroke="#f472b6" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+    );
+}
+
 // Icon map for dynamic usage
 export const iconMap = {
     dna: IconDNA,
@@ -192,6 +241,9 @@ export const iconMap = {
     crown: IconCrown,
     empty: IconEmpty,
     loading: IconLoading,
+    info: IconInfo,
+    trash: IconTrash,
+    megaphone: IconMegaphone,
 } as const;
 
 export type IconName = keyof typeof iconMap;
@@ -200,3 +252,4 @@ export function Icon({ name, size = 48, className = "" }: { name: IconName } & I
     const IconComponent = iconMap[name];
     return <IconComponent size={size} className={className} />;
 }
+
