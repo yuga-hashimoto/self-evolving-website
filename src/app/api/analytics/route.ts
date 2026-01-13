@@ -11,11 +11,8 @@ export async function GET() {
         return NextResponse.json({
             source: 'dummy',
             pageviews: 0,
-            revenue: '0.00',
             avgSessionDuration: 0,
             bounceRate: '0.0',
-            rpm: '0.00',
-            ctr: '0.00',
             sessions: 0,
             lastUpdated: new Date().toISOString(),
         });
@@ -42,11 +39,8 @@ export async function GET() {
             return NextResponse.json({
                 source: 'ga4',
                 pageviews: 0,
-                revenue: '0.00',
                 avgSessionDuration: 0,
                 bounceRate: '0.0',
-                rpm: '0.00',
-                ctr: '0.00',
                 sessions: 0,
                 lastUpdated: new Date().toISOString(),
                 message: 'No data available for the selected period',
@@ -58,19 +52,11 @@ export async function GET() {
         const bounceRate = (parseFloat(row.metricValues?.[2]?.value || '0') * 100).toFixed(1);
         const sessions = parseInt(row.metricValues?.[3]?.value || '0');
 
-        // Revenue estimates (placeholder until AdSense API is integrated)
-        const estimatedRevenue = (pageviews * 0.002).toFixed(2);
-        const rpm = pageviews > 0 ? ((parseFloat(estimatedRevenue) / pageviews) * 1000).toFixed(2) : '0.00';
-        const ctr = (Math.random() * 1 + 0.5).toFixed(2); // Placeholder
-
         return NextResponse.json({
             source: 'ga4',
             pageviews,
-            revenue: estimatedRevenue,
             avgSessionDuration,
             bounceRate,
-            rpm,
-            ctr,
             sessions,
             lastUpdated: new Date().toISOString(),
         });
@@ -81,11 +67,8 @@ export async function GET() {
             source: 'error',
             error: 'Failed to fetch GA4 data',
             pageviews: 0,
-            revenue: '0.00',
             avgSessionDuration: 0,
             bounceRate: '0.0',
-            rpm: '0.00',
-            ctr: '0.00',
             sessions: 0,
             lastUpdated: new Date().toISOString(),
         }, { status: 500 });

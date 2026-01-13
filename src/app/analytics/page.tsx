@@ -1,16 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IconAnalytics, IconClick, IconLoading, IconWarning, IconInfo } from "@/components/icons/Icons";
+import { IconAnalytics, IconLoading, IconWarning, IconInfo } from "@/components/icons/Icons";
 
 interface GA4Analytics {
     source: string;
     pageviews: number;
-    revenue: string;
     avgSessionDuration: number;
     bounceRate: string;
-    rpm: string;
-    ctr: string;
     sessions: number;
     lastUpdated: string;
     message?: string;
@@ -21,10 +18,9 @@ interface StatCardProps {
     label: string;
     value: string | number;
     icon: React.ReactNode;
-    sublabel?: string;
 }
 
-function StatCard({ label, value, icon, sublabel }: StatCardProps) {
+function StatCard({ label, value, icon }: StatCardProps) {
     return (
         <div className="glass-card p-6 text-center">
             <div className="flex justify-center mb-2">
@@ -32,7 +28,6 @@ function StatCard({ label, value, icon, sublabel }: StatCardProps) {
             </div>
             <p className="text-2xl sm:text-3xl font-bold gradient-text">{value}</p>
             <p className="text-sm text-gray-400 mt-1">{label}</p>
-            {sublabel && <p className="text-xs text-gray-500 mt-1">{sublabel}</p>}
         </div>
     );
 }
@@ -108,7 +103,7 @@ export default function AnalyticsPage() {
 
     return (
         <div className="min-h-[calc(100vh-8rem)] px-4 py-16">
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-12">
                     <div className="flex items-center justify-center gap-3 mb-4">
@@ -126,7 +121,7 @@ export default function AnalyticsPage() {
                 {/* Stats Grid */}
                 <div className="mb-12">
                     <h2 className="text-xl font-bold mb-6 text-center">過去7日間の数値</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <StatCard
                             label="PV"
                             value={analytics.pageviews.toLocaleString()}
@@ -135,17 +130,6 @@ export default function AnalyticsPage() {
                         <StatCard
                             label="セッション"
                             value={analytics.sessions.toLocaleString()}
-                            icon={<IconAnalytics size={40} />}
-                        />
-                        <StatCard
-                            label="推定収益"
-                            value={`$${analytics.revenue}`}
-                            icon={<IconAnalytics size={40} />}
-                            sublabel="概算"
-                        />
-                        <StatCard
-                            label="RPM"
-                            value={`$${analytics.rpm}`}
                             icon={<IconAnalytics size={40} />}
                         />
                         <StatCard
@@ -167,9 +151,10 @@ export default function AnalyticsPage() {
                         <IconInfo size={24} /> データソースについて
                     </h3>
                     <ul className="text-gray-400 text-sm space-y-2">
-                        <li>• <strong>PV/セッション:</strong> Google Analytics 4 から取得</li>
-                        <li>• <strong>推定収益/RPM:</strong> PV × $0.002 で概算（AdSense API連携後は実データ表示）</li>
-                        <li>• <strong>平均滞在/直帰率:</strong> Google Analytics 4 から取得</li>
+                        <li>• <strong>PV:</strong> ページビュー数（7日間合計）</li>
+                        <li>• <strong>セッション:</strong> ユニークな訪問数</li>
+                        <li>• <strong>平均滞在:</strong> セッションあたりの平均閲覧時間</li>
+                        <li>• <strong>直帰率:</strong> 1ページのみ閲覧して離脱した割合</li>
                     </ul>
                     {analytics.source === 'dummy' && (
                         <div className="mt-4 p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
