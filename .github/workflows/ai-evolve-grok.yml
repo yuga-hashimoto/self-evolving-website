@@ -112,6 +112,9 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           prompt: ${{ steps.prepare_fix_1.outputs.fix_prompt }}
+          claude_args: |
+            --max-turns 10
+            --allowedTools "Edit,Write,Read,Bash(npm:*),Bash(git:*),Glob,Grep"
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: x-ai/grok-code-fast-1
@@ -153,6 +156,9 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           prompt: ${{ steps.prepare_fix_2.outputs.fix_prompt }}
+          claude_args: |
+            --max-turns 10
+            --allowedTools "Edit,Write,Read,Bash(npm:*),Bash(git:*),Glob,Grep"
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: x-ai/grok-code-fast-1
@@ -194,6 +200,9 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           prompt: ${{ steps.prepare_fix_3.outputs.fix_prompt }}
+          claude_args: |
+            --max-turns 10
+            --allowedTools "Edit,Write,Read,Bash(npm:*),Bash(git:*),Glob,Grep"
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_DEFAULT_SONNET_MODEL: x-ai/grok-code-fast-1
