@@ -66,29 +66,166 @@ jobs:
             echo "ℹ️  No changes"
           fi
 
-      - name: Safety Checks
+      # === Safety Check & Auto-Fix Loop (Attempt 1) ===
+      - name: Safety Check (Attempt 1)
+        if: steps.changes.outputs.has_changes == 'true'
+        id: check_1
+        continue-on-error: true
+        run: |
+          set +e
+          # Run build and capture output (limit output size)
+          OUTPUT=$(npm run build && npx tsc --noEmit 2>&1)
+          EXIT_CODE=$?
+          set -e
+          
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "NEEDS_FIX=true" >> $GITHUB_ENV
+            echo "$OUTPUT" > error_log.txt
+            echo "❌ Attempt 1 failed"
+          else
+            echo "NEEDS_FIX=false" >> $GITHUB_ENV
+            echo "✅ Attempt 1 passed"
+          fi
+
+      - name: Prepare Fix Prompt (Attempt 1)
+        if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        run: |
+          echo "The build failed with the following errors. Please fix the code to resolve these issues. Do NOT change the functionality, just fix the syntax or type errors." > fix_prompt.txt
+          echo "" >> fix_prompt.txt
+          echo "\`\`\`" >> fix_prompt.txt
+          tail -n 50 error_log.txt >> fix_prompt.txt
+          echo "\`\`\`" >> fix_prompt.txt
+
+      - name: Auto-Fix (Attempt 1)
+        if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
+          claude_args: >
+            --message-file fix_prompt.txt
+            --max-turns 5
+            --yes
+            src/app/models/mimo/playground
+        env:
+          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_DEFAULT_SONNET_MODEL: xiaomi/mimo-v2-flash:free
+          ANTHROPIC_API_KEY: ""
+
+      # === Safety Check & Auto-Fix Loop (Attempt 2) ===
+      - name: Safety Check (Attempt 2)
+        if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        id: check_2
+        continue-on-error: true
+        run: |
+          set +e
+          OUTPUT=$(npm run build && npx tsc --noEmit 2>&1)
+          EXIT_CODE=$?
+          set -e
+          
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "NEEDS_FIX=true" >> $GITHUB_ENV
+            echo "$OUTPUT" > error_log.txt
+            echo "❌ Attempt 2 failed"
+          else
+            echo "NEEDS_FIX=false" >> $GITHUB_ENV
+            echo "✅ Attempt 2 passed"
+          fi
+
+      - name: Prepare Fix Prompt (Attempt 2)
+        if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        run: |
+          echo "The build still failed. Please fix these errors:" > fix_prompt.txt
+          echo "\`\`\`" >> fix_prompt.txt
+          tail -n 50 error_log.txt >> fix_prompt.txt
+          echo "\`\`\`" >> fix_prompt.txt
+
+      - name: Auto-Fix (Attempt 2)
+        if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
+          claude_args: >
+            --message-file fix_prompt.txt
+            --max-turns 5
+            --yes
+            src/app/models/mimo/playground
+        env:
+          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_DEFAULT_SONNET_MODEL: xiaomi/mimo-v2-flash:free
+          ANTHROPIC_API_KEY: ""
+
+      # === Safety Check & Auto-Fix Loop (Attempt 3) ===
+      - name: Safety Check (Attempt 3)
+        if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        id: check_3
+        continue-on-error: true
+        run: |
+          set +e
+          OUTPUT=$(npm run build && npx tsc --noEmit 2>&1)
+          EXIT_CODE=$?
+          set -e
+          
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "NEEDS_FIX=true" >> $GITHUB_ENV
+            echo "$OUTPUT" > error_log.txt
+            echo "❌ Attempt 3 failed"
+          else
+            echo "NEEDS_FIX=false" >> $GITHUB_ENV
+            echo "✅ Attempt 3 passed"
+          fi
+
+      - name: Prepare Fix Prompt (Attempt 3)
+        if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        run: |
+          echo "Last attempt. Fix these errors:" > fix_prompt.txt
+          echo "\`\`\`" >> fix_prompt.txt
+          tail -n 50 error_log.txt >> fix_prompt.txt
+          echo "\`\`\`" >> fix_prompt.txt
+
+      - name: Auto-Fix (Attempt 3)
+        if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
+          claude_args: >
+            --message-file fix_prompt.txt
+            --max-turns 5
+            --yes
+            src/app/models/mimo/playground
+        env:
+          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_DEFAULT_SONNET_MODEL: xiaomi/mimo-v2-flash:free
+          ANTHROPIC_API_KEY: ""
+
+      # === Final Verification ===
+      - name: Final Safety Verification
         if: steps.changes.outputs.has_changes == 'true'
         run: |
-          # TypeScript Check
+          echo "Running final verification..."
           npx tsc --noEmit
-          
-          # Build Check (Only building the playground if possible, but full build is safer)
           npm run build
           
           # Dangerous pattern check
           if grep -r "dangerouslySetInnerHTML" src/app/models/mimo/playground; then
             echo "⚠️  Potential security risk detected"
-            # exit 1 (Optional: fail on dangerous patterns)
+             # exit 1 (Optional)
           fi
 
+      - name: Revert Changes on Failure
+        if: failure() && steps.changes.outputs.has_changes == 'true'
+        run: |
+          echo "❌ Verification failed after 3 attempts. Reverting changes."
+          git reset --hard HEAD
+          git clean -fd
+
       - name: Configure Git
-        if: steps.changes.outputs.has_changes == 'true'
+        if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
       - name: Commit & Push
-        if: steps.changes.outputs.has_changes == 'true'
+        if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
           git add src/app/models/mimo/playground
           git add public/models/mimo/changelog.json || echo "No changelog update"
