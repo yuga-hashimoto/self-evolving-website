@@ -4,15 +4,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconDNA, IconPlayground, IconChangelog, IconAnalytics, IconHome } from "@/components/icons/Icons";
 
-const navItems = [
-    { href: "/", label: "ホーム", mobileLabel: "ホーム", icon: IconHome },
-    { href: "/playground", label: "実験場", mobileLabel: "実験", icon: IconPlayground },
-    { href: "/changelog", label: "更新履歴", mobileLabel: "履歴", icon: IconChangelog },
-    { href: "/analytics", label: "分析", mobileLabel: "分析", icon: IconAnalytics },
-];
-
 export default function Header() {
     const pathname = usePathname();
+
+    // パスからモデルIDを抽出 (/models/[modelId]/...)
+    const match = pathname.match(/^\/models\/([^/]+)/);
+    const currentModelId = match ? match[1] : null;
+
+    // ナビゲーションアイテムを動的に生成
+    const navItems = currentModelId
+        ? [
+            { href: `/models/${currentModelId}`, label: "ホーム", mobileLabel: "ホーム", icon: IconHome },
+            { href: `/models/${currentModelId}/playground`, label: "実験場", mobileLabel: "実験", icon: IconPlayground },
+            { href: `/models/${currentModelId}/changelog`, label: "更新履歴", mobileLabel: "履歴", icon: IconChangelog },
+            { href: `/models/${currentModelId}/analytics`, label: "分析", mobileLabel: "分析", icon: IconAnalytics },
+        ]
+        : [];
 
     return (
         <header className="sticky top-0 z-50 glass-card border-b border-white/10 backdrop-blur-xl">

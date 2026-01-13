@@ -1,4 +1,15 @@
+import { notFound } from "next/navigation";
+import { getModel, MODELS } from "@/lib/models";
 import { IconChangelog, IconEmpty } from "@/components/icons/Icons";
+import Link from "next/link";
+import fs from "fs";
+import path from "path";
+
+export function generateStaticParams() {
+    return Object.keys(MODELS).map((modelId) => ({
+        modelId,
+    }));
+}
 
 interface ChangelogEntry {
     id: number;
@@ -16,10 +27,15 @@ interface ChangelogEntry {
     };
 }
 
-async function getChangelog(): Promise<ChangelogEntry[]> {
+interface PageProps {
+    params: Promise<{ modelId: string }>;
+}
+
+async function getChangelog(modelId: string): Promise<ChangelogEntry[]> {
     try {
-        const changelog = await import("../../../public/changelog.json");
-        return changelog.default as ChangelogEntry[];
+        const filePath = path.join(process.cwd(), "public", "models", modelId, "changelog.json");
+        const content = fs.readFileSync(filePath, "utf-8");
+        return JSON.parse(content) as ChangelogEntry[];
     } catch {
         return [];
     }
@@ -42,8 +58,15 @@ function ChangeIndicator({ value }: { value: number }) {
     return <span className="text-red-400">{value}%</span>;
 }
 
-export default async function ChangelogPage() {
-    const changelog = await getChangelog();
+export default async function ChangelogPage({ params }: PageProps) {
+    const { modelId } = await params;
+    const model = getModel(modelId);
+
+    if (!model) {
+        notFound();
+    }
+
+    const changelog = await getChangelog(modelId);
     const sortedChangelog = [...changelog].reverse().slice(0, 50);
 
     return (
@@ -53,10 +76,10 @@ export default async function ChangelogPage() {
                 <div className="text-center mb-12">
                     <div className="flex items-center justify-center gap-3 mb-4">
                         <IconChangelog size={48} />
-                        <h1 className="text-4xl font-bold gradient-text">更新履歴</h1>
+                        <h1 className="text-4xl font-bold gradient-text">{model.name} 更新履歴</h1>
                     </div>
                     <p className="text-gray-400">
-                        AIが行ったすべての変更を記録しています
+                        {model.name}が行ったすべての変更を記録しています
                     </p>
                 </div>
 
@@ -68,7 +91,7 @@ export default async function ChangelogPage() {
                         </div>
                         <p className="text-gray-400 text-lg">まだ変更履歴がありません</p>
                         <p className="text-gray-500 text-sm mt-2">
-                            AIの最初の進化を待っています...
+                            {model.name}の最初の進化を待っています...
                         </p>
                     </div>
                 ) : (
@@ -140,6 +163,16 @@ export default async function ChangelogPage() {
                         ))}
                     </div>
                 )}
+
+                {/* Back Link */}
+                <div className="mt-12 text-center">
+                    <Link
+                        href={`/models/${modelId}`}
+                        className="text-gray-400 hover:text-white transition-colors"
+                    >
+                        ← {model.name}トップに戻る
+                    </Link>
+                </div>
             </div>
         </div>
     );

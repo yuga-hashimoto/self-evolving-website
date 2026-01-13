@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { notFound } from "next/navigation";
+import { getModel, MODELS } from "@/lib/models";
 import { IconAnalytics, IconLoading, IconWarning, IconInfo } from "@/components/icons/Icons";
+import Link from "next/link";
 
 interface PeriodData {
     pageviews: number;
@@ -63,6 +67,10 @@ function PeriodCard({ title, data }: { title: string; data: PeriodData }) {
 }
 
 export default function AnalyticsPage() {
+    const params = useParams();
+    const modelId = params.modelId as string;
+    const model = getModel(modelId);
+
     const [analytics, setAnalytics] = useState<GA4Analytics | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -70,7 +78,7 @@ export default function AnalyticsPage() {
     useEffect(() => {
         async function fetchAnalytics() {
             try {
-                const response = await fetch('/api/analytics');
+                const response = await fetch(`/api/analytics?model=${modelId}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch analytics');
                 }
@@ -86,7 +94,11 @@ export default function AnalyticsPage() {
         fetchAnalytics();
         const interval = setInterval(fetchAnalytics, 5 * 60 * 1000);
         return () => clearInterval(interval);
-    }, []);
+    }, [modelId]);
+
+    if (!model) {
+        notFound();
+    }
 
     if (loading) {
         return (
@@ -122,7 +134,7 @@ export default function AnalyticsPage() {
                 <div className="text-center mb-12">
                     <div className="flex items-center justify-center gap-3 mb-4">
                         <IconAnalytics size={48} />
-                        <h1 className="text-4xl font-bold gradient-text">アナリティクス</h1>
+                        <h1 className="text-4xl font-bold gradient-text">{model.name} アナリティクス</h1>
                     </div>
                     <div className="flex flex-col items-center gap-2">
                         <DataSourceBadge source={analytics.source} />
@@ -158,6 +170,16 @@ export default function AnalyticsPage() {
                             </p>
                         </div>
                     )}
+                </div>
+
+                {/* Back Link */}
+                <div className="mt-12 text-center">
+                    <Link
+                        href={`/models/${modelId}`}
+                        className="text-gray-400 hover:text-white transition-colors"
+                    >
+                        ← {model.name}トップに戻る
+                    </Link>
                 </div>
             </div>
         </div>

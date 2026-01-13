@@ -1,0 +1,92 @@
+name: AI Evolution - Premium (Grok)
+
+on:
+  schedule:
+    - cron: '30 9 * * *'  # 毎日UTC 9:30 (JST 18:30)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  evolve-grok:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Node.js Setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prompt
+        run: node scripts/generate-prompt.js grok
+        env:
+          MODEL_ID: grok
+
+      - name: Read Prompt
+        id: read-prompt
+        run: |
+          echo "PROMPT_FILE=.github/prompts/daily-improvement-template.txt" >> $GITHUB_ENV
+          cat .github/prompts/daily-improvement-template.txt
+
+      - name: Claude Code Execution (Grok-code Fast 1)
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
+          claude_args: >
+            --message-file .github/prompts/daily-improvement-template.txt
+            --max-turns 10
+            --yes
+            src/app/models/grok/playground
+        env:
+          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_DEFAULT_SONNET_MODEL: xai/grok-code-fast-1
+          ANTHROPIC_API_KEY: ""
+
+      - name: Check for Changes
+        id: changes
+        run: |
+          if [[ -n $(git status --porcelain src/app/models/grok/playground) ]]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "✅ Changes detected"
+            git status --short src/app/models/grok/playground
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️  No changes"
+          fi
+
+      - name: Safety Checks
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          # TypeScript Check
+          npx tsc --noEmit
+          
+          # Build Check
+          npm run build
+
+      - name: Configure Git
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Commit & Push
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          git add src/app/models/grok/playground
+          git add public/models/grok/changelog.json || echo "No changelog update"
+          
+          DATE=$(date +'%Y-%m-%d')
+          git commit -m "🚀 AI Evolution (Grok) - $DATE"
+          git push origin main

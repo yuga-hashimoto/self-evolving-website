@@ -1,5 +1,17 @@
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import fs from 'fs';
+import path from 'path';
+
+// モデルIDを環境変数から取得（必須）
+const MODEL_ID = process.env.MODEL_ID;
+if (!MODEL_ID) {
+    console.error('❌ MODEL_ID environment variable is required');
+    process.exit(1);
+}
+
+// モデル別のパス
+const modelDataDir = `public/models/${MODEL_ID}`;
+const analyticsPath = path.join(modelDataDir, 'analytics.json');
 
 // GA4 Property ID from environment
 const propertyId = process.env.GA4_PROPERTY_ID;
@@ -10,7 +22,7 @@ const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
 async function fetchGA4Analytics() {
     // If credentials are not set, generate dummy data
     if (!propertyId || !credentialsJson) {
-        console.log('⚠️  GA4 credentials not configured. Generating dummy data...');
+        console.log(`⚠️  GA4 credentials not configured for ${MODEL_ID}. Generating dummy data...`);
         return generateDummyData();
     }
 
@@ -43,7 +55,7 @@ async function fetchGA4Analytics() {
         // Extract metrics from response
         const row = response.rows?.[0];
         if (!row) {
-            console.log('⚠️  No data returned from GA4. Using dummy data.');
+            console.log(`⚠️  No data returned from GA4 for ${MODEL_ID}. Using dummy data.`);
             return generateDummyData();
         }
 
@@ -61,6 +73,7 @@ async function fetchGA4Analytics() {
         const analytics = {
             date: new Date().toISOString(),
             source: 'ga4', // Mark as real data
+            modelId: MODEL_ID,
             pageviews,
             revenue: estimatedRevenue,
             avgSessionDuration,
@@ -70,11 +83,11 @@ async function fetchGA4Analytics() {
             sessions,
         };
 
-        console.log('✅ GA4 Analytics fetched successfully:', analytics);
+        console.log(`✅ GA4 Analytics fetched successfully for ${MODEL_ID}:`, analytics);
         return analytics;
 
     } catch (error) {
-        console.error('❌ Error fetching GA4 data:', error.message);
+        console.error(`❌ Error fetching GA4 data for ${MODEL_ID}:`, error.message);
         console.log('⚠️  Falling back to dummy data...');
         return generateDummyData();
     }
@@ -84,6 +97,7 @@ function generateDummyData() {
     return {
         date: new Date().toISOString(),
         source: 'dummy', // Mark as dummy data
+        modelId: MODEL_ID,
         pageviews: Math.floor(Math.random() * 500) + 100,
         revenue: (Math.random() * 5 + 1).toFixed(2),
         avgSessionDuration: Math.floor(Math.random() * 120) + 30,
@@ -95,9 +109,14 @@ function generateDummyData() {
 }
 
 async function main() {
+    // ディレクトリがなければ作成
+    if (!fs.existsSync(modelDataDir)) {
+        fs.mkdirSync(modelDataDir, { recursive: true });
+    }
+
     const analytics = await fetchGA4Analytics();
-    fs.writeFileSync('public/analytics.json', JSON.stringify(analytics, null, 2));
-    console.log('📊 Analytics updated:', analytics);
+    fs.writeFileSync(analyticsPath, JSON.stringify(analytics, null, 2));
+    console.log(`📊 Analytics updated for ${MODEL_ID}:`, analytics);
 }
 
 main().catch(error => {
