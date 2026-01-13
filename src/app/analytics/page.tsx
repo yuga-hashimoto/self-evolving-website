@@ -3,33 +3,22 @@
 import { useEffect, useState } from "react";
 import { IconAnalytics, IconLoading, IconWarning, IconInfo } from "@/components/icons/Icons";
 
-interface GA4Analytics {
-    source: string;
+interface PeriodData {
     pageviews: number;
+    sessions: number;
     avgSessionDuration: number;
     bounceRate: string;
-    sessions: number;
+}
+
+interface GA4Analytics {
+    source: string;
+    today: PeriodData;
+    week: PeriodData;
+    month: PeriodData;
+    allTime: PeriodData;
     lastUpdated: string;
     message?: string;
     error?: string;
-}
-
-interface StatCardProps {
-    label: string;
-    value: string | number;
-    icon: React.ReactNode;
-}
-
-function StatCard({ label, value, icon }: StatCardProps) {
-    return (
-        <div className="glass-card p-6 text-center">
-            <div className="flex justify-center mb-2">
-                {icon}
-            </div>
-            <p className="text-2xl sm:text-3xl font-bold gradient-text">{value}</p>
-            <p className="text-sm text-gray-400 mt-1">{label}</p>
-        </div>
-    );
 }
 
 function DataSourceBadge({ source }: { source: string }) {
@@ -44,6 +33,32 @@ function DataSourceBadge({ source }: { source: string }) {
             <div className={`w-2 h-2 rounded-full ${source === 'ga4' ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
             {config.label}
         </span>
+    );
+}
+
+function PeriodCard({ title, data }: { title: string; data: PeriodData }) {
+    return (
+        <div className="glass-card p-6">
+            <h3 className="text-lg font-bold mb-4 text-purple-300">{title}</h3>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                    <p className="text-2xl font-bold gradient-text">{data.pageviews.toLocaleString()}</p>
+                    <p className="text-xs text-gray-400">PV</p>
+                </div>
+                <div className="text-center">
+                    <p className="text-2xl font-bold gradient-text">{data.sessions.toLocaleString()}</p>
+                    <p className="text-xs text-gray-400">セッション</p>
+                </div>
+                <div className="text-center">
+                    <p className="text-2xl font-bold gradient-text">{data.avgSessionDuration}秒</p>
+                    <p className="text-xs text-gray-400">平均滞在</p>
+                </div>
+                <div className="text-center">
+                    <p className="text-2xl font-bold gradient-text">{data.bounceRate}%</p>
+                    <p className="text-xs text-gray-400">直帰率</p>
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -69,7 +84,6 @@ export default function AnalyticsPage() {
         }
 
         fetchAnalytics();
-        // Refresh every 5 minutes
         const interval = setInterval(fetchAnalytics, 5 * 60 * 1000);
         return () => clearInterval(interval);
     }, []);
@@ -119,30 +133,11 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="mb-12">
-                    <h2 className="text-xl font-bold mb-6 text-center">過去7日間の数値</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <StatCard
-                            label="PV"
-                            value={analytics.pageviews.toLocaleString()}
-                            icon={<IconAnalytics size={40} />}
-                        />
-                        <StatCard
-                            label="セッション"
-                            value={analytics.sessions.toLocaleString()}
-                            icon={<IconAnalytics size={40} />}
-                        />
-                        <StatCard
-                            label="平均滞在"
-                            value={`${analytics.avgSessionDuration}秒`}
-                            icon={<IconLoading size={40} />}
-                        />
-                        <StatCard
-                            label="直帰率"
-                            value={`${analytics.bounceRate}%`}
-                            icon={<IconWarning size={40} />}
-                        />
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+                    <PeriodCard title="📅 今日" data={analytics.today} />
+                    <PeriodCard title="📊 過去7日間" data={analytics.week} />
+                    <PeriodCard title="📈 過去30日間" data={analytics.month} />
+                    <PeriodCard title="🏆 全期間" data={analytics.allTime} />
                 </div>
 
                 {/* Info Card */}
@@ -151,7 +146,7 @@ export default function AnalyticsPage() {
                         <IconInfo size={24} /> データソースについて
                     </h3>
                     <ul className="text-gray-400 text-sm space-y-2">
-                        <li>• <strong>PV:</strong> ページビュー数（7日間合計）</li>
+                        <li>• <strong>PV:</strong> ページビュー数</li>
                         <li>• <strong>セッション:</strong> ユニークな訪問数</li>
                         <li>• <strong>平均滞在:</strong> セッションあたりの平均閲覧時間</li>
                         <li>• <strong>直帰率:</strong> 1ページのみ閲覧して離脱した割合</li>
@@ -159,13 +154,8 @@ export default function AnalyticsPage() {
                     {analytics.source === 'dummy' && (
                         <div className="mt-4 p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
                             <p className="text-yellow-400 text-sm">
-                                ⚠️ 現在デモデータを表示しています。Cloud Run 環境変数に GA4 認証情報を設定してください。
+                                ⚠️ 現在デモデータを表示しています。GA4 認証情報を設定してください。
                             </p>
-                        </div>
-                    )}
-                    {analytics.message && (
-                        <div className="mt-4 p-4 bg-blue-500/10 rounded-lg border border-blue-500/30">
-                            <p className="text-blue-400 text-sm">{analytics.message}</p>
                         </div>
                     )}
                 </div>
