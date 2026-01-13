@@ -38,15 +38,15 @@ jobs:
       - name: Read Prompt
         id: read-prompt
         run: |
-          echo "PROMPT_FILE=.github/prompts/daily-improvement-template.txt" >> $GITHUB_ENV
-          cat .github/prompts/daily-improvement-template.txt
+          echo "PROMPT_FILE=.github/prompts/generated-grok.txt" >> $GITHUB_ENV
+          cat .github/prompts/generated-grok.txt
 
       - name: Claude Code Execution (Grok-code Fast 1)
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           claude_args: >
-            --message-file .github/prompts/daily-improvement-template.txt
+            --message-file .github/prompts/generated-grok.txt
             --max-turns 10
             --yes
             src/app/models/grok/playground
