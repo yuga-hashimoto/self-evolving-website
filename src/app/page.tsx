@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IconDNA, IconPlayground, IconChangelog, IconAnalytics } from "@/components/icons/Icons";
+import { IconDNA, IconPlayground, IconChangelog, IconAnalytics, IconBrain, IconCodeSpark, IconCycleDaily } from "@/components/icons/Icons";
 
 export default function Home() {
   return (
@@ -63,11 +63,62 @@ export default function Home() {
         </Link>
       </div>
 
+      {/* Mechanism Section */}
+      <div className="mt-24 max-w-5xl w-full">
+        <h2 className="text-3xl font-bold text-center mb-12 gradient-text">
+          AI自動進化の仕組み
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          {/* Connector Line (Desktop) */}
+          <div className="hidden md:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-purple-500/20 -translate-y-1/2 -z-10"></div>
+
+          {/* Step 1 */}
+          <div className="glass-card p-6 text-center relative hover:scale-105 transition-transform duration-300">
+            <div className="w-16 h-16 mx-auto mb-4 bg-purple-500/10 rounded-full flex items-center justify-center border border-purple-500/30">
+              <IconBrain size={32} />
+            </div>
+            <h3 className="text-xl font-bold mb-3 text-purple-300">Step 1: 分析</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              AIがサイトのアクセス解析データと過去の変更履歴を読み込み、
+              <br />
+              ユーザーの行動パターンを学習します。
+            </p>
+          </div>
+
+          {/* Step 2 */}
+          <div className="glass-card p-6 text-center relative hover:scale-105 transition-transform duration-300">
+            <div className="w-16 h-16 mx-auto mb-4 bg-blue-500/10 rounded-full flex items-center justify-center border border-blue-500/30">
+              <IconCodeSpark size={32} />
+            </div>
+            <h3 className="text-xl font-bold mb-3 text-blue-300">Step 2: 生成</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              「収益とエンゲージメントの最大化」を目的に、AIが自らコードを書き換えます。
+              <br />
+              デザインから機能まで予測不能です。
+            </p>
+          </div>
+
+          {/* Step 3 */}
+          <div className="glass-card p-6 text-center relative hover:scale-105 transition-transform duration-300">
+            <div className="w-16 h-16 mx-auto mb-4 bg-pink-500/10 rounded-full flex items-center justify-center border border-pink-500/30">
+              <IconCycleDaily size={32} />
+            </div>
+            <h3 className="text-xl font-bold mb-3 text-pink-300">Step 3: 検証</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              変更結果は再びデータとして蓄積され、次回の進化の糧となります。
+              <br />
+              <span className="text-pink-400 font-bold">この改善は1日1回行われます。</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl"></div>
       </div>
-    </div>
+    </div >
   );
 }

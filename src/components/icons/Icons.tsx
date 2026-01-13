@@ -226,6 +226,52 @@ export function IconMegaphone({ size = 48, className = "" }: IconProps) {
         </svg>
     );
 }
+// Brain/AI/Analyze icon
+export function IconBrain({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <path d="M32 56C32 56 14 50 14 32C14 14 32 8 32 8C32 8 50 14 50 32C50 50 32 56 32 56Z" fill="#1a1a2e" stroke="#bef264" strokeWidth="3" strokeLinecap="round" />
+            <path d="M32 16V24" stroke="#bef264" strokeWidth="2" strokeLinecap="round" />
+            <path d="M22 20L26 26" stroke="#bef264" strokeWidth="2" strokeLinecap="round" />
+            <path d="M42 20L38 26" stroke="#bef264" strokeWidth="2" strokeLinecap="round" />
+            <path d="M18 32H26" stroke="#bef264" strokeWidth="2" strokeLinecap="round" />
+            <path d="M38 32H46" stroke="#bef264" strokeWidth="2" strokeLinecap="round" />
+            <path d="M22 44L26 38" stroke="#bef264" strokeWidth="2" strokeLinecap="round" />
+            <path d="M42 44L38 38" stroke="#bef264" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="32" cy="32" r="4" fill="#bef264" />
+            <circle cx="32" cy="16" r="2" fill="#bef264" />
+            <circle cx="20" cy="20" r="2" fill="#bef264" />
+            <circle cx="44" cy="20" r="2" fill="#bef264" />
+        </svg>
+    );
+}
+
+// Code/Spark/Generate icon
+export function IconCodeSpark({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <path d="M16 24L8 32L16 40" stroke="#38bdf8" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M48 24L56 32L48 40" stroke="#38bdf8" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M28 20L36 44" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />
+            <path d="M32 10L36 18H30L34 26" stroke="#f472b6" strokeWidth="2" strokeLinecap="round" fill="none" />
+            <circle cx="32" cy="32" r="12" fill="#38bdf8" fillOpacity="0.2" />
+        </svg>
+    );
+}
+
+// Cycle/Daily/Verify icon
+export function IconCycleDaily({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <path d="M32 12V8M32 56V52M52 32H56M8 32H12" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+            <path d="M46.14 17.86L43.31 20.69M17.86 46.14L20.69 43.31M17.86 17.86L20.69 20.69M46.14 46.14L43.31 43.31" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+            <path d="M32 18C24.268 18 18 24.268 18 32C18 39.732 24.268 46 32 46C39.732 46 46 39.732 46 32" stroke="#f9a8d4" strokeWidth="3" strokeLinecap="round" />
+            <path d="M46 32L42 28M46 32L42 36" stroke="#f9a8d4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="32" cy="32" r="6" fill="#fbbf24" />
+        </svg>
+    );
+}
+
 
 // Icon map for dynamic usage
 export const iconMap = {
@@ -244,6 +290,9 @@ export const iconMap = {
     info: IconInfo,
     trash: IconTrash,
     megaphone: IconMegaphone,
+    brain: IconBrain,
+    code: IconCodeSpark,
+    daily: IconCycleDaily,
 } as const;
 
 export type IconName = keyof typeof iconMap;
