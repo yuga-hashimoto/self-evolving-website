@@ -8,7 +8,7 @@ steps:
       - '--build-arg'
       - 'NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-6725733161326563'
       - '--build-arg'
-      - 'NEXT_PUBLIC_GA_MEASUREMENT_ID=G-6YRLQEKHW7'
+      - 'NEXT_PUBLIC_GA_ID=G-6YRLQEKHW7'
       - '.'
   
   # Push the container image to Container Registry
@@ -34,7 +34,7 @@ steps:
       - '--update-secrets'
       - 'OPENROUTER_API_KEY=openrouter-api-key:latest,GOOGLE_APPLICATION_CREDENTIALS_JSON=google-credentials-json:latest,GA4_PROPERTY_ID=ga4-property-id:latest'
       - '--set-env-vars'
-      - 'OPENROUTER_MODEL=x-ai/grok-code-fast-1,NEXT_PUBLIC_GA_MEASUREMENT_ID=G-6YRLQEKHW7,NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-6725733161326563'
+      - 'OPENROUTER_MODEL=x-ai/grok-code-fast-1,NEXT_PUBLIC_GA_ID=G-6YRLQEKHW7,NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-6725733161326563'
 
 images:
   - 'gcr.io/$PROJECT_ID/self-evolving-website:$SHORT_SHA'

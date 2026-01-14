@@ -23,9 +23,12 @@ function AnalyticsLogic() {
 
     useEffect(() => {
         if (pathname && window.gtag) {
+            console.log('📊 GA4 Tracking:', { GA_ID, pathname });
             window.gtag("config", GA_ID!, {
                 page_path: pathname,
             });
+        } else {
+            console.warn('⚠️ GA4 not loaded:', { pathname, gtag: !!window.gtag });
         }
     }, [pathname, searchParams]);
 
