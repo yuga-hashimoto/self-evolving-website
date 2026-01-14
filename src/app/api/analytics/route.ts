@@ -65,17 +65,13 @@ export async function GET(request: NextRequest) {
         });
 
         // 2. Real-time Report (for immediate "today" data)
-        // Note: unifiedPagePath is often available even when pagePath is thresholded
         const realtimeResult = await analyticsDataClient.runRealtimeReport({
             property: `properties/${propertyId}`,
-            dimensions: [{ name: 'unifiedPagePath' }],
-            metrics: [
-                { name: 'screenPageViews' },
-                { name: 'activeUsers' },
-            ],
+            dimensions: [{ name: 'pagePath' }],
+            metrics: [{ name: 'screenPageViews' }],
             dimensionFilter: modelId ? {
                 filter: {
-                    fieldName: 'unifiedPagePath',
+                    fieldName: 'pagePath',
                     stringFilter: {
                         matchType: 'BEGINS_WITH',
                         value: `/models/${modelId}`
