@@ -32,9 +32,10 @@ export async function GET(request: NextRequest) {
             { name: 'bounceRate' },
         ];
 
-        // Build dimensions array - dateRange is needed to distinguish multiple date ranges
+        // Build dimensions array
+        // Note: dateRange is NOT a dimension - GA4 automatically includes it in response
         // pagePath is needed when using dimensionFilter on pagePath
-        const dimensions: { name: string }[] = [{ name: 'dateRange' }];
+        const dimensions: { name: string }[] = [];
 
         let dimensionFilter = undefined;
         if (modelId) {
@@ -60,7 +61,8 @@ export async function GET(request: NextRequest) {
                 { startDate: '30daysAgo', endDate: 'today' },
                 { startDate: '2020-01-01', endDate: 'today' }, // All time (since 2020)
             ],
-            dimensions,
+            // Only include dimensions when filtering (empty array causes issues)
+            ...(dimensions.length > 0 && { dimensions }),
             metrics,
             dimensionFilter,
         });
