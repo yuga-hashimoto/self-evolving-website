@@ -42,13 +42,13 @@ export async function GET(request: NextRequest) {
                         value: `/models/${modelId}`
                     }
                 }
-            };
+            } as const;
         }
 
         // Fetch data for multiple periods
         // Note: dimensionFilter is applied to all date ranges in a single request if supported,
         // but runReport accepts dimensionFilter.
-        const [response] = await analyticsDataClient.runReport({
+        const reportResult = await analyticsDataClient.runReport({
             property: `properties/${propertyId}`,
             dateRanges: [
                 { startDate: 'today', endDate: 'today' },
@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
             metrics,
             dimensionFilter,
         });
+        const response = reportResult[0];
 
         function parseRow(row: any) {
             if (!row) {

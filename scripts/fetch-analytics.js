@@ -36,7 +36,7 @@ async function fetchGA4Analytics() {
         });
 
         // Fetch data for the last 7 days
-        const [response] = await analyticsDataClient.runReport({
+        const reportResult = await analyticsDataClient.runReport({
             property: `properties/${propertyId}`,
             dateRanges: [
                 {
@@ -60,6 +60,7 @@ async function fetchGA4Analytics() {
                 { name: 'sessions' },
             ],
         });
+        const response = reportResult[0];
 
         // Extract metrics from response
         const row = response.rows?.[0];
