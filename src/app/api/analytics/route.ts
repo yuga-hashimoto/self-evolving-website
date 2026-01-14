@@ -53,13 +53,14 @@ export async function GET(request: NextRequest) {
         }
 
         // Fetch data for multiple periods
+        // Fetch data for multiple periods
         const reportResult = await analyticsDataClient.runReport({
             property: `properties/${propertyId}`,
             dateRanges: [
-                { startDate: 'today', endDate: 'today' },
-                { startDate: '7daysAgo', endDate: 'today' },
-                { startDate: '30daysAgo', endDate: 'today' },
-                { startDate: '2020-01-01', endDate: 'today' }, // All time (since 2020)
+                { startDate: 'today', endDate: 'today', name: 'today' },
+                { startDate: '7daysAgo', endDate: 'today', name: 'week' },
+                { startDate: '30daysAgo', endDate: 'today', name: 'month' },
+                { startDate: '2020-01-01', endDate: 'today', name: 'allTime' },
             ],
             // Only include dimensions when filtering (empty array causes issues)
             ...(dimensions.length > 0 && { dimensions }),
@@ -74,10 +75,11 @@ export async function GET(request: NextRequest) {
         }
 
         // Aggregate data by dateRange
-        // dimensionValues[0] is dateRange (date_range_0, date_range_1, etc.)
-        // When pagePath filter is used, multiple rows per dateRange may exist
-        function aggregateByDateRange(rows: AnalyticsRow[], dateRangeIndex: string) {
-            const matchingRows = rows.filter(r => r.dimensionValues?.[0]?.value === dateRangeIndex);
+        // We look through all dimension values to find the one that matches our dateRange names
+        function aggregateByDateRange(rows: AnalyticsRow[], rangeName: string) {
+            const matchingRows = rows.filter(r =>
+                r.dimensionValues?.some(dv => dv.value === rangeName)
+            );
 
             if (matchingRows.length === 0) {
                 return { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' };
@@ -115,10 +117,10 @@ export async function GET(request: NextRequest) {
 
         // Each row corresponds to a date range
         const rows: AnalyticsRow[] = response.rows || [];
-        const today = aggregateByDateRange(rows, 'date_range_0');
-        const week = aggregateByDateRange(rows, 'date_range_1');
-        const month = aggregateByDateRange(rows, 'date_range_2');
-        const allTime = aggregateByDateRange(rows, 'date_range_3');
+        const today = aggregateByDateRange(rows, 'today');
+        const week = aggregateByDateRange(rows, 'week');
+        const month = aggregateByDateRange(rows, 'month');
+        const allTime = aggregateByDateRange(rows, 'allTime');
 
         return NextResponse.json({
             source: 'ga4',
@@ -128,6 +130,15 @@ export async function GET(request: NextRequest) {
             allTime,
             lastUpdated: new Date().toISOString(),
             rowCount: rows.length,
+            // Debug info
+            debug: {
+                modelId,
+                dimensionsCount: dimensions.length,
+                rows: rows.slice(0, 5).map(r => ({
+                    dimensions: r.dimensionValues?.map(dv => dv.value),
+                    metrics: r.metricValues?.map(mv => mv.value)
+                }))
+            }
         });
 
     } catch (error) {
