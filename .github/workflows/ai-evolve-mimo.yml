@@ -254,4 +254,5 @@ jobs:
           
           DATE=$(date +'%Y-%m-%d')
           git commit -m "🆓 AI Evolution (MiMo) - $DATE"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push origin main
