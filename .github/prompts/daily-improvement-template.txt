@@ -24,7 +24,7 @@ Freedom to Modify/Delete/Recreate:
 - RECREATE from scratch if existing code doesn't fit your vision
 - Don't be attached to old code - if it's not working, replace it
 
-Balance: Bold changes are ENCOURAGED when backed by strong hypotheses.
+When backed by strong hypotheses, bold changes are allowed.
 
 ## Hypothesis-Driven Approach
 
