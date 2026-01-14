@@ -2,14 +2,14 @@ import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import fs from 'fs';
 import path from 'path';
 
-// モデルIDを環境変数から取得（必須）
+// Get model ID from environment variables (required)
 const MODEL_ID = process.env.MODEL_ID;
 if (!MODEL_ID) {
     console.error('❌ MODEL_ID environment variable is required');
     process.exit(1);
 }
 
-// モデル別のパス
+// Model-specific paths
 const modelDataDir = `public/models/${MODEL_ID}`;
 const analyticsPath = path.join(modelDataDir, 'analytics.json');
 
@@ -119,7 +119,7 @@ function generateDummyData() {
 }
 
 async function main() {
-    // ディレクトリがなければ作成
+    // Create directory if it doesn't exist
     if (!fs.existsSync(modelDataDir)) {
         fs.mkdirSync(modelDataDir, { recursive: true });
     }

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-// 引数または環境変数からモデルIDを取得
+// Get model ID from args or environment variable
 const MODEL_ID = process.env.MODEL_ID || process.argv[2];
 
 if (!MODEL_ID) {
@@ -16,51 +16,51 @@ const MODEL_NAMES = {
 
 const MODEL_NAME = MODEL_NAMES[MODEL_ID] || MODEL_ID;
 
-// パス設定
+// Path configuration
 const projectRoot = path.resolve(__dirname, '..');
 const templatePath = path.join(projectRoot, '.github/prompts/daily-improvement-template.txt');
 const analyticsPath = path.join(projectRoot, `public/models/${MODEL_ID}/analytics.json`);
 const changelogPath = path.join(projectRoot, `public/models/${MODEL_ID}/changelog.json`);
 const outputPath = path.join(projectRoot, `.github/prompts/generated-${MODEL_ID}.txt`);
 
-// データ読み込み
-let analyticsData = '（データなし）';
+// Read Data
+let analyticsData = '(No data)';
 try {
     if (fs.existsSync(analyticsPath)) {
         analyticsData = fs.readFileSync(analyticsPath, 'utf8');
     }
-} catch (e) {
+} catch {
     console.warn(`⚠️ Analytics data not found for ${MODEL_ID}`);
 }
 
-let changelogData = '（履歴なし）';
+let changelogData = '(No history)';
 try {
     if (fs.existsSync(changelogPath)) {
-        // 最新3件のみ取得
+        // Get only the latest 3 entries
         const fullChangelog = JSON.parse(fs.readFileSync(changelogPath, 'utf8'));
         changelogData = JSON.stringify(fullChangelog.slice(0, 3), null, 2);
     }
-} catch (e) {
+} catch {
     console.warn(`⚠️ Changelog data not found for ${MODEL_ID}`);
 }
 
-// テンプレート読み込み
+// Load Template
 let template = '';
 try {
     template = fs.readFileSync(templatePath, 'utf8');
-} catch (e) {
+} catch {
     console.error(`❌ Template not found at ${templatePath}`);
     process.exit(1);
 }
 
-// プレースホルダー置換
+// Replace Placeholders
 let prompt = template
     .replace('{{ANALYTICS}}', analyticsData)
     .replace('{{CHANGELOG}}', changelogData)
     .replace(/{{MODEL_ID}}/g, MODEL_ID)
     .replace(/{{MODEL_NAME}}/g, MODEL_NAME);
 
-// 出力書き込み (ディレクトリが存在することを確認)
+// Write Output (Ensure directory exists)
 const outputDir = path.dirname(outputPath);
 if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });

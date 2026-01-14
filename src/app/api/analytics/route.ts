@@ -61,7 +61,12 @@ export async function GET(request: NextRequest) {
         });
         const response = reportResult[0];
 
-        function parseRow(row: any) {
+        interface AnalyticsRow {
+            metricValues?: { value?: string | null }[] | null;
+            dimensionValues?: { value?: string | null }[] | null;
+        }
+
+        function parseRow(row: AnalyticsRow | undefined) {
             if (!row) {
                 return { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' };
             }
@@ -74,11 +79,11 @@ export async function GET(request: NextRequest) {
         }
 
         // Each row corresponds to a date range
-        const rows = response.rows || [];
-        const today = parseRow(rows.find((r: any) => r.dimensionValues?.[0]?.value === 'date_range_0') || rows[0]);
-        const week = parseRow(rows.find((r: any) => r.dimensionValues?.[0]?.value === 'date_range_1') || rows[1]);
-        const month = parseRow(rows.find((r: any) => r.dimensionValues?.[0]?.value === 'date_range_2') || rows[2]);
-        const allTime = parseRow(rows.find((r: any) => r.dimensionValues?.[0]?.value === 'date_range_3') || rows[3]);
+        const rows: AnalyticsRow[] = response.rows || [];
+        const today = parseRow(rows.find((r) => r.dimensionValues?.[0]?.value === 'date_range_0') || rows[0]);
+        const week = parseRow(rows.find((r) => r.dimensionValues?.[0]?.value === 'date_range_1') || rows[1]);
+        const month = parseRow(rows.find((r) => r.dimensionValues?.[0]?.value === 'date_range_2') || rows[2]);
+        const allTime = parseRow(rows.find((r) => r.dimensionValues?.[0]?.value === 'date_range_3') || rows[3]);
 
         return NextResponse.json({
             source: 'ga4',

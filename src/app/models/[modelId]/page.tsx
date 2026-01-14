@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getModel, MODELS, ModelId } from "@/lib/models";
+import { getModel, MODELS } from "@/lib/models";
 import { IconPlayground, IconChangelog, IconAnalytics, IconDNA } from "@/components/icons/Icons";
 
 export function generateStaticParams() {

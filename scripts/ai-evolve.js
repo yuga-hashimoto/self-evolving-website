@@ -3,28 +3,28 @@ const path = require('path');
 const { glob } = require('glob');
 const { execSync } = require('child_process');
 
-// モデルIDを環境変数から取得（必須）
+// Get Model ID from environment variables (Required)
 const MODEL_ID = process.env.MODEL_ID;
 if (!MODEL_ID) {
     console.error('❌ MODEL_ID environment variable is required');
     process.exit(1);
 }
 
-// モデル別のパス設定
+// Model-specific paths
 const modelDataDir = `public/models/${MODEL_ID}`;
 const modelPlaygroundDir = `src/app/models/${MODEL_ID}/playground`;
 
-// 保護パス（モデル共通部分 + 他モデルのファイル）
+// Protected paths (common parts + other models' files)
 const PROTECTED_PATHS = [
     'src/app/page.tsx',
     'src/app/layout.tsx',
-    'src/app/models/*/page.tsx',        // モデルランディングページ
-    'src/app/models/*/changelog/**',     // changelog ページ
-    'src/app/models/*/analytics/**',     // analytics ページ
+    'src/app/models/*/page.tsx',        // Model landing pages
+    'src/app/models/*/changelog/**',     // changelog pages
+    'src/app/models/*/analytics/**',     // analytics pages
     'src/lib/**',
     'src/components/protected/**',
     'src/components/icons/**',
-    'public/models/**/*.json',           // 全モデルのJSONは保護
+    'public/models/**/*.json',           // All model JSONs are protected
     'scripts/**',
     '.github/**',
     'Dockerfile',
@@ -38,7 +38,7 @@ const PROTECTED_PATHS = [
 async function main() {
     console.log(`🤖 Starting AI Evolution for model: ${MODEL_ID} (via OpenRouter)...`);
 
-    // 1. 変更可能なファイル一覧取得（このモデルのplaygroundディレクトリのみ）
+    // 1. Get editable files list (only within this model's playground directory)
     const allFiles = await glob(`src/app/models/${MODEL_ID}/playground/**/*.{ts,tsx,css}`);
     const editableFiles = allFiles.filter(file =>
         !PROTECTED_PATHS.some(pattern => {
@@ -49,41 +49,41 @@ async function main() {
 
     console.log(`📁 Editable files for ${MODEL_ID}: ${editableFiles.length}`);
 
-    // 2. モデル専用のアナリティクスデータ読み込み
+    // 2. Read model-specific analytics data
     const analyticsPath = path.join(modelDataDir, 'analytics.json');
     const analyticsPrevPath = path.join(modelDataDir, 'analytics-previous.json');
 
     let analytics = { pageviews: 0, revenue: '0.00', avgSessionDuration: 0, bounceRate: '0.0' };
     try {
         analytics = JSON.parse(fs.readFileSync(analyticsPath, 'utf-8'));
-    } catch (e) {
+    } catch {
         console.log(`📊 No analytics found for ${MODEL_ID}, using defaults`);
     }
 
-    // 前日のデータをバックアップ
+    // Backup previous day's data
     try {
         fs.copyFileSync(analyticsPath, analyticsPrevPath);
-    } catch (e) {
+    } catch {
         console.log('📊 No previous analytics to backup');
     }
 
-    // 3. モデル専用の変更履歴読み込み（過去の学習）
+    // 3. Read model-specific changelog (past history)
     const changelogPath = path.join(modelDataDir, 'changelog.json');
     let changelog = [];
     try {
         changelog = JSON.parse(fs.readFileSync(changelogPath, 'utf-8'));
-    } catch (e) {
+    } catch {
         console.log(`📝 No changelog found for ${MODEL_ID}, starting fresh`);
     }
 
-    // 4. コードベース読み込み
+    // 4. Read codebase
     const codebase = editableFiles.map(file => ({
         path: file,
         content: fs.readFileSync(file, 'utf-8')
     }));
 
-    // 5. プロンプト構築
-    // 5. プロンプト読み込み
+    // 5. Build Prompt
+    // 5. Read Prompt
     let prompt = '';
     const promptFile = process.env.PROMPT_FILE;
 
@@ -96,33 +96,33 @@ async function main() {
         process.exit(1);
     }
 
-    // コードベース情報をプロンプトに追加（テンプレートに含まれていない場合）
-    // 自動修復(Fix)モードの場合はコードベース全体を渡さない方がいいかもしれないが、
-    // コンテキストとしてあった方が有利。ただしトークン節約のため、Fixプロンプト側で制御されることを期待。
-    // ここでは、テンプレート置換済みファイルを渡される前提なので、そのまま送信する。
+    // Add codebase info to prompt (if not included in template)
+    // In Auto-Fix mode, better not to pass whole codebase but context helps.
+    // It's expected to be controlled by Fix prompt.
+    // Here we assume prompt is pre-replaced template, so execute as is.
 
     /* 
-       NOTE: generate-prompt.js で生成されたプロンプトにはコードベースが含まれていないため、
-       ここで注入する必要がある。（変更前のスクリプトではここでコードベースを埋め込んでいた）
-       generate-prompt.js は {{ANALYTICS}} と {{CHANGELOG}} しか置換しない。
-       したがって、コードベースの注入はここで行う必要がある。
+       NOTE: The prompt generated by generate-prompt.js does NOT include the codebase,
+       so we must inject it here.
+       generate-prompt.js only replaces {{ANALYTICS}} and {{CHANGELOG}}.
+       Therefore, code injection happens here.
     */
 
     const codebaseContext = `
-## 編集可能なコードベース
+## Editable Codebase
 ${codebase.length > 0
             ? codebase.slice(0, 10).map(f => `### ${f.path}\n\`\`\`\n${f.content}\n\`\`\``).join('\n\n')
-            : '(空のプレイグラウンド - 新しいコンポーネントを作成してください)'
+            : '(Empty Playground - Create new components)'
         }
 
 ${codebase.length > 10 ? `... and ${codebase.length - 10} more files` : ''}
 
-## 絶対に触ってはいけないファイル（システム保護）
+## Protected Files (DO NOT TOUCH)
 ${PROTECTED_PATHS.join('\n')}
 `;
 
-    // プロンプトファイルの内容にコードベースが含まれていなければ追加
-    if (!prompt.includes('## 編集可能なコードベース')) {
+    // If prompt file doesn't have codebase section, append it
+    if (!prompt.includes('## Editable Codebase')) {
         prompt += '\n\n' + codebaseContext;
     }
 
@@ -155,7 +155,7 @@ ${PROTECTED_PATHS.join('\n')}
     const resultText = data.choices[0].message.content;
     console.log('✅ AI Response received');
 
-    // 6. レスポンスをパースして保存
+    // 6. Parse and save response
     const result = parseAndSave(resultText);
 
     if (result.changes.length === 0) {
@@ -165,7 +165,7 @@ ${PROTECTED_PATHS.join('\n')}
         process.exit(0);
     }
 
-    // 7. GitHub Actions の output に設定
+    // 7. Set GitHub Actions output
     execSync(`echo "reasoning=${result.reasoning}" >> $GITHUB_OUTPUT`);
     execSync(`echo "files=${result.files}" >> $GITHUB_OUTPUT`);
     execSync(`echo "model=${model}" >> $GITHUB_OUTPUT`);
@@ -190,7 +190,7 @@ function parseAndSave(response) {
         const [, filepath, content] = match;
         const trimmedPath = filepath.trim();
 
-        // 保護ファイルチェック
+        // Check protected files
         if (PROTECTED_PATHS.some(pattern => {
             const regex = new RegExp(pattern.replace('**', '.*').replace('*', '[^/]*'));
             return regex.test(trimmedPath);
@@ -199,13 +199,13 @@ function parseAndSave(response) {
             continue;
         }
 
-        // このモデルのplaygroundディレクトリ外へのアクセスを禁止
+        // Restrict access to outside of model playground
         if (!trimmedPath.startsWith(`src/app/models/${MODEL_ID}/playground`)) {
             console.warn(`⚠️  Skipping file outside model playground: ${trimmedPath}`);
             continue;
         }
 
-        // ディレクトリ作成（必要に応じて）
+        // Create directory (if needed)
         const dir = path.dirname(trimmedPath);
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });

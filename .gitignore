@@ -42,3 +42,7 @@ next-env.d.ts
 
 # AI Evolution
 .github/prompts/generated-*.txt
+
+# analytics
+public/analytics.json
+public/analytics-previous.json

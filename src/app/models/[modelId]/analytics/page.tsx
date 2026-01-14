@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { notFound } from "next/navigation";
-import { getModel, MODELS } from "@/lib/models";
+import { getModel } from "@/lib/models";
 import { IconAnalytics, IconLoading, IconWarning, IconInfo } from "@/components/icons/Icons";
 import Link from "next/link";
 
@@ -82,7 +82,7 @@ export default function AnalyticsPage() {
                 if (!response.ok) {
                     throw new Error('Failed to fetch analytics');
                 }
-                const data = await response.json();
+                const data = await response.json() as GA4Analytics;
                 setAnalytics(data);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Unknown error');

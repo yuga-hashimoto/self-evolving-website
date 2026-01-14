@@ -6,7 +6,7 @@ let previous;
 
 try {
     previous = JSON.parse(fs.readFileSync('public/analytics-previous.json', 'utf-8'));
-} catch (e) {
+} catch {
     console.log('⚠️  No previous data, assuming safe');
     execSync(`echo "safe=true" >> $GITHUB_OUTPUT`);
     process.exit(0);
@@ -15,7 +15,7 @@ try {
 const currentRevenue = parseFloat(analytics.revenue);
 const previousRevenue = parseFloat(previous.revenue);
 
-// 前回が0の場合はチェックをスキップ
+// Skip check if previous revenue was 0
 if (previousRevenue === 0) {
     console.log('ℹ️  Previous revenue was 0, skipping safety check');
     execSync(`echo "safe=true" >> $GITHUB_OUTPUT`);
@@ -24,7 +24,7 @@ if (previousRevenue === 0) {
 
 const revenueChange = (currentRevenue - previousRevenue) / previousRevenue;
 
-// セーフティ判定: 収益30%減まで許容
+// Safety check: Allow up to 30% drop in revenue
 const safe = revenueChange > -0.3;
 
 console.log('💰 Revenue change:', (revenueChange * 100).toFixed(1) + '%');

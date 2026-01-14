@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-// モデルIDを環境変数から取得（必須）
+// Get model ID from environment variables (required)
 const MODEL_ID = process.env.MODEL_ID;
 if (!MODEL_ID) {
     console.error('❌ MODEL_ID environment variable is required');
@@ -11,29 +11,29 @@ if (!MODEL_ID) {
 const reasoning = process.env.AI_REASONING || 'No reasoning provided';
 const changedFiles = process.env.CHANGED_FILES?.split(',') || [];
 
-// モデル別のパス
+// Model-specific paths
 const modelDataDir = `public/models/${MODEL_ID}`;
 const analyticsPath = path.join(modelDataDir, 'analytics.json');
 const analyticsPrevPath = path.join(modelDataDir, 'analytics-previous.json');
 const changelogPath = path.join(modelDataDir, 'changelog.json');
 
-// アナリティクス読み込み
+// Read Analytics
 let analytics = { revenue: '0', pageviews: 0, avgSessionDuration: 0, bounceRate: '0' };
 try {
     analytics = JSON.parse(fs.readFileSync(analyticsPath, 'utf-8'));
-} catch (e) {
+} catch {
     console.log(`📊 No analytics found for ${MODEL_ID}`);
 }
 
-// 前日のデータ読み込み
+// Read previous day's data
 let previous = { revenue: '0', pageviews: 0 };
 try {
     previous = JSON.parse(fs.readFileSync(analyticsPrevPath, 'utf-8'));
-} catch (e) {
+} catch {
     console.log(`📊 No previous analytics for ${MODEL_ID}`);
 }
 
-// 変化率計算
+// Calculate change rates
 const revenueChange = parseFloat(previous.revenue) > 0
     ? ((parseFloat(analytics.revenue) - parseFloat(previous.revenue)) / parseFloat(previous.revenue) * 100).toFixed(1)
     : '0';
@@ -41,15 +41,15 @@ const pvChange = previous.pageviews > 0
     ? ((analytics.pageviews - previous.pageviews) / previous.pageviews * 100).toFixed(1)
     : '0';
 
-// 変更履歴読み込み
+// Read Changelog
 let changelog = [];
 try {
     changelog = JSON.parse(fs.readFileSync(changelogPath, 'utf-8'));
-} catch (e) {
+} catch {
     console.log(`📝 Creating new changelog for ${MODEL_ID}`);
 }
 
-// 新しいエントリー追加
+// Add new entry
 const entry = {
     id: changelog.length + 1,
     date: new Date().toISOString(),
@@ -69,7 +69,7 @@ const entry = {
 
 changelog.push(entry);
 
-// 最新100件のみ保持
+// Keep only latest 100 entries
 if (changelog.length > 100) {
     changelog = changelog.slice(-100);
 }

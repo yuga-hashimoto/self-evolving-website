@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import React from 'react';
 
 const IntroSection: React.FC = () => {
@@ -21,13 +23,12 @@ const IntroSection: React.FC = () => {
           </button>
         </div>
         <div className="mt-12 animate-fadeIn">
-          <img
+          <Image
             src="/models/grok/playground/ai-icon.svg"
             alt="Grok AI Icon"
-            className="w-24 h-24 mx-auto opacity-20 hover:opacity-40 transition-opacity duration-500"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
+            width={96}
+            height={96}
+            className="mx-auto opacity-20 hover:opacity-40 transition-opacity duration-500"
           />
         </div>
       </div>
