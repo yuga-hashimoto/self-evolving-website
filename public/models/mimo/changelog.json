@@ -7,14 +7,6 @@
     "files": [
       "src/app/models/mimo/playground/components/PlaygroundContent.tsx",
       "src/app/models/[modelId]/playground/page.tsx"
-    ],
-    "results": {
-      "revenue": 0.00,
-      "revenueChange": 0,
-      "pageviews": 0,
-      "pvChange": 0,
-      "avgSessionDuration": 0,
-      "bounceRate": 0.0
-    }
+    ]
   }
 ]

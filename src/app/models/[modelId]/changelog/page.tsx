@@ -15,9 +15,9 @@ interface ChangelogEntry {
     id: number;
     date: string;
     model?: string;
-    reasoning: string;
-    files: string[];
-    results: {
+    // Old format
+    reasoning?: string;
+    results?: {
         revenue: number;
         revenueChange: number;
         pageviews: number;
@@ -25,6 +25,10 @@ interface ChangelogEntry {
         avgSessionDuration: number;
         bounceRate: number;
     };
+    // New format
+    changes?: string;
+    intent?: string;
+    files: string[];
 }
 
 interface PageProps {
@@ -119,8 +123,23 @@ export default async function ChangelogPage({ params }: PageProps) {
                                         )}
                                     </div>
 
-                                    {/* Reasoning */}
-                                    <p className="text-white font-medium mb-4">{entry.reasoning}</p>
+                                    {/* Content - Support both new and old formats */}
+                                    {entry.changes && (
+                                        <div className="mb-4">
+                                            <h4 className="text-sm text-purple-400 font-bold mb-1">変更内容</h4>
+                                            <p className="text-white font-medium">{entry.changes}</p>
+                                        </div>
+                                    )}
+                                    {entry.intent && (
+                                        <div className="mb-4">
+                                            <h4 className="text-sm text-purple-400 font-bold mb-1">変更の狙い</h4>
+                                            <p className="text-gray-300">{entry.intent}</p>
+                                        </div>
+                                    )}
+                                    {/* Legacy reasoning support */}
+                                    {!entry.changes && entry.reasoning && (
+                                        <p className="text-white font-medium mb-4">{entry.reasoning}</p>
+                                    )}
 
                                     {/* Changed Files */}
                                     <div className="mb-4">
@@ -137,32 +156,35 @@ export default async function ChangelogPage({ params }: PageProps) {
                                         </div>
                                     </div>
 
-                                    {/* Results */}
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-black/20 rounded-lg">
-                                        <div>
-                                            <p className="text-xs text-gray-400">収益</p>
-                                            <p className="font-bold">${entry.results.revenue.toFixed(2)}</p>
-                                            <ChangeIndicator value={entry.results.revenueChange} />
+                                    {/* Results (Only if available) */}
+                                    {entry.results && (
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-black/20 rounded-lg">
+                                            <div>
+                                                <p className="text-xs text-gray-400">収益</p>
+                                                <p className="font-bold">${entry.results.revenue.toFixed(2)}</p>
+                                                <ChangeIndicator value={entry.results.revenueChange} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-400">PV</p>
+                                                <p className="font-bold">{entry.results.pageviews}</p>
+                                                <ChangeIndicator value={entry.results.pvChange} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-400">滞在時間</p>
+                                                <p className="font-bold">{entry.results.avgSessionDuration}秒</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-400">直帰率</p>
+                                                <p className="font-bold">{entry.results.bounceRate}%</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-xs text-gray-400">PV</p>
-                                            <p className="font-bold">{entry.results.pageviews}</p>
-                                            <ChangeIndicator value={entry.results.pvChange} />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-400">滞在時間</p>
-                                            <p className="font-bold">{entry.results.avgSessionDuration}秒</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-400">直帰率</p>
-                                            <p className="font-bold">{entry.results.bounceRate}%</p>
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
                     </div>
                 )}
+
 
                 {/* Back Link */}
                 <div className="mt-12 text-center">

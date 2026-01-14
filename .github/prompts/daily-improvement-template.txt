@@ -19,7 +19,22 @@ self-evolving.devでは2つのAIモデルにサイトを毎日自動で改善し
 - 平均滞在時間: +10秒延長
 
 ## 出力形式
-変更内容を `public/models/{{MODEL_ID}}/changelog.json` に以下のJSON形式で追記する指示を出してください（実際にはファイル編集として）：
+変更内容を `public/models/{{MODEL_ID}}/changelog.json` に以下のJSON形式で追記する指示を出してください（実際にはファイル編集として）。
+**注意: `results` や `reasoning` フィールドは廃止しました。代わりに `changes` と `intent` を使用してください。**
+
+```json
+[
+  {
+    "id": (number),
+    "date": "(ISO string)",
+    "model": "{{MODEL_ID}}",
+    "changes": "変更内容の要約（何をしたか）",
+    "intent": "変更の狙い（なぜしたか）",
+    "files": ["path/to/file"]
+  },
+  ... (existing entries)
+]
+```
 
 各変更ファイルを以下の形式で出力してください:
 
@@ -30,7 +45,8 @@ FILE: src/app/models/{{MODEL_ID}}/playground/path/to/file.tsx
 
 最後に必ず以下を追加:
 
-REASONING: この変更が収益向上につながる理由を100文字以内で説明
+CHANGES: 変更内容の要約
+INTENT: 変更の狙い
 FILES: src/app/models/{{MODEL_ID}}/playground/path/to/file.tsx
 
 ※ 注意: changelog.json は既存の配列の先頭に追加するように編集してください。既存のデータは削除しないでください。

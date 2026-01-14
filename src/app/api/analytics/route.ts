@@ -1,7 +1,10 @@
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+    const searchParams = request.nextUrl.searchParams;
+    const modelId = searchParams.get('model');
+
     const propertyId = process.env.GA4_PROPERTY_ID;
     const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
 
@@ -29,7 +32,22 @@ export async function GET() {
             { name: 'bounceRate' },
         ];
 
+        let dimensionFilter = undefined;
+        if (modelId) {
+            dimensionFilter = {
+                filter: {
+                    fieldName: 'pagePath',
+                    stringFilter: {
+                        matchType: 'BEGINS_WITH',
+                        value: `/models/${modelId}`
+                    }
+                }
+            };
+        }
+
         // Fetch data for multiple periods
+        // Note: dimensionFilter is applied to all date ranges in a single request if supported,
+        // but runReport accepts dimensionFilter.
         const [response] = await analyticsDataClient.runReport({
             property: `properties/${propertyId}`,
             dateRanges: [
@@ -39,6 +57,7 @@ export async function GET() {
                 { startDate: '2020-01-01', endDate: 'today' }, // All time (since 2020)
             ],
             metrics,
+            dimensionFilter,
         });
 
         function parseRow(row: any) {
@@ -55,10 +74,10 @@ export async function GET() {
 
         // Each row corresponds to a date range
         const rows = response.rows || [];
-        const today = parseRow(rows.find(r => r.dimensionValues?.[0]?.value === 'date_range_0') || rows[0]);
-        const week = parseRow(rows.find(r => r.dimensionValues?.[0]?.value === 'date_range_1') || rows[1]);
-        const month = parseRow(rows.find(r => r.dimensionValues?.[0]?.value === 'date_range_2') || rows[2]);
-        const allTime = parseRow(rows.find(r => r.dimensionValues?.[0]?.value === 'date_range_3') || rows[3]);
+        const today = parseRow(rows.find((r: any) => r.dimensionValues?.[0]?.value === 'date_range_0') || rows[0]);
+        const week = parseRow(rows.find((r: any) => r.dimensionValues?.[0]?.value === 'date_range_1') || rows[1]);
+        const month = parseRow(rows.find((r: any) => r.dimensionValues?.[0]?.value === 'date_range_2') || rows[2]);
+        const allTime = parseRow(rows.find((r: any) => r.dimensionValues?.[0]?.value === 'date_range_3') || rows[3]);
 
         return NextResponse.json({
             source: 'ga4',
@@ -83,3 +102,4 @@ export async function GET() {
         }, { status: 500 });
     }
 }
+
