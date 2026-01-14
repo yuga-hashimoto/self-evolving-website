@@ -284,5 +284,6 @@ jobs:
           DATE=$(date +'%Y-%m-%d')
           git commit -m "${{ inputs.commit_prefix }} (${{ inputs.model_display_name }}) - $DATE"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git stash
           git pull --rebase origin main
           git push origin main
