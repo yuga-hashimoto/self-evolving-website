@@ -35,6 +35,13 @@ jobs:
         run: node scripts/generate-prompt.js grok
         env:
           MODEL_ID: grok
+      
+      - name: Fetch Analytics
+        run: node scripts/fetch-analytics.js
+        env:
+          MODEL_ID: grok
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
 
       - name: Read Prompt
         id: read-prompt

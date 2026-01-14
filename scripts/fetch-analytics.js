@@ -44,6 +44,15 @@ async function fetchGA4Analytics() {
                     endDate: 'today',
                 },
             ],
+            dimensionFilter: {
+                filter: {
+                    fieldName: 'pagePath',
+                    stringFilter: {
+                        matchType: 'BEGINS_WITH',
+                        value: `/models/${MODEL_ID}`
+                    }
+                }
+            },
             metrics: [
                 { name: 'screenPageViews' },
                 { name: 'averageSessionDuration' },
