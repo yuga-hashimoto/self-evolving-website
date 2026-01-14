@@ -114,17 +114,25 @@ Example:
 }
 ```
 
-### Required: Before/After Articulation
+### Required Format
 
-In `changes` field (Japanese):
+**MANDATORY (必須):**
+- `changes` field: 何を変更したか（変更内容の要約）を日本語で記述
+- `intent` field: なぜ変更したか（変更の理由・狙い）を日本語で記述
+
+**RECOMMENDED (推奨・プラスアルファ):**
+
+For `changes` field, you may optionally structure as:
 - Before: 変更前の状態
 - After: 変更後の状態
 - Implementation: 実装した内容
 
-In `intent` field (Japanese):
+For `intent` field, you may optionally include:
 - Hypothesis: もし〇〇なら△△が改善
 - Principle: 適用したUX原理/心理学原理
 - Metric: 目標指標（CVR +X%, 直帰率 -Y%）
+
+Simple format is acceptable. Structured format is preferred when appropriate.
 
 Output each modified file in the following format:
 
