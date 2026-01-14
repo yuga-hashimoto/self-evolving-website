@@ -10,7 +10,14 @@ async function takeScreenshot() {
   }
 
   const url = `http://localhost:3131/models/${modelId}/playground`;
-  const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+  // Use local timezone date instead of UTC
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const date = `${year}-${month}-${day}`;
+
   const screenshotDir = path.join(__dirname, `../public/models/${modelId}/screenshots`);
   const screenshotPath = path.join(screenshotDir, `${date}.png`);
 

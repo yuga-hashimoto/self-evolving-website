@@ -11,7 +11,16 @@ export default function Header() {
     const match = pathname.match(/^\/models\/([^/]+)/);
     const currentModelId = match ? match[1] : null;
 
-    // デスクトップ用ナビゲーションアイテム（モデルページ内のみ）
+    // グローバルナビゲーションアイテム（トップページや比較履歴ページ用）
+    const globalNavItems = [
+        { href: "/", label: "ホーム", icon: IconHome },
+        { href: "/models/mimo", label: "Mimo", icon: IconMimo },
+        { href: "/models/grok", label: "Grok", icon: IconGrok },
+        { href: "/changelogs/compare", label: "比較履歴", icon: IconChangelog },
+    ];
+
+    // デスクトップ用ナビゲーションアイテム
+    // モデルページ内ではモデル専用ナビ、それ以外ではグローバルナビ
     const desktopNavItems = currentModelId
         ? [
             { href: `/models/${currentModelId}`, label: "ホーム", icon: IconHome },
@@ -19,15 +28,10 @@ export default function Header() {
             { href: `/models/${currentModelId}/changelog`, label: "更新履歴", icon: IconChangelog },
             { href: `/models/${currentModelId}/analytics`, label: "分析", icon: IconAnalytics },
         ]
-        : [];
+        : globalNavItems;
 
     // モバイル用ボトムナビゲーションアイテム（常時表示）
-    const mobileNavItems = [
-        { href: "/", label: "ホーム", icon: IconHome },
-        { href: "/models/mimo", label: "Mimo", icon: IconMimo },
-        { href: "/models/grok", label: "Grok", icon: IconGrok },
-        { href: "/changelogs/compare", label: "比較履歴", icon: IconChangelog },
-    ];
+    const mobileNavItems = globalNavItems;
 
     return (
         <>
