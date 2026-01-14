@@ -303,6 +303,16 @@ export function IconGrok({ size = 48, className = "" }: IconProps) {
     );
 }
 
+// Star/Favorite icon
+export function IconStar({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <path d="M32 8L39 24H56L42 34L48 50L32 40L16 50L22 34L8 24H25L32 8Z" fill="#FFD93D" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="32" cy="32" r="4" fill="#fbbf24" fillOpacity="0.5" />
+        </svg>
+    );
+}
+
 // Icon map for dynamic usage
 export const iconMap = {
     mimo: IconMimo,
@@ -326,6 +336,7 @@ export const iconMap = {
     brain: IconBrain,
     code: IconCodeSpark,
     daily: IconCycleDaily,
+    star: IconStar,
 } as const;
 
 export type IconName = keyof typeof iconMap;
