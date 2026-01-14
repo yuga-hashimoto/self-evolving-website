@@ -70,7 +70,8 @@ jobs:
           PROMPT=$(cat .github/prompts/generated-${{ inputs.model_id }}.txt)
           # Prepend working directory instructions to the prompt
           FULL_PROMPT="Working directory: src/app/models/${{ inputs.model_id }}/playground
-          Only edit files within this directory.
+          You may also edit src/components/icons/Icons.tsx if you need to add new icons.
+          Only edit files within these directories. Do NOT edit other files.
 
           $PROMPT"
           echo "prompt<<EOF" >> $GITHUB_OUTPUT
@@ -95,10 +96,10 @@ jobs:
       - name: Check for Changes
         id: changes
         run: |
-          if [[ -n $(git status --porcelain src/app/models/${{ inputs.model_id }}/playground) ]]; then
+          if [[ -n $(git status --porcelain src/app/models/${{ inputs.model_id }}/playground) ]] || [[ -n $(git status --porcelain src/components/icons/Icons.tsx) ]]; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "✅ Changes detected"
-            git status --short src/app/models/${{ inputs.model_id }}/playground
+            git status --short
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "ℹ️  No changes"
@@ -276,10 +277,23 @@ jobs:
       - name: Commit & Push
         if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
+          # Add expected files
           git add src/app/models/${{ inputs.model_id }}/playground
+          git add src/components/icons/Icons.tsx || true # Allow icons update
+          
           git add public/models/${{ inputs.model_id }}/changelog.json || echo "No changelog update"
           git add public/models/${{ inputs.model_id }}/analytics.json || echo "No analytics update"
           git add public/models/${{ inputs.model_id }}/analytics-previous.json || echo "No prev analytics update"
+          
+          # Safety Check: Fail if other source files are modified but not staged
+          # This prevents "Build passed but file missing in push" scenario
+          if [[ -n $(git status --porcelain src/) ]]; then
+             echo "❌ CRITICAL ERROR: AI modified files outside of allowed scope!"
+             echo "The following files were modified but not staged for commit:"
+             git status --porcelain src/
+             echo "Blocking push to prevent build inconsistencies."
+             exit 1
+          fi
           
           DATE=$(date +'%Y-%m-%d')
           git commit -m "${{ inputs.commit_prefix }} (${{ inputs.model_display_name }}) - $DATE"
