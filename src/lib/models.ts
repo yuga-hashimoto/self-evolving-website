@@ -3,14 +3,14 @@ export const MODELS = {
     mimo: {
         id: 'mimo',
         name: 'Mimo',
-        description: 'Xiaomi Mimo V2 Flash ベースの進化',
+        description: 'Xiaomi Mimo V2 Flash',
         openrouterModel: 'xiaomi/mimo-v2-flash:free',
         color: 'purple',
     },
     grok: {
         id: 'grok',
         name: 'Grok',
-        description: 'X-AI Grok Code Fast ベースの進化',
+        description: 'X-AI Grok Code Fast',
         openrouterModel: 'x-ai/grok-code-fast-1',
         color: 'blue',
     },

@@ -11,13 +11,30 @@ export async function GET(request: NextRequest) {
     // If credentials are not set, return dummy data
     if (!propertyId || !credentialsJson) {
         console.log('⚠️ GA4 credentials not configured. Returning dummy data.');
+
+        // テスト用: 過去90日分のダミーグラフデータを生成
+        const dummyDailyData = Array.from({ length: 90 }, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - (89 - i));
+            const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+            const baseValue = 100 + Math.floor(Math.random() * 150);
+            return {
+                date: dateStr,
+                pageviews: baseValue + Math.floor(Math.random() * 50),
+                sessions: Math.floor(baseValue * 0.8),
+                avgSessionDuration: 120 + Math.floor(Math.random() * 180),
+                bounceRate: parseFloat((40 + Math.random() * 30).toFixed(1))
+            };
+        });
+
         return NextResponse.json({
             source: 'dummy',
-            today: { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
-            week: { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
-            month: { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
-            allTime: { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
+            today: { pageviews: 156, sessions: 124, avgSessionDuration: 185, bounceRate: '45.2' },
+            week: { pageviews: 1089, sessions: 871, avgSessionDuration: 172, bounceRate: '48.5' },
+            month: { pageviews: 4234, sessions: 3387, avgSessionDuration: 168, bounceRate: '50.1' },
+            allTime: { pageviews: 12567, sessions: 10054, avgSessionDuration: 165, bounceRate: '51.3' },
             lastUpdated: new Date().toISOString(),
+            dailyData: dummyDailyData,
         });
     }
 
@@ -66,6 +83,20 @@ export async function GET(request: NextRequest) {
 
         const response = reportResult[0];
 
+        // 90日間の日別データを取得
+        const dailyReportResult = await analyticsDataClient.runReport({
+            property: `properties/${propertyId}`,
+            dateRanges: [{ startDate: '90daysAgo', endDate: 'today' }],
+            dimensions: [{ name: 'date' }],
+            metrics: [
+                { name: 'screenPageViews' },
+                { name: 'sessions' },
+                { name: 'averageSessionDuration' },
+                { name: 'bounceRate' }
+            ],
+            dimensionFilter,
+            orderBys: [{ dimension: { dimensionName: 'date' }, desc: false }]
+        });
 
         interface AnalyticsRow {
             metricValues?: { value?: string | null }[] | null;
@@ -113,10 +144,20 @@ export async function GET(request: NextRequest) {
         }
 
         const rows: AnalyticsRow[] = response.rows || [];
-        const today = aggregateByDateRange(rows, 'today');
-        const week = aggregateByDateRange(rows, 'week');
-        const month = aggregateByDateRange(rows, 'month');
-        const allTime = aggregateByDateRange(rows, 'allTime');
+        const today = aggregateByDateRange(rows, 'date_range_0');
+        const week = aggregateByDateRange(rows, 'date_range_1');
+        const month = aggregateByDateRange(rows, 'date_range_2');
+        const allTime = aggregateByDateRange(rows, 'date_range_3');
+
+        // 日別データの整形
+        const dailyResponse = dailyReportResult[0];
+        const dailyData = dailyResponse.rows?.map(row => ({
+            date: row.dimensionValues?.[0]?.value || '',
+            pageviews: parseInt(row.metricValues?.[0]?.value || '0'),
+            sessions: parseInt(row.metricValues?.[1]?.value || '0'),
+            avgSessionDuration: Math.round(parseFloat(row.metricValues?.[2]?.value || '0')),
+            bounceRate: parseFloat((parseFloat(row.metricValues?.[3]?.value || '0') * 100).toFixed(1))
+        })) || [];
 
         return NextResponse.json({
             source: 'ga4',
@@ -126,6 +167,7 @@ export async function GET(request: NextRequest) {
             allTime,
             lastUpdated: new Date().toISOString(),
             rowCount: rows.length,
+            dailyData,
         });
 
     } catch (error) {
@@ -142,6 +184,7 @@ export async function GET(request: NextRequest) {
             month: { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
             allTime: { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
             lastUpdated: new Date().toISOString(),
+            dailyData: [],
         }, { status: 500 });
     }
 }

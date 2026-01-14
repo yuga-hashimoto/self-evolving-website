@@ -6,23 +6,20 @@ import { notFound } from "next/navigation";
 import { getModel } from "@/lib/models";
 import { IconAnalytics, IconLoading, IconWarning, IconInfo } from "@/components/icons/Icons";
 import Link from "next/link";
+import { PageviewsChart } from "@/components/analytics/PageviewsChart";
 
-interface PeriodData {
+interface DailyData {
+    date: string;
     pageviews: number;
     sessions: number;
     avgSessionDuration: number;
-    bounceRate: string;
+    bounceRate: number;
 }
 
 interface GA4Analytics {
     source: string;
-    today: PeriodData;
-    week: PeriodData;
-    month: PeriodData;
-    allTime: PeriodData;
     lastUpdated: string;
-    message?: string;
-    error?: string;
+    dailyData?: DailyData[];
 }
 
 function DataSourceBadge({ source }: { source: string }) {
@@ -37,32 +34,6 @@ function DataSourceBadge({ source }: { source: string }) {
             <div className={`w-2 h-2 rounded-full ${source === 'ga4' ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
             {config.label}
         </span>
-    );
-}
-
-function PeriodCard({ title, data }: { title: string; data: PeriodData }) {
-    return (
-        <div className="glass-card p-6">
-            <h3 className="text-lg font-bold mb-4 text-purple-300">{title}</h3>
-            <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                    <p className="text-2xl font-bold gradient-text">{data.pageviews.toLocaleString()}</p>
-                    <p className="text-xs text-gray-400">PV</p>
-                </div>
-                <div className="text-center">
-                    <p className="text-2xl font-bold gradient-text">{data.sessions.toLocaleString()}</p>
-                    <p className="text-xs text-gray-400">セッション</p>
-                </div>
-                <div className="text-center">
-                    <p className="text-2xl font-bold gradient-text">{data.avgSessionDuration}秒</p>
-                    <p className="text-xs text-gray-400">平均滞在</p>
-                </div>
-                <div className="text-center">
-                    <p className="text-2xl font-bold gradient-text">{data.bounceRate}%</p>
-                    <p className="text-xs text-gray-400">直帰率</p>
-                </div>
-            </div>
-        </div>
     );
 }
 
@@ -131,12 +102,15 @@ export default function AnalyticsPage() {
         <div className="min-h-[calc(100vh-8rem)] px-4 py-16">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
-                <div className="text-center mb-12">
-                    <div className="flex items-center justify-center gap-3 mb-4">
-                        <IconAnalytics size={48} />
-                        <h1 className="text-4xl font-bold gradient-text">{model.name} アナリティクス</h1>
+                <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-3">
+                        <IconAnalytics size={40} />
+                        <div>
+                            <h1 className="text-3xl font-bold gradient-text">{model.name}</h1>
+                            <p className="text-lg text-gray-400">アナリティクス</p>
+                        </div>
                     </div>
-                    <div className="flex flex-col items-center gap-2">
+                    <div className="flex flex-col items-end gap-2">
                         <DataSourceBadge source={analytics.source} />
                         <p className="text-gray-500 text-xs">
                             最終更新: {new Date(analytics.lastUpdated).toLocaleString('ja-JP')}
@@ -144,38 +118,41 @@ export default function AnalyticsPage() {
                     </div>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
-                    <PeriodCard title="📅 今日" data={analytics.today} />
-                    <PeriodCard title="📊 過去7日間" data={analytics.week} />
-                    <PeriodCard title="📈 過去30日間" data={analytics.month} />
-                    <PeriodCard title="🏆 全期間" data={analytics.allTime} />
-                </div>
+                {/* グラフセクション */}
+                {analytics.dailyData && analytics.dailyData.length > 0 ? (
+                    <div className="mb-12">
+                        <PageviewsChart data={analytics.dailyData} />
+                    </div>
+                ) : (
+                    <div className="glass-card p-12 text-center mb-12">
+                        <div className="flex justify-center mb-4">
+                            <IconInfo size={64} />
+                        </div>
+                        <p className="text-gray-400 text-lg">データが不足しています</p>
+                        <p className="text-gray-500 text-sm mt-2">
+                            アナリティクスデータを表示するには、GA4認証情報を設定してください。
+                        </p>
+                    </div>
+                )}
 
                 {/* Info Card */}
-                <div className="glass-card p-6">
-                    <h3 className="font-bold mb-4 flex items-center gap-2">
-                        <IconInfo size={24} /> データの反映と詳細
-                    </h3>
-                    <ul className="text-gray-400 text-sm space-y-3">
-                        <li>• <strong>PV:</strong> ページビュー数</li>
-                        <li>• <strong>セッション:</strong> ユニークな訪問数</li>
-                        <li>• <strong>平均滞在:</strong> セッションあたりの平均閲覧時間</li>
-                        <li>• <strong>直帰率:</strong> 1ページのみ閲覧して離脱した割合</li>
-                        {analytics.source === 'ga4' && (
-                            <li className="pt-2 border-t border-white/5 text-purple-300/80 italic">
-                                ※ Google Analyticsのデータ集計ラグにより、最新の訪問データが反映されるまでに数時間〜最大48時間かかる場合があります。
-                            </li>
-                        )}
-                    </ul>
-                    {analytics.source === 'dummy' && (
-                        <div className="mt-6 p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
-                            <p className="text-yellow-400 text-sm">
-                                ⚠️ 現在デモデータを表示しています。GA4 認証情報を設定してください。
-                            </p>
-                        </div>
-                    )}
-                </div>
+                {analytics.source === 'ga4' && (
+                    <div className="glass-card p-6">
+                        <h3 className="font-bold mb-4 flex items-center gap-2">
+                            <IconInfo size={24} /> データについて
+                        </h3>
+                        <p className="text-gray-400 text-sm">
+                            Google Analyticsのデータ集計ラグにより、最新の訪問データが反映されるまでに数時間〜最大48時間かかる場合があります。
+                        </p>
+                    </div>
+                )}
+                {analytics.source === 'dummy' && (
+                    <div className="glass-card p-6 bg-yellow-500/5 border border-yellow-500/30">
+                        <p className="text-yellow-400">
+                            ⚠️ 現在デモデータを表示しています。GA4 認証情報を設定すると実際のデータが表示されます。
+                        </p>
+                    </div>
+                )}
 
                 {/* Back Link */}
                 <div className="mt-12 text-center">

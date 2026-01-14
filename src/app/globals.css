@@ -90,3 +90,16 @@ body {
   height: 0 !important;
   z-index: -9999 !important;
 }
+
+/* Mobile safe area and tap targets */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media (max-width: 640px) {
+  .glass-card {
+    min-height: 44px;
+  }
+}

@@ -42,12 +42,9 @@ export default async function ModelPage({ params }: PageProps) {
                 <div className="inline-block mb-2 sm:mb-6 animate-float">
                     <IconDNA className="w-12 h-12 sm:w-24 sm:h-24" />
                 </div>
-                <h1 className={`text-2xl sm:text-5xl lg:text-6xl font-bold mb-2 sm:mb-6 bg-gradient-to-r ${colors.gradient} bg-clip-text text-transparent`}>
+                <h1 className={`text-2xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-8 bg-gradient-to-r ${colors.gradient} bg-clip-text text-transparent`}>
                     {model.name} Evolution
                 </h1>
-                <p className="text-sm sm:text-2xl text-gray-300 mb-2 sm:mb-4">
-                    {model.description}
-                </p>
 
                 {/* Model Badge */}
                 <div className={`inline-flex items-center gap-2 px-3 py-1 sm:px-4 sm:py-2 rounded-full border mb-4 sm:mb-8 ${colors.badge}`}>
@@ -66,7 +63,7 @@ export default async function ModelPage({ params }: PageProps) {
                         <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
                             <IconPlayground className="w-12 h-12 sm:w-16 sm:h-16" />
                         </div>
-                        <h2 className="text-xl font-bold mb-2">実験場を見る</h2>
+                        <h2 className="text-xl font-bold mb-2">実験場</h2>
                         <p className="text-gray-400 text-sm">
                             AIが自由に進化させるページ
                         </p>

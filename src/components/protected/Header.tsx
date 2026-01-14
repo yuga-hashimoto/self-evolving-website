@@ -75,18 +75,18 @@ export default function Header() {
 
             {/* Mobile Bottom Navigation Bar - Universal */}
             <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-[2147483647] bg-[#0f0f1a] border-t border-white/10 safe-area-bottom">
-                <div className="flex items-center justify-around h-16 px-2">
+                <div className="flex items-center justify-around h-16 px-1">
                     {mobileNavItems.map((item) => (
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl flex-1 mx-1 transition-all duration-200 ${pathname === item.href
+                            className={`flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl flex-1 mx-1 min-w-[64px] min-h-[64px] transition-all duration-200 ${pathname === item.href
                                 ? "bg-purple-500/20 text-purple-300"
                                 : "text-gray-400 active:bg-white/10"
                                 }`}
                         >
-                            <item.icon size={22} />
-                            <span className="text-[10px] font-medium">{item.label}</span>
+                            <item.icon size={24} />
+                            <span className="text-[11px] font-medium">{item.label}</span>
                         </Link>
                     ))}
                 </div>
