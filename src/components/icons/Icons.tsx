@@ -288,7 +288,7 @@ export function IconMimo({ size = 48, className = "" }: IconProps) {
     return (
         <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
             <circle cx="32" cy="32" r="28" fill="#a855f7" fillOpacity="0.1" stroke="#a855f7" strokeWidth="2" />
-            <text x="32" y="42" textAnchor="middle" fontSize="30" fontWeight="bold" fill="#a855f7">M</text>
+            <path d="M20 44V20L32 32L44 20V44" stroke="#a855f7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
     );
 }
@@ -298,7 +298,61 @@ export function IconGrok({ size = 48, className = "" }: IconProps) {
     return (
         <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
             <circle cx="32" cy="32" r="28" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" strokeWidth="2" />
-            <text x="32" y="42" textAnchor="middle" fontSize="30" fontWeight="bold" fill="#3b82f6">G</text>
+            <path d="M44 26V20H20V44H44V34H32" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
+
+// Balance/Fairness icon
+export function IconBalance({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <path d="M32 8V24" stroke="#eab308" strokeWidth="3" strokeLinecap="round" />
+            <path d="M12 24H52" stroke="#eab308" strokeWidth="3" strokeLinecap="round" />
+            <path d="M16 24L8 44H24L16 24Z" fill="#eab308" fillOpacity="0.2" stroke="#eab308" strokeWidth="2" strokeLinejoin="round" />
+            <path d="M48 24L40 44H56L48 24Z" fill="#eab308" fillOpacity="0.2" stroke="#eab308" strokeWidth="2" strokeLinejoin="round" />
+            <path d="M32 56V24" stroke="#eab308" strokeWidth="2" strokeLinecap="round" />
+            <path d="M24 56H40" stroke="#eab308" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="32" cy="12" r="4" fill="#fbbf24" stroke="#eab308" strokeWidth="2" />
+        </svg>
+    );
+}
+
+// Target/Goal icon
+export function IconTarget({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <circle cx="32" cy="32" r="24" stroke="#a855f7" strokeWidth="2" fill="#a855f7" fillOpacity="0.05" />
+            <circle cx="32" cy="32" r="16" stroke="#6366f1" strokeWidth="2" />
+            <circle cx="32" cy="32" r="8" fill="#FFD93D" />
+            <circle cx="32" cy="32" r="4" fill="#1a1a2e" />
+            <path d="M56 32H60M4 32H8M32 4V8M32 56V60" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+// Rocket/Launch icon
+export function IconRocket({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <path d="M32 6C32 6 20 18 20 34C20 44 16 48 12 50V54H24L26 48H38L40 54H52V50C48 48 44 44 44 34C44 18 32 6 32 6Z" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="32" cy="24" r="6" fill="#FFD93D" stroke="#1a1a2e" strokeWidth="2" />
+            <path d="M26 48L24 54M38 48L40 54" stroke="#1a1a2e" strokeWidth="2" />
+            <path d="M32 54V60" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" />
+            <path d="M26 56L24 58M38 56L40 58" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+// Clipboard/Rules icon
+export function IconClipboard({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <rect x="14" y="10" width="36" height="46" rx="4" fill="#1a1a2e" fillOpacity="0.05" stroke="#22c55e" strokeWidth="2" />
+            <path d="M22 6H42V14H22V6Z" fill="#22c55e" />
+            <circle cx="32" cy="10" r="2" fill="#1a1a2e" />
+            <path d="M22 24H42M22 34H42M22 44H34" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" />
+            <path d="M18 24H20M18 34H20M18 44H20" stroke="#FFD93D" strokeWidth="3" strokeLinecap="round" />
         </svg>
     );
 }
@@ -337,6 +391,10 @@ export const iconMap = {
     code: IconCodeSpark,
     daily: IconCycleDaily,
     star: IconStar,
+    target: IconTarget,
+    rocket: IconRocket,
+    clipboard: IconClipboard,
+    balance: IconBalance,
 } as const;
 
 export type IconName = keyof typeof iconMap;

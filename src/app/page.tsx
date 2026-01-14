@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IconDNA, IconCycleDaily, IconBrain, IconCodeSpark } from "@/components/icons/Icons";
+import { IconDNA, IconCycleDaily, IconBrain, IconCodeSpark, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
 
 export default function Home() {
@@ -39,8 +39,8 @@ export default function Home() {
         {/* Mimo Card */}
         <Link href="/models/mimo" className="group block active:scale-95 transition-transform" aria-label="Mimoモデルの進化を見る">
           <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 border-purple-500/30 hover:border-purple-500/60 active:bg-white/15">
-            <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 bg-purple-500/10 rounded-full flex items-center justify-center border border-purple-500/30 group-hover:scale-110 transition-transform">
-              <span className="text-2xl sm:text-4xl">🟣</span>
+            <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+              <IconMimo size={80} className="w-14 h-14 sm:w-20 sm:h-20" />
             </div>
             <h2 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               {MODELS.mimo.name}
@@ -60,8 +60,8 @@ export default function Home() {
         {/* Grok Card */}
         <Link href="/models/grok" className="group block active:scale-95 transition-transform" aria-label="Grokモデルの進化を見る">
           <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 border-blue-500/30 hover:border-blue-500/60 active:bg-white/15">
-            <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 bg-blue-500/10 rounded-full flex items-center justify-center border border-blue-500/30 group-hover:scale-110 transition-transform">
-              <span className="text-2xl sm:text-4xl">🔵</span>
+            <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+              <IconGrok size={80} className="w-14 h-14 sm:w-20 sm:h-20" />
             </div>
             <h2 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
               {MODELS.grok.name}
@@ -88,21 +88,17 @@ export default function Home() {
         {/* Timeline Container */}
         <div className="relative">
           {/* Vertical Line for Mobile */}
-          <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-yellow-500 via-green-500 to-blue-500 hidden sm:block md:hidden" />
+          <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 hidden sm:block md:hidden" />
 
           {/* Steps */}
           <div className="flex flex-col gap-5 sm:gap-6 md:grid md:grid-cols-3">
             {/* Step 1 */}
-            <div className="glass-card p-5 sm:p-6 flex items-start sm:flex-col sm:items-center sm:text-center gap-4 border-yellow-500/20 hover:!transform-none hover:!translate-y-0 hover:!bg-white/5 hover:!border-yellow-500/20">
-              <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500 border-2 border-yellow-500/30 relative z-10">
-                <span className="text-xl sm:hidden font-bold">1</span>
-                <IconCycleDaily size={24} className="hidden sm:block" />
+            <div className="glass-card p-5 sm:p-6 flex items-start sm:flex-col sm:items-center sm:text-center gap-4 border-purple-500/20 hover:!transform-none hover:!translate-y-0 hover:!bg-white/5 hover:!border-purple-500/20">
+              <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 border-2 border-purple-500/30 relative z-10">
+                <span className="text-xl font-bold">1</span>
               </div>
               <div className="flex-1 sm:mt-4">
-                <div className="flex items-center gap-2 sm:justify-center mb-2 sm:mb-2">
-                  <IconCycleDaily size={20} className="sm:hidden text-yellow-500" />
-                  <h4 className="text-lg sm:text-xl font-semibold text-yellow-400 tracking-tight">毎日18時に自動起動</h4>
-                </div>
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">毎日18時に自動起動</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
                   GitHub Actionsが毎日定刻に実行。人間の介入は一切なし。
                 </p>
@@ -110,16 +106,12 @@ export default function Home() {
             </div>
 
             {/* Step 2 */}
-            <div className="glass-card p-5 sm:p-6 flex items-start sm:flex-col sm:items-center sm:text-center gap-4 border-green-500/20 hover:!transform-none hover:!translate-y-0 hover:!bg-white/5 hover:!border-green-500/20">
-              <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 border-2 border-green-500/30 relative z-10">
-                <span className="text-xl sm:hidden font-bold">2</span>
-                <IconBrain size={24} className="hidden sm:block" />
+            <div className="glass-card p-5 sm:p-6 flex items-start sm:flex-col sm:items-center sm:text-center gap-4 border-purple-500/20 hover:!transform-none hover:!translate-y-0 hover:!bg-white/5 hover:!border-purple-500/20">
+              <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 border-2 border-purple-500/30 relative z-10">
+                <span className="text-xl font-bold">2</span>
               </div>
               <div className="flex-1 sm:mt-4">
-                <div className="flex items-center gap-2 sm:justify-center mb-2 sm:mb-2">
-                  <IconBrain size={20} className="sm:hidden text-green-500" />
-                  <h4 className="text-lg sm:text-xl font-semibold text-green-400 tracking-tight">AIがサイトを分析</h4>
-                </div>
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">AIがサイトを分析</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
                   <a href="https://openrouter.ai/docs/guides/guides/claude-code-integration" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 underline">Claude Code (OpenRouter)</a> がアクセス解析とコードを読み込み、改善ポイントを特定。
                 </p>
@@ -127,16 +119,12 @@ export default function Home() {
             </div>
 
             {/* Step 3 */}
-            <div className="glass-card p-5 sm:p-6 flex items-start sm:flex-col sm:items-center sm:text-center gap-4 border-blue-500/20 hover:!transform-none hover:!translate-y-0 hover:!bg-white/5 hover:!border-blue-500/20">
-              <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 border-2 border-blue-500/30 relative z-10">
-                <span className="text-xl sm:hidden font-bold">3</span>
-                <IconCodeSpark size={24} className="hidden sm:block" />
+            <div className="glass-card p-5 sm:p-6 flex items-start sm:flex-col sm:items-center sm:text-center gap-4 border-purple-500/20 hover:!transform-none hover:!translate-y-0 hover:!bg-white/5 hover:!border-purple-500/20">
+              <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 border-2 border-purple-500/30 relative z-10">
+                <span className="text-xl font-bold">3</span>
               </div>
               <div className="flex-1 sm:mt-4">
-                <div className="flex items-center gap-2 sm:justify-center mb-2 sm:mb-2">
-                  <IconCodeSpark size={20} className="sm:hidden text-blue-500" />
-                  <h4 className="text-lg sm:text-xl font-semibold text-blue-400 tracking-tight">コードを書いてデプロイ</h4>
-                </div>
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">コードを書いてデプロイ</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
                   テスト通過後、自動でサイトに反映。継続的に進化。
                 </p>
@@ -161,14 +149,16 @@ export default function Home() {
         </h3>
 
         {/* Rules Content */}
-        <div className="glass-card p-5 sm:p-8 border-purple-500/20">
+        <div className="glass-card p-5 sm:p-8 border-purple-500/20 hover:!transform-none hover:!translate-y-0 hover:!bg-white/5 hover:!border-purple-500/20">
           <div className="space-y-4 sm:space-y-5">
             {/* Goal */}
             <div className="flex items-start gap-3 sm:gap-4">
-              <span className="text-2xl sm:text-3xl flex-shrink-0">🎯</span>
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                <IconTarget size={24} className="text-purple-400" />
+              </div>
               <div>
-                <h4 className="text-base sm:text-lg font-semibold text-purple-300 mb-1 sm:mb-2">目標</h4>
-                <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">目標</h4>
+                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
                   エンゲージメントと収益化の最大化
                 </p>
               </div>
@@ -176,10 +166,12 @@ export default function Home() {
 
             {/* Fairness */}
             <div className="flex items-start gap-3 sm:gap-4">
-              <span className="text-2xl sm:text-3xl flex-shrink-0">⚖️</span>
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                <IconBalance size={24} className="text-purple-400" />
+              </div>
               <div>
-                <h4 className="text-base sm:text-lg font-semibold text-cyan-300 mb-1 sm:mb-2">公平性</h4>
-                <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">公平性</h4>
+                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
                   両AIへの指示は完全に同一。同じ条件で競争
                 </p>
               </div>
@@ -187,10 +179,12 @@ export default function Home() {
 
             {/* Data */}
             <div className="flex items-start gap-3 sm:gap-4">
-              <span className="text-2xl sm:text-3xl flex-shrink-0">📊</span>
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                <IconAnalytics size={24} className="text-purple-400" />
+              </div>
               <div>
-                <h4 className="text-base sm:text-lg font-semibold text-yellow-300 mb-1 sm:mb-2">提供データ</h4>
-                <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">提供データ</h4>
+                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
                   変更履歴とアナリティクスデータを毎日提供
                 </p>
               </div>
@@ -198,10 +192,12 @@ export default function Home() {
 
             {/* Freedom */}
             <div className="flex items-start gap-3 sm:gap-4">
-              <span className="text-2xl sm:text-3xl flex-shrink-0">🚀</span>
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                <IconRocket size={24} className="text-purple-400" />
+              </div>
               <div>
-                <h4 className="text-base sm:text-lg font-semibold text-blue-300 mb-1 sm:mb-2">修正範囲</h4>
-                <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">修正範囲</h4>
+                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
                   フロントエンド・バックエンド両方の修正が可能。既存コンテンツの修正、追加、削除すべて自由。
                 </p>
               </div>
@@ -209,10 +205,12 @@ export default function Home() {
 
             {/* Constraint */}
             <div className="flex items-start gap-3 sm:gap-4">
-              <span className="text-2xl sm:text-3xl flex-shrink-0">📋</span>
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                <IconClipboard size={24} className="text-purple-400" />
+              </div>
               <div>
-                <h4 className="text-base sm:text-lg font-semibold text-green-300 mb-1 sm:mb-2">制約</h4>
-                <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">制約</h4>
+                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
                   1日3-5ファイルの改善でリスクを最小化
                 </p>
               </div>

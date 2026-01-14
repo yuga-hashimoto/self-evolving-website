@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getModel, MODELS } from "@/lib/models";
-import { IconPlayground, IconChangelog, IconAnalytics, IconDNA } from "@/components/icons/Icons";
+import { IconPlayground, IconChangelog, IconAnalytics, IconMimo, IconGrok } from "@/components/icons/Icons";
 
 export function generateStaticParams() {
     return Object.keys(MODELS).map((modelId) => ({
@@ -36,11 +36,14 @@ export default async function ModelPage({ params }: PageProps) {
 
     const colors = colorMap[model.color as keyof typeof colorMap] || colorMap.purple;
 
+    // モデルごとのアイコンを選択
+    const ModelIcon = modelId === 'mimo' ? IconMimo : IconGrok;
+
     return (
         <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-4 sm:py-16">
             <div className="text-center max-w-4xl mx-auto mb-4 sm:mb-16">
                 <div className="inline-block mb-2 sm:mb-6 animate-float">
-                    <IconDNA className="w-12 h-12 sm:w-24 sm:h-24" />
+                    <ModelIcon size={96} className="w-12 h-12 sm:w-24 sm:h-24" />
                 </div>
                 <h1 className={`text-2xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-8 bg-gradient-to-r ${colors.gradient} bg-clip-text text-transparent`}>
                     {model.name} Evolution
