@@ -70,7 +70,10 @@ jobs:
           PROMPT=$(cat .github/prompts/generated-${{ inputs.model_id }}.txt)
           # Prepend working directory instructions to the prompt
           FULL_PROMPT="Working directory: src/app/models/${{ inputs.model_id }}/playground
-          You may also edit src/components/icons/Icons.tsx if you need to add new icons.
+          You may also edit the following directories and files:
+          - src/app/api/ - API Routes (create/edit endpoints for new functionality)
+          - src/components/icons/Icons.tsx - Icon definitions
+
           Only edit files within these directories. Do NOT edit other files.
 
           $PROMPT"
@@ -96,9 +99,17 @@ jobs:
       - name: Check for Changes
         id: changes
         run: |
-          if [[ -n $(git status --porcelain src/app/models/${{ inputs.model_id }}/playground) ]] || [[ -n $(git status --porcelain src/components/icons/Icons.tsx) ]]; then
+          # Check for changes in allowed directories
+          PLAYGROUND_CHANGES=$(git status --porcelain src/app/models/${{ inputs.model_id }}/playground)
+          API_CHANGES=$(git status --porcelain src/app/api)
+          ICONS_CHANGES=$(git status --porcelain src/components/icons/Icons.tsx)
+
+          if [[ -n "$PLAYGROUND_CHANGES" ]] || [[ -n "$API_CHANGES" ]] || [[ -n "$ICONS_CHANGES" ]]; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "✅ Changes detected"
+            echo "Playground: $PLAYGROUND_CHANGES"
+            echo "API: $API_CHANGES"
+            echo "Icons: $ICONS_CHANGES"
             git status --short
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
@@ -254,12 +265,72 @@ jobs:
           echo "Running final verification..."
           npx tsc --noEmit
           npm run build
-          
-          # Dangerous pattern check
-          if grep -r "dangerouslySetInnerHTML" src/app/models/${{ inputs.model_id }}/playground; then
-            echo "⚠️  Potential security risk detected (dangerouslySetInnerHTML)"
-            # We treat this as a warning for now to align with both workflows
+
+          # Security pattern checks
+          echo "🔒 Running security checks..."
+
+          # Check for dangerouslySetInnerHTML (warning only)
+          if grep -r "dangerouslySetInnerHTML" src/app/models/${{ inputs.model_id }}/playground src/app/api 2>/dev/null; then
+            echo "⚠️  Warning: dangerouslySetInnerHTML detected"
           fi
+
+          # Check for eval/Function in API routes (CRITICAL - blocks push)
+          if grep -rE "eval\(|new Function\(|Function\(" src/app/api 2>/dev/null; then
+            echo "❌ CRITICAL: Code execution patterns detected in API routes!"
+            echo "Detected patterns: eval(), new Function(), or Function() constructor"
+            exit 1
+          fi
+
+          # Check for process.env exposure in client components (warning only)
+          if grep -r "process\.env\." src/app/models/${{ inputs.model_id }}/playground --include="*.tsx" --include="*.ts" 2>/dev/null | grep -v "NEXT_PUBLIC_"; then
+            echo "⚠️  Warning: Non-public environment variable may be exposed in client code"
+          fi
+
+          # Check for SQL injection patterns (CRITICAL - blocks push)
+          if grep -rE "db\.query\(.*\$\{|execute\(.*\$\{|raw\(.*\$\{" src/app/api 2>/dev/null; then
+            echo "❌ CRITICAL: Potential SQL injection vulnerability!"
+            echo "Detected string interpolation in database queries"
+            exit 1
+          fi
+
+          # Check for unauthorized file system access (CRITICAL - blocks push)
+          if grep -rE "fs\.writeFileSync|fs\.unlinkSync|fs\.rmdirSync|child_process\.exec" src/app/api 2>/dev/null; then
+            echo "❌ CRITICAL: Unauthorized file system/process operations!"
+            echo "File system writes and process execution are not allowed"
+            exit 1
+          fi
+
+          echo "✅ Security checks passed"
+
+      - name: Install Playwright
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          npx playwright install chromium --with-deps
+
+      - name: Take Screenshot
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          # Start dev server in background
+          npm run dev &
+          DEV_PID=$!
+
+          # Wait for server to start
+          echo "Waiting for dev server to start..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3131 > /dev/null; then
+              echo "✅ Dev server is ready"
+              break
+            fi
+            sleep 2
+          done
+
+          # Take screenshot
+          node scripts/take-screenshot.js
+
+          # Cleanup
+          kill $DEV_PID || true
+        env:
+          MODEL_ID: ${{ inputs.model_id }}
 
       - name: Revert Changes on Failure
         if: failure() && steps.changes.outputs.has_changes == 'true'
@@ -277,21 +348,24 @@ jobs:
       - name: Commit & Push
         if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
-          # Add expected files
-          git add src/app/models/${{ inputs.model_id }}/playground
-          git add src/components/icons/Icons.tsx || true # Allow icons update
-          
+          # Add allowed directories
+          git add src/app/models/${{ inputs.model_id }}/playground || true
+          git add src/app/api || true
+          git add src/components/icons/Icons.tsx || true
+
           git add public/models/${{ inputs.model_id }}/changelog.json || echo "No changelog update"
           git add public/models/${{ inputs.model_id }}/analytics.json || echo "No analytics update"
           git add public/models/${{ inputs.model_id }}/analytics-previous.json || echo "No prev analytics update"
-          
-          # Safety Check: Fail if other source files are modified but not staged
-          # This prevents "Build passed but file missing in push" scenario
-          if [[ -n $(git status --porcelain src/) ]]; then
+          git add public/models/${{ inputs.model_id }}/screenshots/ || echo "No screenshot update"
+
+          # Safety Check: Fail if files outside allowed scope are modified
+          UNEXPECTED_CHANGES=$(git status --porcelain src/ | grep -vE "^(M |A |D | M| D)?src/app/models/${{ inputs.model_id }}/playground|^(M |A |D | M| D)?src/app/api|^(M |A |D | M| D)?src/components/icons/Icons.tsx" || true)
+
+          if [[ -n "$UNEXPECTED_CHANGES" ]]; then
              echo "❌ CRITICAL ERROR: AI modified files outside of allowed scope!"
-             echo "The following files were modified but not staged for commit:"
-             git status --porcelain src/
-             echo "Blocking push to prevent build inconsistencies."
+             echo "The following files were modified but not allowed:"
+             echo "$UNEXPECTED_CHANGES"
+             echo "Blocking push to prevent security issues."
              exit 1
           fi
           
