@@ -37,34 +37,34 @@ export default async function ModelPage({ params }: PageProps) {
     const colors = colorMap[model.color as keyof typeof colorMap] || colorMap.purple;
 
     return (
-        <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-16">
-            <div className="text-center max-w-4xl mx-auto mb-16">
-                <div className="inline-block mb-6 animate-float">
-                    <IconDNA size={96} />
+        <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-4 sm:py-16">
+            <div className="text-center max-w-4xl mx-auto mb-4 sm:mb-16">
+                <div className="inline-block mb-2 sm:mb-6 animate-float">
+                    <IconDNA className="w-12 h-12 sm:w-24 sm:h-24" />
                 </div>
-                <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r ${colors.gradient} bg-clip-text text-transparent`}>
+                <h1 className={`text-2xl sm:text-5xl lg:text-6xl font-bold mb-2 sm:mb-6 bg-gradient-to-r ${colors.gradient} bg-clip-text text-transparent`}>
                     {model.name} Evolution
                 </h1>
-                <p className="text-xl sm:text-2xl text-gray-300 mb-4">
+                <p className="text-sm sm:text-2xl text-gray-300 mb-2 sm:mb-4">
                     {model.description}
                 </p>
 
                 {/* Model Badge */}
-                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-8 ${colors.badge}`}>
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-xs text-gray-400">Model:</span>
-                    <span className="text-xs font-mono">
+                <div className={`inline-flex items-center gap-2 px-3 py-1 sm:px-4 sm:py-2 rounded-full border mb-4 sm:mb-8 ${colors.badge}`}>
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-[10px] sm:text-xs text-gray-400">Model:</span>
+                    <span className="text-[10px] sm:text-xs font-mono">
                         {model.openrouterModel}
                     </span>
                 </div>
             </div>
 
             {/* Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl w-full">
-                <Link href={`/models/${modelId}/playground`} className="group">
-                    <div className={`glass-card p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 ${colors.glow}`}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl w-full">
+                <Link href={`/models/${modelId}/playground`} className="group col-span-2 sm:col-span-1">
+                    <div className={`glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 ${colors.glow}`}>
                         <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <IconPlayground size={64} />
+                            <IconPlayground className="w-12 h-12 sm:w-16 sm:h-16" />
                         </div>
                         <h2 className="text-xl font-bold mb-2">実験場を見る</h2>
                         <p className="text-gray-400 text-sm">
@@ -73,25 +73,25 @@ export default async function ModelPage({ params }: PageProps) {
                     </div>
                 </Link>
 
-                <Link href={`/models/${modelId}/changelog`} className="group">
-                    <div className="glass-card p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105">
+                <Link href={`/models/${modelId}/changelog`} className="group col-span-1">
+                    <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105">
                         <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <IconChangelog size={64} />
+                            <IconChangelog className="w-12 h-12 sm:w-16 sm:h-16" />
                         </div>
-                        <h2 className="text-xl font-bold mb-2">更新履歴</h2>
-                        <p className="text-gray-400 text-sm">
+                        <h2 className="text-lg sm:text-xl font-bold mb-2">更新履歴</h2>
+                        <p className="text-gray-400 text-xs sm:text-sm">
                             AIが行った変更の記録
                         </p>
                     </div>
                 </Link>
 
-                <Link href={`/models/${modelId}/analytics`} className="group">
-                    <div className="glass-card p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105">
+                <Link href={`/models/${modelId}/analytics`} className="group col-span-1">
+                    <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105">
                         <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <IconAnalytics size={64} />
+                            <IconAnalytics className="w-12 h-12 sm:w-16 sm:h-16" />
                         </div>
-                        <h2 className="text-xl font-bold mb-2">アナリティクス</h2>
-                        <p className="text-gray-400 text-sm">
+                        <h2 className="text-lg sm:text-xl font-bold mb-2">アナリティクス</h2>
+                        <p className="text-gray-400 text-xs sm:text-sm">
                             リアルタイム統計データ
                         </p>
                     </div>
@@ -99,7 +99,7 @@ export default async function ModelPage({ params }: PageProps) {
             </div>
 
             {/* Back Link */}
-            <div className="mt-12">
+            <div className="mt-8 sm:mt-12">
                 <Link
                     href="/"
                     className="text-gray-400 hover:text-white transition-colors"

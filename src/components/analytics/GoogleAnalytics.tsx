@@ -4,6 +4,17 @@ import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
 
+declare global {
+    interface Window {
+        gtag: (
+            command: string,
+            targetId: string,
+            config?: { [key: string]: any }
+        ) => void;
+        dataLayer: any[];
+    }
+}
+
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 function AnalyticsLogic() {
