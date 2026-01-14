@@ -155,16 +155,21 @@ export default function AnalyticsPage() {
                 {/* Info Card */}
                 <div className="glass-card p-6">
                     <h3 className="font-bold mb-4 flex items-center gap-2">
-                        <IconInfo size={24} /> データソースについて
+                        <IconInfo size={24} /> データの反映と詳細
                     </h3>
-                    <ul className="text-gray-400 text-sm space-y-2">
+                    <ul className="text-gray-400 text-sm space-y-3">
                         <li>• <strong>PV:</strong> ページビュー数</li>
                         <li>• <strong>セッション:</strong> ユニークな訪問数</li>
                         <li>• <strong>平均滞在:</strong> セッションあたりの平均閲覧時間</li>
                         <li>• <strong>直帰率:</strong> 1ページのみ閲覧して離脱した割合</li>
+                        {analytics.source === 'ga4' && (
+                            <li className="pt-2 border-t border-white/5 text-purple-300/80 italic">
+                                ※ Google Analyticsのデータ集計ラグにより、最新の訪問データが反映されるまでに数時間〜最大48時間かかる場合があります。
+                            </li>
+                        )}
                     </ul>
                     {analytics.source === 'dummy' && (
-                        <div className="mt-4 p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
+                        <div className="mt-6 p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
                             <p className="text-yellow-400 text-sm">
                                 ⚠️ 現在デモデータを表示しています。GA4 認証情報を設定してください。
                             </p>
