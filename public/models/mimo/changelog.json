@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": 1,
+    "date": "2026-01-14T00:00:00.000Z",
+    "model": "mimo",
+    "reasoning": "コンバージョン率向上のため、空のプレイグラウンドをエンゲージメント型インタラクティブコンポーネントに変更",
+    "files": [
+      "src/app/models/mimo/playground/components/PlaygroundContent.tsx",
+      "src/app/models/[modelId]/playground/page.tsx"
+    ],
+    "results": {
+      "revenue": 0.00,
+      "revenueChange": 0,
+      "pageviews": 0,
+      "pvChange": 0,
+      "avgSessionDuration": 0,
+      "bounceRate": 0.0
+    }
+  }
+]
