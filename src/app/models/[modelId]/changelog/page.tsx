@@ -62,6 +62,51 @@ function ChangeIndicator({ value }: { value: number }) {
     return <span className="text-red-400">{value}%</span>;
 }
 
+// Parse structured changelog entries
+function parseChanges(changes: string) {
+    const lines = changes.split('\n').filter(line => line.trim());
+    const parsed: { before?: string; after?: string; implementation?: string; raw?: string } = {};
+
+    lines.forEach(line => {
+        if (line.includes('変更前:') || line.includes('Before:')) {
+            parsed.before = line.split(':')[1]?.trim();
+        } else if (line.includes('変更後:') || line.includes('After:')) {
+            parsed.after = line.split(':')[1]?.trim();
+        } else if (line.includes('実装:') || line.includes('Implementation:')) {
+            parsed.implementation = line.split(':')[1]?.trim();
+        }
+    });
+
+    // If no structured format found, return as raw
+    if (!parsed.before && !parsed.after && !parsed.implementation) {
+        parsed.raw = changes;
+    }
+
+    return parsed;
+}
+
+function parseIntent(intent: string) {
+    const lines = intent.split('\n').filter(line => line.trim());
+    const parsed: { hypothesis?: string; principle?: string; metric?: string; raw?: string } = {};
+
+    lines.forEach(line => {
+        if (line.includes('仮説:') || line.includes('Hypothesis:')) {
+            parsed.hypothesis = line.split(':')[1]?.trim();
+        } else if (line.includes('原理:') || line.includes('Principle:')) {
+            parsed.principle = line.split(':')[1]?.trim();
+        } else if (line.includes('目標指標:') || line.includes('Metric:')) {
+            parsed.metric = line.split(':')[1]?.trim();
+        }
+    });
+
+    // If no structured format found, return as raw
+    if (!parsed.hypothesis && !parsed.principle && !parsed.metric) {
+        parsed.raw = intent;
+    }
+
+    return parsed;
+}
+
 export default async function ChangelogPage({ params }: PageProps) {
     const { modelId } = await params;
     const model = getModel(modelId);
@@ -124,18 +169,70 @@ export default async function ChangelogPage({ params }: PageProps) {
                                     </div>
 
                                     {/* Content - Support both new and old formats */}
-                                    {entry.changes && (
-                                        <div className="mb-4">
-                                            <h4 className="text-sm text-purple-400 font-bold mb-1">変更内容</h4>
-                                            <p className="text-white font-medium">{entry.changes}</p>
-                                        </div>
-                                    )}
-                                    {entry.intent && (
-                                        <div className="mb-4">
-                                            <h4 className="text-sm text-purple-400 font-bold mb-1">変更の狙い</h4>
-                                            <p className="text-gray-300">{entry.intent}</p>
-                                        </div>
-                                    )}
+                                    {entry.changes && (() => {
+                                        const changes = parseChanges(entry.changes);
+                                        return (
+                                            <div className="mb-4">
+                                                <h4 className="text-sm text-purple-400 font-bold mb-2">変更内容</h4>
+                                                {changes.raw ? (
+                                                    <p className="text-white font-medium">{changes.raw}</p>
+                                                ) : (
+                                                    <div className="space-y-2">
+                                                        {changes.before && (
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">変更前: </span>
+                                                                <span className="text-gray-300">{changes.before}</span>
+                                                            </div>
+                                                        )}
+                                                        {changes.after && (
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">変更後: </span>
+                                                                <span className="text-white font-medium">{changes.after}</span>
+                                                            </div>
+                                                        )}
+                                                        {changes.implementation && (
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">実装: </span>
+                                                                <span className="text-gray-300">{changes.implementation}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
+                                    {entry.intent && (() => {
+                                        const intent = parseIntent(entry.intent);
+                                        return (
+                                            <div className="mb-4">
+                                                <h4 className="text-sm text-purple-400 font-bold mb-2">変更の狙い</h4>
+                                                {intent.raw ? (
+                                                    <p className="text-gray-300">{intent.raw}</p>
+                                                ) : (
+                                                    <div className="space-y-2">
+                                                        {intent.hypothesis && (
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">仮説: </span>
+                                                                <span className="text-gray-300">{intent.hypothesis}</span>
+                                                            </div>
+                                                        )}
+                                                        {intent.principle && (
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">原理: </span>
+                                                                <span className="text-gray-300">{intent.principle}</span>
+                                                            </div>
+                                                        )}
+                                                        {intent.metric && (
+                                                            <div>
+                                                                <span className="text-xs text-purple-300 font-medium">目標: </span>
+                                                                <span className="text-purple-200 font-medium">{intent.metric}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
                                     {/* Legacy reasoning support */}
                                     {!entry.changes && entry.reasoning && (
                                         <p className="text-white font-medium mb-4">{entry.reasoning}</p>
