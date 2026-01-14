@@ -26,7 +26,10 @@ export function AdSenseAutoAds() {
 
 // 開発環境用プレースホルダー（どこに広告が出るか分からないことを示す）
 export function AdDevNotice() {
-    if (ADSENSE_CLIENT) return null;
+    // 本番環境、またはAdSense IDが設定されている場合は非表示
+    if (process.env.NODE_ENV !== "development" || ADSENSE_CLIENT) {
+        return null;
+    }
 
     return (
         <div className="fixed bottom-4 right-4 glass-card px-4 py-2 text-xs text-gray-400 z-50 flex items-center gap-2">

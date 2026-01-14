@@ -1,7 +1,15 @@
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/self-evolving-website:$SHORT_SHA', '.']
+    args: 
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/self-evolving-website:$SHORT_SHA'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-6725733161326563'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_GA_MEASUREMENT_ID=G-6YRLQEKHW7'
+      - '.'
   
   # Push the container image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
