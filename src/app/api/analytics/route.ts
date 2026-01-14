@@ -67,11 +67,11 @@ export async function GET(request: NextRequest) {
         // 2. Real-time Report (for immediate "today" data)
         const realtimeResult = await analyticsDataClient.runRealtimeReport({
             property: `properties/${propertyId}`,
-            dimensions: [{ name: 'pagePath' }],
-            metrics: [{ name: 'screenPageViews' }],
+            dimensions: [{ name: 'unifiedPagePath' }],
+            metrics: [{ name: 'eventCount' }],
             dimensionFilter: modelId ? {
                 filter: {
-                    fieldName: 'pagePath',
+                    fieldName: 'unifiedPagePath',
                     stringFilter: {
                         matchType: 'BEGINS_WITH',
                         value: `/models/${modelId}`
