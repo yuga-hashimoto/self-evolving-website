@@ -33,13 +33,13 @@ export async function GET(request: NextRequest) {
         ];
 
         // Build dimensions array
-        // Note: dateRange is NOT a dimension - GA4 automatically includes it in response
-        // pagePath is needed when using dimensionFilter on pagePath
-        const dimensions: { name: string }[] = [];
+        // Always include pagePath to see what's being recorded
+        const dimensions: { name: string }[] = [{ name: 'pagePath' }];
 
+        // Temporarily disable filter for debugging
         let dimensionFilter = undefined;
+        /*
         if (modelId) {
-            // When filtering by pagePath, it must be included in dimensions array
             dimensions.push({ name: 'pagePath' });
             dimensionFilter = {
                 filter: {
@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
                 }
             } as const;
         }
+        */
 
-        // Fetch data for multiple periods
         // Fetch data for multiple periods
         const reportResult = await analyticsDataClient.runReport({
             property: `properties/${propertyId}`,
@@ -62,8 +62,7 @@ export async function GET(request: NextRequest) {
                 { startDate: '30daysAgo', endDate: 'today', name: 'month' },
                 { startDate: '2020-01-01', endDate: 'today', name: 'allTime' },
             ],
-            // Only include dimensions when filtering (empty array causes issues)
-            ...(dimensions.length > 0 && { dimensions }),
+            dimensions,
             metrics,
             dimensionFilter,
         });
