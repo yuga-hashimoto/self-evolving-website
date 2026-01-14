@@ -1,5 +1,4 @@
 import Link from "next/link";
-import KofiWidget from "@/components/KofiWidget";
 import { IconDNA, IconCycleDaily, IconBrain, IconCodeSpark } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
 
@@ -132,8 +131,6 @@ export default function Home() {
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl"></div>
       </div>
-      {/* Ko-fi Widget */}
-      <KofiWidget />
     </div>
   );
 }
