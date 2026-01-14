@@ -278,6 +278,8 @@ jobs:
         run: |
           git add src/app/models/${{ inputs.model_id }}/playground
           git add public/models/${{ inputs.model_id }}/changelog.json || echo "No changelog update"
+          git add public/models/${{ inputs.model_id }}/analytics.json || echo "No analytics update"
+          git add public/models/${{ inputs.model_id }}/analytics-previous.json || echo "No prev analytics update"
           
           DATE=$(date +'%Y-%m-%d')
           git commit -m "${{ inputs.commit_prefix }} (${{ inputs.model_display_name }}) - $DATE"
