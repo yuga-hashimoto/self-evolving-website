@@ -47,6 +47,51 @@ function formatTimeDisplay(dateString: string): string {
     });
 }
 
+// Parse structured changelog entries (same as in individual changelog page)
+function parseChanges(changes: string) {
+    const lines = changes.split('\n').filter(line => line.trim());
+    const parsed: { before?: string; after?: string; implementation?: string; raw?: string } = {};
+
+    lines.forEach(line => {
+        if (line.includes('変更前:') || line.includes('Before:')) {
+            parsed.before = line.split(':')[1]?.trim();
+        } else if (line.includes('変更後:') || line.includes('After:')) {
+            parsed.after = line.split(':')[1]?.trim();
+        } else if (line.includes('実装:') || line.includes('Implementation:')) {
+            parsed.implementation = line.split(':')[1]?.trim();
+        }
+    });
+
+    // If no structured format found, return as raw
+    if (!parsed.before && !parsed.after && !parsed.implementation) {
+        parsed.raw = changes;
+    }
+
+    return parsed;
+}
+
+function parseIntent(intent: string) {
+    const lines = intent.split('\n').filter(line => line.trim());
+    const parsed: { hypothesis?: string; principle?: string; metric?: string; raw?: string } = {};
+
+    lines.forEach(line => {
+        if (line.includes('仮説:') || line.includes('Hypothesis:')) {
+            parsed.hypothesis = line.split(':')[1]?.trim();
+        } else if (line.includes('原理:') || line.includes('Principle:')) {
+            parsed.principle = line.split(':')[1]?.trim();
+        } else if (line.includes('目標指標:') || line.includes('Metric:')) {
+            parsed.metric = line.split(':')[1]?.trim();
+        }
+    });
+
+    // If no structured format found, return as raw
+    if (!parsed.hypothesis && !parsed.principle && !parsed.metric) {
+        parsed.raw = intent;
+    }
+
+    return parsed;
+}
+
 export default async function CompareChangelogPage() {
     const mimoChangelog = await getChangelog("mimo");
     const grokChangelog = await getChangelog("grok");
@@ -172,18 +217,46 @@ function ModelCard({ entry, modelId, align }: { entry: ChangelogEntry; modelId: 
             </div>
 
             <div className={align === "right" ? "md:text-right" : "text-left"}>
-                {entry.changes && (
-                    <div className="mb-3">
-                        <p className="text-white text-sm font-semibold leading-relaxed">{entry.changes}</p>
-                    </div>
-                )}
+                {entry.changes && (() => {
+                    const changes = parseChanges(entry.changes);
+                    return (
+                        <div className="mb-3">
+                            {changes.raw ? (
+                                <p className="text-white text-sm font-semibold leading-relaxed">{changes.raw}</p>
+                            ) : (
+                                <div className="space-y-1 text-sm">
+                                    {changes.after && (
+                                        <p className="text-white font-semibold">{changes.after}</p>
+                                    )}
+                                    {changes.before && (
+                                        <p className="text-gray-400 text-xs">← {changes.before}</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
 
-                {entry.intent && (
-                    <div className="mb-3 bg-black/20 p-2 rounded-lg">
-                        <h4 className={`text-[10px] uppercase font-bold mb-1 opacity-70 ${colorClass}`}>狙い</h4>
-                        <p className="text-xs text-gray-400 italic">"{entry.intent}"</p>
-                    </div>
-                )}
+                {entry.intent && (() => {
+                    const intent = parseIntent(entry.intent);
+                    return (
+                        <div className="mb-3 bg-black/20 p-2 rounded-lg">
+                            <h4 className={`text-[10px] uppercase font-bold mb-1 opacity-70 ${colorClass}`}>狙い</h4>
+                            {intent.raw ? (
+                                <p className="text-xs text-gray-400 italic">"{intent.raw}"</p>
+                            ) : (
+                                <div className="space-y-1">
+                                    {intent.hypothesis && (
+                                        <p className="text-xs text-gray-300">{intent.hypothesis}</p>
+                                    )}
+                                    {intent.metric && (
+                                        <p className="text-xs text-purple-300 font-medium">目標: {intent.metric}</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
 
                 {!entry.changes && entry.reasoning && (
                     <p className="text-sm text-gray-200 mb-3 leading-relaxed">{entry.reasoning}</p>
