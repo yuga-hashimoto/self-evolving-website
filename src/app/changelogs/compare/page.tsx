@@ -47,6 +47,17 @@ function formatTimeDisplay(dateString: string): string {
     });
 }
 
+// Generate screenshot path from date
+function getScreenshotPath(modelId: string, date: string): string {
+    const dateObj = new Date(date);
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+
+    return `/models/${modelId}/screenshots/${dateStr}.png`;
+}
+
 // Parse structured changelog entries (same as in individual changelog page)
 function parseChanges(changes: string) {
     const lines = changes.split('\n').filter(line => line.trim());
@@ -261,6 +272,32 @@ function ModelCard({ entry, modelId, align }: { entry: ChangelogEntry; modelId: 
                 {!entry.changes && entry.reasoning && (
                     <p className="text-sm text-gray-200 mb-3 leading-relaxed">{entry.reasoning}</p>
                 )}
+
+                {/* Screenshot */}
+                <div className="mb-3">
+                    <details className="group">
+                        <summary className={`text-[10px] text-gray-500 cursor-pointer hover:text-${isMimo ? 'purple' : 'blue'}-300 transition-colors list-none flex items-center gap-1 ${align === "right" ? "md:justify-end" : "justify-start"}`}>
+                            <span className="group-open:rotate-90 transition-transform">▶</span>
+                            スクショ
+                        </summary>
+                        <div className="mt-2 rounded overflow-hidden border border-white/10">
+                            <img
+                                src={getScreenshotPath(modelId, entry.date)}
+                                alt={`Screenshot ${formatTimeDisplay(entry.date)}`}
+                                className="w-full h-auto"
+                                loading="lazy"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                        parent.innerHTML = '<p class="text-gray-500 text-[10px] p-2 text-center">画像なし</p>';
+                                    }
+                                }}
+                            />
+                        </div>
+                    </details>
+                </div>
 
                 <div className={`flex flex-wrap gap-1 mt-4 ${align === "right" ? "md:justify-end" : "justify-start"}`}>
                     {entry.files.slice(0, 3).map((file, i) => (

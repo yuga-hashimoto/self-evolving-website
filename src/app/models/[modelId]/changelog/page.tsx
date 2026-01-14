@@ -31,6 +31,18 @@ interface ChangelogEntry {
     files: string[];
 }
 
+// Generate screenshot path from date
+function getScreenshotPath(modelId: string, date: string): string {
+    // Extract date in YYYY-MM-DD format
+    const dateObj = new Date(date);
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+
+    return `/models/${modelId}/screenshots/${dateStr}.png`;
+}
+
 interface PageProps {
     params: Promise<{ modelId: string }>;
 }
@@ -237,6 +249,32 @@ export default async function ChangelogPage({ params }: PageProps) {
                                     {!entry.changes && entry.reasoning && (
                                         <p className="text-white font-medium mb-4">{entry.reasoning}</p>
                                     )}
+
+                                    {/* Screenshot */}
+                                    <div className="mb-4">
+                                        <details className="group">
+                                            <summary className="text-sm text-gray-400 cursor-pointer hover:text-purple-300 transition-colors list-none flex items-center gap-2">
+                                                <span className="group-open:rotate-90 transition-transform">▶</span>
+                                                スクリーンショットを表示
+                                            </summary>
+                                            <div className="mt-3 rounded-lg overflow-hidden border border-purple-500/30">
+                                                <img
+                                                    src={getScreenshotPath(modelId, entry.date)}
+                                                    alt={`Screenshot from ${formatDate(entry.date)}`}
+                                                    className="w-full h-auto"
+                                                    loading="lazy"
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        target.style.display = 'none';
+                                                        const parent = target.parentElement;
+                                                        if (parent) {
+                                                            parent.innerHTML = '<p class="text-gray-500 text-xs p-4 text-center">スクリーンショットが見つかりません</p>';
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                        </details>
+                                    </div>
 
                                     {/* Changed Files */}
                                     <div className="mb-4">
