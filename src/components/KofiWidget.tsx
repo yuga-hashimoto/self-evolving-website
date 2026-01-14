@@ -26,7 +26,8 @@ export default function KofiWidget() {
                             'type': 'floating-chat',
                             'floating-chat.donateButton.text': 'Tip Me',
                             'floating-chat.donateButton.background-color': '#8b5cf6',
-                            'floating-chat.donateButton.text-color': '#fff'
+                            'floating-chat.donateButton.text-color': '#fff',
+                            'floating-chat.core.position.bottom-left': 'position: static; width: auto; transform: none;'
                         }, 'kofi-widget-container');
                     }
                 }}
