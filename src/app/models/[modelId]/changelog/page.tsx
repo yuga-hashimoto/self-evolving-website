@@ -257,21 +257,28 @@ export default async function ChangelogPage({ params }: PageProps) {
                                                 <span className="group-open:rotate-90 transition-transform">▶</span>
                                                 スクリーンショットを表示
                                             </summary>
-                                            <div className="mt-3 rounded-lg overflow-hidden border border-purple-500/30">
-                                                <img
-                                                    src={getScreenshotPath(modelId, entry.date)}
-                                                    alt={`Screenshot from ${formatDate(entry.date)}`}
-                                                    className="w-full h-auto"
-                                                    loading="lazy"
-                                                    onError={(e) => {
-                                                        const target = e.target as HTMLImageElement;
-                                                        target.style.display = 'none';
-                                                        const parent = target.parentElement;
-                                                        if (parent) {
-                                                            parent.innerHTML = '<p class="text-gray-500 text-xs p-4 text-center">スクリーンショットが見つかりません</p>';
-                                                        }
-                                                    }}
-                                                />
+                                            <div className="mt-3">
+                                                <a
+                                                    href={getScreenshotPath(modelId, entry.date)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="block max-w-2xl rounded-lg overflow-hidden border border-purple-500/30 hover:border-purple-500/60 transition-colors"
+                                                >
+                                                    <img
+                                                        src={getScreenshotPath(modelId, entry.date)}
+                                                        alt={`Screenshot from ${formatDate(entry.date)}`}
+                                                        className="w-full h-auto"
+                                                        loading="lazy"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.style.display = 'none';
+                                                            const parent = target.parentElement?.parentElement;
+                                                            if (parent) {
+                                                                parent.innerHTML = '<p class="text-gray-500 text-xs p-4 text-center">スクリーンショットが見つかりません</p>';
+                                                            }
+                                                        }}
+                                                    />
+                                                </a>
                                             </div>
                                         </details>
                                     </div>

@@ -280,21 +280,28 @@ function ModelCard({ entry, modelId, align }: { entry: ChangelogEntry; modelId: 
                             <span className="group-open:rotate-90 transition-transform">▶</span>
                             スクショ
                         </summary>
-                        <div className="mt-2 rounded overflow-hidden border border-white/10">
-                            <img
-                                src={getScreenshotPath(modelId, entry.date)}
-                                alt={`Screenshot ${formatTimeDisplay(entry.date)}`}
-                                className="w-full h-auto"
-                                loading="lazy"
-                                onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.style.display = 'none';
-                                    const parent = target.parentElement;
-                                    if (parent) {
-                                        parent.innerHTML = '<p class="text-gray-500 text-[10px] p-2 text-center">画像なし</p>';
-                                    }
-                                }}
-                            />
+                        <div className="mt-2">
+                            <a
+                                href={getScreenshotPath(modelId, entry.date)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block max-w-md rounded overflow-hidden border border-white/10 hover:border-white/30 transition-colors"
+                            >
+                                <img
+                                    src={getScreenshotPath(modelId, entry.date)}
+                                    alt={`Screenshot ${formatTimeDisplay(entry.date)}`}
+                                    className="w-full h-auto"
+                                    loading="lazy"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.display = 'none';
+                                        const parent = target.parentElement?.parentElement;
+                                        if (parent) {
+                                            parent.innerHTML = '<p class="text-gray-500 text-[10px] p-2 text-center">画像なし</p>';
+                                        }
+                                    }}
+                                />
+                            </a>
                         </div>
                     </details>
                 </div>
