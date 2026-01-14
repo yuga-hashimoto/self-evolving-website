@@ -32,8 +32,14 @@ export async function GET(request: NextRequest) {
             { name: 'bounceRate' },
         ];
 
+        // Build dimensions array - dateRange is needed to distinguish multiple date ranges
+        // pagePath is needed when using dimensionFilter on pagePath
+        const dimensions: { name: string }[] = [{ name: 'dateRange' }];
+
         let dimensionFilter = undefined;
         if (modelId) {
+            // When filtering by pagePath, it must be included in dimensions array
+            dimensions.push({ name: 'pagePath' });
             dimensionFilter = {
                 filter: {
                     fieldName: 'pagePath',
@@ -46,8 +52,6 @@ export async function GET(request: NextRequest) {
         }
 
         // Fetch data for multiple periods
-        // Note: dimensionFilter is applied to all date ranges in a single request if supported,
-        // but runReport accepts dimensionFilter.
         const reportResult = await analyticsDataClient.runReport({
             property: `properties/${propertyId}`,
             dateRanges: [
@@ -56,6 +60,7 @@ export async function GET(request: NextRequest) {
                 { startDate: '30daysAgo', endDate: 'today' },
                 { startDate: '2020-01-01', endDate: 'today' }, // All time (since 2020)
             ],
+            dimensions,
             metrics,
             dimensionFilter,
         });
@@ -66,31 +71,59 @@ export async function GET(request: NextRequest) {
             dimensionValues?: { value?: string | null }[] | null;
         }
 
-        function parseRow(row: AnalyticsRow | undefined) {
-            if (!row) {
+        // Aggregate data by dateRange
+        // dimensionValues[0] is dateRange (date_range_0, date_range_1, etc.)
+        // When pagePath filter is used, multiple rows per dateRange may exist
+        function aggregateByDateRange(rows: AnalyticsRow[], dateRangeIndex: string) {
+            const matchingRows = rows.filter(r => r.dimensionValues?.[0]?.value === dateRangeIndex);
+
+            if (matchingRows.length === 0) {
                 return { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' };
             }
+
+            let totalPageviews = 0;
+            let totalSessions = 0;
+            let totalDuration = 0;
+            let totalBounceRate = 0;
+            let durationCount = 0;
+            let bounceCount = 0;
+
+            for (const row of matchingRows) {
+                totalPageviews += parseInt(row.metricValues?.[0]?.value || '0');
+                totalSessions += parseInt(row.metricValues?.[1]?.value || '0');
+                const duration = parseFloat(row.metricValues?.[2]?.value || '0');
+                const bounce = parseFloat(row.metricValues?.[3]?.value || '0');
+                if (duration > 0) {
+                    totalDuration += duration;
+                    durationCount++;
+                }
+                if (bounce > 0) {
+                    totalBounceRate += bounce;
+                    bounceCount++;
+                }
+            }
+
             return {
-                pageviews: parseInt(row.metricValues?.[0]?.value || '0'),
-                sessions: parseInt(row.metricValues?.[1]?.value || '0'),
-                avgSessionDuration: Math.round(parseFloat(row.metricValues?.[2]?.value || '0')),
-                bounceRate: (parseFloat(row.metricValues?.[3]?.value || '0') * 100).toFixed(1),
+                pageviews: totalPageviews,
+                sessions: totalSessions,
+                avgSessionDuration: durationCount > 0 ? Math.round(totalDuration / durationCount) : 0,
+                bounceRate: (bounceCount > 0 ? (totalBounceRate / bounceCount) * 100 : 0).toFixed(1),
             };
         }
 
         // Each row corresponds to a date range
         const rows: AnalyticsRow[] = response.rows || [];
-        const today = parseRow(rows.find((r) => r.dimensionValues?.[0]?.value === 'date_range_0') || rows[0]);
-        const week = parseRow(rows.find((r) => r.dimensionValues?.[0]?.value === 'date_range_1') || rows[1]);
-        const month = parseRow(rows.find((r) => r.dimensionValues?.[0]?.value === 'date_range_2') || rows[2]);
-        const allTime = parseRow(rows.find((r) => r.dimensionValues?.[0]?.value === 'date_range_3') || rows[3]);
+        const today = aggregateByDateRange(rows, 'date_range_0');
+        const week = aggregateByDateRange(rows, 'date_range_1');
+        const month = aggregateByDateRange(rows, 'date_range_2');
+        const allTime = aggregateByDateRange(rows, 'date_range_3');
 
         return NextResponse.json({
             source: 'ga4',
-            today: rows.length > 0 ? today : { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
-            week: rows.length > 1 ? week : { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
-            month: rows.length > 2 ? month : { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
-            allTime: rows.length > 3 ? allTime : { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
+            today,
+            week,
+            month,
+            allTime,
             lastUpdated: new Date().toISOString(),
             rowCount: rows.length,
         });
