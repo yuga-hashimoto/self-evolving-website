@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IconDNA } from "@/components/icons/Icons";
+import { IconDNA, IconCycleDaily, IconBrain, IconCodeSpark } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
 
 export default function Home() {
@@ -26,7 +26,7 @@ export default function Home() {
       </div>
 
       {/* Model Selection Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl w-full mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl w-full mb-16">
         {/* Mimo Card */}
         <Link href="/models/mimo" className="group">
           <div className="glass-card p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 animate-pulse-glow border-purple-500/30 hover:border-purple-500/60">
@@ -68,6 +68,53 @@ export default function Home() {
             </div>
           </div>
         </Link>
+      </div>
+
+      {/* Internal Mechanism Section */}
+      <div className="max-w-5xl w-full mb-16">
+        <h3 className="text-2xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-400">
+          How it Works
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Step 1 */}
+          <div className="glass-card p-6 flex flex-col items-center text-center border-white/5 bg-white/5">
+            <div className="w-16 h-16 mb-4 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+              <IconCycleDaily size={32} />
+            </div>
+            <h4 className="text-lg font-semibold mb-2 text-yellow-400">毎日自動実行</h4>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              毎日18:00 (JST) に<br />
+              GitHub Actionsがワークフローを起動。<br />
+              完全に自動化されたサイクルです。
+            </p>
+          </div>
+
+          {/* Step 2 */}
+          <div className="glass-card p-6 flex flex-col items-center text-center border-white/5 bg-white/5">
+            <div className="w-16 h-16 mb-4 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
+              <IconBrain size={32} />
+            </div>
+            <h4 className="text-lg font-semibold mb-2 text-green-400">AIによる分析・計画</h4>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              Claude Code (via OpenRouter) が<br />
+              アナリティクスとコードを分析し、<br />
+              その日の改善計画を立案します。
+            </p>
+          </div>
+
+          {/* Step 3 */}
+          <div className="glass-card p-6 flex flex-col items-center text-center border-white/5 bg-white/5">
+            <div className="w-16 h-16 mb-4 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+              <IconCodeSpark size={32} />
+            </div>
+            <h4 className="text-lg font-semibold mb-2 text-blue-400">実装とデプロイ</h4>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              AIが自らコードを書き換え、<br />
+              ビルドテストを通ったものだけを<br />
+              自動でmainブランチに反映します。
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Explanation */}
