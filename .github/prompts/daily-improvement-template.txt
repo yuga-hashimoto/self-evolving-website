@@ -175,7 +175,6 @@ Note: Edit changelog.json to prepend to the existing array. Do NOT delete existi
 ## Important Principles
 1. **Data-Driven**: Follow psychology and UX principles.
 2. **User-Centric**: Always prioritize user experience.
-3. **Measurable**: Make changes whose effects can be measured.
 
 ## API Development Guidelines
 
