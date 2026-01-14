@@ -4,6 +4,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  devIndicators: false,
 };
 
 export default nextConfig;

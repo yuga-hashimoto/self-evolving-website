@@ -33,14 +33,8 @@ export function IconDNA({ size = 48, className = "" }: IconProps) {
 export function IconHome({ size = 48, className = "" }: IconProps) {
     return (
         <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
-            <path d="M32 10L8 32H16V54H28V40H36V54H48V32H56L32 10Z" fill="url(#home-grad)" />
+            <path d="M32 10L8 32H16V54H28V40H36V54H48V32H56L32 10Z" fill="#a855f7" />
             <rect x="28" y="28" width="8" height="8" rx="1" fill="#FFD93D" />
-            <defs>
-                <linearGradient id="home-grad" x1="8" y1="10" x2="56" y2="54" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#a855f7" />
-                    <stop offset="1" stopColor="#6366f1" />
-                </linearGradient>
-            </defs>
         </svg>
     );
 }
@@ -289,8 +283,30 @@ export function IconCycleDaily({ size = 48, className = "" }: IconProps) {
 }
 
 
+// Mimo Icon
+export function IconMimo({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <circle cx="32" cy="32" r="28" fill="#a855f7" fillOpacity="0.1" stroke="#a855f7" strokeWidth="2" />
+            <text x="32" y="42" textAnchor="middle" fontSize="30" fontWeight="bold" fill="#a855f7">M</text>
+        </svg>
+    );
+}
+
+// Grok Icon
+export function IconGrok({ size = 48, className = "" }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+            <circle cx="32" cy="32" r="28" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" strokeWidth="2" />
+            <text x="32" y="42" textAnchor="middle" fontSize="30" fontWeight="bold" fill="#3b82f6">G</text>
+        </svg>
+    );
+}
+
 // Icon map for dynamic usage
 export const iconMap = {
+    mimo: IconMimo,
+    grok: IconGrok,
     dna: IconDNA,
     home: IconHome,
     playground: IconPlayground,

@@ -53,6 +53,12 @@ export default function KofiWidget() {
                     justify-content: center;
                     align-items: center;
                 }
+                /* Ko-fi overlay panel (popup) should appear above everything */
+                .floatingchat-container-wrap .floatingchat-panel,
+                .kofi-overlay-iframe,
+                div[class*="kofi"] iframe {
+                    z-index: 9999 !important;
+                }
             `}</style>
         </>
     );
