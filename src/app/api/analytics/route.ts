@@ -32,13 +32,10 @@ export async function GET(request: NextRequest) {
             { name: 'bounceRate' },
         ];
 
-        // Build dimensions array
-        // Always include pagePath to see what's being recorded
-        const dimensions: { name: string }[] = [{ name: 'pagePath' }];
-
-        // Temporarily disable filter for debugging
+        // Build dimensions array for standard report
+        const dimensions: { name: string }[] = [];
         let dimensionFilter = undefined;
-        /*
+
         if (modelId) {
             dimensions.push({ name: 'pagePath' });
             dimensionFilter = {
@@ -51,30 +48,51 @@ export async function GET(request: NextRequest) {
                 }
             } as const;
         }
-        */
 
         // Fetch data for multiple periods
+        // 1. Standard Report (for historical data)
         const reportResult = await analyticsDataClient.runReport({
             property: `properties/${propertyId}`,
             dateRanges: [
-                { startDate: 'today', endDate: 'today', name: 'today' },
                 { startDate: '7daysAgo', endDate: 'today', name: 'week' },
                 { startDate: '30daysAgo', endDate: 'today', name: 'month' },
                 { startDate: '2020-01-01', endDate: 'today', name: 'allTime' },
             ],
-            dimensions,
+            // Only include dimensions when filtering (empty array can be omitted)
+            ...(dimensions.length > 0 && { dimensions }),
             metrics,
             dimensionFilter,
         });
+
+        // 2. Real-time Report (for immediate "today" data)
+        // Note: unifiedPagePath is often available even when pagePath is thresholded
+        const realtimeResult = await analyticsDataClient.runRealtimeReport({
+            property: `properties/${propertyId}`,
+            dimensions: [{ name: 'unifiedPagePath' }],
+            metrics: [
+                { name: 'screenPageViews' },
+                { name: 'activeUsers' },
+            ],
+            dimensionFilter: modelId ? {
+                filter: {
+                    fieldName: 'unifiedPagePath',
+                    stringFilter: {
+                        matchType: 'BEGINS_WITH',
+                        value: `/models/${modelId}`
+                    }
+                }
+            } : undefined
+        });
+
         const response = reportResult[0];
+        const realtimeResponse = realtimeResult[0];
 
         interface AnalyticsRow {
             metricValues?: { value?: string | null }[] | null;
             dimensionValues?: { value?: string | null }[] | null;
         }
 
-        // Aggregate data by dateRange
-        // We look through all dimension values to find the one that matches our dateRange names
+        // Aggregate data by dateRange (for standard report)
         function aggregateByDateRange(rows: AnalyticsRow[], rangeName: string) {
             const matchingRows = rows.filter(r =>
                 r.dimensionValues?.some(dv => dv.value === rangeName)
@@ -114,9 +132,27 @@ export async function GET(request: NextRequest) {
             };
         }
 
-        // Each row corresponds to a date range
+        // Parse real-time data for "today"
+        function parseRealtime(realtimeRows: AnalyticsRow[]) {
+            if (!realtimeRows || realtimeRows.length === 0) {
+                return { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' };
+            }
+            let totalPV = 0;
+            let totalUsers = 0;
+            for (const row of realtimeRows) {
+                totalPV += parseInt(row.metricValues?.[0]?.value || '0');
+                totalUsers += parseInt(row.metricValues?.[1]?.value || '0');
+            }
+            return {
+                pageviews: totalPV,
+                sessions: totalUsers, // Using activeUsers as a proxy for sessions in real-time
+                avgSessionDuration: 0,
+                bounceRate: '0.0'
+            };
+        }
+
         const rows: AnalyticsRow[] = response.rows || [];
-        const today = aggregateByDateRange(rows, 'today');
+        const today = parseRealtime(realtimeResponse.rows || []);
         const week = aggregateByDateRange(rows, 'week');
         const month = aggregateByDateRange(rows, 'month');
         const allTime = aggregateByDateRange(rows, 'allTime');
@@ -129,14 +165,10 @@ export async function GET(request: NextRequest) {
             allTime,
             lastUpdated: new Date().toISOString(),
             rowCount: rows.length,
-            // Debug info
             debug: {
                 modelId,
-                dimensionsCount: dimensions.length,
-                rows: rows.slice(0, 5).map(r => ({
-                    dimensions: r.dimensionValues?.map(dv => dv.value),
-                    metrics: r.metricValues?.map(mv => mv.value)
-                }))
+                realtimeRowCount: realtimeResponse.rows?.length || 0,
+                realtimePaths: realtimeResponse.rows?.map(r => r.dimensionValues?.[0]?.value)
             }
         });
 
