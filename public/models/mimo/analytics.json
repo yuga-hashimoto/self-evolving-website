@@ -1,11 +1,12 @@
 {
-    "date": "2026-01-14T00:00:00.000Z",
-    "source": "dummy",
-    "pageviews": 0,
-    "revenue": "0.00",
-    "avgSessionDuration": 0,
-    "bounceRate": "0.0",
-    "rpm": "0.00",
-    "ctr": "0.00",
-    "sessions": 0
+  "date": "2026-01-14T13:07:54.297Z",
+  "source": "dummy",
+  "modelId": "mimo",
+  "pageviews": 494,
+  "revenue": "2.27",
+  "avgSessionDuration": 99,
+  "bounceRate": "32.8",
+  "rpm": "2.23",
+  "ctr": "1.24",
+  "sessions": 90
 }
