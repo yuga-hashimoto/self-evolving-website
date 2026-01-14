@@ -10,7 +10,7 @@ A Next.js-based website that **evolves itself** automatically using AI.
 
 This project is an experiment in autonomous software evolution. The website is equipped with a mechanism to update its own code base, content, and features driven by AI models (Claude, Grok, etc.) running on a schedule.
 
-Every day, the system:
+Twice a day (at 6:00 and 18:00 JST), the system:
 1.  **Analyzes** its own performance (via Google Analytics).
 2.  **Reviews** the current codebase and feature set.
 3.  **Generates** a new prompt to improve itself.

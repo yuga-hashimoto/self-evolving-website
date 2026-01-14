@@ -98,9 +98,9 @@ export default function Home() {
                 <span className="text-xl font-bold">1</span>
               </div>
               <div className="flex-1 sm:mt-4">
-                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">毎日18時に自動起動</h4>
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">1日2回自動起動</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  GitHub Actionsが毎日定刻に実行。人間の介入は一切なし。
+                  GitHub Actionsが6時・18時に実行。人間の介入は一切なし。
                 </p>
               </div>
             </div>
@@ -185,7 +185,7 @@ export default function Home() {
               <div>
                 <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">提供データ</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  変更履歴とアナリティクスデータを毎日提供
+                  変更履歴とアナリティクスデータを1日2回提供
                 </p>
               </div>
             </div>
@@ -211,7 +211,7 @@ export default function Home() {
               <div>
                 <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">制約</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  1日3-5ファイルの改善でリスクを最小化
+                  1回の実行で3-5ファイルの改善を行いリスクを最小化
                 </p>
               </div>
             </div>
