@@ -44,6 +44,25 @@ try {
     console.warn(`⚠️ Changelog data not found for ${MODEL_ID}`);
 }
 
+// Extract metrics baseline from analytics
+let metricsBaseline = 'No analytics data yet. Design for future measurement.';
+try {
+    if (fs.existsSync(analyticsPath)) {
+        const analytics = JSON.parse(fs.readFileSync(analyticsPath, 'utf8'));
+        const bounceRate = analytics.bounceRate || 'N/A';
+        const avgSessionDuration = analytics.avgSessionDuration || 'N/A';
+        const conversionRate = analytics.conversionRate || 'N/A';
+
+        metricsBaseline = `
+Bounce Rate: ${bounceRate}
+Avg Session Duration: ${avgSessionDuration}
+Conversion Rate: ${conversionRate}
+        `.trim();
+    }
+} catch (err) {
+    console.warn('⚠️ Could not parse analytics for baseline');
+}
+
 // Load Template
 let template = '';
 try {
@@ -58,7 +77,8 @@ let prompt = template
     .replace('{{ANALYTICS}}', analyticsData)
     .replace('{{CHANGELOG}}', changelogData)
     .replace(/{{MODEL_ID}}/g, MODEL_ID)
-    .replace(/{{MODEL_NAME}}/g, MODEL_NAME);
+    .replace(/{{MODEL_NAME}}/g, MODEL_NAME)
+    .replace('{{METRICS_BASELINE}}', metricsBaseline);
 
 // Write Output (Ensure directory exists)
 const outputDir = path.dirname(outputPath);

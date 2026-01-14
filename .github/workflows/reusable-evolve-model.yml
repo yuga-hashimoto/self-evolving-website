@@ -71,10 +71,10 @@ jobs:
           # Prepend working directory instructions to the prompt
           FULL_PROMPT="Working directory: src/app/models/${{ inputs.model_id }}/playground
           You may also edit the following directories and files:
-          - src/app/api/ - API Routes (create/edit endpoints for new functionality)
+          - src/app/api/${{ inputs.model_id }}/ - Your dedicated API Routes namespace
           - src/components/icons/Icons.tsx - Icon definitions
 
-          Only edit files within these directories. Do NOT edit other files.
+          Only edit files within these directories. Do NOT edit other files or other model's API directories.
 
           $PROMPT"
           echo "prompt<<EOF" >> $GITHUB_OUTPUT
@@ -101,7 +101,7 @@ jobs:
         run: |
           # Check for changes in allowed directories
           PLAYGROUND_CHANGES=$(git status --porcelain src/app/models/${{ inputs.model_id }}/playground)
-          API_CHANGES=$(git status --porcelain src/app/api)
+          API_CHANGES=$(git status --porcelain src/app/api/${{ inputs.model_id }})
           ICONS_CHANGES=$(git status --porcelain src/components/icons/Icons.tsx)
 
           if [[ -n "$PLAYGROUND_CHANGES" ]] || [[ -n "$API_CHANGES" ]] || [[ -n "$ICONS_CHANGES" ]]; then
@@ -350,7 +350,7 @@ jobs:
         run: |
           # Add allowed directories
           git add src/app/models/${{ inputs.model_id }}/playground || true
-          git add src/app/api || true
+          git add src/app/api/${{ inputs.model_id }} || true
           git add src/components/icons/Icons.tsx || true
 
           git add public/models/${{ inputs.model_id }}/changelog.json || echo "No changelog update"
@@ -359,7 +359,7 @@ jobs:
           git add public/models/${{ inputs.model_id }}/screenshots/ || echo "No screenshot update"
 
           # Safety Check: Fail if files outside allowed scope are modified
-          UNEXPECTED_CHANGES=$(git status --porcelain src/ | grep -vE "^(M |A |D | M| D)?src/app/models/${{ inputs.model_id }}/playground|^(M |A |D | M| D)?src/app/api|^(M |A |D | M| D)?src/components/icons/Icons.tsx" || true)
+          UNEXPECTED_CHANGES=$(git status --porcelain src/ | grep -vE "^(M |A |D | M| D)?src/app/models/${{ inputs.model_id }}/playground|^(M |A |D | M| D)?src/app/api/${{ inputs.model_id }}|^(M |A |D | M| D)?src/components/icons/Icons.tsx" || true)
 
           if [[ -n "$UNEXPECTED_CHANGES" ]]; then
              echo "❌ CRITICAL ERROR: AI modified files outside of allowed scope!"
