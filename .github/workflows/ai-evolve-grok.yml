@@ -59,8 +59,10 @@ jobs:
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
-          ANTHROPIC_API_KEY: ${{ secrets.GROK_API_KEY }}
+          ANTHROPIC_MODEL: x-ai/grok-code-fast-1
           ANTHROPIC_DEFAULT_SONNET_MODEL: x-ai/grok-code-fast-1
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: x-ai/grok-code-fast-1
+          ANTHROPIC_DEFAULT_OPUS_MODEL: x-ai/grok-code-fast-1
 
       - name: Check for Changes
         id: changes
@@ -117,7 +119,10 @@ jobs:
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_MODEL: x-ai/grok-code-fast-1
           ANTHROPIC_DEFAULT_SONNET_MODEL: x-ai/grok-code-fast-1
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: x-ai/grok-code-fast-1
+          ANTHROPIC_DEFAULT_OPUS_MODEL: x-ai/grok-code-fast-1
 
       # === Safety Check & Auto-Fix Loop (Attempt 2) ===
       - name: Safety Check (Attempt 2)
@@ -161,7 +166,10 @@ jobs:
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_MODEL: x-ai/grok-code-fast-1
           ANTHROPIC_DEFAULT_SONNET_MODEL: x-ai/grok-code-fast-1
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: x-ai/grok-code-fast-1
+          ANTHROPIC_DEFAULT_OPUS_MODEL: x-ai/grok-code-fast-1
 
       # === Safety Check & Auto-Fix Loop (Attempt 3) ===
       - name: Safety Check (Attempt 3)
@@ -205,7 +213,10 @@ jobs:
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_MODEL: x-ai/grok-code-fast-1
           ANTHROPIC_DEFAULT_SONNET_MODEL: x-ai/grok-code-fast-1
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: x-ai/grok-code-fast-1
+          ANTHROPIC_DEFAULT_OPUS_MODEL: x-ai/grok-code-fast-1
 
       # === Final Verification ===
       - name: Final Safety Verification
