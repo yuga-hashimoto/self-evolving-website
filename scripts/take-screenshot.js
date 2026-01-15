@@ -30,11 +30,14 @@ async function takeScreenshot() {
     fs.mkdirSync(screenshotDir, { recursive: true });
   }
 
-  console.log(`📸 Taking screenshot of ${url}...`);
+  console.log(`📸 Taking screenshot of ${url} (iPhone 16)...`);
 
   const browser = await chromium.launch();
   const page = await browser.newPage({
-    viewport: { width: 1920, height: 1080 }
+    viewport: { width: 390, height: 844 },
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+    hasTouch: true,
+    isMobile: true
   });
 
   try {
