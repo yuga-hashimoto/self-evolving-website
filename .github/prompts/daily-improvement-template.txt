@@ -88,14 +88,19 @@ Reference: Stripe.com (micro-interactions), Linear.app (animations), Duolingo (g
 You have access to a web search API (max 20 searches per session):
 
 ```bash
-curl "http://localhost:3131/api/search?q=<query>" | jq
+bash scripts/web-search.sh "your search query"
 ```
 
-**Returns**: Top 5 Google results + full content of first result (via Jina Reader)
+**Returns**: JSON with top 5 Google results + full content of first result (via Jina Reader)
 
 **When to use**: Research UX/UI trends, study competitors (Stripe, Linear), validate hypotheses, discover CRO techniques
 
-**Example**: `curl "http://localhost:3131/api/search?q=modern+CTA+button+design" | jq '.fullContent' -r`
+**Example**:
+```bash
+bash scripts/web-search.sh "modern CTA button design"
+bash scripts/web-search.sh "Stripe micro-interactions" | jq '.fullContent' -r
+bash scripts/web-search.sh "Linear animations" | jq '.results[0].title' -r
+```
 
 **Best practice**: Extract principles, not code snippets. Use search wisely (20 max per session).
 

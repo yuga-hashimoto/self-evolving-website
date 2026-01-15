@@ -28,7 +28,7 @@ on:
 jobs:
   evolve:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 120
     
     steps:
       - name: Checkout
@@ -130,7 +130,7 @@ jobs:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.read-prompt.outputs.prompt }}
           claude_args: |
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(curl http://localhost:3131/api/search*),Bash(jq:*),Glob,Grep,TodoWrite"
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
@@ -448,12 +448,75 @@ jobs:
             public/models/${{ inputs.model_id }}/screenshots/20*.png
           retention-days: 30
 
-      - name: Revert Changes on Failure
+      - name: Configure Git (on Failure)
         if: failure() && steps.changes.outputs.has_changes == 'true'
         run: |
-          echo "❌ Verification failed after 3 attempts. Reverting changes."
-          git reset --hard HEAD
-          git clean -fd
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Create Branch and Commit (on Failure)
+        if: failure() && steps.changes.outputs.has_changes == 'true'
+        run: |
+          # タイムスタンプ付きブランチ名生成
+          TIMESTAMP=$(TZ=Asia/Tokyo date +'%Y%m%d-%H%M%S')
+          BRANCH_NAME="ai-evolution/${{ inputs.model_id }}-${TIMESTAMP}"
+
+          echo "Creating branch: $BRANCH_NAME"
+          git checkout -b "$BRANCH_NAME"
+
+          # 許可されたディレクトリのみステージング
+          git add src/app/models/${{ inputs.model_id }}/playground || true
+          git add src/app/api/${{ inputs.model_id }} || true
+          git add src/components/icons/Icons.tsx || true
+          git add public/models/${{ inputs.model_id }}/changelog.json || true
+          git add public/models/${{ inputs.model_id }}/analytics.json || true
+          git add public/models/${{ inputs.model_id }}/analytics-previous.json || true
+          git add public/models/${{ inputs.model_id }}/screenshots/ || true
+
+          # セキュリティチェック：許可外の変更を除外
+          UNEXPECTED_CHANGES=$(git status --porcelain src/ | grep -vE "^(M |A |D | M| D)?src/app/models/${{ inputs.model_id }}/playground|^(M |A |D | M| D)?src/app/api/${{ inputs.model_id }}|^(M |A |D | M| D)?src/components/icons/Icons.tsx" || true)
+
+          if [[ -n "$UNEXPECTED_CHANGES" ]]; then
+             echo "⚠️  WARNING: AI modified files outside of allowed scope!"
+             echo "$UNEXPECTED_CHANGES"
+             git checkout -- $(echo "$UNEXPECTED_CHANGES" | awk '{print $2}')
+          fi
+
+          # 変更がない場合は終了
+          if git diff --cached --quiet; then
+            echo "No changes to commit after filtering."
+            exit 0
+          fi
+
+          # 失敗理由の特定
+          FAILURE_REASON="Unknown error"
+          if [[ "${{ steps.check_3.outcome }}" == "failure" ]]; then
+            FAILURE_REASON="Build/Type check failed after 3 attempts"
+          elif [[ "${{ job.status }}" == "failure" ]]; then
+            FAILURE_REASON="Security check or final verification failed"
+          fi
+
+          # コミットメッセージ作成
+          DATE=$(TZ=Asia/Tokyo date +'%Y-%m-%d %H:%M:%S JST')
+          echo "🚧 AI Evolution (Incomplete) - ${{ inputs.model_display_name }} - ${DATE}" > /tmp/commit_msg.txt
+          echo "" >> /tmp/commit_msg.txt
+          echo "Workflow failed: ${FAILURE_REASON}" >> /tmp/commit_msg.txt
+          echo "" >> /tmp/commit_msg.txt
+          echo "Branch: ${BRANCH_NAME}" >> /tmp/commit_msg.txt
+          echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> /tmp/commit_msg.txt
+          echo "" >> /tmp/commit_msg.txt
+          echo "⚠️  DO NOT MERGE - Review and fix issues first" >> /tmp/commit_msg.txt
+
+          git commit -F /tmp/commit_msg.txt
+
+          # リモートにプッシュ
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin "$BRANCH_NAME"
+
+          echo "✅ Changes saved to branch: $BRANCH_NAME"
+          echo "🔗 View at: ${{ github.server_url }}/${{ github.repository }}/tree/$BRANCH_NAME"
+        env:
+          TZ: Asia/Tokyo
 
       - name: Record Failure Metrics
         if: failure() && steps.changes.outputs.has_changes == 'true'
