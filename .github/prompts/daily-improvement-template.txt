@@ -83,6 +83,46 @@ Design for future measurement. Analytics validate impact post-deployment.
 
 Reference: Stripe.com (micro-interactions), Linear.app (animations), Duolingo (gamification)
 
+## Web Search for Research & Inspiration
+
+You have access to a web search API to research latest trends, best practices, and competitor implementations.
+
+### Usage
+```bash
+curl "http://localhost:3131/api/search?q=modern+CTA+button+design" | jq
+```
+
+### API Response
+The API returns:
+- Top 5 Google search results (titles, descriptions, URLs)
+- Full content of the first result (via Jina Reader for in-depth analysis)
+- Remaining search quota (max 20 searches per server session)
+
+### When to Use
+- Research latest UX/UI trends before implementing features
+- Study competitor implementations (Stripe, Linear, Duolingo, etc.)
+- Find best practices for specific patterns (CTAs, animations, progress indicators)
+- Validate hypotheses with real-world examples
+- Discover new conversion optimization techniques
+
+### Examples
+```bash
+# Research modern CTA button designs
+curl "http://localhost:3131/api/search?q=stripe+payment+button+hover+animation" | jq '.fullContent' -r
+
+# Find social proof implementation patterns
+curl "http://localhost:3131/api/search?q=best+social+proof+widgets+2026" | jq '.results'
+
+# Study gamification patterns
+curl "http://localhost:3131/api/search?q=duolingo+progress+indicator+design" | jq
+```
+
+### Best Practices
+- Use search to inform decisions, not copy blindly
+- Combine multiple sources for well-rounded insights
+- Extract principles, not just code snippets
+- Track search usage (20 max per session - use wisely)
+
 ## Output Format
 Instruct to append the changes to `public/models/{{MODEL_ID}}/changelog.json` in the following JSON format (actually as a file edit).
 **Note: `results` and `reasoning` fields are deprecated. Use `changes` and `intent` instead.**
