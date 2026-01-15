@@ -216,6 +216,7 @@ jobs:
 
       - name: Auto-Fix (Attempt 1)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.model_api_key }}
@@ -285,6 +286,7 @@ jobs:
 
       - name: Auto-Fix (Attempt 2)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.model_api_key }}
@@ -354,6 +356,7 @@ jobs:
 
       - name: Auto-Fix (Attempt 3)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
+        continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.model_api_key }}

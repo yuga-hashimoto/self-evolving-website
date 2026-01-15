@@ -11,7 +11,7 @@ interface ChangelogEntry {
     changes?: string;
     intent?: string;
     reasoning?: string;
-    files: string[];
+    files?: string[];
 }
 
 interface GroupedEntry {
@@ -25,8 +25,20 @@ async function getChangelog(modelId: string): Promise<ChangelogEntry[]> {
     try {
         const filePath = path.join(process.cwd(), "public", "models", modelId, "changelog.json");
         const content = fs.readFileSync(filePath, "utf-8");
-        return JSON.parse(content) as ChangelogEntry[];
-    } catch {
+        const entries = JSON.parse(content) as ChangelogEntry[];
+
+        // files プロパティが undefined の場合は空配列をデフォルトとして設定
+        return entries.map((entry, index) => {
+            if (!entry.files) {
+                console.warn(`⚠️  Changelog entry ${index} for ${modelId} is missing 'files' property (date: ${entry.date})`);
+            }
+            return {
+                ...entry,
+                files: entry.files ?? []
+            };
+        });
+    } catch (error) {
+        console.warn(`⚠️  Failed to load changelog for ${modelId}:`, error);
         return [];
     }
 }
@@ -299,7 +311,7 @@ function ModelCard({ entry, modelId, align }: { entry: ChangelogEntry; modelId: 
                 </div>
 
                 <div className={`flex flex-wrap gap-1 mt-4 ${align === "right" ? "md:justify-end" : "justify-start"}`}>
-                    {entry.files.slice(0, 3).map((file, i) => (
+                    {(entry.files || []).slice(0, 3).map((file, i) => (
                         <span key={i} className="px-2 py-0.5 bg-black/30 rounded text-[10px] text-gray-500 border border-white/5">
                             {file.split("/").pop()}
                         </span>

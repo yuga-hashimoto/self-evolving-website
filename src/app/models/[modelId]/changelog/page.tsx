@@ -29,7 +29,7 @@ interface ChangelogEntry {
     // New format
     changes?: string;
     intent?: string;
-    files: string[];
+    files?: string[];
     // Workflow metrics
     metrics?: {
         executionTime: {
@@ -85,8 +85,20 @@ async function getChangelog(modelId: string): Promise<ChangelogEntry[]> {
     try {
         const filePath = path.join(process.cwd(), "public", "models", modelId, "changelog.json");
         const content = fs.readFileSync(filePath, "utf-8");
-        return JSON.parse(content) as ChangelogEntry[];
-    } catch {
+        const entries = JSON.parse(content) as ChangelogEntry[];
+
+        // files プロパティが undefined の場合は空配列をデフォルトとして設定
+        return entries.map((entry, index) => {
+            if (!entry.files) {
+                console.warn(`⚠️  Changelog entry ${index} for ${modelId} is missing 'files' property (date: ${entry.date})`);
+            }
+            return {
+                ...entry,
+                files: entry.files ?? []
+            };
+        });
+    } catch (error) {
+        console.warn(`⚠️  Failed to load changelog for ${modelId}:`, error);
         return [];
     }
 }
@@ -312,7 +324,7 @@ export default async function ChangelogPage({ params }: PageProps) {
                                     <div className="mb-4">
                                         <p className="text-sm text-gray-400 mb-2">変更ファイル:</p>
                                         <div className="flex flex-wrap gap-2">
-                                            {entry.files.map((file, i) => (
+                                            {(entry.files || []).map((file, i) => (
                                                 <span
                                                     key={i}
                                                     className="px-2 py-1 bg-purple-500/20 rounded text-xs text-purple-300"
