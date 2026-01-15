@@ -115,17 +115,17 @@ jobs:
 
           **実装前に必ず確認してください：**
 
-          ✅ Canvasサイズは画面幅に応じて動的に設定していますか？
-          ✅ タッチ操作は直感的で快適ですか？（実際にスマホで試すイメージで）
-          ✅ 画面が小さくても文字・タイルは見えますか？
-          ✅ バイブレーションなどのフィードバックはありますか？
+          ✅ Canvasサイズは画面サイズに応じて動的に設定していますか？
+          ✅ タッチ操作は直感的で快適ですか？
+          ✅ 小さい画面でも見やすく操作しやすいですか？
+          ✅ フィードバックはありますか？
 
           **実装後に確認してください：**
 
-          ✅ window.innerWidth を使って画面幅を取得していますか？
+          ✅ 画面サイズを取得して動的にサイズ設定していますか？
           ✅ タッチイベントは連続的に処理されますか？
           ✅ スワイプ判定は画面サイズに応じていますか？
-          ✅ \`const CANVAS_WIDTH = 数値\` のような固定値を使っていませんか？
+          ✅ 固定値を使っていませんか？
           "
 
 
@@ -271,7 +271,7 @@ jobs:
           echo "The build failed with the following errors. Please fix the code to resolve these issues. Do NOT change the functionality, just fix the syntax or type errors." >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           echo "⚠️  IMPORTANT: Ensure mobile compatibility while fixing errors:" >> $GITHUB_OUTPUT
-          echo "- Canvas must be responsive (use window.innerWidth, not hardcoded values)" >> $GITHUB_OUTPUT
+          echo "- Canvas must be responsive (dynamic sizing, not hardcoded values)" >> $GITHUB_OUTPUT
           echo "- Touch controls must be intuitive and work continuously" >> $GITHUB_OUTPUT
           echo "- Swipe distance should adapt to screen size" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
@@ -348,7 +348,7 @@ jobs:
           echo "The build still failed. Please fix these errors:" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           echo "⚠️  IMPORTANT: Ensure mobile compatibility while fixing errors:" >> $GITHUB_OUTPUT
-          echo "- Canvas must be responsive (use window.innerWidth, not hardcoded values)" >> $GITHUB_OUTPUT
+          echo "- Canvas must be responsive (dynamic sizing, not hardcoded values)" >> $GITHUB_OUTPUT
           echo "- Touch controls must be intuitive and work continuously" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           echo "\`\`\`" >> $GITHUB_OUTPUT
@@ -424,7 +424,7 @@ jobs:
           echo "Last attempt. Fix these errors:" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           echo "⚠️  CRITICAL: Ensure mobile compatibility while fixing errors:" >> $GITHUB_OUTPUT
-          echo "- Canvas MUST be responsive (use window.innerWidth, NOT hardcoded values)" >> $GITHUB_OUTPUT
+          echo "- Canvas MUST be responsive (dynamic sizing, NOT hardcoded values)" >> $GITHUB_OUTPUT
           echo "- Touch controls MUST work continuously, not just once per tap" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           echo "\`\`\`" >> $GITHUB_OUTPUT
