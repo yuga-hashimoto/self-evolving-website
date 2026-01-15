@@ -29,6 +29,39 @@ interface ChangelogEntry {
     changes?: string;
     intent?: string;
     files: string[];
+    // Workflow metrics
+    metrics?: {
+        executionTime: {
+            claudeCode: number;
+            autoFix?: {
+                attempt1?: number;
+                attempt2?: number;
+                attempt3?: number;
+            };
+            total: number;
+        };
+        errors: {
+            buildFailures: number;
+            retryCount: number;
+            finalStatus: 'success' | 'failure';
+            errorTypes?: {
+                typescript?: number;
+                build?: number;
+                security?: number;
+            };
+            errorDetails?: string;
+        };
+        codeChanges: {
+            filesChanged: number;
+            additions: number;
+            deletions: number;
+        };
+        screenshot?: {
+            pixelDiffPercent: number;
+            diffPixels: number;
+            totalPixels: number;
+        };
+    };
 }
 
 // Generate screenshot path from date
@@ -318,6 +351,110 @@ export default async function ChangelogPage({ params }: PageProps) {
                                             <div>
                                                 <p className="text-xs text-gray-400">直帰率</p>
                                                 <p className="font-bold">{entry.results.bounceRate}%</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Workflow Metrics */}
+                                    {entry.metrics && (
+                                        <div className="mt-4 p-4 bg-black/20 rounded-lg">
+                                            <h4 className="text-sm text-purple-400 font-bold mb-3">ワークフローメトリクス</h4>
+
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
+                                                {/* 実行時間 */}
+                                                <div>
+                                                    <p className="text-gray-400 mb-1">実行時間</p>
+                                                    <p className="font-mono text-white font-bold">
+                                                        {Math.floor(entry.metrics.executionTime.total / 60)}分{entry.metrics.executionTime.total % 60}秒
+                                                    </p>
+                                                    {entry.metrics.executionTime.claudeCode > 0 && (
+                                                        <p className="text-gray-500 mt-1">
+                                                            Claude: {entry.metrics.executionTime.claudeCode}秒
+                                                        </p>
+                                                    )}
+                                                    {entry.metrics.executionTime.autoFix && Object.keys(entry.metrics.executionTime.autoFix).length > 0 && (
+                                                        <p className="text-gray-500">
+                                                            修正: {Object.values(entry.metrics.executionTime.autoFix).reduce((a, b) => a + (b || 0), 0)}秒
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {/* エラー・リトライ */}
+                                                <div>
+                                                    <p className="text-gray-400 mb-1">ビルド状態</p>
+                                                    <div className="flex items-center gap-2">
+                                                        {entry.metrics.errors.finalStatus === 'success' ? (
+                                                            <span className="text-green-400 font-bold">✓ 成功</span>
+                                                        ) : (
+                                                            <span className="text-red-400 font-bold">✗ 失敗</span>
+                                                        )}
+                                                    </div>
+                                                    {entry.metrics.errors.retryCount > 0 && (
+                                                        <p className="text-yellow-400 mt-1">
+                                                            リトライ: {entry.metrics.errors.retryCount}回
+                                                        </p>
+                                                    )}
+                                                    {entry.metrics.errors.buildFailures > 0 && (
+                                                        <p className="text-gray-500">
+                                                            失敗: {entry.metrics.errors.buildFailures}回
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {/* コード変更量 */}
+                                                <div>
+                                                    <p className="text-gray-400 mb-1">コード変更</p>
+                                                    <p className="font-mono text-white">
+                                                        {entry.metrics.codeChanges.filesChanged} ファイル
+                                                    </p>
+                                                    <div className="flex gap-3 mt-1">
+                                                        <span className="text-green-400 font-mono">
+                                                            +{entry.metrics.codeChanges.additions}
+                                                        </span>
+                                                        <span className="text-red-400 font-mono">
+                                                            -{entry.metrics.codeChanges.deletions}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* スクリーンショット差分 */}
+                                                {entry.metrics.screenshot && (
+                                                    <div>
+                                                        <p className="text-gray-400 mb-1">画面差分</p>
+                                                        <p className="font-mono text-white font-bold">
+                                                            {entry.metrics.screenshot.pixelDiffPercent}%
+                                                        </p>
+                                                        <p className="text-gray-500 text-[10px] mt-1">
+                                                            {entry.metrics.screenshot.diffPixels.toLocaleString()} / {entry.metrics.screenshot.totalPixels.toLocaleString()} px
+                                                        </p>
+                                                    </div>
+                                                )}
+
+                                                {/* エラー詳細（展開可能） */}
+                                                {entry.metrics.errors.errorTypes &&
+                                                 (entry.metrics.errors.errorTypes.typescript ||
+                                                  entry.metrics.errors.errorTypes.build ||
+                                                  entry.metrics.errors.errorTypes.security) && (
+                                                    <div className="col-span-2 sm:col-span-3">
+                                                        <details className="group mt-2">
+                                                            <summary className="text-gray-400 cursor-pointer hover:text-purple-300 transition-colors list-none flex items-center gap-2">
+                                                                <span className="group-open:rotate-90 transition-transform">▶</span>
+                                                                エラー詳細
+                                                            </summary>
+                                                            <div className="mt-2 p-2 bg-black/30 rounded text-[10px] font-mono">
+                                                                {(entry.metrics.errors.errorTypes?.typescript ?? 0) > 0 && (
+                                                                    <p className="text-blue-400">TypeScript: {entry.metrics.errors.errorTypes.typescript}件</p>
+                                                                )}
+                                                                {(entry.metrics.errors.errorTypes?.build ?? 0) > 0 && (
+                                                                    <p className="text-yellow-400">Build: {entry.metrics.errors.errorTypes.build}件</p>
+                                                                )}
+                                                                {(entry.metrics.errors.errorTypes?.security ?? 0) > 0 && (
+                                                                    <p className="text-red-400">Security: {entry.metrics.errors.errorTypes.security}件</p>
+                                                                )}
+                                                            </div>
+                                                        </details>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     )}

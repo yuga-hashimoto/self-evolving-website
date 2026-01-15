@@ -49,6 +49,14 @@ try {
     console.log(`📝 Creating new changelog for ${MODEL_ID}`);
 }
 
+// Read workflow metrics
+let metrics = null;
+try {
+    metrics = JSON.parse(fs.readFileSync('/tmp/workflow-metrics.json', 'utf-8'));
+} catch {
+    console.log('⚠️  No workflow metrics found');
+}
+
 // Add new entry
 const entry = {
     id: changelog.length + 1,
@@ -64,7 +72,8 @@ const entry = {
         pvChange: parseFloat(pvChange),
         avgSessionDuration: analytics.avgSessionDuration,
         bounceRate: parseFloat(analytics.bounceRate)
-    }
+    },
+    metrics: metrics
 };
 
 changelog.push(entry);
