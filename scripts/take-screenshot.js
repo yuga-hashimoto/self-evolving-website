@@ -11,7 +11,7 @@ async function takeScreenshot() {
 
   const url = `http://localhost:3131/models/${modelId}/playground`;
 
-  // Use local timezone date instead of UTC
+  // Use local timezone date (TZ environment variable should be set to Asia/Tokyo in GitHub Actions)
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');

@@ -334,6 +334,7 @@ jobs:
           kill $DEV_PID || true
         env:
           MODEL_ID: ${{ inputs.model_id }}
+          TZ: Asia/Tokyo
 
       - name: Revert Changes on Failure
         if: failure() && steps.changes.outputs.has_changes == 'true'
