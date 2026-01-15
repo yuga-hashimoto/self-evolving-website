@@ -531,7 +531,15 @@ jobs:
           if [[ -n "$UNEXPECTED_CHANGES" ]]; then
              echo "⚠️  WARNING: AI modified files outside of allowed scope!"
              echo "$UNEXPECTED_CHANGES"
-             git checkout -- $(echo "$UNEXPECTED_CHANGES" | awk '{print $2}')
+
+             # 修正・削除されたファイルを元に戻す（M, D）
+             echo "$UNEXPECTED_CHANGES" | grep "^[MD]" | awk '{print $2}' | xargs -r git checkout -- 2>/dev/null || true
+
+             # ステージング済みの新規ファイルをリセット（A）
+             echo "$UNEXPECTED_CHANGES" | grep "^A" | awk '{print $2}' | xargs -r git reset HEAD 2>/dev/null || true
+
+             # 新規追加・未追跡ファイルを削除（A, ??）
+             echo "$UNEXPECTED_CHANGES" | grep -E "^(A|\?\?)" | awk '{print $2}' | xargs -r rm -f 2>/dev/null || true
           fi
 
           # 変更がない場合は終了
