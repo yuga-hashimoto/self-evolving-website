@@ -35,9 +35,16 @@ async function fetchGA4Analytics() {
             credentials: credentials
         });
 
+        // Debug: Log request details
+        const propertyPath = `properties/${propertyId}`;
+        console.log(`📊 Fetching GA4 data for ${MODEL_ID}:`);
+        console.log(`   - Property: ${propertyPath}`);
+        console.log(`   - Filter: pagePath BEGINS_WITH /models/${MODEL_ID}`);
+        console.log(`   - Date range: 7daysAgo to today`);
+
         // Fetch data for the last 7 days
         const reportResult = await analyticsDataClient.runReport({
-            property: `properties/${propertyId}`,
+            property: propertyPath,
             dateRanges: [
                 {
                     startDate: '7daysAgo',
@@ -61,6 +68,15 @@ async function fetchGA4Analytics() {
             ],
         });
         const response = reportResult[0];
+
+        // Debug: Log response details
+        console.log(`📊 GA4 Response for ${MODEL_ID}:`);
+        console.log(`   - Row count: ${response.rows?.length || 0}`);
+        console.log(`   - Dimension headers: ${response.dimensionHeaders?.map(h => h.name).join(', ') || 'none'}`);
+        console.log(`   - Metric headers: ${response.metricHeaders?.map(h => h.name).join(', ') || 'none'}`);
+        if (response.rowCount !== undefined) {
+            console.log(`   - Row count (reported): ${response.rowCount}`);
+        }
 
         // Extract metrics from response
         const row = response.rows?.[0];
@@ -98,6 +114,12 @@ async function fetchGA4Analytics() {
 
     } catch (error) {
         console.error(`❌ Error fetching GA4 data for ${MODEL_ID}:`, error.message);
+        if (error.code) {
+            console.error(`   - Error code: ${error.code}`);
+        }
+        if (error.details) {
+            console.error(`   - Details: ${JSON.stringify(error.details)}`);
+        }
         console.log('⚠️  Falling back to dummy data...');
         return generateDummyData();
     }
