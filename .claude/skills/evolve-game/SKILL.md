@@ -21,15 +21,16 @@ Create highly addictive browser games that are comfortable to play on smartphone
 【Analysis & Planning Phase】
 1. Analyze current metrics
 2. Review improvement history
-3. Decide improvement direction (general approach)
-4. Establish implementation plan (specific implementation details)
+3. Review existing game code (find bugs, issues, improvement opportunities)
+4. Decide improvement direction (general approach)
+5. Establish implementation plan (specific implementation details)
 
 【Implementation Phase】
-5. Code implementation
+6. Code implementation
 
 【Verification & Testing Phase】
-6. Record changelog
-7. Build validation & testing
+7. Record changelog
+8. Build validation & testing
 ```
 
 ### Task 1: Analyze Current Metrics
@@ -59,38 +60,59 @@ Review the latest 3 change history entries injected into the prompt.
 - Continue improving in the same direction, or pivot?
 - Are you repeatedly facing the same issues?
 
-### Task 3: Decide Improvement Direction
+### Task 3: Review Existing Game Code (Mandatory)
 
-Based on data analysis, choose one of the following approaches:
+**Important**: This task is mandatory. Always review existing game code before deciding on improvements.
 
-**Option 1: Add a new game**
-- High bounce rate (70% or higher)
-- Existing games are getting boring
-- Lack of variety
+Read and analyze all existing game files in `src/app/models/{MODEL_ID}/playground/`:
+- `page.tsx` - Main page
+- `components/*.tsx` - Game components
 
-**Option 2: Improve existing game**
-- Existing game has some support
-- Specific features are missing
-- User experience has issues
+**Items to check:**
+- 🐛 Bugs: Logic errors, runtime errors, edge cases
+- ⚠️ Issues: Poor UX, confusing controls, missing feedback
+- 🎮 Gameplay: Balance issues, difficulty problems, boring mechanics
+- 📱 Mobile: Touch control issues, responsive problems
+- ⚡ Performance: Slow rendering, memory leaks, inefficient code
+- 🎨 UI/UX: Unclear UI, missing visual feedback, poor accessibility
 
-**Option 3: Performance optimization**
-- Game is good but runs slow
-- Poor mobile experience
-- Large build size
+**Create a list of findings:**
+```
+Found issues in existing games:
+1. [Game name]: [Issue description] - Priority: High/Medium/Low
+2. [Game name]: [Issue description] - Priority: High/Medium/Low
+...
+```
 
-**Optimization examples:**
-- Canvas optimization
-- Asset compression
-- Code splitting
-- Rendering efficiency
+### Task 4: Decide Improvement Direction
 
-### Task 4: Establish Implementation Plan
+Based on data analysis AND code review findings:
+
+**Always do (Mandatory):**
+- Fix High priority bugs found in Task 3
+- Improve existing game quality (UX, controls, feedback)
+
+**Optionally do (AI decision):**
+
+**Option A: Focus on existing game improvements**
+- Deep polish of one or more existing games
+- Add new features to existing games
+- Performance optimization
+
+**Option B: Add a new game**
+- When existing games are mature and polished
+- When variety would improve retention
+- When there's a clear concept that would increase engagement
+
+**You can do both A and B if appropriate. Use your judgment based on the data and code review.**
+
+### Task 5: Establish Implementation Plan
 
 **Important**: Before writing code, create a specific implementation plan.
 
-Based on the improvement direction decided in Task 3, clarify the following:
+Based on the improvement direction decided in Task 4, clarify the following:
 
-#### 4-1. Feature Details to Implement
+#### 5-1. Feature Details to Implement
 
 **When adding a new game:**
 - Game name
@@ -100,6 +122,12 @@ Based on the improvement direction decided in Task 3, clarify the following:
 - Score system
 - Difficulty settings (if any)
 - Data to save (high scores, stats, etc.)
+
+**When fixing bugs/issues (from Task 3):**
+- Bug/issue description
+- Root cause analysis
+- Fix approach
+- How to verify the fix works
 
 **When improving an existing game:**
 - Target game name
@@ -112,7 +140,7 @@ Based on the improvement direction decided in Task 3, clarify the following:
 - Specific optimization techniques
 - Expected improvement effects (load time, FPS, etc.)
 
-#### 4-2. Required Files and Implementation Steps
+#### 5-2. Required Files and Implementation Steps
 
 **Files to create/modify:**
 - `src/app/models/{MODEL_ID}/playground/page.tsx` - Main game implementation
@@ -125,14 +153,14 @@ Based on the improvement direction decided in Task 3, clarify the following:
 2. What to implement next (e.g., UI/UX)
 3. What to implement last (e.g., data persistence)
 
-#### 4-3. Expected Effects
+#### 5-3. Expected Effects
 
 Through this implementation, expect the following KPI improvements:
 - Session time: XX seconds → YY seconds
 - Bounce rate: XX% → YY%
 - Repeat rate: Improvement
 
-#### 4-4. Risks and Precautions
+#### 5-4. Risks and Precautions
 
 Points to be careful about during implementation:
 - Sections where build errors might occur
@@ -141,7 +169,7 @@ Points to be careful about during implementation:
 
 **After planning, proceed to the next task (code implementation).**
 
-### Task 5: Code Implementation
+### Task 6: Code Implementation
 
 Implement code based on the chosen approach.
 
@@ -211,7 +239,7 @@ Implement code based on the chosen approach.
 
 Details: Refer to `.github/prompts/api-development-guidelines.txt`
 
-### Task 6: Record Changelog
+### Task 7: Record Changelog
 
 **Important**: Add all changes made in this execution as **one entry** to **both** of the following files.
 
@@ -276,7 +304,7 @@ List the relative paths of all changed files in an array.
 ]
 ```
 
-### Task 7: Build Validation & Testing
+### Task 8: Build Validation & Testing
 
 After completing changes, be sure to execute the following:
 
