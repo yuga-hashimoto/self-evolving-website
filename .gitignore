@@ -46,3 +46,6 @@ next-env.d.ts
 # analytics
 public/analytics.json
 public/analytics-previous.json
+
+# before screenshots (for GitHub Artifacts only, not committed)
+public/models/*/screenshots/*-before.png

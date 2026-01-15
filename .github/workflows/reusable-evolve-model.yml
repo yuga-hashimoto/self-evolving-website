@@ -103,6 +103,18 @@ jobs:
         env:
           SERPER_API_KEY: ${{ secrets.serper_api_key }}
 
+      - name: Install Playwright for Screenshots
+        run: |
+          npx playwright install chromium --with-deps
+
+      - name: Take Before Screenshot
+        run: |
+          node scripts/take-screenshot.js
+        env:
+          MODEL_ID: ${{ inputs.model_id }}
+          SCREENSHOT_SUFFIX: before
+          TZ: Asia/Tokyo
+
       - name: Claude Code Execution
         uses: anthropics/claude-code-action@v1
         with:
@@ -325,22 +337,27 @@ jobs:
 
           echo "✅ Security checks passed"
 
-      - name: Install Playwright
-        if: steps.changes.outputs.has_changes == 'true'
-        run: |
-          npx playwright install chromium --with-deps
-
-      - name: Take Screenshot
+      - name: Take After Screenshot
         if: steps.changes.outputs.has_changes == 'true'
         run: |
           # Dev server is already running from "Start Dev Server" step
           echo "Using existing dev server..."
 
-          # Take screenshot
+          # Take screenshot (will be committed to git)
           node scripts/take-screenshot.js
         env:
           MODEL_ID: ${{ inputs.model_id }}
           TZ: Asia/Tokyo
+
+      - name: Upload Before/After Screenshots
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ inputs.model_id }}-${{ github.run_id }}
+          path: |
+            public/models/${{ inputs.model_id }}/screenshots/*-before.png
+            public/models/${{ inputs.model_id }}/screenshots/20*.png
+          retention-days: 30
 
       - name: Revert Changes on Failure
         if: failure() && steps.changes.outputs.has_changes == 'true'

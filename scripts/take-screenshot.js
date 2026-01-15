@@ -18,8 +18,12 @@ async function takeScreenshot() {
   const day = String(now.getDate()).padStart(2, '0');
   const date = `${year}-${month}-${day}`;
 
+  // Optional suffix for before/after comparison (e.g., "before", "after")
+  const suffix = process.env.SCREENSHOT_SUFFIX;
+  const filename = suffix ? `${date}-${suffix}.png` : `${date}.png`;
+
   const screenshotDir = path.join(__dirname, `../public/models/${modelId}/screenshots`);
-  const screenshotPath = path.join(screenshotDir, `${date}.png`);
+  const screenshotPath = path.join(screenshotDir, filename);
 
   // Create screenshots directory if it doesn't exist
   if (!fs.existsSync(screenshotDir)) {
