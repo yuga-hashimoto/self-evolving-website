@@ -23,6 +23,35 @@ interface InfinityDropState {
   isGameOver: boolean;
   accuracy: number;
   combo: number;
+  coins: number;
+  difficultyLevel: number;
+  bestCombo: number;
+}
+
+interface SkillState {
+  boostActive: boolean;
+  slowActive: boolean;
+  wideActive: boolean;
+  boostEndTime: number;
+  slowEndTime: number;
+}
+
+interface ShopItem {
+  id: string;
+  cost: number;
+  owned: boolean;
+  key: 'boost' | 'slow' | 'wide';
+}
+
+interface InfinityParticle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  color: string;
+  size: number;
 }
 
 // 2048 Interfaces
@@ -46,6 +75,43 @@ interface Game2048State {
   isWon: boolean;
   difficulty: 'easy' | 'normal' | 'hard';
   gridSize: number;
+}
+
+// Neon Dash Interfaces
+interface Obstacle {
+  id: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  type: 'block' | 'gap';
+  passed?: boolean;
+}
+
+interface NeonParticle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  color: string;
+}
+
+interface NeonDashState {
+  isPlaying: boolean;
+  isGameOver: boolean;
+  score: number;
+  highScore: number;
+  playerY: number;
+  playerVelocityY: number;
+  playerState: 'running' | 'jumping' | 'sliding';
+  obstacles: Obstacle[];
+  particles: NeonParticle[];
+  speed: number;
+  distance: number;
+  obstacleTimer: number;
+  slideTimer: number;
 }
 
 const INITIAL_BLOCK_WIDTH = 200;
@@ -73,7 +139,8 @@ const TILE_COLORS: Record<number, string> = {
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon'>('menu');
+  const [shopOpen, setShopOpen] = useState(false);
 
   const [gameState, setGameState] = useState<InfinityDropState>({
     blocks: [],
@@ -83,7 +150,24 @@ export default function MimoPlayground() {
     isGameOver: false,
     accuracy: 0,
     combo: 0,
+    coins: 0,
+    difficultyLevel: 1,
+    bestCombo: 0,
   });
+
+  const [skillState, setSkillState] = useState<SkillState>({
+    boostActive: false,
+    slowActive: false,
+    wideActive: false,
+    boostEndTime: 0,
+    slowEndTime: 0,
+  });
+
+  const [shopItems, setShopItems] = useState<ShopItem[]>([
+    { id: 'skill_boost', cost: 50, owned: false, key: 'boost' },
+    { id: 'skill_slow', cost: 75, owned: false, key: 'slow' },
+    { id: 'skill_wide', cost: 100, owned: false, key: 'wide' },
+  ]);
 
   const [game2048State, setGame2048State] = useState<Game2048State>({
     grid: [],
@@ -94,6 +178,22 @@ export default function MimoPlayground() {
     isWon: false,
     difficulty: 'normal',
     gridSize: 4,
+  });
+
+  const [neonState, setNeonState] = useState<NeonDashState>({
+    isPlaying: false,
+    isGameOver: false,
+    score: 0,
+    highScore: 0,
+    playerY: 0,
+    playerVelocityY: 0,
+    playerState: 'running',
+    obstacles: [],
+    particles: [],
+    speed: 5,
+    distance: 0,
+    obstacleTimer: 0,
+    slideTimer: 0,
   });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -110,7 +210,24 @@ export default function MimoPlayground() {
     tapToStart: 'TAP TO START',
     placeBlockPerfectly: 'Place blocks perfectly to stack higher!',
     combo: 'COMBO',
+    coins: 'Coins',
+    level: 'Level',
+    newCombo: 'New Combo!',
+    skillActive: 'SKILL ACTIVE!',
+    shop: 'SHOP',
+    boostSkill: 'Boost',
+    slowSkill: 'Slow',
+    shopTitle: 'SKILL SHOP',
+    buy: 'BUY',
+    owned: 'OWNED',
+    activate: 'ACTIVATE',
+    boostDesc: '+20% Block Width',
+    slowDesc: '-30% Block Speed',
+    wideDesc: 'Start with 30% wider',
   });
+
+  // Infinity Drop particles state
+  const [infinityParticles, setInfinityParticles] = useState<InfinityParticle[]>([]);
 
   // 翻訳が変更されたらrefを更新
   useEffect(() => {
@@ -122,6 +239,20 @@ export default function MimoPlayground() {
       tapToStart: tc('tapToStart'),
       placeBlockPerfectly: t('infinityDrop.placeBlockPerfectly'),
       combo: t('infinityDrop.combo'),
+      coins: t('infinityDrop.coins'),
+      level: t('infinityDrop.level'),
+      newCombo: t('infinityDrop.newCombo'),
+      skillActive: t('infinityDrop.skillActive'),
+      shop: t('infinityDrop.shop'),
+      boostSkill: t('infinityDrop.boostSkill'),
+      slowSkill: t('infinityDrop.slowSkill'),
+      shopTitle: t('infinityDrop.shopTitle'),
+      buy: t('infinityDrop.buy'),
+      owned: t('infinityDrop.owned'),
+      activate: t('infinityDrop.activate'),
+      boostDesc: t('infinityDrop.boostDesc'),
+      slowDesc: t('infinityDrop.slowDesc'),
+      wideDesc: t('infinityDrop.wideDesc'),
     };
   }, [t, tc]);
 
@@ -141,11 +272,36 @@ export default function MimoPlayground() {
     highestValue: 2,
   });
 
+  // Neon Dash用統計
+  const neonStatsRef = useRef({
+    sessionStartTime: 0,
+    playCount: 0,
+    obstaclesPassed: 0,
+    jumps: 0,
+    slides: 0,
+  });
+
   // ハイスコアの読み込みと保存
   useEffect(() => {
     const infinitySaved = localStorage.getItem('infinityDrop_highScore');
-    if (infinitySaved) {
-      setGameState((prev) => ({ ...prev, highScore: parseInt(infinitySaved) }));
+    const coinsSaved = localStorage.getItem('infinityDrop_coins');
+    if (infinitySaved || coinsSaved) {
+      setGameState((prev) => ({
+        ...prev,
+        highScore: infinitySaved ? parseInt(infinitySaved) : 0,
+        coins: coinsSaved ? parseInt(coinsSaved) : 0,
+      }));
+    }
+
+    // Shop itemsの読み込み
+    const shopItemsSaved = localStorage.getItem('infinityDrop_shopItems');
+    if (shopItemsSaved) {
+      try {
+        const parsedItems = JSON.parse(shopItemsSaved);
+        setShopItems(parsedItems);
+      } catch (e) {
+        // parse error - keep defaults
+      }
     }
 
     // 2048ハイスコア読み込み
@@ -161,6 +317,12 @@ export default function MimoPlayground() {
       }));
     };
     load2048Scores();
+
+    // Neon Dashハイスコア読み込み
+    const neonSaved = localStorage.getItem('neonDash_highScore');
+    if (neonSaved) {
+      setNeonState((prev) => ({ ...prev, highScore: parseInt(neonSaved) }));
+    }
   }, []);
 
   // キャンバスの描画
@@ -193,6 +355,17 @@ export default function MimoPlayground() {
       ctx.lineTo(width, i);
       ctx.stroke();
     }
+
+    // パーティクルを描画
+    infinityParticles.forEach((p) => {
+      const alpha = p.life / 20;
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    });
 
     // ブロックを描画
     gameState.blocks.forEach((block, index) => {
@@ -234,6 +407,47 @@ export default function MimoPlayground() {
       }
     });
 
+    // プレイ中のUI表示
+    if (gameState.isPlaying && !gameState.isGameOver) {
+      // コイン表示
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 18px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${canvasTextsRef.current.coins}: ${gameState.coins}`, 15, 25);
+
+      // レベル表示
+      ctx.fillStyle = '#00ffff';
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText(`${canvasTextsRef.current.level}: ${gameState.difficultyLevel}`, 15, 48);
+
+      // ベストコンボ
+      if (gameState.bestCombo > 0) {
+        ctx.fillStyle = '#ff6b6b';
+        ctx.font = '14px Arial';
+        ctx.fillText(`Best: ${gameState.bestCombo}`, 15, 68);
+      }
+
+      // スキル状態表示
+      const now = Date.now();
+      let skillOffset = 88;
+
+      if (skillState.boostActive && now < skillState.boostEndTime) {
+        ctx.fillStyle = '#00ff88';
+        ctx.font = '12px Arial';
+        const remaining = Math.ceil((skillState.boostEndTime - now) / 1000);
+        ctx.fillText(`⚡ ${canvasTextsRef.current.boostSkill}: ${remaining}s`, 15, skillOffset);
+        skillOffset += 18;
+      }
+
+      if (skillState.slowActive && now < skillState.slowEndTime) {
+        ctx.fillStyle = '#00ddff';
+        ctx.font = '12px Arial';
+        const remaining = Math.ceil((skillState.slowEndTime - now) / 1000);
+        ctx.fillText(`🐌 ${canvasTextsRef.current.slowSkill}: ${remaining}s`, 15, skillOffset);
+        skillOffset += 18;
+      }
+    }
+
     // ゲームオーバー時のオーバーレイ
     if (gameState.isGameOver) {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -242,17 +456,21 @@ export default function MimoPlayground() {
       ctx.fillStyle = '#ef4444';
       ctx.font = 'bold 48px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(canvasTextsRef.current.gameOver, width / 2, height / 2 - 40);
+      ctx.fillText(canvasTextsRef.current.gameOver, width / 2, height / 2 - 60);
 
       ctx.fillStyle = '#fff';
       ctx.font = '24px Arial';
-      ctx.fillText(`${canvasTextsRef.current.score}: ${gameState.score}`, width / 2, height / 2 + 10);
-      ctx.fillText(`${canvasTextsRef.current.high}: ${gameState.highScore}`, width / 2, height / 2 + 45);
+      ctx.fillText(`${canvasTextsRef.current.score}: ${gameState.score}`, width / 2, height / 2 - 10);
+      ctx.fillText(`${canvasTextsRef.current.high}: ${gameState.highScore}`, width / 2, height / 2 + 25);
+
+      ctx.fillStyle = '#ffd700';
+      ctx.font = '20px Arial';
+      ctx.fillText(`${canvasTextsRef.current.coins}: +${Math.floor(gameState.score / 10)}`, width / 2, height / 2 + 60);
 
       if (gameState.accuracy > 0) {
         ctx.fillStyle = '#10b981';
-        ctx.font = '20px Arial';
-        ctx.fillText(`${canvasTextsRef.current.accuracy} ${(gameState.accuracy * 100).toFixed(1)}%`, width / 2, height / 2 + 80);
+        ctx.font = '18px Arial';
+        ctx.fillText(`${canvasTextsRef.current.accuracy} ${(gameState.accuracy * 100).toFixed(1)}%`, width / 2, height / 2 + 90);
       }
     }
 
@@ -266,8 +484,15 @@ export default function MimoPlayground() {
       ctx.font = '16px Arial';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.fillText(canvasTextsRef.current.placeBlockPerfectly, width / 2, height / 2 + 20);
+
+      // Show total coins
+      if (gameState.coins > 0) {
+        ctx.fillStyle = '#ffd700';
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText(`${canvasTextsRef.current.coins}: ${gameState.coins}`, width / 2, height / 2 + 50);
+      }
     }
-  }, [gameState]);
+  }, [gameState, infinityParticles]);
 
   // カラー調整関数
   const adjustColor = (color: string, amount: number): string => {
@@ -280,6 +505,15 @@ export default function MimoPlayground() {
 
   // ゲームループ
   const gameLoop = useCallback(() => {
+    // Check skill timeouts
+    const now = Date.now();
+    if (skillState.boostActive && now >= skillState.boostEndTime) {
+      setSkillState((prev) => ({ ...prev, boostActive: false }));
+    }
+    if (skillState.slowActive && now >= skillState.slowEndTime) {
+      setSkillState((prev) => ({ ...prev, slowActive: false }));
+    }
+
     setGameState((prev) => {
       if (!prev.isPlaying || prev.isGameOver) return prev;
 
@@ -303,9 +537,22 @@ export default function MimoPlayground() {
       return { ...prev, blocks: updatedBlocks };
     });
 
+    // Update particles
+    setInfinityParticles((prev) =>
+      prev
+        .map((p) => ({
+          ...p,
+          x: p.x + p.vx,
+          y: p.y + p.vy,
+          vy: p.vy + 0.2, // gravity
+          life: p.life - 1,
+        }))
+        .filter((p) => p.life > 0)
+    );
+
     draw();
     requestRef.current = requestAnimationFrame(gameLoop);
-  }, [draw]);
+  }, [draw, skillState.boostActive, skillState.boostEndTime, skillState.slowActive, skillState.slowEndTime]);
 
   // リサイズ時のキャンバス設定
   const handleResize = useCallback(() => {
@@ -336,12 +583,18 @@ export default function MimoPlayground() {
     };
   }, [gameState.isPlaying, gameState.isGameOver, gameLoop]);
 
+  // Neon Dashゲームループ - neonGameLoop is defined later in the file, using requestRef pattern
+
   // ゲーム開始
   const startGame = useCallback(() => {
     if (gameState.isGameOver) {
       // リセット - 新しいプレイ
       gameStatsRef.current.playCount += 1;
       gameStatsRef.current.sessionStartTime = Date.now();
+
+      // Award coins for the completed game
+      const earnedCoins = Math.floor(gameState.score / 10);
+      const newCoins = gameState.coins + earnedCoins;
 
       setGameState({
         blocks: [],
@@ -351,19 +604,30 @@ export default function MimoPlayground() {
         isGameOver: false,
         accuracy: 0,
         combo: 0,
+        coins: newCoins,
+        difficultyLevel: 1,
+        bestCombo: 0,
       });
+
+      // Save coins to localStorage
+      localStorage.setItem('infinityDrop_coins', newCoins.toString());
 
       // 追跡: ゲーム再開
       trackClick();
-      storeGameEvent('game_restart', { score: gameState.score });
+      storeGameEvent('game_restart', { score: gameState.score, coinsEarned: earnedCoins });
     } else if (!gameState.isPlaying) {
       // 初回スタート
       const containerWidth = containerRef.current?.clientWidth || 360;
+
+      // Check for Wide Mode skill ownership
+      const wideOwned = shopItems.find(item => item.key === 'wide')?.owned || false;
+      const widthBonus = wideOwned ? INITIAL_BLOCK_WIDTH * 0.3 : 0;
+
       const initialBlock: Block = {
         id: 0,
-        x: (containerWidth - INITIAL_BLOCK_WIDTH) / 2,
+        x: (containerWidth - (INITIAL_BLOCK_WIDTH + widthBonus)) / 2,
         y: 50,
-        width: INITIAL_BLOCK_WIDTH,
+        width: INITIAL_BLOCK_WIDTH + widthBonus,
         height: BLOCK_HEIGHT,
         velocityX: BASE_SPEED,
         color: '#3b82f6',
@@ -378,11 +642,27 @@ export default function MimoPlayground() {
         isPlaying: true,
       }));
 
+      // Reset wide skill after use
+      if (wideOwned) {
+        setShopItems((prev) =>
+          prev.map((item) =>
+            item.key === 'wide' ? { ...item, owned: false } : item
+          )
+        );
+        // Save to localStorage
+        const updatedItems = shopItems.map((item) =>
+          item.key === 'wide' ? { ...item, owned: false } : item
+        );
+        localStorage.setItem('infinityDrop_shopItems', JSON.stringify(updatedItems));
+        playSound('success');
+        createParticles(containerWidth / 2, 50, '#00ff88', 10);
+      }
+
       // 追跡: ゲーム開始
       trackClick();
-      storeGameEvent('game_start', {});
+      storeGameEvent('game_start', { wideModeUsed: wideOwned });
     }
-  }, [gameState, trackClick]);
+  }, [gameState, trackClick, shopItems]);
 
   // ブロックを配置
   const placeBlock = useCallback(() => {
@@ -443,6 +723,12 @@ export default function MimoPlayground() {
 
     // コンボ更新
     let newCombo = accuracy > 0.9 ? gameState.combo + 1 : 1;
+    const newBestCombo = Math.max(gameState.bestCombo, newCombo);
+
+    // レベルアップ判定
+    const shouldLevelUp = gameState.blocks.length > 0 && gameState.blocks.length % 10 === 0;
+    const newDifficultyLevel = shouldLevelUp ? gameState.difficultyLevel + 1 : gameState.difficultyLevel;
+    const speedMultiplier = shouldLevelUp ? 1.1 : 1.0;
 
     // 新しいブロック
     const newBlock: Block = {
@@ -451,17 +737,37 @@ export default function MimoPlayground() {
       y: lastBlock.y + BLOCK_HEIGHT + 2,
       width: lastBlock.width,
       height: BLOCK_HEIGHT,
-      velocityX: lastBlock.velocityX * 1.03, // 少し速く
+      velocityX: lastBlock.velocityX * 1.03 * speedMultiplier, // 少し速く、レベルアップ時はさらに速く
       color: `hsl(${(gameState.blocks.length * 30) % 360}, 70%, 60%)`,
     };
 
     // 正確配置のエフェクト
     if (accuracy > 0.95) {
       vibrate(30);
-      // 成功音（オプション）
+      // 成功音
       playSound('success');
+      // パーティクル生成 (成功時)
+      createParticles(
+        newBlock.x + newBlock.width / 2,
+        newBlock.y,
+        accuracy > 0.98 ? '#00ff88' : '#00ddff'
+      );
     } else if (accuracy > 0.7) {
       vibrate(10);
+      createParticles(newBlock.x + newBlock.width / 2, newBlock.y, '#ffd700');
+    }
+
+    // New best combo effect
+    if (newCombo > 1 && newCombo > gameState.bestCombo) {
+      createParticles(newBlock.x + newBlock.width / 2, newBlock.y - 20, '#ff6b6b', 15);
+      playSound('combo');
+    }
+
+    // Level up effect
+    if (shouldLevelUp) {
+      vibrate(50);
+      playSound('success');
+      createParticles(newBlock.x + newBlock.width / 2, newBlock.y, '#ff00ff', 20);
     }
 
     setGameState((prev) => ({
@@ -471,6 +777,8 @@ export default function MimoPlayground() {
       accuracy: accuracy,
       combo: newCombo,
       highScore: Math.max(prev.highScore, prev.score + points),
+      difficultyLevel: newDifficultyLevel,
+      bestCombo: newBestCombo,
     }));
 
     // ハイスコア保存
@@ -515,6 +823,9 @@ export default function MimoPlayground() {
       if (type === 'success') {
         oscillator.frequency.value = 523.25; // C5
         oscillator.type = 'sine';
+      } else if (type === 'combo') {
+        oscillator.frequency.value = 659.25; // E5
+        oscillator.type = 'triangle';
       } else {
         oscillator.frequency.value = 220;
         oscillator.type = 'square';
@@ -529,6 +840,27 @@ export default function MimoPlayground() {
       // オーディオコンテキストのエラーは無視
     }
   };
+
+  // パーティクル生成 (Infinity Drop用)
+  const createParticles = useCallback((x: number, y: number, color: string, count: number = 8) => {
+    const containerWidth = containerRef.current?.clientWidth || 300;
+    const newParticles: InfinityParticle[] = [];
+
+    for (let i = 0; i < count; i++) {
+      newParticles.push({
+        id: Date.now() + Math.random(),
+        x: x,
+        y: y,
+        vx: (Math.random() - 0.5) * 8,
+        vy: (Math.random() - 0.5) * 8 - 2,
+        life: 20 + Math.random() * 10,
+        color: color,
+        size: 3 + Math.random() * 3,
+      });
+    }
+
+    setInfinityParticles((prev) => [...prev, ...newParticles].slice(-100)); // 最新100個のみ保持
+  }, []);
 
   // ゲームイベントを保存
   const storeGameEvent = (eventType: string, data: Record<string, any>) => {
@@ -554,6 +886,513 @@ export default function MimoPlayground() {
     }
   };
 
+  // スキルをアクティブ化する関数
+  const activateSkill = useCallback((skillKey: 'boost' | 'slow' | 'wide') => {
+    if (skillKey === 'wide') {
+      // Wide skill is passive (applied on game start)
+      playSound('success');
+      return;
+    }
+
+    const duration = skillKey === 'boost' ? 15000 : 20000; // 15秒 or 20秒
+    const endTime = Date.now() + duration;
+
+    setSkillState((prev) => ({
+      ...prev,
+      [`${skillKey}Active`]: true,
+      [`${skillKey}EndTime`]: endTime,
+    }));
+
+    playSound('success');
+    vibrate(30);
+    trackClick();
+    storeGameEvent('skill_activated', { skill: skillKey, duration });
+  }, [trackClick]);
+
+  // スキルショップのアイテムクリック処理
+  const handleSkillItemClick = useCallback((item: ShopItem) => {
+    if (item.owned) {
+      // スキルをアクティブ化する
+      activateSkill(item.key);
+      return;
+    }
+
+    // 購入処理
+    if (gameState.coins >= item.cost) {
+      setShopItems((prev) =>
+        prev.map((i) => (i.id === item.id ? { ...i, owned: true } : i))
+      );
+      setGameState((prev) => ({ ...prev, coins: prev.coins - item.cost }));
+
+      // Save to localStorage
+      const updatedItems = shopItems.map((i) =>
+        i.id === item.id ? { ...i, owned: true } : i
+      );
+      localStorage.setItem('infinityDrop_shopItems', JSON.stringify(updatedItems));
+      localStorage.setItem('infinityDrop_coins', (gameState.coins - item.cost).toString());
+
+      // 成功エフェクト
+      playSound('success');
+      if (containerRef.current) {
+        createParticles(containerRef.current.clientWidth / 2, 100, '#ffd700', 15);
+      }
+
+      // 追跡
+      trackClick();
+      storeGameEvent('shop_purchase', { itemId: item.id, cost: item.cost });
+    }
+  }, [gameState.coins, shopItems, trackClick, activateSkill]);
+
+  // ==================== NEON DASH GAME LOGIC ====================
+
+  // Neon Dash: 新しいゲーム開始
+  const startNeonDashGame = useCallback(() => {
+    neonStatsRef.current = {
+      sessionStartTime: Date.now(),
+      playCount: neonStatsRef.current.playCount + 1,
+      obstaclesPassed: 0,
+      jumps: 0,
+      slides: 0,
+    };
+
+    const containerHeight = containerRef.current?.clientHeight || 400;
+
+    setNeonState({
+      isPlaying: true,
+      isGameOver: false,
+      score: 0,
+      highScore: neonState.highScore,
+      playerY: containerHeight - 100,
+      playerVelocityY: 0,
+      playerState: 'running',
+      obstacles: [],
+      particles: [],
+      speed: 6,
+      distance: 0,
+      obstacleTimer: 0,
+      slideTimer: 0,
+    });
+
+    trackClick();
+    storeGameEvent('neonDash_start', {});
+  }, [neonState.highScore, trackClick]);
+
+  // Neon Dash: ゲームオーバー
+  const gameOverNeonDash = useCallback(() => {
+    const sessionDuration = neonStatsRef.current.sessionStartTime > 0
+      ? Math.floor((Date.now() - neonStatsRef.current.sessionStartTime) / 1000)
+      : 0;
+
+    // ハイスコア保存
+    const newHighScore = Math.max(neonState.highScore, neonState.score);
+    if (newHighScore > neonState.highScore) {
+      localStorage.setItem('neonDash_highScore', newHighScore.toString());
+    }
+
+    setNeonState((prev) => ({
+      ...prev,
+      isPlaying: false,
+      isGameOver: true,
+      highScore: newHighScore,
+    }));
+
+    trackClick();
+    storeGameEvent('neonDash_over', {
+      score: neonState.score,
+      duration: sessionDuration,
+      obstaclesPassed: neonStatsRef.current.obstaclesPassed,
+      jumps: neonStatsRef.current.jumps,
+      slides: neonStatsRef.current.slides,
+    });
+  }, [neonState.highScore, neonState.score, trackClick]);
+
+  // Neon Dash: パーティクル生成
+  const createNeonParticles = useCallback((y: number, color: string) => {
+    const containerWidth = containerRef.current?.clientWidth || 300;
+
+    setNeonState((prev) => {
+      const newParticles: NeonParticle[] = [];
+      for (let i = 0; i < 8; i++) {
+        newParticles.push({
+          id: Date.now() + Math.random(),
+          x: containerWidth / 2,
+          y: y,
+          vx: (Math.random() - 0.5) * 8,
+          vy: (Math.random() - 0.5) * 8,
+          life: 20,
+          color: color,
+        });
+      }
+      return {
+        ...prev,
+        particles: [...prev.particles, ...newParticles].slice(-50), // 最新50個のみ保持
+      };
+    });
+  }, []);
+
+  // Neon Dash: ジャンプ
+  const jump = useCallback(() => {
+    if (!neonState.isPlaying || neonState.isGameOver) return;
+
+    const containerHeight = containerRef.current?.clientHeight || 400;
+    const groundY = containerHeight - 100;
+
+    // 地面上にいる時のみジャンプ
+    if (neonState.playerState === 'running' && neonState.playerY >= groundY - 1) {
+      setNeonState((prev) => ({
+        ...prev,
+        playerVelocityY: -18,
+        playerState: 'jumping',
+      }));
+      neonStatsRef.current.jumps += 1;
+      vibrate(10);
+      playSound('jump');
+      createNeonParticles(groundY, '#00ff88');
+    }
+  }, [neonState.isPlaying, neonState.isGameOver, neonState.playerState, neonState.playerY, createNeonParticles]);
+
+  // Neon Dash: スライド
+  const slide = useCallback(() => {
+    if (!neonState.isPlaying || neonState.isGameOver) return;
+
+    const containerHeight = containerRef.current?.clientHeight || 400;
+    const groundY = containerHeight - 100;
+
+    // 地面上にいる時のみスライド
+    if (neonState.playerState === 'running' && neonState.playerY >= groundY - 1) {
+      setNeonState((prev) => ({
+        ...prev,
+        playerState: 'sliding',
+        slideTimer: 30, // 30フレーム（約0.5秒）
+      }));
+      neonStatsRef.current.slides += 1;
+      vibrate(5);
+      playSound('slide');
+      createNeonParticles(groundY, '#00ddff');
+    }
+  }, [neonState.isPlaying, neonState.isGameOver, neonState.playerState, neonState.playerY, createNeonParticles]);
+
+  // Neon Dash: 障害物生成
+  const generateObstacle = useCallback(() => {
+    const containerWidth = containerRef.current?.clientWidth || 300;
+    const containerHeight = containerRef.current?.clientHeight || 400;
+    const groundY = containerHeight - 100;
+
+    const type: 'block' | 'gap' = Math.random() > 0.5 ? 'block' : 'gap';
+
+    const newObstacle: Obstacle = {
+      id: Date.now() + Math.random(),
+      x: containerWidth,
+      y: type === 'block' ? groundY - 50 : groundY,
+      width: 40,
+      height: type === 'block' ? 50 : 20,
+      type: type,
+    };
+
+    setNeonState((prev) => ({
+      ...prev,
+      obstacles: [...prev.obstacles, newObstacle].slice(-10), // 10個まで保持
+    }));
+  }, []);
+
+  // Neon Dash: 確認当たったか
+  const checkCollision = useCallback((playerY: number, playerState: 'running' | 'jumping' | 'sliding'): boolean => {
+    const containerHeight = containerRef.current?.clientHeight || 400;
+    const groundY = containerHeight - 100;
+    const playerHeight = playerState === 'sliding' ? 20 : 40;
+    const playerWidth = 30;
+
+    const playerLeft = containerRef.current!.clientWidth / 2 - playerWidth / 2;
+    const playerRight = containerRef.current!.clientWidth / 2 + playerWidth / 2;
+    const playerTop = playerY - playerHeight;
+    const playerBottom = playerY;
+
+    for (const obstacle of neonState.obstacles) {
+      const obstacleLeft = obstacle.x;
+      const obstacleRight = obstacle.x + obstacle.width;
+      const obstacleTop = obstacle.y - obstacle.height;
+      const obstacleBottom = obstacle.y;
+
+      // AABB collision detection
+      if (
+        playerLeft < obstacleRight &&
+        playerRight > obstacleLeft &&
+        playerTop < obstacleBottom &&
+        playerBottom > obstacleTop
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }, [neonState.obstacles]);
+
+  // Neon Dash: ゲームループ
+  const neonGameLoop = useCallback(() => {
+    setNeonState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver) return prev;
+
+      const containerHeight = containerRef.current?.clientHeight || 400;
+      const containerWidth = containerRef.current?.clientWidth || 300;
+      const groundY = containerHeight - 100;
+
+      let newState = { ...prev };
+
+      // プレイヤーの重力と移動
+      newState.playerVelocityY += 0.8; // 重力
+      newState.playerY += newState.playerVelocityY;
+
+      // 地面チェック
+      if (newState.playerY >= groundY) {
+        newState.playerY = groundY;
+        newState.playerVelocityY = 0;
+        if (newState.playerState !== 'sliding') {
+          newState.playerState = 'running';
+        }
+      }
+
+      // スライドタイマー
+      if (newState.playerState === 'sliding') {
+        newState.slideTimer -= 1;
+        if (newState.slideTimer <= 0) {
+          newState.playerState = 'running';
+        }
+      }
+
+      // スコアと距離
+      newState.score += 1;
+      newState.distance += newState.speed;
+
+      // 障害物生成
+      newState.obstacleTimer += 1;
+      const obstacleInterval = Math.max(60, 120 - Math.floor(newState.speed * 2));
+      if (newState.obstacleTimer >= obstacleInterval) {
+        generateObstacle();
+        newState.obstacleTimer = 0;
+      }
+
+      // 障害物移動
+      newState.obstacles = newState.obstacles
+        .map((obs) => ({
+          ...obs,
+          x: obs.x - newState.speed,
+        }))
+        .filter((obs) => obs.x + obs.width > 0);
+
+      // 障害物を通り抜けたかチェック
+      for (const obs of newState.obstacles) {
+        const playerX = containerWidth / 2;
+        if (obs.x + obs.width < playerX && !obs.passed) {
+          obs.passed = true;
+          newState.score += 10;
+          neonStatsRef.current.obstaclesPassed += 1;
+        }
+      }
+
+      // 障害物とプレイヤーの衝突判定
+      if (checkCollision(newState.playerY, newState.playerState)) {
+        vibrate(200);
+        playSound('hit');
+        gameOverNeonDash();
+        return newState;
+      }
+
+      // パーティクル更新
+      newState.particles = newState.particles
+        .map((p) => ({
+          ...p,
+          x: p.x + p.vx,
+          y: p.y + p.vy,
+          life: p.life - 1,
+          vy: p.vy + 0.3, // 重力
+        }))
+        .filter((p) => p.life > 0);
+
+      // スコアによる速度上昇
+      if (newState.score > 0 && newState.score % 100 === 0) {
+        newState.speed = Math.min(newState.speed + 0.1, 15);
+      }
+
+      return newState;
+    });
+
+    drawNeon();
+    requestRef.current = requestAnimationFrame(neonGameLoop);
+  }, [checkCollision, gameOverNeonDash, generateObstacle]);
+
+  // Neon Dash: 描画
+  const drawNeon = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const groundY = height - 100;
+
+    // 背景（ネオングロー）
+    ctx.fillStyle = '#0a0a0f';
+    ctx.fillRect(0, 0, width, height);
+
+    // グリッドライン
+    ctx.strokeStyle = 'rgba(100, 100, 255, 0.1)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < width; i += 50) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, height);
+      ctx.stroke();
+    }
+
+    // 地面
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, groundY, width, height - groundY);
+
+    // 地面ライン（ネオン）
+    ctx.strokeStyle = '#00ff88';
+    ctx.lineWidth = 3;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#00ff88';
+    ctx.beginPath();
+    ctx.moveTo(0, groundY);
+    ctx.lineTo(width, groundY);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // 障害物
+    neonState.obstacles.forEach((obs) => {
+      if (obs.type === 'block') {
+        // ブロック障害物（ネオン赤）
+        ctx.fillStyle = '#ff0055';
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#ff0055';
+        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+        ctx.strokeStyle = '#ff6699';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
+      } else {
+        // 穴障害物（ネオン紫）
+        ctx.fillStyle = '#0a0a0f';
+        ctx.fillRect(obs.x, obs.y, obs.width, height - obs.y);
+        ctx.strokeStyle = '#9900ff';
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#9900ff';
+        ctx.strokeRect(obs.x, obs.y, obs.width, 20);
+      }
+      ctx.shadowBlur = 0;
+    });
+
+    // パーティクル
+    neonState.particles.forEach((p) => {
+      const alpha = p.life / 20;
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = alpha;
+      ctx.fillRect(p.x, p.y, 4, 4);
+      ctx.globalAlpha = 1;
+    });
+
+    // プレイヤー
+    const playerX = width / 2;
+    const playerWidth = 30;
+    const playerHeight = neonState.playerState === 'sliding' ? 20 : 40;
+    const playerY = neonState.playerY;
+
+    // プレイヤーシャドウ
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#00ffff';
+
+    // プレイヤー本体（ネオン青）
+    if (neonState.playerState === 'sliding') {
+      ctx.fillStyle = '#00ddff';
+      ctx.fillRect(playerX - playerWidth / 2, playerY - playerHeight, playerWidth, playerHeight);
+    } else {
+      ctx.fillStyle = '#00ffff';
+      ctx.fillRect(playerX - playerWidth / 2, playerY - playerHeight, playerWidth, playerHeight);
+    }
+
+    // プレイヤーアウトライン
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(playerX - playerWidth / 2, playerY - playerHeight, playerWidth, playerHeight);
+    ctx.shadowBlur = 0;
+
+    // UI: スコア
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${neonState.score}`, 15, 35);
+
+    ctx.fillStyle = '#666';
+    ctx.font = '14px Arial';
+    ctx.fillText('SCORE', 15, 55);
+
+    // UI: ハイスコア
+    ctx.fillStyle = '#ffff00';
+    ctx.font = 'bold 18px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(`HI: ${neonState.highScore}`, width - 15, 30);
+
+    // UI: スピード
+    ctx.fillStyle = '#00ff88';
+    ctx.font = '14px Arial';
+    ctx.fillText(`SPD: ${neonState.speed.toFixed(1)}`, width - 15, 55);
+
+    // ゲームオーバー画面
+    if (neonState.isGameOver) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = '#ff0055';
+      ctx.font = 'bold 48px Arial';
+      ctx.textAlign = 'center';
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#ff0055';
+      ctx.fillText('GAME OVER', width / 2, height / 2 - 40);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = '24px Arial';
+      ctx.shadowBlur = 0;
+      ctx.fillText(`Score: ${neonState.score}`, width / 2, height / 2 + 10);
+      ctx.fillText(`High: ${neonState.highScore}`, width / 2, height / 2 + 50);
+    }
+
+    // プレイ開始画面
+    if (!neonState.isPlaying && !neonState.isGameOver) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = '#00ffff';
+      ctx.font = 'bold 36px Arial';
+      ctx.textAlign = 'center';
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#00ffff';
+      ctx.fillText('TAP TO START', width / 2, height / 2 - 20);
+
+      ctx.fillStyle = '#aaa';
+      ctx.font = '16px Arial';
+      ctx.shadowBlur = 0;
+      ctx.fillText('UP: Jump | DOWN: Slide', width / 2, height / 2 + 30);
+      ctx.fillText('Touch or Arrow Keys', width / 2, height / 2 + 55);
+    }
+  }, [neonState]);
+
+  // Neon Dashゲームループ
+  useEffect(() => {
+    if (neonState.isPlaying && !neonState.isGameOver) {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+      requestRef.current = requestAnimationFrame(neonGameLoop);
+    }
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, [neonState.isPlaying, neonState.isGameOver, neonGameLoop]);
+
   // キーコントロール（PC用）
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -568,6 +1407,9 @@ export default function MimoPlayground() {
           } else if (gameState.isGameOver) {
             startGame();
           }
+        } else if (e.code === 'KeyS') {
+          e.preventDefault();
+          setShopOpen((prev) => !prev);
         }
       }
       // 2048
@@ -587,11 +1429,29 @@ export default function MimoPlayground() {
           move2048(dirMap[e.code]);
         }
       }
+      // Neon Dash
+      else if (currentGame === 'neon') {
+        if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+          e.preventDefault();
+          if (!neonState.isPlaying && !neonState.isGameOver) {
+            startNeonDashGame();
+          } else if (neonState.isGameOver) {
+            startNeonDashGame();
+          } else {
+            jump();
+          }
+        } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+          e.preventDefault();
+          if (neonState.isPlaying && !neonState.isGameOver) {
+            slide();
+          }
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver]);
+  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, neonState.isPlaying, neonState.isGameOver, startNeonDashGame, jump, slide]);
 
   // スコア表示用フォーマット
   const formatScore = (score: number): string => {
@@ -893,7 +1753,7 @@ export default function MimoPlayground() {
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              {currentGame === 'menu' ? t('title') : currentGame === 'infinity' ? t('infinityDrop.title') : t('slide2048.title')}
+              {currentGame === 'menu' ? t('title') : currentGame === 'infinity' ? t('infinityDrop.title') : currentGame === '2048' ? t('slide2048.title') : t('neonDash.title')}
             </h1>
           </div>
 
@@ -905,8 +1765,15 @@ export default function MimoPlayground() {
                 ? formatScore(gameState.score)
                 : currentGame === '2048'
                 ? formatScore(game2048State.score)
+                : currentGame === 'neon'
+                ? formatScore(neonState.score)
                 : '-'}
             </div>
+            {currentGame === 'infinity' && gameState.coins > 0 && (
+              <div className="text-xs text-slate-400 mt-1">
+                <span className="text-yellow-400">💰 {gameState.coins}</span>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -961,6 +1828,29 @@ export default function MimoPlayground() {
                   {tc('highScore')}: {formatScore(game2048State.highScore)} / {t('slide2048.bestLabel')}: {game2048State.bestTile}
                 </div>
               </button>
+
+              {/* Neon Dash カード */}
+              <button
+                onClick={() => {
+                  setCurrentGame('neon');
+                  trackClick();
+                }}
+                className="bg-gradient-to-br from-cyan-600 to-teal-800 p-6 rounded-xl border-2 border-cyan-500 hover:border-cyan-400 hover:scale-105 transition-all text-left group"
+              >
+                <div className="text-2xl font-bold mb-2 group-hover:text-cyan-200">{t('neonDash.title')}</div>
+                <div className="text-cyan-200 text-sm mb-3">{t('neonDash.subtitle')}</div>
+                <p className="text-slate-300 text-xs mb-3">
+                  {t('neonDash.description')}
+                </p>
+                <div className="text-xs text-slate-400">
+                  {tc('highScore')}: {formatScore(neonState.highScore)}
+                </div>
+              </button>
+
+              {/* Next Game カード (Locked) */}
+              <div className="bg-gradient-to-br from-slate-700 to-slate-800 p-6 rounded-xl border-2 border-dashed border-slate-600 opacity-60 flex items-center justify-center">
+                <span className="text-slate-400 text-sm">🔒 Coming Soon</span>
+              </div>
             </div>
 
             {/* 広告スペース */}
@@ -1026,15 +1916,23 @@ export default function MimoPlayground() {
 
             <div className="mt-4 text-center text-slate-400 text-sm">
               <p className="mb-2">📌 {t('infinityDrop.tapToPlace')}</p>
-              <p className="text-xs">🎯 {t('infinityDrop.aimForCombo')}</p>
+              <p className="text-xs">🎯 {t('infinityDrop.aimForCombo')} | 💰 {t('infinityDrop.coins')}: {gameState.coins}</p>
             </div>
 
-            <button
-              onClick={() => setCurrentGame('menu')}
-              className="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
-            >
-              ← {t('infinityDrop.backToMenu')}
-            </button>
+            <div className="flex justify-center gap-2 mt-4">
+              <button
+                onClick={() => setShopOpen(true)}
+                className="px-4 py-2 bg-amber-600 hover:bg-amber-500 rounded border border-amber-500 text-sm font-bold text-white"
+              >
+                🛒 {t('infinityDrop.shop')}
+              </button>
+              <button
+                onClick={() => setCurrentGame('menu')}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+              >
+                ← {t('infinityDrop.backToMenu')}
+              </button>
+            </div>
           </>
         )}
 
@@ -1165,8 +2063,61 @@ export default function MimoPlayground() {
           </div>
         )}
 
+        {/* ==================== NEON DASH GAME ==================== */}
+        {currentGame === 'neon' && (
+          <>
+            <div
+              ref={containerRef}
+              className="w-full max-w-md bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden shadow-2xl shadow-cyan-900/10 relative"
+            >
+              <div className="relative">
+                <canvas
+                  ref={canvasRef}
+                  className="w-full block cursor-pointer touch-none"
+                  onClick={() => {
+                    if (!neonState.isPlaying && !neonState.isGameOver) {
+                      startNeonDashGame();
+                    } else if (neonState.isGameOver) {
+                      startNeonDashGame();
+                    }
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    if (!neonState.isPlaying && !neonState.isGameOver) {
+                      startNeonDashGame();
+                    } else if (neonState.isGameOver) {
+                      startNeonDashGame();
+                    }
+                  }}
+                />
+
+                {neonState.isPlaying && !neonState.isGameOver && (
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
+                      <span className="text-slate-400">{tc('score')}</span>{' '}
+                      <span className="text-yellow-400 font-bold">{formatScore(neonState.score)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 text-center text-slate-400 text-sm">
+              <p className="mb-2">⚡ {t('neonDash.tapToStart')}</p>
+              <p className="text-xs">🎮 {t('neonDash.controls')}</p>
+            </div>
+
+            <button
+              onClick={() => setCurrentGame('menu')}
+              className="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+            >
+              ← {t('neonDash.backToMenu')}
+            </button>
+          </>
+        )}
+
         {/* 広告スペース（ゲームプレイ画面のみ） */}
-        {(currentGame === 'infinity' || currentGame === '2048') && (
+        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
               {t('adArea')}
@@ -1187,9 +2138,10 @@ export default function MimoPlayground() {
       {/* フッター */}
       <footer className="bg-slate-900 border-t border-slate-800 p-3 text-center text-xs text-slate-500">
         <p>{t('copyright')} - {t('footer')}</p>
-        <div className="mt-1 flex justify-center gap-4">
+        <div className="mt-1 flex justify-center gap-4 flex-wrap">
           <span>{t('infinityDrop.title')}: {formatScore(gameState.highScore)}</span>
           <span>{t('slide2048.title')}: {formatScore(game2048State.highScore)}</span>
+          <span>{t('neonDash.title')}: {formatScore(neonState.highScore)}</span>
         </div>
       </footer>
 
@@ -1224,6 +2176,123 @@ export default function MimoPlayground() {
           }}
           className="fixed inset-0 z-50 pointer-events-none"
         />
+      )}
+
+      {/* Neon Dash ジャンプ/スライドイベント用（画面全体） */}
+      {currentGame === 'neon' && (
+        <div
+          onTouchStart={(e) => {
+            e.preventDefault();
+            if (!neonState.isPlaying || neonState.isGameOver) {
+              if (neonState.isGameOver || !neonState.isPlaying) {
+                startNeonDashGame();
+              }
+              return;
+            }
+            // 上部タップ = ジャンプ, 下部タップ = スライド
+            const touchY = e.touches[0].clientY;
+            const rect = containerRef.current?.getBoundingClientRect();
+            const containerHeight = rect?.height || 400;
+            const relativeY = touchY - (rect?.top || 0);
+
+            if (relativeY < containerHeight * 0.4) {
+              // 上部40% = ジャンプ
+              jump();
+            } else {
+              // 下部 = スライド
+              slide();
+            }
+          }}
+          className="fixed inset-0 z-50 pointer-events-none"
+        />
+      )}
+
+      {/* Infinity Drop Shop Modal */}
+      {shopOpen && currentGame === 'infinity' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+          <div className="w-full max-w-md bg-slate-900 rounded-xl border-2 border-amber-500 shadow-2xl">
+            {/* Header */}
+            <div className="p-4 bg-gradient-to-r from-amber-600 to-orange-600 rounded-t-xl border-b border-amber-500">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                🛒 {t('infinityDrop.shopTitle')}
+              </h3>
+              <p className="text-amber-100 text-sm mt-1">
+                💰 {t('infinityDrop.coins')}: {gameState.coins}
+              </p>
+            </div>
+
+            {/* Shop Items */}
+            <div className="p-4 space-y-3 max-h-80 overflow-y-auto">
+              {shopItems.map((item) => (
+                <div
+                  key={item.id}
+                  className={`p-3 rounded-lg border-2 ${
+                    item.owned
+                      ? 'border-green-500 bg-green-900/20'
+                      : gameState.coins >= item.cost
+                        ? 'border-slate-600 bg-slate-800 hover:border-amber-500 hover:bg-slate-700 cursor-pointer'
+                        : 'border-slate-700 bg-slate-800/50 opacity-60'
+                  }`}
+                  onClick={() => handleSkillItemClick(item)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="font-bold text-white flex items-center gap-2">
+                        {item.key === 'boost' && '⚡'}
+                        {item.key === 'slow' && '🐌'}
+                        {item.key === 'wide' && '📏'}
+                        {t(`infinityDrop.${item.key}Skill`)}
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">
+                        {t(`infinityDrop.${item.key}Desc`)}
+                      </div>
+                    </div>
+                    <div className="text-right ml-3">
+                      {item.owned ? (
+                        <div className="px-3 py-1 bg-green-600 text-white text-xs font-bold rounded">
+                          {t('infinityDrop.owned')}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <div className="text-amber-400 font-bold text-sm">
+                            💰 {item.cost}
+                          </div>
+                          <div className={`px-3 py-1 text-white text-xs font-bold rounded ${
+                            gameState.coins >= item.cost
+                              ? 'bg-amber-600 hover:bg-amber-500'
+                              : 'bg-slate-700'
+                          }`}>
+                            {t('infinityDrop.buy')}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {item.owned && item.key !== 'wide' && (
+                    <div className="mt-2 text-xs text-slate-300">
+                      <span className="text-green-400">✓ {t('infinityDrop.activate')} - {item.key === 'boost' ? '15s' : '20s'}</span>
+                    </div>
+                  )}
+                  {item.owned && item.key === 'wide' && (
+                    <div className="mt-2 text-xs text-slate-300">
+                      <span className="text-green-400">✓ {t('infinityDrop.owned')} - {t('infinityDrop.activate')} on Start</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-700 flex justify-end gap-2">
+              <button
+                onClick={() => setShopOpen(false)}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded border border-slate-600 text-sm"
+              >
+                {t('playground.common.back')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
