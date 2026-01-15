@@ -81,14 +81,21 @@ jobs:
       - name: Prepare Skill Context
         id: prepare-skill
         run: |
+          # Skillファイルの内容を読み込み
+          SKILL_CONTENT=$(cat .claude/skills/evolve-game.md)
+
           # アナリティクスデータを読み込み
           ANALYTICS_DATA=$(cat public/models/${{ inputs.model_id }}/analytics.json 2>/dev/null || echo '{}')
 
           # Changelogデータを読み込み（最新3件のみ）
           CHANGELOG_DATA=$(cat public/models/${{ inputs.model_id }}/changelog.json 2>/dev/null | jq '.[0:3]' || echo '[]')
 
-          # Skillへの指示プロンプトを構成
-          SKILL_PROMPT="Use the evolve-game skill to improve the game for model ${{ inputs.model_id }}.
+          # Skillの内容とコンテキストデータを含むプロンプトを構成
+          SKILL_PROMPT="$SKILL_CONTENT
+
+          ---
+
+          # Current Context for Model: ${{ inputs.model_id }}
 
           Working directory: src/app/models/${{ inputs.model_id }}/playground
           You may also edit:
@@ -96,10 +103,10 @@ jobs:
           - src/components/icons/Icons.tsx - Icon definitions
           - public/models/${{ inputs.model_id }}/changelog.json - Change history
 
-          Current Analytics Data:
+          ## Current Analytics Data:
           $ANALYTICS_DATA
 
-          Recent Change History (last 3 entries):
+          ## Recent Change History (last 3 entries):
           $CHANGELOG_DATA
           "
 
@@ -170,8 +177,7 @@ jobs:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare-skill.outputs.skill_prompt }}
           claude_args: |
-            --skill evolve-game
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite,Skill"
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
