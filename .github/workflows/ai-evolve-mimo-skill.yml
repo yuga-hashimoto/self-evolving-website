@@ -1,23 +1,20 @@
-name: AI Evolution - Free (MiMo)
+name: AI Evolution (MiMo) - Skill Version
 
 on:
-  schedule:
-    - cron: '0 9 * * *'   # 毎日UTC 9:00 (JST 18:00)
-    - cron: '0 21 * * *'  # 毎日UTC 21:00 (JST 6:00)
+  # schedule:
+  #   # 既存のMiMoとずらして実行（30分後）
+  #   - cron: '30 9 * * *'   # UTC 9:30 (JST 18:30)
+  #   - cron: '30 21 * * *'  # UTC 21:30 (JST 翌6:30)
   workflow_dispatch:
 
-permissions:
-  contents: write
-  id-token: write
-
 jobs:
-  evolve-mimo:
-    uses: ./.github/workflows/reusable-evolve-model.yml
+  evolve-mimo-skill:
+    uses: ./.github/workflows/reusable-evolve-model-skill.yml
     with:
       model_id: 'mimo'
       model_display_name: 'MiMo'
       anthropic_model: 'xiaomi/mimo-v2-flash:free'
-      commit_prefix: '🆓 AI Evolution'
+      commit_prefix: '🆓 AI Evolution (Skill)'
     secrets:
       model_api_key: ${{ secrets.MIMO_API_KEY }}
       ga4_property_id: ${{ secrets.GA4_PROPERTY_ID }}

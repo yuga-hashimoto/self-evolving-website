@@ -1,23 +1,20 @@
-name: AI Evolution - Premium (Grok)
+name: AI Evolution (Grok) - Skill Version
 
 on:
-  schedule:
-    - cron: '30 9 * * *'   # 毎日UTC 9:30 (JST 18:30)
-    - cron: '30 21 * * *'  # 毎日UTC 21:30 (JST 6:30)
+  # schedule:
+  #   # 既存のGrokとずらして実行（30分後）
+  #   - cron: '0 10 * * *'   # UTC 10:00 (JST 19:00)
+  #   - cron: '0 22 * * *'   # UTC 22:00 (JST 翌7:00)
   workflow_dispatch:
 
-permissions:
-  contents: write
-  id-token: write
-
 jobs:
-  evolve-grok:
-    uses: ./.github/workflows/reusable-evolve-model.yml
+  evolve-grok-skill:
+    uses: ./.github/workflows/reusable-evolve-model-skill.yml
     with:
       model_id: 'grok'
       model_display_name: 'Grok'
       anthropic_model: 'x-ai/grok-code-fast-1'
-      commit_prefix: '🚀 AI Evolution'
+      commit_prefix: '🚀 AI Evolution (Skill)'
     secrets:
       model_api_key: ${{ secrets.GROK_API_KEY }}
       ga4_property_id: ${{ secrets.GA4_PROPERTY_ID }}
