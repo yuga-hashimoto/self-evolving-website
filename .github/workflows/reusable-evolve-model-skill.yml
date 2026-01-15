@@ -265,7 +265,7 @@ jobs:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare-skill.outputs.skill_prompt }}
           claude_args: |
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite"
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
@@ -576,30 +576,30 @@ jobs:
 
           echo "✅ Security checks passed"
 
-      - name: Mobile Compatibility Check
+      # === Mobile Compatibility Check & Auto-Fix Loop ===
+      - name: Mobile Compatibility Check (Attempt 1)
         if: steps.changes.outputs.has_changes == 'true'
+        id: mobile_check_1
+        continue-on-error: true
         run: |
-          echo "📱 Running mobile compatibility checks..."
+          echo "📱 Running mobile compatibility checks (Attempt 1)..."
+
+          MOBILE_ERRORS=""
 
           # Check for hardcoded Canvas sizes
           if grep -rE "const (CANVAS_WIDTH|CANVAS_HEIGHT) = [0-9]+" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null; then
             echo "❌ ERROR: Canvas size is hardcoded!"
-            echo "Found hardcoded CANVAS_WIDTH or CANVAS_HEIGHT. Must use responsive sizing."
-            echo ""
-            echo "Example of what was found:"
+            MOBILE_ERRORS="$MOBILE_ERRORS\n- Hardcoded CANVAS_WIDTH or CANVAS_HEIGHT found. Must use responsive sizing with window.innerWidth."
             grep -rn "const CANVAS_WIDTH = [0-9]" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null || true
             grep -rn "const CANVAS_HEIGHT = [0-9]" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null || true
-            echo ""
-            echo "Please use window.innerWidth for responsive sizing."
-            exit 1
           fi
 
           # Check for window.innerWidth usage (responsive sizing)
           if ! grep -r "window\.innerWidth\|innerWidth" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null; then
-            echo "⚠️  WARNING: No responsive sizing detected (window.innerWidth not found)"
-            echo "Games should adapt to screen size for mobile compatibility"
+            echo "⚠️  WARNING: No responsive sizing detected"
+            MOBILE_ERRORS="$MOBILE_ERRORS\n- No window.innerWidth found. Games should adapt to screen size."
           else
-            echo "✅ Responsive sizing detected (window.innerWidth found)"
+            echo "✅ Responsive sizing detected"
           fi
 
           # Check for touch event handlers
@@ -609,7 +609,110 @@ jobs:
             echo "⚠️  WARNING: No touch event handlers detected"
           fi
 
-          echo "✅ Mobile compatibility check completed"
+          if [ -n "$MOBILE_ERRORS" ]; then
+            echo "MOBILE_NEEDS_FIX=true" >> $GITHUB_ENV
+            echo -e "$MOBILE_ERRORS" > mobile_errors.txt
+            echo "❌ Mobile compatibility check failed"
+            exit 1
+          fi
+
+          echo "MOBILE_NEEDS_FIX=false" >> $GITHUB_ENV
+          echo "✅ Mobile compatibility check passed"
+
+      - name: Prepare Mobile Fix Prompt (Attempt 1)
+        if: steps.changes.outputs.has_changes == 'true' && steps.mobile_check_1.outcome == 'failure'
+        id: prepare_mobile_fix_1
+        run: |
+          echo "mobile_fix_prompt<<EOF" >> $GITHUB_OUTPUT
+          echo "🚨 CRITICAL: Mobile compatibility check failed. Fix the following issues:" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          cat mobile_errors.txt >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "## Required fixes:" >> $GITHUB_OUTPUT
+          echo "1. Remove hardcoded CANVAS_WIDTH and CANVAS_HEIGHT constants" >> $GITHUB_OUTPUT
+          echo "2. Use useState to manage canvas size dynamically" >> $GITHUB_OUTPUT
+          echo "3. Use window.innerWidth and window.innerHeight for responsive sizing" >> $GITHUB_OUTPUT
+          echo "4. Add resize event listener to handle screen size changes" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "Example implementation:" >> $GITHUB_OUTPUT
+          echo "\`\`\`typescript" >> $GITHUB_OUTPUT
+          echo "const [canvasSize, setCanvasSize] = useState({ width: 300, height: 400 });" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "useEffect(() => {" >> $GITHUB_OUTPUT
+          echo "  const updateSize = () => {" >> $GITHUB_OUTPUT
+          echo "    const maxWidth = Math.min(window.innerWidth - 32, 400);" >> $GITHUB_OUTPUT
+          echo "    const maxHeight = Math.min(window.innerHeight - 200, 600);" >> $GITHUB_OUTPUT
+          echo "    setCanvasSize({ width: maxWidth, height: maxHeight });" >> $GITHUB_OUTPUT
+          echo "  };" >> $GITHUB_OUTPUT
+          echo "  updateSize();" >> $GITHUB_OUTPUT
+          echo "  window.addEventListener('resize', updateSize);" >> $GITHUB_OUTPUT
+          echo "  return () => window.removeEventListener('resize', updateSize);" >> $GITHUB_OUTPUT
+          echo "}, []);" >> $GITHUB_OUTPUT
+          echo "\`\`\`" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Auto-Fix Mobile (Attempt 1)
+        if: steps.changes.outputs.has_changes == 'true' && steps.mobile_check_1.outcome == 'failure'
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.model_api_key }}
+          prompt: ${{ steps.prepare_mobile_fix_1.outputs.mobile_fix_prompt }}
+          claude_args: |
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Glob,Grep,TodoWrite"
+          show_full_output: true
+        env:
+          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
+          ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ inputs.anthropic_model }}
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ inputs.anthropic_model }}
+          ANTHROPIC_DEFAULT_OPUS_MODEL: ${{ inputs.anthropic_model }}
+          MODEL_ID: ${{ inputs.model_id }}
+
+      - name: Rebuild After Mobile Fix (Attempt 1)
+        if: steps.changes.outputs.has_changes == 'true' && steps.mobile_check_1.outcome == 'failure'
+        continue-on-error: true
+        run: |
+          echo "Rebuilding after mobile fix..."
+          npm run build
+
+      - name: Mobile Compatibility Check (Attempt 2)
+        if: steps.changes.outputs.has_changes == 'true' && steps.mobile_check_1.outcome == 'failure'
+        id: mobile_check_2
+        continue-on-error: true
+        run: |
+          echo "📱 Running mobile compatibility checks (Attempt 2)..."
+
+          # Check for hardcoded Canvas sizes
+          if grep -rE "const (CANVAS_WIDTH|CANVAS_HEIGHT) = [0-9]+" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null; then
+            echo "❌ ERROR: Canvas size is still hardcoded!"
+            grep -rn "const CANVAS_WIDTH = [0-9]" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null || true
+            grep -rn "const CANVAS_HEIGHT = [0-9]" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null || true
+            exit 1
+          fi
+
+          # Check for window.innerWidth usage
+          if ! grep -r "window\.innerWidth\|innerWidth" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null; then
+            echo "⚠️  WARNING: Still no responsive sizing detected"
+          else
+            echo "✅ Responsive sizing detected"
+          fi
+
+          echo "✅ Mobile compatibility check passed (Attempt 2)"
+
+      - name: Final Mobile Compatibility Verification
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          echo "📱 Final mobile compatibility verification..."
+
+          # Final check - must pass or fail the workflow
+          if grep -rE "const (CANVAS_WIDTH|CANVAS_HEIGHT) = [0-9]+" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null; then
+            echo "❌ FINAL ERROR: Canvas size is still hardcoded after auto-fix attempts!"
+            echo "Manual intervention required."
+            exit 1
+          fi
+
+          echo "✅ Final mobile compatibility check passed"
 
       - name: Take After Screenshot
         if: steps.changes.outputs.has_changes == 'true'

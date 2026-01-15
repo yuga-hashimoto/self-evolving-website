@@ -1,10 +1,8 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 
-const CANVAS_WIDTH = 300;
-const CANVAS_HEIGHT = 400;
 const PLAYER_SIZE = 20;
 const PLATFORM_WIDTH = 60;
 const PLATFORM_HEIGHT = 10;
@@ -30,11 +28,30 @@ export default function Game() {
   const [highScore, setHighScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [canvasSize, setCanvasSize] = useState({ width: 300, height: 400 });
   const t = useTranslations('playground');
 
-  const playerRef = useRef<Player>({ x: CANVAS_WIDTH / 2 - PLAYER_SIZE / 2, y: CANVAS_HEIGHT - 100, velocityY: 0 });
+  // Use ref for canvasSize to access latest value in callbacks
+  const canvasSizeRef = useRef(canvasSize);
+  useEffect(() => {
+    canvasSizeRef.current = canvasSize;
+  }, [canvasSize]);
+
+  const playerRef = useRef<Player>({ x: canvasSize.width / 2 - PLAYER_SIZE / 2, y: canvasSize.height - 100, velocityY: 0 });
   const platformsRef = useRef<Platform[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
+
+  // Responsive canvas sizing
+  useEffect(() => {
+    const updateSize = () => {
+      const maxWidth = Math.min(window.innerWidth - 32, 400);
+      const maxHeight = Math.min(window.innerHeight - 200, 600);
+      setCanvasSize({ width: maxWidth, height: maxHeight });
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('doodleLeapHighScore');
@@ -46,20 +63,22 @@ export default function Game() {
   }, []);
 
   const initializePlatforms = () => {
+    const { width, height } = canvasSizeRef.current;
     platformsRef.current = [];
     for (let i = 0; i < 10; i++) {
       platformsRef.current.push({
-        x: Math.random() * (CANVAS_WIDTH - PLATFORM_WIDTH),
-        y: CANVAS_HEIGHT - i * 80 - 50,
+        x: Math.random() * (width - PLATFORM_WIDTH),
+        y: height - i * 80 - 50,
       });
     }
   };
 
   const startGame = () => {
+    const { width, height } = canvasSizeRef.current;
     if (gameOver) {
       setScore(0);
       setGameOver(false);
-      playerRef.current = { x: CANVAS_WIDTH / 2 - PLAYER_SIZE / 2, y: CANVAS_HEIGHT - 100, velocityY: 0 };
+      playerRef.current = { x: width / 2 - PLAYER_SIZE / 2, y: height - 100, velocityY: 0 };
       initializePlatforms();
     }
     setPlaying(true);
@@ -75,6 +94,7 @@ export default function Game() {
   };
 
   const update = () => {
+    const { width, height } = canvasSizeRef.current;
     const player = playerRef.current;
     const platforms = platformsRef.current;
 
@@ -111,16 +131,16 @@ export default function Game() {
     // Generate new platforms at top
     if (platforms.length < 10 || platforms[platforms.length - 1].y > 0) {
       platforms.push({
-        x: Math.random() * (CANVAS_WIDTH - PLATFORM_WIDTH),
+        x: Math.random() * (width - PLATFORM_WIDTH),
         y: platforms.length > 0 ? platforms[platforms.length - 1].y - 80 : 0,
       });
     }
 
     // Remove off-screen platforms
-    platformsRef.current = platforms.filter(p => p.y < CANVAS_HEIGHT + 50);
+    platformsRef.current = platforms.filter(p => p.y < height + 50);
 
     // Check game over
-    if (player.y > CANVAS_HEIGHT) {
+    if (player.y > height) {
       setGameOver(true);
       setPlaying(false);
       if (score > highScore) {
@@ -131,10 +151,11 @@ export default function Game() {
 
     // Keep player on screen horizontally
     if (player.x < 0) player.x = 0;
-    if (player.x + PLAYER_SIZE > CANVAS_WIDTH) player.x = CANVAS_WIDTH - PLAYER_SIZE;
+    if (player.x + PLAYER_SIZE > width) player.x = width - PLAYER_SIZE;
   };
 
   const render = () => {
+    const { width, height } = canvasSizeRef.current;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -142,7 +163,7 @@ export default function Game() {
     if (!ctx) return;
 
     // Clear canvas
-    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.clearRect(0, 0, width, height);
 
     // Draw platforms
     ctx.fillStyle = '#4CAF50';
@@ -167,12 +188,13 @@ export default function Game() {
 
   const handleTouchStart = (e: TouchEvent) => {
     if (!playing) return;
+    const { width } = canvasSizeRef.current;
     const player = playerRef.current;
     const touch = e.touches[0];
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
     const touchX = touch.clientX - rect.left;
-    if (touchX < CANVAS_WIDTH / 2) {
+    if (touchX < width / 2) {
       player.x -= PLAYER_SPEED;
     } else {
       player.x += PLAYER_SPEED;
@@ -202,8 +224,8 @@ export default function Game() {
       </div>
       <canvas
         ref={canvasRef}
-        width={CANVAS_WIDTH}
-        height={CANVAS_HEIGHT}
+        width={canvasSize.width}
+        height={canvasSize.height}
         className="border border-gray-300 bg-white"
         onClick={startGame}
       />
