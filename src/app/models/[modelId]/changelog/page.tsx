@@ -65,8 +65,8 @@ interface ChangelogEntry {
     };
 }
 
-// Generate screenshot path from date
-function getScreenshotPath(modelId: string, date: string): string {
+// Generate screenshot path from date and changelog entries
+function getScreenshotPath(modelId: string, date: string, allEntries: ChangelogEntry[]): string {
     // Extract date in YYYY-MM-DD format
     const dateObj = new Date(date);
     const year = dateObj.getFullYear();
@@ -74,7 +74,22 @@ function getScreenshotPath(modelId: string, date: string): string {
     const day = String(dateObj.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`;
 
-    return `/models/${modelId}/screenshots/${dateStr}.png`;
+    // Find all entries for the same date and sort by time (earliest first)
+    const sameDate = allEntries
+        .filter(entry => {
+            const entryDate = new Date(entry.date);
+            const entryYear = entryDate.getFullYear();
+            const entryMonth = String(entryDate.getMonth() + 1).padStart(2, '0');
+            const entryDay = String(entryDate.getDate()).padStart(2, '0');
+            return `${entryYear}-${entryMonth}-${entryDay}` === dateStr;
+        })
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Find the index of current entry (1-based)
+    const index = sameDate.findIndex(entry => entry.date === date);
+    const sequenceNumber = index >= 0 ? index + 1 : 1;
+
+    return `/models/${modelId}/screenshots/${dateStr}-${sequenceNumber}.png`;
 }
 
 interface PageProps {
@@ -299,13 +314,13 @@ export default async function ChangelogPage({ params }: PageProps) {
                                             </summary>
                                             <div className="mt-3">
                                                 <a
-                                                    href={getScreenshotPath(modelId, entry.date)}
+                                                    href={getScreenshotPath(modelId, entry.date, changelog)}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="block max-w-2xl rounded-lg overflow-hidden border border-purple-500/30 hover:border-purple-500/60 transition-colors"
                                                 >
                                                     <ChangelogScreenshot
-                                                        src={getScreenshotPath(modelId, entry.date)}
+                                                        src={getScreenshotPath(modelId, entry.date, changelog)}
                                                         alt={`Screenshot from ${formatDate(entry.date)}`}
                                                         className="w-full h-auto"
                                                     />
@@ -406,9 +421,9 @@ export default async function ChangelogPage({ params }: PageProps) {
 
                                                 {/* エラー詳細（展開可能） */}
                                                 {entry.metrics.errors.errorTypes &&
-                                                 (entry.metrics.errors.errorTypes.typescript ||
-                                                  entry.metrics.errors.errorTypes.build ||
-                                                  entry.metrics.errors.errorTypes.security) && (
+                                                 ((entry.metrics.errors.errorTypes.typescript ?? 0) > 0 ||
+                                                  (entry.metrics.errors.errorTypes.build ?? 0) > 0 ||
+                                                  (entry.metrics.errors.errorTypes.security ?? 0) > 0) && (
                                                     <div className="col-span-2 sm:col-span-3">
                                                         <details className="group mt-2">
                                                             <summary className="text-gray-400 cursor-pointer hover:text-purple-300 transition-colors list-none flex items-center gap-2">

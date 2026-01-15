@@ -1,10 +1,10 @@
 name: AI Evolution (MiMo) - Skill Version
 
 on:
-  # schedule:
-  #   # 既存のMiMoとずらして実行（30分後）
-  #   - cron: '30 9 * * *'   # UTC 9:30 (JST 18:30)
-  #   - cron: '30 21 * * *'  # UTC 21:30 (JST 翌6:30)
+  schedule:
+    # 通常版と同じ時刻で実行
+    - cron: '0 9 * * *'   # UTC 9:00 (JST 18:00)
+    - cron: '0 21 * * *'  # UTC 21:00 (JST 6:00)
   workflow_dispatch:
 
 permissions:
