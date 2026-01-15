@@ -1,9 +1,10 @@
 const { PNG } = require('pngjs');
-const pixelmatch = require('pixelmatch');
 const fs = require('fs');
 const path = require('path');
 
 async function compareScreenshots(modelId) {
+  // Dynamic import for ES module
+  const pixelmatch = (await import('pixelmatch')).default;
   const screenshotDir = path.join(__dirname, `../public/models/${modelId}/screenshots`);
 
   // 日付を取得（JST）
