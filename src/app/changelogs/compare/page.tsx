@@ -12,6 +12,40 @@ interface ChangelogEntry {
     intent?: string;
     reasoning?: string;
     files?: string[];
+    results?: {
+        revenue: number;
+        revenueChange: number;
+        pageviews: number;
+        pvChange: number;
+        avgSessionDuration: number;
+        bounceRate: number;
+    };
+    metrics?: {
+        executionTime: {
+            claudeCode: number;
+            autoFix?: {
+                attempt1?: number;
+                attempt2?: number;
+                attempt3?: number;
+            };
+            total: number;
+        };
+        errors: {
+            buildFailures: number;
+            retryCount: number;
+            finalStatus: 'success' | 'failure';
+            errorTypes?: {
+                typescript?: number;
+                build?: number;
+                security?: number;
+            };
+        };
+        codeChanges: {
+            filesChanged: number;
+            additions: number;
+            deletions: number;
+        };
+    };
 }
 
 interface GroupedEntry {
@@ -309,6 +343,41 @@ function ModelCard({ entry, modelId, align }: { entry: ChangelogEntry; modelId: 
                         </div>
                     </details>
                 </div>
+
+                {/* Metrics - Compact Display */}
+                {entry.metrics && (
+                    <div className="mt-3 pt-3 border-t border-white/5">
+                        <div className={`flex flex-wrap gap-3 text-[10px] ${align === "right" ? "md:justify-end" : "justify-start"}`}>
+                            {/* Execution Time */}
+                            <div className="flex items-center gap-1">
+                                <span className="opacity-50">⏱️</span>
+                                <span className="text-gray-400">
+                                    {Math.floor(entry.metrics.executionTime.total / 60)}分
+                                </span>
+                            </div>
+
+                            {/* Build Status */}
+                            <div className="flex items-center gap-1">
+                                {entry.metrics.errors.finalStatus === 'success' ? (
+                                    <>
+                                        <span className="text-green-400">✓</span>
+                                        {entry.metrics.errors.retryCount > 0 && (
+                                            <span className="text-yellow-400">({entry.metrics.errors.retryCount}回修正)</span>
+                                        )}
+                                    </>
+                                ) : (
+                                    <span className="text-red-400">✗ 失敗</span>
+                                )}
+                            </div>
+
+                            {/* Code Changes */}
+                            <div className="flex items-center gap-1 font-mono">
+                                <span className="text-green-400">+{entry.metrics.codeChanges.additions}</span>
+                                <span className="text-red-400">-{entry.metrics.codeChanges.deletions}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className={`flex flex-wrap gap-1 mt-4 ${align === "right" ? "md:justify-end" : "justify-start"}`}>
                     {(entry.files || []).slice(0, 3).map((file, i) => (

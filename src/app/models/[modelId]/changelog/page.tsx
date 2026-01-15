@@ -114,12 +114,6 @@ function formatDate(dateString: string): string {
     });
 }
 
-function ChangeIndicator({ value }: { value: number }) {
-    if (value === 0) return <span className="text-gray-400">±0%</span>;
-    if (value > 0) return <span className="text-green-400">+{value}%</span>;
-    return <span className="text-red-400">{value}%</span>;
-}
-
 // Parse structured changelog entries
 function parseChanges(changes: string) {
     const lines = changes.split('\n').filter(line => line.trim());
@@ -334,30 +328,6 @@ export default async function ChangelogPage({ params }: PageProps) {
                                             ))}
                                         </div>
                                     </div>
-
-                                    {/* Results (Only if available) */}
-                                    {entry.results && (
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-black/20 rounded-lg">
-                                            <div>
-                                                <p className="text-xs text-gray-400">収益</p>
-                                                <p className="font-bold">${entry.results.revenue.toFixed(2)}</p>
-                                                <ChangeIndicator value={entry.results.revenueChange} />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-gray-400">PV</p>
-                                                <p className="font-bold">{entry.results.pageviews}</p>
-                                                <ChangeIndicator value={entry.results.pvChange} />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-gray-400">滞在時間</p>
-                                                <p className="font-bold">{entry.results.avgSessionDuration}秒</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-gray-400">直帰率</p>
-                                                <p className="font-bold">{entry.results.bounceRate}%</p>
-                                            </div>
-                                        </div>
-                                    )}
 
                                     {/* Workflow Metrics */}
                                     {entry.metrics && (

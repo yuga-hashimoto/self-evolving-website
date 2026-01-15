@@ -651,6 +651,14 @@ jobs:
           ADDITIONS: ${{ env.additions }}
           DELETIONS: ${{ env.deletions }}
 
+      - name: Update Changelog with Metrics
+        if: success() && steps.changes.outputs.has_changes == 'true'
+        run: |
+          echo "📝 Adding workflow metrics to changelog..."
+          node scripts/add-metrics-to-changelog.js
+        env:
+          MODEL_ID: ${{ inputs.model_id }}
+
       - name: Configure Git
         if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
