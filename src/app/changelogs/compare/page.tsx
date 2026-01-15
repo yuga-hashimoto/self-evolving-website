@@ -51,8 +51,8 @@ interface ChangelogEntry {
 interface GroupedEntry {
     date: string; // YYYY-MM-DD
     displayDate: string; // 日本語フォーマット
-    mimo: ChangelogEntry | null;
-    grok: ChangelogEntry | null;
+    mimo: ChangelogEntry[]; // 配列に変更
+    grok: ChangelogEntry[]; // 配列に変更
 }
 
 async function getChangelog(modelId: string): Promise<ChangelogEntry[]> {
@@ -87,11 +87,20 @@ function formatDateDisplay(dateString: string): string {
 }
 
 function formatTimeDisplay(dateString: string): string {
+    // 日付のみの場合を検出（Tがない、または時刻が00:00:00の場合）
+    if (!dateString.includes('T')) {
+        return '時刻不明';
+    }
     const date = new Date(dateString);
-    return date.toLocaleTimeString("ja-JP", {
+    const timeString = date.toLocaleTimeString("ja-JP", {
         hour: "2-digit",
         minute: "2-digit",
     });
+    // 00:00の場合も時刻不明として扱う
+    if (timeString === '00:00') {
+        return '時刻不明';
+    }
+    return timeString;
 }
 
 // Generate screenshot path from date
@@ -163,13 +172,20 @@ export default async function CompareChangelogPage() {
             groups[dateKey] = {
                 date: dateKey,
                 displayDate: formatDateDisplay(entry.date),
-                mimo: entry,
-                grok: null
+                mimo: [entry],
+                grok: []
             };
         } else {
-            // Mimoの最新のエントリを保持
-            groups[dateKey].mimo = entry;
+            // 配列に追加
+            groups[dateKey].mimo.push(entry);
         }
+    });
+
+    // 各グループ内で時刻順にソート（新しい順）
+    Object.values(groups).forEach(group => {
+        group.mimo.sort((a, b) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
     });
 
     grokChangelog.forEach(entry => {
@@ -178,12 +194,20 @@ export default async function CompareChangelogPage() {
             groups[dateKey] = {
                 date: dateKey,
                 displayDate: formatDateDisplay(entry.date),
-                mimo: null,
-                grok: entry
+                mimo: [],
+                grok: [entry]
             };
         } else {
-            groups[dateKey].grok = entry;
+            // 配列に追加
+            groups[dateKey].grok.push(entry);
         }
+    });
+
+    // 各グループ内で時刻順にソート（新しい順）
+    Object.values(groups).forEach(group => {
+        group.grok.sort((a, b) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
     });
 
     // 日付の降順でソート
@@ -226,20 +250,58 @@ export default async function CompareChangelogPage() {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
                                         {/* Mimo Content */}
-                                        <div className="flex flex-col items-end">
-                                            {group.mimo ? (
-                                                <ModelCard entry={group.mimo} modelId="mimo" align="right" />
-                                            ) : (
+                                        <div className="flex flex-col items-end w-full">
+                                            {group.mimo.length === 0 ? (
                                                 <EmptyModelCard modelId="mimo" align="right" />
+                                            ) : group.mimo.length === 1 ? (
+                                                <ModelCard entry={group.mimo[0]} modelId="mimo" align="right" />
+                                            ) : (
+                                                <details className="w-full" open={false}>
+                                                    <summary className="glass-card p-3 cursor-pointer hover:bg-white/10 list-none flex items-center justify-between transition-colors border border-purple-500/30 rounded-2xl">
+                                                        <div className="flex-1 text-right mr-3">
+                                                            <span className="text-sm font-bold text-purple-400">{group.mimo.length}件の更新</span>
+                                                            {group.mimo[0].changes && (
+                                                                <p className="text-xs text-gray-400 mt-1 line-clamp-1">
+                                                                    {parseChanges(group.mimo[0].changes).after || parseChanges(group.mimo[0].changes).raw}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                        <span className="group-open:rotate-90 transition-transform text-purple-400">▶</span>
+                                                    </summary>
+                                                    <div className="mt-4 space-y-4">
+                                                        {group.mimo.map(entry => (
+                                                            <ModelCard key={entry.id} entry={entry} modelId="mimo" align="right" />
+                                                        ))}
+                                                    </div>
+                                                </details>
                                             )}
                                         </div>
 
                                         {/* Grok Content */}
-                                        <div className="flex flex-col items-start">
-                                            {group.grok ? (
-                                                <ModelCard entry={group.grok} modelId="grok" align="left" />
-                                            ) : (
+                                        <div className="flex flex-col items-start w-full">
+                                            {group.grok.length === 0 ? (
                                                 <EmptyModelCard modelId="grok" align="left" />
+                                            ) : group.grok.length === 1 ? (
+                                                <ModelCard entry={group.grok[0]} modelId="grok" align="left" />
+                                            ) : (
+                                                <details className="w-full" open={false}>
+                                                    <summary className="glass-card p-3 cursor-pointer hover:bg-white/10 list-none flex items-center justify-between transition-colors border border-blue-500/30 rounded-2xl">
+                                                        <span className="group-open:rotate-90 transition-transform text-blue-400">▶</span>
+                                                        <div className="flex-1 text-left ml-3">
+                                                            <span className="text-sm font-bold text-blue-400">{group.grok.length}件の更新</span>
+                                                            {group.grok[0].changes && (
+                                                                <p className="text-xs text-gray-400 mt-1 line-clamp-1">
+                                                                    {parseChanges(group.grok[0].changes).after || parseChanges(group.grok[0].changes).raw}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </summary>
+                                                    <div className="mt-4 space-y-4">
+                                                        {group.grok.map(entry => (
+                                                            <ModelCard key={entry.id} entry={entry} modelId="grok" align="left" />
+                                                        ))}
+                                                    </div>
+                                                </details>
                                             )}
                                         </div>
                                     </div>
