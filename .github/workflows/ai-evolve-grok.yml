@@ -22,3 +22,4 @@ jobs:
       model_api_key: ${{ secrets.GROK_API_KEY }}
       ga4_property_id: ${{ secrets.GA4_PROPERTY_ID }}
       google_application_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+      serper_api_key: ${{ secrets.SERPER_API_KEY }}
