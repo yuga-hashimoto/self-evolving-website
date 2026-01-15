@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "id": 1,
+    "date": "2026-01-15",
+    "model": "grok",
+    "changes": "新しい中毒性高いジャンプゲーム「Doodle Leap」を実装。Canvas APIを使用したプラットフォームジャンプゲームで、タッチ操作、キーボード入力、スコアトラッキング、ローカルストレージでハイスコア保存",
+    "intent": "ユーザーの滞在時間を最大化するための即時フィードバックと記録更新可能なシンプルなゲームを提供。AdSense対応の広告スペースも確保",
+    "files": ["src/app/models/grok/playground/page.tsx", "src/app/models/grok/playground/components/Game.tsx"]
+  }
+]
