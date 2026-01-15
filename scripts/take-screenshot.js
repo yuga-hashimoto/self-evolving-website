@@ -18,11 +18,26 @@ async function takeScreenshot() {
   const day = String(now.getDate()).padStart(2, '0');
   const date = `${year}-${month}-${day}`;
 
+  const screenshotDir = path.join(__dirname, `../public/models/${modelId}/screenshots`);
+
   // Optional suffix for before/after comparison (e.g., "before", "after")
   const suffix = process.env.SCREENSHOT_SUFFIX;
-  const filename = suffix ? `${date}-${suffix}.png` : `${date}.png`;
+  let filename;
 
-  const screenshotDir = path.join(__dirname, `../public/models/${modelId}/screenshots`);
+  if (suffix) {
+    // If suffix is provided (e.g., "before"), use it as-is
+    filename = `${date}-${suffix}.png`;
+  } else {
+    // Find next available sequence number for today's screenshots
+    // Count existing files for today: 2026-01-15-1.png, 2026-01-15-2.png, etc.
+    const existingFiles = fs.existsSync(screenshotDir)
+      ? fs.readdirSync(screenshotDir).filter(file => file.startsWith(`${date}-`) && file.endsWith('.png') && !file.includes('-before'))
+      : [];
+
+    const sequenceNumber = existingFiles.length + 1;
+    filename = `${date}-${sequenceNumber}.png`;
+  }
+
   const screenshotPath = path.join(screenshotDir, filename);
 
   // Create screenshots directory if it doesn't exist
