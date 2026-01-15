@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getModel, MODELS } from "@/lib/models";
 import { IconPlayground, IconWarning } from "@/components/icons/Icons";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 export function generateStaticParams() {
     return Object.keys(MODELS).map((modelId) => ({
@@ -21,6 +22,8 @@ export default async function PlaygroundPage({ params }: PageProps) {
         notFound();
     }
 
+    const t = await getTranslations("playground.generic");
+
     return (
         <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-16">
             <div className="max-w-2xl w-full">
@@ -29,7 +32,7 @@ export default async function PlaygroundPage({ params }: PageProps) {
                     <div className="flex items-center gap-3">
                         <IconWarning size={32} />
                         <p className="text-yellow-300 text-sm">
-                            このページは{model.name}が自由に変更します。予期しない変化が発生する可能性があります。
+                            {t("warningMessage", { modelName: model.name })}
                         </p>
                     </div>
                 </div>
@@ -38,13 +41,13 @@ export default async function PlaygroundPage({ params }: PageProps) {
                 <div className="glass-card p-8">
                     <div className="flex items-center justify-center gap-3 mb-8">
                         <IconPlayground size={48} />
-                        <h1 className="text-3xl font-bold gradient-text">{model.name} 実験場</h1>
+                        <h1 className="text-3xl font-bold gradient-text">{t("pageTitle", { modelName: model.name })}</h1>
                     </div>
 
                     {/* Empty - AI will add content here */}
                     <div className="text-center text-gray-400 py-12">
-                        <p>{model.name}による実験コンテンツがここに表示されます</p>
-                        <p className="text-xs text-gray-500 mt-2">（空の状態から開始）</p>
+                        <p>{t("emptyContent", { modelName: model.name })}</p>
+                        <p className="text-xs text-gray-500 mt-2">{t("emptyState")}</p>
                     </div>
                 </div>
 
@@ -54,7 +57,7 @@ export default async function PlaygroundPage({ params }: PageProps) {
                         href={`/models/${modelId}`}
                         className="text-gray-400 hover:text-white transition-colors"
                     >
-                        ← {model.name}トップに戻る
+                        {t("backToModel", { modelName: model.name })}
                     </Link>
                 </div>
             </div>

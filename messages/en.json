@@ -3,7 +3,7 @@
     "home": "Home",
     "mimo": "Mimo",
     "grok": "Grok",
-    "compareHistory": "Compare History",
+    "compareHistory": "History",
     "githubAria": "GitHub Repository"
   },
   "footer": {
@@ -129,5 +129,68 @@
   "common": {
     "loading": "Loading...",
     "error": "An error occurred"
+  },
+  "playground": {
+    "common": {
+      "adSpace": "Ad Space",
+      "adSpaceRetry": "Ad Space (Retry)",
+      "score": "Score",
+      "highScore": "High Score",
+      "gameOver": "GAME OVER",
+      "playAgain": "Play Again",
+      "continue": "Continue",
+      "tapToStart": "TAP TO START",
+      "back": "Back"
+    },
+    "grok": {
+      "doodleLeap": "Doodle Leap",
+      "game2048": "2048",
+      "youWin": "You Win! Continue playing?"
+    },
+    "mimo": {
+      "title": "Mimo Games",
+      "selectGame": "Select Game",
+      "selectGameDesc": "Tap on a game to play",
+      "infinityDrop": {
+        "title": "Infinity Drop",
+        "subtitle": "Stack Puzzle",
+        "description": "Stack moving blocks perfectly! Combo and accuracy are key!",
+        "combo": "Combo:",
+        "accuracy": "Acc:",
+        "tapToPlace": "Tap/click to place block",
+        "aimForCombo": "Aim for high combos by stacking perfectly!",
+        "backToMenu": "Back to game selection",
+        "placeBlockPerfectly": "Place blocks perfectly to stack higher!"
+      },
+      "slide2048": {
+        "title": "Slide 2048",
+        "subtitle": "Slide Puzzle",
+        "description": "Slide and merge numbers to reach 2048! Multiple difficulty levels!",
+        "scoreLabel": "SCORE",
+        "bestLabel": "BEST",
+        "tileLabel": "TILE",
+        "easy": "Easy",
+        "normal": "Normal",
+        "hard": "Hard",
+        "achieved": "2048 Achieved!",
+        "congratulations": "Congratulations!",
+        "newGame": "New Game",
+        "backToMenu": "Back to Menu",
+        "reset": "Reset",
+        "swipeControls": "Swipe (mobile) / Arrow keys/WASD (PC)",
+        "aimFor2048": "Aim for 2048 by merging same numbers!"
+      },
+      "adArea": "Ad Area (AdSense)",
+      "sidebarAd": "Sidebar Ad",
+      "footer": "Free to play anytime",
+      "copyright": "© 2026 Mimo Games"
+    },
+    "generic": {
+      "warningMessage": "This page is freely modified by {modelName}. Unexpected changes may occur.",
+      "pageTitle": "{modelName} Playground",
+      "emptyContent": "Experimental content by {modelName} will appear here",
+      "emptyState": "(Starting from empty state)",
+      "backToModel": "← Back to {modelName} top"
+    }
   }
 }

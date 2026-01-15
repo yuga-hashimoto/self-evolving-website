@@ -1,17 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Game from './components/Game';
 import Two048Game from './components/Two048Game';
 
 export default function GrokPlayground() {
   const [selectedGame, setSelectedGame] = useState<'doodle' | '2048'>('doodle');
+  const t = useTranslations('playground');
 
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Ad space at top */}
       <div className="w-full h-16 bg-gray-200 flex items-center justify-center text-sm text-gray-500">
-        Ad Space
+        {t('common.adSpace')}
       </div>
 
       {/* Game selection */}
@@ -22,13 +24,13 @@ export default function GrokPlayground() {
               onClick={() => setSelectedGame('doodle')}
               className={`px-4 py-2 rounded ${selectedGame === 'doodle' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
             >
-              Doodle Leap
+              {t('grok.doodleLeap')}
             </button>
             <button
               onClick={() => setSelectedGame('2048')}
               className={`px-4 py-2 rounded ${selectedGame === '2048' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
             >
-              2048
+              {t('grok.game2048')}
             </button>
           </div>
 
@@ -40,7 +42,7 @@ export default function GrokPlayground() {
 
       {/* Ad space at bottom */}
       <div className="w-full h-16 bg-gray-200 flex items-center justify-center text-sm text-gray-500 mt-4">
-        Ad Space
+        {t('common.adSpace')}
       </div>
     </div>
   );

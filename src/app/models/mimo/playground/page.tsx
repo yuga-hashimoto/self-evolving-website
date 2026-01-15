@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAnalytics } from '@/lib/analytics';
 
 // Infinity Drop Interfaces
@@ -70,6 +71,8 @@ const TILE_COLORS: Record<number, string> = {
 };
 
 export default function MimoPlayground() {
+  const t = useTranslations('playground.mimo');
+  const tc = useTranslations('playground.common');
   const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048'>('menu');
 
   const [gameState, setGameState] = useState<InfinityDropState>({
@@ -97,6 +100,30 @@ export default function MimoPlayground() {
   const requestRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { trackClick } = useAnalytics();
+
+  // Canvas用翻訳テキストをrefで保持
+  const canvasTextsRef = useRef({
+    gameOver: 'GAME OVER',
+    score: 'Score',
+    high: 'High',
+    accuracy: 'Accuracy',
+    tapToStart: 'TAP TO START',
+    placeBlockPerfectly: 'Place blocks perfectly to stack higher!',
+    combo: 'COMBO',
+  });
+
+  // 翻訳が変更されたらrefを更新
+  useEffect(() => {
+    canvasTextsRef.current = {
+      gameOver: tc('gameOver'),
+      score: tc('score'),
+      high: tc('highScore'),
+      accuracy: t('infinityDrop.accuracy'),
+      tapToStart: tc('tapToStart'),
+      placeBlockPerfectly: t('infinityDrop.placeBlockPerfectly'),
+      combo: t('infinityDrop.combo'),
+    };
+  }, [t, tc]);
 
   // 追跡用のゲーム统计
   const gameStatsRef = useRef({
@@ -215,17 +242,17 @@ export default function MimoPlayground() {
       ctx.fillStyle = '#ef4444';
       ctx.font = 'bold 48px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('GAME OVER', width / 2, height / 2 - 40);
+      ctx.fillText(canvasTextsRef.current.gameOver, width / 2, height / 2 - 40);
 
       ctx.fillStyle = '#fff';
       ctx.font = '24px Arial';
-      ctx.fillText(`Score: ${gameState.score}`, width / 2, height / 2 + 10);
-      ctx.fillText(`High: ${gameState.highScore}`, width / 2, height / 2 + 45);
+      ctx.fillText(`${canvasTextsRef.current.score}: ${gameState.score}`, width / 2, height / 2 + 10);
+      ctx.fillText(`${canvasTextsRef.current.high}: ${gameState.highScore}`, width / 2, height / 2 + 45);
 
       if (gameState.accuracy > 0) {
         ctx.fillStyle = '#10b981';
         ctx.font = '20px Arial';
-        ctx.fillText(`Accuracy: ${(gameState.accuracy * 100).toFixed(1)}%`, width / 2, height / 2 + 80);
+        ctx.fillText(`${canvasTextsRef.current.accuracy} ${(gameState.accuracy * 100).toFixed(1)}%`, width / 2, height / 2 + 80);
       }
     }
 
@@ -234,11 +261,11 @@ export default function MimoPlayground() {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.font = 'bold 32px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('TAP TO START', width / 2, height / 2 - 20);
+      ctx.fillText(canvasTextsRef.current.tapToStart, width / 2, height / 2 - 20);
 
       ctx.font = '16px Arial';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.fillText('Place blocks perfectly to stack higher!', width / 2, height / 2 + 20);
+      ctx.fillText(canvasTextsRef.current.placeBlockPerfectly, width / 2, height / 2 + 20);
     }
   }, [gameState]);
 
@@ -866,13 +893,13 @@ export default function MimoPlayground() {
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              {currentGame === 'menu' ? 'Mimo Games' : currentGame === 'infinity' ? 'Infinity Drop' : 'Slide 2048'}
+              {currentGame === 'menu' ? t('title') : currentGame === 'infinity' ? t('infinityDrop.title') : t('slide2048.title')}
             </h1>
           </div>
 
           {/* スコア表示 */}
           <div className="text-right text-sm">
-            <div className="text-slate-400">Score</div>
+            <div className="text-slate-400">{tc('score')}</div>
             <div className="text-2xl font-bold text-yellow-400">
               {currentGame === 'infinity'
                 ? formatScore(gameState.score)
@@ -891,8 +918,8 @@ export default function MimoPlayground() {
         {currentGame === 'menu' && (
           <div className="w-full max-w-2xl">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-2">ゲームを選択</h2>
-              <p className="text-slate-400">遊ぶゲームをタップしてください</p>
+              <h2 className="text-3xl font-bold mb-2">{t('selectGame')}</h2>
+              <p className="text-slate-400">{t('selectGameDesc')}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -904,13 +931,13 @@ export default function MimoPlayground() {
                 }}
                 className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl border-2 border-blue-500 hover:border-blue-400 hover:scale-105 transition-all text-left group"
               >
-                <div className="text-2xl font-bold mb-2 group-hover:text-blue-200">Infinity Drop</div>
-                <div className="text-blue-200 text-sm mb-3">積み上げパズル</div>
+                <div className="text-2xl font-bold mb-2 group-hover:text-blue-200">{t('infinityDrop.title')}</div>
+                <div className="text-blue-200 text-sm mb-3">{t('infinityDrop.subtitle')}</div>
                 <p className="text-slate-300 text-xs mb-3">
-                  移動するブロックを完璧に積み上げろ！コンボと精度が鍵！
+                  {t('infinityDrop.description')}
                 </p>
                 <div className="text-xs text-slate-400">
-                  ハイスコア: {formatScore(gameState.highScore)}
+                  {tc('highScore')}: {formatScore(gameState.highScore)}
                 </div>
               </button>
 
@@ -925,13 +952,13 @@ export default function MimoPlayground() {
                 }}
                 className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl border-2 border-purple-500 hover:border-purple-400 hover:scale-105 transition-all text-left group"
               >
-                <div className="text-2xl font-bold mb-2 group-hover:text-purple-200">Slide 2048</div>
-                <div className="text-purple-200 text-sm mb-3">スライドパズル</div>
+                <div className="text-2xl font-bold mb-2 group-hover:text-purple-200">{t('slide2048.title')}</div>
+                <div className="text-purple-200 text-sm mb-3">{t('slide2048.subtitle')}</div>
                 <p className="text-slate-300 text-xs mb-3">
-                  数字をスライドさせて合体させ、2048を目指せ！難易度別あり！
+                  {t('slide2048.description')}
                 </p>
                 <div className="text-xs text-slate-400">
-                  ハイスコア: {formatScore(game2048State.highScore)} / 最高: {game2048State.bestTile}
+                  {tc('highScore')}: {formatScore(game2048State.highScore)} / {t('slide2048.bestLabel')}: {game2048State.bestTile}
                 </div>
               </button>
             </div>
@@ -939,7 +966,7 @@ export default function MimoPlayground() {
             {/* 広告スペース */}
             <div className="mt-8 w-full">
               <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
-                広告エリア (AdSense)
+                {t('adArea')}
                 <div className="text-xs mt-1">[300x250]</div>
               </div>
             </div>
@@ -981,12 +1008,12 @@ export default function MimoPlayground() {
                 {gameState.isPlaying && !gameState.isGameOver && (
                   <div className="absolute top-3 left-3 flex gap-2">
                     <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
-                      <span className="text-slate-400">Combo:</span>{' '}
+                      <span className="text-slate-400">{t('infinityDrop.combo')}</span>{' '}
                       <span className="text-yellow-400 font-bold">x{gameState.combo}</span>
                     </div>
                     {gameState.accuracy > 0 && (
                       <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
-                        <span className="text-slate-400">Acc:</span>{' '}
+                        <span className="text-slate-400">{t('infinityDrop.accuracy')}</span>{' '}
                         <span className="text-green-400 font-bold">
                           {(gameState.accuracy * 100).toFixed(0)}%
                         </span>
@@ -998,15 +1025,15 @@ export default function MimoPlayground() {
             </div>
 
             <div className="mt-4 text-center text-slate-400 text-sm">
-              <p className="mb-2">📌 タップ/クリックでブロックを配置</p>
-              <p className="text-xs">🎯 完全に重ねて高いコンボを狙え！</p>
+              <p className="mb-2">📌 {t('infinityDrop.tapToPlace')}</p>
+              <p className="text-xs">🎯 {t('infinityDrop.aimForCombo')}</p>
             </div>
 
             <button
               onClick={() => setCurrentGame('menu')}
               className="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
             >
-              ← ゲーム選ゲーム選択へ戻る
+              ← {t('infinityDrop.backToMenu')}
             </button>
           </>
         )}
@@ -1017,15 +1044,15 @@ export default function MimoPlayground() {
             {/* 2048 HUD */}
             <div className="flex justify-between items-center mb-4 gap-2">
               <div className="flex-1 bg-slate-800 p-3 rounded-lg text-center border border-slate-700">
-                <div className="text-xs text-slate-400">SCORE</div>
+                <div className="text-xs text-slate-400">{t('slide2048.scoreLabel')}</div>
                 <div className="text-xl font-bold text-yellow-400">{formatScore(game2048State.score)}</div>
               </div>
               <div className="flex-1 bg-slate-800 p-3 rounded-lg text-center border border-slate-700">
-                <div className="text-xs text-slate-400">BEST</div>
+                <div className="text-xs text-slate-400">{t('slide2048.bestLabel')}</div>
                 <div className="text-xl font-bold text-yellow-400">{formatScore(game2048State.highScore)}</div>
               </div>
               <div className="flex-1 bg-slate-800 p-3 rounded-lg text-center border border-slate-700">
-                <div className="text-xs text-slate-400">TILE</div>
+                <div className="text-xs text-slate-400">{t('slide2048.tileLabel')}</div>
                 <div className="text-xl font-bold text-green-400">{game2048State.bestTile}</div>
               </div>
             </div>
@@ -1042,7 +1069,7 @@ export default function MimoPlayground() {
                       : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
                   }`}
                 >
-                  {diff === 'easy' ? '初級' : diff === 'normal' ? '中級' : '上級'}
+                  {t(`slide2048.${diff}`)}
                 </button>
               ))}
             </div>
@@ -1075,15 +1102,15 @@ export default function MimoPlayground() {
                 {/* ゲームオーバーオーバー */}
                 {game2048State.isGameOver && (
                   <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg">
-                    <div className="text-3xl font-bold text-red-500 mb-2">GAME OVER</div>
+                    <div className="text-3xl font-bold text-red-500 mb-2">{tc('gameOver')}</div>
                     <div className="text-slate-300 mb-4">
-                      スコア: <span className="text-yellow-400 font-bold">{formatScore(game2048State.score)}</span>
+                      {tc('score')}: <span className="text-yellow-400 font-bold">{formatScore(game2048State.score)}</span>
                     </div>
                     <button
                       onClick={reset2048}
                       className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded border border-blue-400 font-bold"
                     >
-                      もう一度遊ぶ
+                      {tc('playAgain')}
                     </button>
                   </div>
                 )}
@@ -1091,20 +1118,20 @@ export default function MimoPlayground() {
                 {/* ゲーム勝利 */}
                 {game2048State.isWon && !game2048State.isGameOver && (
                   <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center rounded-lg">
-                    <div className="text-3xl font-bold text-green-400 mb-2">2048達成！</div>
-                    <div className="text-slate-300 mb-4">おめでとうございます！</div>
+                    <div className="text-3xl font-bold text-green-400 mb-2">{t('slide2048.achieved')}</div>
+                    <div className="text-slate-300 mb-4">{t('slide2048.congratulations')}</div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setGame2048State(prev => ({ ...prev, isWon: false }))}
                         className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded border border-slate-600"
                       >
-                        続ける
+                        {tc('continue')}
                       </button>
                       <button
                         onClick={reset2048}
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded border border-blue-400"
                       >
-                        新しいゲーム
+                        {t('slide2048.newGame')}
                       </button>
                     </div>
                   </div>
@@ -1114,8 +1141,8 @@ export default function MimoPlayground() {
 
             {/* 操作説明 */}
             <div className="mt-4 text-center text-slate-400 text-sm space-y-1">
-              <p>📱 スワイプ（スマホ） / ⌨️ 矢印キー・WASD（PC）</p>
-              <p className="text-xs">🎯 同じ数字を重ねて2048を目指せ！</p>
+              <p>📱 {t('slide2048.swipeControls')}</p>
+              <p className="text-xs">🎯 {t('slide2048.aimFor2048')}</p>
             </div>
 
             {/* リセット/戻るボタン */}
@@ -1124,14 +1151,14 @@ export default function MimoPlayground() {
                 onClick={() => setCurrentGame('menu')}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
               >
-                ← メニューへ
+                ← {t('slide2048.backToMenu')}
               </button>
               {!game2048State.isGameOver && (
                 <button
                   onClick={reset2048}
                   className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
                 >
-                  リセット
+                  {t('slide2048.reset')}
                 </button>
               )}
             </div>
@@ -1142,7 +1169,7 @@ export default function MimoPlayground() {
         {(currentGame === 'infinity' || currentGame === '2048') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
-              広告エリア (AdSense)
+              {t('adArea')}
               <div className="text-xs mt-1">[300x250]</div>
             </div>
           </div>
@@ -1152,17 +1179,17 @@ export default function MimoPlayground() {
       {/* サイドバー広告エリア */}
       <aside className="hidden md:block fixed right-4 top-1/2 -translate-y-1/2 w-[160px]">
         <div className="bg-slate-900 border-2 border-dashed border-slate-700 rounded-lg p-2 text-center text-slate-500 text-xs">
-          サイドバー広告<br />
+          {t('sidebarAd')}<br />
           [160x600]
         </div>
       </aside>
 
       {/* フッター */}
       <footer className="bg-slate-900 border-t border-slate-800 p-3 text-center text-xs text-slate-500">
-        <p>© 2026 Mimo Games - 無料でいつでも遊べます</p>
+        <p>{t('copyright')} - {t('footer')}</p>
         <div className="mt-1 flex justify-center gap-4">
-          <span>Infinity Drop: {formatScore(gameState.highScore)}</span>
-          <span>Slide 2048: {formatScore(game2048State.highScore)}</span>
+          <span>{t('infinityDrop.title')}: {formatScore(gameState.highScore)}</span>
+          <span>{t('slide2048.title')}: {formatScore(game2048State.highScore)}</span>
         </div>
       </footer>
 

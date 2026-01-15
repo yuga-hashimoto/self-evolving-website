@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 
 const GRID_SIZE = 4;
 const TILE_SIZE = 75;
@@ -24,6 +25,7 @@ export default function Two048Game() {
   const [won, setWon] = useState(false);
   const startX = useRef<number>(0);
   const startY = useRef<number>(0);
+  const t = useTranslations('playground');
 
   useEffect(() => {
     const saved = localStorage.getItem('2048HighScore');
@@ -267,10 +269,10 @@ export default function Two048Game() {
 
   return (
     <div className="text-center">
-      <h1 className="text-2xl font-bold mb-4">2048</h1>
+      <h1 className="text-2xl font-bold mb-4">{t('grok.game2048')}</h1>
       <div className="mb-4">
-        <div>Score: {score}</div>
-        <div>High Score: {highScore}</div>
+        <div>{t('common.score')}: {score}</div>
+        <div>{t('common.highScore')}: {highScore}</div>
       </div>
       <canvas
         ref={canvasRef}
@@ -280,27 +282,27 @@ export default function Two048Game() {
       />
       {gameOver && (
         <div className="mt-4">
-          <p className="text-lg font-semibold">Game Over!</p>
+          <p className="text-lg font-semibold">{t('common.gameOver')}</p>
           <button
             onClick={initializeGame}
             className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
-            Play Again
+            {t('common.playAgain')}
           </button>
           {/* Ad space before retry */}
           <div className="mt-4 w-full h-16 bg-gray-200 flex items-center justify-center text-sm text-gray-500">
-            Ad Space (Retry)
+            {t('common.adSpaceRetry')}
           </div>
         </div>
       )}
       {won && !gameOver && (
         <div className="mt-4">
-          <p className="text-lg font-semibold">You Win! Continue playing?</p>
+          <p className="text-lg font-semibold">{t('grok.youWin')}</p>
           <button
             onClick={() => setWon(false)}
             className="mt-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
-            Continue
+            {t('common.continue')}
           </button>
         </div>
       )}

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 const CANVAS_WIDTH = 300;
 const CANVAS_HEIGHT = 400;
@@ -29,6 +30,7 @@ export default function Game() {
   const [highScore, setHighScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const t = useTranslations('playground');
 
   const playerRef = useRef<Player>({ x: CANVAS_WIDTH / 2 - PLAYER_SIZE / 2, y: CANVAS_HEIGHT - 100, velocityY: 0 });
   const platformsRef = useRef<Platform[]>([]);
@@ -193,10 +195,10 @@ export default function Game() {
 
   return (
     <div className="text-center">
-      <h1 className="text-2xl font-bold mb-4">Doodle Leap</h1>
+      <h1 className="text-2xl font-bold mb-4">{t('grok.doodleLeap')}</h1>
       <div className="mb-4">
-        <div>Score: {score}</div>
-        <div>High Score: {highScore}</div>
+        <div>{t('common.score')}: {score}</div>
+        <div>{t('common.highScore')}: {highScore}</div>
       </div>
       <canvas
         ref={canvasRef}
@@ -207,22 +209,22 @@ export default function Game() {
       />
       {gameOver && (
         <div className="mt-4">
-          <p className="text-lg font-semibold">Game Over!</p>
+          <p className="text-lg font-semibold">{t('common.gameOver')}</p>
           <button
             onClick={startGame}
             className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
-            Play Again
+            {t('common.playAgain')}
           </button>
           {/* Ad space before retry */}
           <div className="mt-4 w-full h-16 bg-gray-200 flex items-center justify-center text-sm text-gray-500">
-            Ad Space (Retry)
+            {t('common.adSpaceRetry')}
           </div>
         </div>
       )}
       {!gameOver && !playing && (
         <div className="mt-4">
-          <p className="text-lg font-semibold">Tap to Start!</p>
+          <p className="text-lg font-semibold">{t('common.tapToStart')}</p>
         </div>
       )}
     </div>
