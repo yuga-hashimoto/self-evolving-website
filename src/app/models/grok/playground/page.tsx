@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Game from './components/Game';
 import Two048Game from './components/Two048Game';
+import PhotonDashGame from './components/PhotonDashGame';
 
 export default function GrokPlayground() {
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'photondash'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -19,7 +20,7 @@ export default function GrokPlayground() {
       {/* Game selection */}
       <div className="flex justify-center p-4">
         <div className="max-w-md w-full">
-          <div className="flex justify-center space-x-4 mb-4">
+          <div className="flex justify-center space-x-2 mb-4 flex-wrap">
             <button
               onClick={() => setSelectedGame('doodle')}
               className={`px-4 py-2 rounded ${selectedGame === 'doodle' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
@@ -32,11 +33,18 @@ export default function GrokPlayground() {
             >
               {t('grok.game2048')}
             </button>
+            <button
+              onClick={() => setSelectedGame('photondash')}
+              className={`px-4 py-2 rounded ${selectedGame === 'photondash' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.photonDash')}
+            </button>
           </div>
 
           {/* Game container */}
           {selectedGame === 'doodle' && <Game />}
           {selectedGame === '2048' && <Two048Game />}
+          {selectedGame === 'photondash' && <PhotonDashGame />}
         </div>
       </div>
 
