@@ -20,10 +20,10 @@ const propertyId = process.env.GA4_PROPERTY_ID;
 const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
 
 async function fetchGA4Analytics() {
-    // If credentials are not set, generate dummy data
+    // If credentials are not set, skip analytics
     if (!propertyId || !credentialsJson) {
-        console.log(`⚠️  GA4 credentials not configured for ${MODEL_ID}. Generating dummy data...`);
-        return generateDummyData();
+        console.log(`⚠️  GA4 credentials not configured for ${MODEL_ID}. Skipping analytics.`);
+        return null;
     }
 
     try {
@@ -81,8 +81,8 @@ async function fetchGA4Analytics() {
         // Extract metrics from response
         const row = response.rows?.[0];
         if (!row) {
-            console.log(`⚠️  No data returned from GA4 for ${MODEL_ID}. Using dummy data.`);
-            return generateDummyData();
+            console.log(`⚠️  No data returned from GA4 for ${MODEL_ID}. Skipping analytics.`);
+            return null;
         }
 
         const pageviews = parseInt(row.metricValues?.[0]?.value || '0');
@@ -120,33 +120,29 @@ async function fetchGA4Analytics() {
         if (error.details) {
             console.error(`   - Details: ${JSON.stringify(error.details)}`);
         }
-        console.log('⚠️  Falling back to dummy data...');
-        return generateDummyData();
+        console.log('⚠️  Skipping analytics due to error.');
+        return null;
     }
 }
 
-function generateDummyData() {
-    return {
-        date: new Date().toISOString(),
-        source: 'dummy', // Mark as dummy data
-        modelId: MODEL_ID,
-        pageviews: Math.floor(Math.random() * 500) + 100,
-        revenue: (Math.random() * 5 + 1).toFixed(2),
-        avgSessionDuration: Math.floor(Math.random() * 120) + 30,
-        bounceRate: (Math.random() * 40 + 30).toFixed(1),
-        rpm: (Math.random() * 3 + 1).toFixed(2),
-        ctr: (Math.random() * 1.5 + 0.5).toFixed(2),
-        sessions: Math.floor(Math.random() * 200) + 50,
-    };
-}
-
 async function main() {
+    const analytics = await fetchGA4Analytics();
+
+    if (!analytics) {
+        console.log(`ℹ️  No analytics data to save for ${MODEL_ID}.`);
+        // Delete existing analytics file if it exists
+        if (fs.existsSync(analyticsPath)) {
+            fs.unlinkSync(analyticsPath);
+            console.log(`🗑️  Removed existing analytics file for ${MODEL_ID}.`);
+        }
+        return;
+    }
+
     // Create directory if it doesn't exist
     if (!fs.existsSync(modelDataDir)) {
         fs.mkdirSync(modelDataDir, { recursive: true });
     }
 
-    const analytics = await fetchGA4Analytics();
     fs.writeFileSync(analyticsPath, JSON.stringify(analytics, null, 2));
     console.log(`📊 Analytics updated for ${MODEL_ID}:`, analytics);
 }
