@@ -1,24 +1,28 @@
 import Link from "next/link";
 import { IconDNA, IconCycleDaily, IconBrain, IconCodeSpark, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
+import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
 
 export default function Home() {
+  // モデルのアナリティクスデータを取得
+  const mimoAnalytics = getModelAnalytics('mimo');
+  const grokAnalytics = getModelAnalytics('grok');
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
       {/* Hero Section */}
-      <div className="text-center max-w-4xl mx-auto mb-6 sm:mb-16">
+      <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
         {/* Mobile: タイトルのみ */}
         <h1 className="text-5xl font-bold gradient-text leading-tight mb-4 sm:hidden">
           <div className="flex flex-col">
             <span>Self-Evolving</span>
-            <span>Website</span>
+            <span>Game</span>
           </div>
         </h1>
 
         {/* Desktop: ロゴとタイトル */}
         <div className="hidden sm:flex items-center justify-center gap-4 mb-6">
           <h1 className="text-5xl lg:text-6xl font-bold gradient-text leading-tight">
-            Self-Evolving Website
+            Self-Evolving Game
           </h1>
           <div className="inline-block animate-float">
             <IconDNA size={96} />
@@ -29,13 +33,13 @@ export default function Home() {
           同じ指示で、エンゲージメント向上を競っています。
         </p>
         <p className="text-sm sm:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed">
-          <span className="text-purple-400 font-medium">2026年1月14日</span>から改善を開始。<br className="sm:hidden" />
-          どちらがより良いサイトを作るでしょうか？
+          <span className="text-purple-400 font-medium">2026年1月15日</span>から改善を開始。<br className="sm:hidden" />
+          どちらがより面白いゲームを作るでしょうか？
         </p>
       </div>
 
       {/* Model Selection Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-8 max-w-4xl w-full mb-12 sm:mb-16 px-3 sm:px-2">
+      <div className="grid grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
         {/* Mimo Card */}
         <Link href="/models/mimo" className="group block active:scale-95 transition-transform" aria-label="Mimoモデルの進化を見る">
           <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 border-purple-500/30 hover:border-purple-500/60 active:bg-white/15">
@@ -79,8 +83,75 @@ export default function Home() {
         </Link>
       </div>
 
+      {/* Engagement Comparison */}
+      <div className="max-w-3xl w-full mb-6 px-4">
+        <div className="glass-card p-4 sm:p-8 border-purple-500/20 hover:!bg-white/5 hover:!border-purple-500/20 hover:!transform-none hover:!translate-y-0">
+          {(mimoAnalytics && grokAnalytics) ? (
+            <>
+              {/* Model Headers */}
+              <div className="flex items-center justify-center gap-6 mb-6">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <IconMimo size={48} className="w-8 h-8 sm:w-10 sm:h-10" />
+                  <div>
+                    <h4 className="text-base sm:text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                      Mimo
+                    </h4>
+                    <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">{MODELS.mimo.openrouterModel}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="text-right">
+                    <h4 className="text-base sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                      Grok
+                    </h4>
+                    <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">{MODELS.grok.openrouterModel}</p>
+                  </div>
+                  <IconGrok size={48} className="w-8 h-8 sm:w-10 sm:h-10" />
+                </div>
+              </div>
+
+              {/* Comparison Bars */}
+              <div className="space-y-4 sm:space-y-5">
+                <ComparisonBar
+                  label="平均滞在時間"
+                  mimoValue={mimoAnalytics.avgSessionDuration}
+                  grokValue={grokAnalytics.avgSessionDuration}
+                  mimoDisplay={formatDuration(mimoAnalytics.avgSessionDuration)}
+                  grokDisplay={formatDuration(grokAnalytics.avgSessionDuration)}
+                  higherIsBetter
+                />
+                <ComparisonBar
+                  label="ページビュー"
+                  mimoValue={mimoAnalytics.pageviews}
+                  grokValue={grokAnalytics.pageviews}
+                  mimoDisplay={mimoAnalytics.pageviews.toString()}
+                  grokDisplay={grokAnalytics.pageviews.toString()}
+                  higherIsBetter
+                />
+              </div>
+
+              {/* Update Note */}
+              <div className="mt-6 pt-4 border-t border-white/10 text-center">
+                <p className="text-xs text-gray-500">
+                  1日2回更新（6時・18時）
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-400 text-sm sm:text-base mb-2">
+                データを集計中です
+              </p>
+              <p className="text-gray-500 text-xs">
+                1日2回（6時・18時）の自動実行後にデータが表示されます
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* How it Works - Mobile Optimized Timeline */}
-      <div className="max-w-4xl w-full mb-4 sm:mb-8 px-4">
+      <div className="max-w-3xl w-full mb-4 sm:mb-8 px-4">
         <h3 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-400">
           How it Works
         </h3>
@@ -111,7 +182,7 @@ export default function Home() {
                 <span className="text-xl font-bold">2</span>
               </div>
               <div className="flex-1 sm:mt-4">
-                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">AIがサイトを分析</h4>
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">AIがゲームを分析</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
                   <a href="https://openrouter.ai/docs/guides/guides/claude-code-integration" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 underline">Claude Code (OpenRouter)</a> がアクセス解析とコードを読み込み、改善ポイントを特定。
                 </p>
@@ -126,24 +197,16 @@ export default function Home() {
               <div className="flex-1 sm:mt-4">
                 <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">コードを書いてデプロイ</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  テスト通過後、自動でサイトに反映。継続的に進化。
+                  テスト通過後、自動でゲームに反映。継続的に進化。
                 </p>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Summary Note */}
-        <div className="mt-6 sm:mt-8 text-center px-2">
-          <p className="text-sm sm:text-base text-gray-500 leading-relaxed">
-            💡 各モデルは独自の判断で改善を続けます。<br className="sm:hidden" />
-            変更履歴とアナリティクスで進化を追跡できます。
-          </p>
-        </div>
       </div>
 
       {/* AI Modification Rules */}
-      <div className="max-w-4xl w-full mb-8 sm:mb-12 px-4">
+      <div className="max-w-3xl w-full mb-8 sm:mb-12 px-4">
         <h3 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-400">
           AIが修正する際のルール
         </h3>
@@ -159,7 +222,7 @@ export default function Home() {
               <div>
                 <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">目標</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  エンゲージメントと収益化の最大化
+                  ゲームの面白さと滞在時間の最大化
                 </p>
               </div>
             </div>
@@ -223,6 +286,65 @@ export default function Home() {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl"></div>
+      </div>
+    </div>
+  );
+}
+
+// 比較バーコンポーネント
+function ComparisonBar({
+  label,
+  mimoValue,
+  grokValue,
+  mimoDisplay,
+  grokDisplay,
+  higherIsBetter = true
+}: {
+  label: string;
+  mimoValue: number;
+  grokValue: number;
+  mimoDisplay: string;
+  grokDisplay: string;
+  higherIsBetter?: boolean;
+}) {
+  const total = mimoValue + grokValue;
+  const mimoPercent = total > 0 ? (mimoValue / total) * 100 : 50;
+  const grokPercent = total > 0 ? (grokValue / total) * 100 : 50;
+
+  const mimoWins = higherIsBetter ? mimoValue > grokValue : mimoValue < grokValue;
+  const grokWins = higherIsBetter ? grokValue > mimoValue : grokValue < mimoValue;
+
+  return (
+    <div className="space-y-1.5">
+      {/* Label & Values */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          {mimoWins && <span className="text-base sm:text-lg">🏆</span>}
+          <span className={`text-sm sm:text-base font-bold ${mimoWins ? 'text-purple-300' : 'text-gray-400'}`}>
+            {mimoDisplay}
+          </span>
+        </div>
+        <span className="text-xs sm:text-sm text-gray-400">{label}</span>
+        <div className="flex items-center gap-1.5">
+          <span className={`text-sm sm:text-base font-bold ${grokWins ? 'text-blue-300' : 'text-gray-400'}`}>
+            {grokDisplay}
+          </span>
+          {grokWins && <span className="text-base sm:text-lg">🏆</span>}
+        </div>
+      </div>
+
+      {/* Bar */}
+      <div className="relative h-2 sm:h-3 bg-gray-800/50 rounded-full overflow-hidden">
+        {/* Mimo側（左） */}
+        <div
+          className="absolute left-0 top-0 h-full bg-gradient-to-r from-purple-500 to-purple-400 transition-all duration-500"
+          style={{ width: `${mimoPercent}%` }}
+        />
+        {/* Grok側（右） */}
+        <div
+          className="absolute right-0 top-0 h-full bg-gradient-to-l from-blue-500 to-blue-400 transition-all duration-500"
+          style={{ width: `${grokPercent}%` }}
+        />
       </div>
     </div>
   );

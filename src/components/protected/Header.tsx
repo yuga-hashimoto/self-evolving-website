@@ -2,16 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconDNA, IconPlayground, IconChangelog, IconAnalytics, IconHome, IconMimo, IconGrok } from "@/components/icons/Icons";
+import { IconDNA, IconChangelog, IconHome, IconMimo, IconGrok } from "@/components/icons/Icons";
 
 export default function Header() {
     const pathname = usePathname();
 
-    // パスからモデルIDを抽出 (/models/[modelId]/...)
-    const match = pathname.match(/^\/models\/([^/]+)/);
-    const currentModelId = match ? match[1] : null;
-
-    // グローバルナビゲーションアイテム（トップページや比較履歴ページ用）
+    // グローバルナビゲーションアイテム（全ページ共通）
     const globalNavItems = [
         { href: "/", label: "ホーム", icon: IconHome },
         { href: "/models/mimo", label: "Mimo", icon: IconMimo },
@@ -19,16 +15,8 @@ export default function Header() {
         { href: "/changelogs/compare", label: "比較履歴", icon: IconChangelog },
     ];
 
-    // デスクトップ用ナビゲーションアイテム
-    // モデルページ内ではモデル専用ナビ、それ以外ではグローバルナビ
-    const desktopNavItems = currentModelId
-        ? [
-            { href: `/models/${currentModelId}`, label: "ホーム", icon: IconHome },
-            { href: `/models/${currentModelId}/playground`, label: "実験場", icon: IconPlayground },
-            { href: `/models/${currentModelId}/changelog`, label: "更新履歴", icon: IconChangelog },
-            { href: `/models/${currentModelId}/analytics`, label: "分析", icon: IconAnalytics },
-        ]
-        : globalNavItems;
+    // デスクトップ用ナビゲーションアイテム（常にグローバルナビを表示）
+    const desktopNavItems = globalNavItems;
 
     // モバイル用ボトムナビゲーションアイテム（常時表示）
     const mobileNavItems = globalNavItems;

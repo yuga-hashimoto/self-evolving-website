@@ -30,7 +30,7 @@ export default async function ModelPage({ params }: PageProps) {
         blue: {
             gradient: "from-blue-500 to-cyan-500",
             badge: "bg-blue-500/20 border-blue-500/30 text-blue-300",
-            glow: "",
+            glow: "animate-pulse-glow",
         },
     };
 
@@ -68,7 +68,7 @@ export default async function ModelPage({ params }: PageProps) {
                         </div>
                         <h2 className="text-xl font-bold mb-2">実験場</h2>
                         <p className="text-gray-400 text-sm">
-                            AIが自由に進化させるページ
+                            AIが自由に進化させるゲーム
                         </p>
                     </div>
                 </Link>
