@@ -497,19 +497,6 @@ function ModelCard({ entry, modelId, align, allEntries }: { entry: ChangelogEntr
                                             </span>
                                         </div>
                                     </div>
-
-                                    {/* スクリーンショット差分 */}
-                                    {entry.metrics.screenshot && (
-                                        <div>
-                                            <p className="text-gray-400 mb-1">画面差分</p>
-                                            <p className="font-mono text-white font-bold">
-                                                {entry.metrics.screenshot.pixelDiffPercent}%
-                                            </p>
-                                            <p className="text-gray-500 text-[9px] mt-1">
-                                                {entry.metrics.screenshot.diffPixels.toLocaleString()} / {entry.metrics.screenshot.totalPixels.toLocaleString()} px
-                                            </p>
-                                        </div>
-                                    )}
                                 </div>
 
                                 {/* エラー詳細 */}
