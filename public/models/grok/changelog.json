@@ -1,1 +1,1 @@
-[]
+[{"id": 1, "date": "2026-01-15T09:00:00.000Z", "model": "grok", "changes": "ヒーローコンポーネントを追加し、アニメーションとCTAボタンを含めます。変更前: シンプルなテキストのみ。変更後: 魅力的なヒーローセクション。実装: 新しいHeroコンポーネントの作成とページへの統合。", "intent": "変換率を向上させるため。仮説: アニメーション付きCTAを追加すると、注目を集め、変換率が15%向上。原理: 動きが注意を引く。指標: クリック率 +15%。", "files": ["src/app/models/grok/playground/components/Hero.tsx", "src/app/models/grok/playground/page.tsx"]}]
