@@ -526,7 +526,7 @@ jobs:
           git add public/models/${{ inputs.model_id }}/screenshots/ || true
 
           # セキュリティチェック：許可外の変更を除外
-          UNEXPECTED_CHANGES=$(git status --porcelain src/ | grep -vE "^(M |A |D | M| D)?src/app/models/${{ inputs.model_id }}/playground|^(M |A |D | M| D)?src/app/api/${{ inputs.model_id }}|^(M |A |D | M| D)?src/components/icons/Icons.tsx" || true)
+          UNEXPECTED_CHANGES=$(git status --porcelain src/ | grep -vE "^(M |A |D | M| D)?src/app/models/${{ inputs.model_id }}/playground/|^(M |A |D | M| D)?src/app/models/${{ inputs.model_id }}/playground$|^(M |A |D | M| D)?src/app/api/${{ inputs.model_id }}/|^(M |A |D | M| D)?src/app/api/${{ inputs.model_id }}$|^(M |A |D | M| D)?src/components/icons/Icons.tsx" || true)
 
           if [[ -n "$UNEXPECTED_CHANGES" ]]; then
              echo "⚠️  WARNING: AI modified files outside of allowed scope!"
@@ -642,7 +642,7 @@ jobs:
           git add public/models/${{ inputs.model_id }}/screenshots/ || echo "No screenshot update"
 
           # Safety Check: Fail if files outside allowed scope are modified
-          UNEXPECTED_CHANGES=$(git status --porcelain src/ | grep -vE "^(M |A |D | M| D)?src/app/models/${{ inputs.model_id }}/playground|^(M |A |D | M| D)?src/app/api/${{ inputs.model_id }}|^(M |A |D | M| D)?src/components/icons/Icons.tsx" || true)
+          UNEXPECTED_CHANGES=$(git status --porcelain src/ | grep -vE "^(M |A |D | M| D)?src/app/models/${{ inputs.model_id }}/playground/|^(M |A |D | M| D)?src/app/models/${{ inputs.model_id }}/playground$|^(M |A |D | M| D)?src/app/api/${{ inputs.model_id }}/|^(M |A |D | M| D)?src/app/api/${{ inputs.model_id }}$|^(M |A |D | M| D)?src/components/icons/Icons.tsx" || true)
 
           if [[ -n "$UNEXPECTED_CHANGES" ]]; then
              echo "❌ CRITICAL ERROR: AI modified files outside of allowed scope!"
