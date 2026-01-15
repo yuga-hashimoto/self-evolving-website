@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Game from './components/Game';
 import Two048Game from './components/Two048Game';
+import SnakeGame from './components/SnakeGame';
 
 export default function GrokPlayground() {
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -19,7 +20,7 @@ export default function GrokPlayground() {
       {/* Game selection */}
       <div className="flex justify-center p-4">
         <div className="max-w-md w-full">
-          <div className="flex justify-center space-x-4 mb-4">
+          <div className="flex flex-wrap justify-center gap-2 mb-4">
             <button
               onClick={() => setSelectedGame('doodle')}
               className={`px-4 py-2 rounded ${selectedGame === 'doodle' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
@@ -32,11 +33,18 @@ export default function GrokPlayground() {
             >
               {t('grok.game2048')}
             </button>
+            <button
+              onClick={() => setSelectedGame('snake')}
+              className={`px-4 py-2 rounded ${selectedGame === 'snake' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              Snake Game
+            </button>
           </div>
 
           {/* Game container */}
           {selectedGame === 'doodle' && <Game />}
           {selectedGame === '2048' && <Two048Game />}
+          {selectedGame === 'snake' && <SnakeGame />}
         </div>
       </div>
 
