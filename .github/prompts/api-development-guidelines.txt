@@ -1,0 +1,52 @@
+# API Development Guidelines
+
+When creating or modifying API routes to improve conversion or user experience:
+
+## 1. Security First
+- **Input Validation**: Always validate request inputs using Zod or similar
+- **Environment Variables**: Use process.env for secrets (NEVER hardcode API keys)
+- **Sanitization**: Sanitize user inputs to prevent injection attacks
+- **Error Messages**: Provide helpful errors for debugging but hide sensitive details
+
+## 2. Error Handling
+- Return appropriate HTTP status codes:
+  - 200: Success
+  - 400: Bad Request (invalid input)
+  - 401: Unauthorized
+  - 404: Not Found
+  - 500: Internal Server Error
+- Use `NextResponse.json()` for JSON responses
+- Implement try-catch blocks for all async operations
+
+## 3. Performance
+- Use Edge Runtime where possible: `export const runtime = 'edge'`
+- Implement caching with appropriate headers
+- Avoid N+1 queries
+- Use streaming for large responses
+
+## 4. Code Examples
+
+**Good: Input validation**
+```typescript
+const searchParams = request.nextUrl.searchParams;
+const id = searchParams.get('id');
+if (!id || !/^[a-zA-Z0-9-]+$/.test(id)) {
+  return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+}
+```
+
+**Good: Error handling**
+```typescript
+try {
+  const data = await fetchData(id);
+  return NextResponse.json(data);
+} catch (error) {
+  console.error('API Error:', error);
+  return NextResponse.json(
+    { error: 'Internal server error' },
+    { status: 500 }
+  );
+}
+```
+
+**Reference**: See `src/app/api/analytics/route.ts` for a well-structured example.

@@ -85,43 +85,19 @@ Reference: Stripe.com (micro-interactions), Linear.app (animations), Duolingo (g
 
 ## Web Search for Research & Inspiration
 
-You have access to a web search API to research latest trends, best practices, and competitor implementations.
+You have access to a web search API (max 20 searches per session):
 
-### Usage
 ```bash
-curl "http://localhost:3131/api/search?q=modern+CTA+button+design" | jq
+curl "http://localhost:3131/api/search?q=<query>" | jq
 ```
 
-### API Response
-The API returns:
-- Top 5 Google search results (titles, descriptions, URLs)
-- Full content of the first result (via Jina Reader for in-depth analysis)
-- Remaining search quota (max 20 searches per server session)
+**Returns**: Top 5 Google results + full content of first result (via Jina Reader)
 
-### When to Use
-- Research latest UX/UI trends before implementing features
-- Study competitor implementations (Stripe, Linear, Duolingo, etc.)
-- Find best practices for specific patterns (CTAs, animations, progress indicators)
-- Validate hypotheses with real-world examples
-- Discover new conversion optimization techniques
+**When to use**: Research UX/UI trends, study competitors (Stripe, Linear), validate hypotheses, discover CRO techniques
 
-### Examples
-```bash
-# Research modern CTA button designs
-curl "http://localhost:3131/api/search?q=stripe+payment+button+hover+animation" | jq '.fullContent' -r
+**Example**: `curl "http://localhost:3131/api/search?q=modern+CTA+button+design" | jq '.fullContent' -r`
 
-# Find social proof implementation patterns
-curl "http://localhost:3131/api/search?q=best+social+proof+widgets+2026" | jq '.results'
-
-# Study gamification patterns
-curl "http://localhost:3131/api/search?q=duolingo+progress+indicator+design" | jq
-```
-
-### Best Practices
-- Use search to inform decisions, not copy blindly
-- Combine multiple sources for well-rounded insights
-- Extract principles, not just code snippets
-- Track search usage (20 max per session - use wisely)
+**Best practice**: Extract principles, not code snippets. Use search wisely (20 max per session).
 
 ## Output Format
 Instruct to append the changes to `public/models/{{MODEL_ID}}/changelog.json` in the following JSON format (actually as a file edit).
@@ -218,53 +194,8 @@ Note: Edit changelog.json to prepend to the existing array. Do NOT delete existi
 
 ## API Development Guidelines
 
-When creating or modifying API routes to improve conversion or user experience:
+When creating API routes, follow the guidelines in `.github/prompts/api-development-guidelines.txt`.
 
-### 1. Security First
-- **Input Validation**: Always validate request inputs using Zod or similar
-- **Environment Variables**: Use process.env for secrets (NEVER hardcode API keys)
-- **Sanitization**: Sanitize user inputs to prevent injection attacks
-- **Error Messages**: Provide helpful errors for debugging but hide sensitive details
-
-### 2. Error Handling
-- Return appropriate HTTP status codes:
-  - 200: Success
-  - 400: Bad Request (invalid input)
-  - 401: Unauthorized
-  - 404: Not Found
-  - 500: Internal Server Error
-- Use `NextResponse.json()` for JSON responses
-- Implement try-catch blocks for all async operations
-
-### 3. Performance
-- Use Edge Runtime where possible: `export const runtime = 'edge'`
-- Implement caching with appropriate headers
-- Avoid N+1 queries
-- Use streaming for large responses
-
-### 4. Code Examples
-
-**Good: Input validation**
-```typescript
-const searchParams = request.nextUrl.searchParams;
-const id = searchParams.get('id');
-if (!id || !/^[a-zA-Z0-9-]+$/.test(id)) {
-  return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
-}
-```
-
-**Good: Error handling**
-```typescript
-try {
-  const data = await fetchData(id);
-  return NextResponse.json(data);
-} catch (error) {
-  console.error('API Error:', error);
-  return NextResponse.json(
-    { error: 'Internal server error' },
-    { status: 500 }
-  );
-}
-```
+**Key points**: Input validation (Zod), proper error handling (try-catch, appropriate status codes), use NextResponse.json(), Edge Runtime where possible.
 
 **Reference**: See `src/app/api/analytics/route.ts` for a well-structured example.
