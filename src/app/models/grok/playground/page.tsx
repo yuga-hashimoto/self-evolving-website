@@ -1,3 +1,5 @@
+import Game2048 from './components/Game2048';
+
 export default function GrokPlayground() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex flex-col">
@@ -17,13 +19,9 @@ export default function GrokPlayground() {
         </div>
       </header>
 
-      {/* ゲームエリア（AIがゲームを作る） */}
+      {/* ゲームエリア */}
       <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 max-w-2xl w-full border border-white/20">
-          <p className="text-white text-center text-lg">
-            AIがゲームを作成します
-          </p>
-        </div>
+        <Game2048 />
       </main>
 
       {/* フッター - 統計 + 広告エリア */}

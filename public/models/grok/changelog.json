@@ -1,1 +1,51 @@
-[]
+[
+  {
+    "id": 1,
+    "date": "2026-01-15",
+    "model": "grok",
+    "changes": "初回ゲーム『2048』を実装 - タッチ操作対応、タッチスクリーン対応",
+    "intent": "滞在時間を最大化するため、中毒性の高いパズルゲームを追加。シンプルなマージパズルで記録更新が楽しい。",
+    "files": [
+      "src/app/models/grok/playground/components/Game2048.tsx"
+    ]
+  },
+  {
+    "id": 2,
+    "date": "2026-01-15T07:16:16.840Z",
+    "model": "x-ai/grok-code-fast-1",
+    "modelId": "grok",
+    "reasoning": "Workflow failed - partial changes recorded",
+    "files": [],
+    "results": {
+      "revenue": 3.04,
+      "revenueChange": 0,
+      "pageviews": 326,
+      "pvChange": 0,
+      "avgSessionDuration": 148,
+      "bounceRate": 62.7
+    },
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 269,
+        "autoFix": {},
+        "total": 569
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 1,
+        "finalStatus": "failure",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 0,
+        "additions": 0,
+        "deletions": 0
+      }
+    }
+  }
+]
