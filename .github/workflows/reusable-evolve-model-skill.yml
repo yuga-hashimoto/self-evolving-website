@@ -81,8 +81,8 @@ jobs:
       - name: Prepare Skill Context
         id: prepare-skill
         run: |
-          # Skillファイルの内容を読み込み
-          SKILL_CONTENT=$(cat .claude/skills/evolve-game.md)
+          # Skillファイルの内容を読み込み（YAMLフロントマターを除外）
+          SKILL_CONTENT=$(awk '/^---$/{count++; next} count>=2' .claude/skills/evolve-game/SKILL.md)
 
           # アナリティクスデータを読み込み
           ANALYTICS_DATA=$(cat public/models/${{ inputs.model_id }}/analytics.json 2>/dev/null || echo '{}')
@@ -108,7 +108,26 @@ jobs:
 
           ## Recent Change History (last 3 entries):
           $CHANGELOG_DATA
+
+          ---
+
+          # 🚨 重要: スマホ対応チェックリスト
+
+          **実装前に必ず確認してください：**
+
+          ✅ Canvasサイズは画面幅に応じて動的に設定していますか？
+          ✅ タッチ操作は直感的で快適ですか？（実際にスマホで試すイメージで）
+          ✅ 画面が小さくても文字・タイルは見えますか？
+          ✅ バイブレーションなどのフィードバックはありますか？
+
+          **実装後に確認してください：**
+
+          ✅ window.innerWidth を使って画面幅を取得していますか？
+          ✅ タッチイベントは連続的に処理されますか？
+          ✅ スワイプ判定は画面サイズに応じていますか？
+          ✅ \`const CANVAS_WIDTH = 数値\` のような固定値を使っていませんか？
           "
+
 
           echo "skill_prompt<<EOF" >> $GITHUB_OUTPUT
           echo "$SKILL_PROMPT" >> $GITHUB_OUTPUT
@@ -251,6 +270,11 @@ jobs:
           echo "fix_prompt<<EOF" >> $GITHUB_OUTPUT
           echo "The build failed with the following errors. Please fix the code to resolve these issues. Do NOT change the functionality, just fix the syntax or type errors." >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
+          echo "⚠️  IMPORTANT: Ensure mobile compatibility while fixing errors:" >> $GITHUB_OUTPUT
+          echo "- Canvas must be responsive (use window.innerWidth, not hardcoded values)" >> $GITHUB_OUTPUT
+          echo "- Touch controls must be intuitive and work continuously" >> $GITHUB_OUTPUT
+          echo "- Swipe distance should adapt to screen size" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
           echo "\`\`\`" >> $GITHUB_OUTPUT
           tail -n 50 error_log.txt >> $GITHUB_OUTPUT
           echo "\`\`\`" >> $GITHUB_OUTPUT
@@ -270,7 +294,7 @@ jobs:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_1.outputs.fix_prompt }}
           claude_args: |
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite,Skill"
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
@@ -322,6 +346,11 @@ jobs:
         run: |
           echo "fix_prompt<<EOF" >> $GITHUB_OUTPUT
           echo "The build still failed. Please fix these errors:" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "⚠️  IMPORTANT: Ensure mobile compatibility while fixing errors:" >> $GITHUB_OUTPUT
+          echo "- Canvas must be responsive (use window.innerWidth, not hardcoded values)" >> $GITHUB_OUTPUT
+          echo "- Touch controls must be intuitive and work continuously" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
           echo "\`\`\`" >> $GITHUB_OUTPUT
           tail -n 50 error_log.txt >> $GITHUB_OUTPUT
           echo "\`\`\`" >> $GITHUB_OUTPUT
@@ -341,7 +370,7 @@ jobs:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_2.outputs.fix_prompt }}
           claude_args: |
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite,Skill"
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
@@ -393,6 +422,11 @@ jobs:
         run: |
           echo "fix_prompt<<EOF" >> $GITHUB_OUTPUT
           echo "Last attempt. Fix these errors:" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "⚠️  CRITICAL: Ensure mobile compatibility while fixing errors:" >> $GITHUB_OUTPUT
+          echo "- Canvas MUST be responsive (use window.innerWidth, NOT hardcoded values)" >> $GITHUB_OUTPUT
+          echo "- Touch controls MUST work continuously, not just once per tap" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
           echo "\`\`\`" >> $GITHUB_OUTPUT
           tail -n 50 error_log.txt >> $GITHUB_OUTPUT
           echo "\`\`\`" >> $GITHUB_OUTPUT
@@ -412,7 +446,7 @@ jobs:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_3.outputs.fix_prompt }}
           claude_args: |
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite,Skill"
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
@@ -473,6 +507,41 @@ jobs:
 
           echo "✅ Security checks passed"
 
+      - name: Mobile Compatibility Check
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          echo "📱 Running mobile compatibility checks..."
+
+          # Check for hardcoded Canvas sizes
+          if grep -rE "const (CANVAS_WIDTH|CANVAS_HEIGHT) = [0-9]+" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null; then
+            echo "❌ ERROR: Canvas size is hardcoded!"
+            echo "Found hardcoded CANVAS_WIDTH or CANVAS_HEIGHT. Must use responsive sizing."
+            echo ""
+            echo "Example of what was found:"
+            grep -rn "const CANVAS_WIDTH = [0-9]" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null || true
+            grep -rn "const CANVAS_HEIGHT = [0-9]" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null || true
+            echo ""
+            echo "Please use window.innerWidth for responsive sizing."
+            exit 1
+          fi
+
+          # Check for window.innerWidth usage (responsive sizing)
+          if ! grep -r "window\.innerWidth\|innerWidth" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null; then
+            echo "⚠️  WARNING: No responsive sizing detected (window.innerWidth not found)"
+            echo "Games should adapt to screen size for mobile compatibility"
+          else
+            echo "✅ Responsive sizing detected (window.innerWidth found)"
+          fi
+
+          # Check for touch event handlers
+          if grep -r "touchstart\|touchend\|touchmove" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null; then
+            echo "✅ Touch event handlers found"
+          else
+            echo "⚠️  WARNING: No touch event handlers detected"
+          fi
+
+          echo "✅ Mobile compatibility check completed"
+
       - name: Take After Screenshot
         if: steps.changes.outputs.has_changes == 'true'
         run: |
@@ -525,7 +594,11 @@ jobs:
       - name: Collect Git Statistics (on Failure)
         if: failure() && steps.changes.outputs.has_changes == 'true'
         run: |
-          GIT_STATS=$(git diff --stat HEAD | tail -n 1)
+          # アプリケーションコードのみを対象にした統計
+          GIT_STATS=$(git diff --stat HEAD -- \
+            src/app/models/${{ inputs.model_id }}/playground \
+            src/app/api/${{ inputs.model_id }} \
+            src/components/icons/Icons.tsx | tail -n 1)
           FILES_CHANGED=$(echo "$GIT_STATS" | grep -oP '\d+(?= file)' || echo 0)
           ADDITIONS=$(echo "$GIT_STATS" | grep -oP '\d+(?= insertion)' || echo 0)
           DELETIONS=$(echo "$GIT_STATS" | grep -oP '\d+(?= deletion)' || echo 0)
@@ -629,7 +702,11 @@ jobs:
       - name: Collect Git Statistics
         if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
-          GIT_STATS=$(git diff --stat HEAD | tail -n 1)
+          # アプリケーションコードのみを対象にした統計
+          GIT_STATS=$(git diff --stat HEAD -- \
+            src/app/models/${{ inputs.model_id }}/playground \
+            src/app/api/${{ inputs.model_id }} \
+            src/components/icons/Icons.tsx | tail -n 1)
           FILES_CHANGED=$(echo "$GIT_STATS" | grep -oP '\d+(?= file)' || echo 0)
           ADDITIONS=$(echo "$GIT_STATS" | grep -oP '\d+(?= insertion)' || echo 0)
           DELETIONS=$(echo "$GIT_STATS" | grep -oP '\d+(?= deletion)' || echo 0)
