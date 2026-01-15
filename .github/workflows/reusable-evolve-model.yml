@@ -448,6 +448,58 @@ jobs:
             public/models/${{ inputs.model_id }}/screenshots/20*.png
           retention-days: 30
 
+      # === Failure Handling (Record Metrics BEFORE Commit) ===
+      - name: Record Failure Metrics
+        if: failure() && steps.changes.outputs.has_changes == 'true'
+        run: |
+          # 失敗時もメトリクスを記録
+          WORKFLOW_END=$(date +%s)
+          TOTAL_DURATION=$((WORKFLOW_END - ${workflow_start:-0}))
+          echo "total_duration=$TOTAL_DURATION" >> $GITHUB_ENV
+          echo "final_status=failure" >> $GITHUB_ENV
+          node scripts/record-workflow-metrics.js || true
+        env:
+          MODEL_ID: ${{ inputs.model_id }}
+          CLAUDE_CODE_DURATION: ${{ env.claude_code_duration }}
+          AUTOFIX_1_DURATION: ${{ env.autofix_1_duration }}
+          AUTOFIX_2_DURATION: ${{ env.autofix_2_duration }}
+          AUTOFIX_3_DURATION: ${{ env.autofix_3_duration }}
+          TOTAL_DURATION: ${{ env.total_duration }}
+          BUILD_FAILURES: ${{ env.build_failures }}
+          RETRY_COUNT: ${{ env.retry_count }}
+          FINAL_STATUS: failure
+          TYPESCRIPT_ERRORS: ${{ env.typescript_errors }}
+          BUILD_ERRORS: ${{ env.build_errors }}
+          SECURITY_ERRORS: ${{ env.security_errors }}
+          FILES_CHANGED: ${{ env.files_changed }}
+          ADDITIONS: ${{ env.additions }}
+          DELETIONS: ${{ env.deletions }}
+
+      - name: Collect Git Statistics (on Failure)
+        if: failure() && steps.changes.outputs.has_changes == 'true'
+        run: |
+          GIT_STATS=$(git diff --stat HEAD | tail -n 1)
+          FILES_CHANGED=$(echo "$GIT_STATS" | grep -oP '\d+(?= file)' || echo 0)
+          ADDITIONS=$(echo "$GIT_STATS" | grep -oP '\d+(?= insertion)' || echo 0)
+          DELETIONS=$(echo "$GIT_STATS" | grep -oP '\d+(?= deletion)' || echo 0)
+
+          echo "files_changed=$FILES_CHANGED" >> $GITHUB_ENV
+          echo "additions=$ADDITIONS" >> $GITHUB_ENV
+          echo "deletions=$DELETIONS" >> $GITHUB_ENV
+          echo "📊 Git Stats (Failure): $FILES_CHANGED files, +$ADDITIONS -$DELETIONS"
+
+      - name: Update Changelog (on Failure)
+        if: failure() && steps.changes.outputs.has_changes == 'true'
+        run: |
+          # 失敗時でもchangelog.jsonを更新
+          echo "📝 Updating changelog with failure metrics..."
+          node scripts/update-changelog.js || true
+        env:
+          MODEL_ID: ${{ inputs.model_id }}
+          AI_MODEL: ${{ inputs.anthropic_model }}
+          AI_REASONING: "Workflow failed - partial changes recorded"
+          CHANGED_FILES: ""
+
       - name: Configure Git (on Failure)
         if: failure() && steps.changes.outputs.has_changes == 'true'
         run: |
@@ -518,32 +570,7 @@ jobs:
         env:
           TZ: Asia/Tokyo
 
-      - name: Record Failure Metrics
-        if: failure() && steps.changes.outputs.has_changes == 'true'
-        run: |
-          # 失敗時もメトリクスを記録
-          WORKFLOW_END=$(date +%s)
-          TOTAL_DURATION=$((WORKFLOW_END - ${workflow_start:-0}))
-          echo "total_duration=$TOTAL_DURATION" >> $GITHUB_ENV
-          echo "final_status=failure" >> $GITHUB_ENV
-          node scripts/record-workflow-metrics.js || true
-        env:
-          MODEL_ID: ${{ inputs.model_id }}
-          CLAUDE_CODE_DURATION: ${{ env.claude_code_duration }}
-          AUTOFIX_1_DURATION: ${{ env.autofix_1_duration }}
-          AUTOFIX_2_DURATION: ${{ env.autofix_2_duration }}
-          AUTOFIX_3_DURATION: ${{ env.autofix_3_duration }}
-          TOTAL_DURATION: ${{ env.total_duration }}
-          BUILD_FAILURES: ${{ env.build_failures }}
-          RETRY_COUNT: ${{ env.retry_count }}
-          FINAL_STATUS: failure
-          TYPESCRIPT_ERRORS: ${{ env.typescript_errors }}
-          BUILD_ERRORS: ${{ env.build_errors }}
-          SECURITY_ERRORS: ${{ env.security_errors }}
-          FILES_CHANGED: ${{ env.files_changed }}
-          ADDITIONS: ${{ env.additions }}
-          DELETIONS: ${{ env.deletions }}
-
+      # === Success Handling ===
       - name: Collect Git Statistics
         if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
