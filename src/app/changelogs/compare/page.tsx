@@ -1,5 +1,6 @@
 import { MODELS } from "@/lib/models";
 import { IconChangelog, IconEmpty } from "@/components/icons/Icons";
+import ChangelogScreenshot from "@/components/changelog/ChangelogScreenshot";
 import fs from "fs";
 import path from "path";
 
@@ -287,19 +288,10 @@ function ModelCard({ entry, modelId, align }: { entry: ChangelogEntry; modelId: 
                                 rel="noopener noreferrer"
                                 className="block max-w-md rounded overflow-hidden border border-white/10 hover:border-white/30 transition-colors"
                             >
-                                <img
+                                <ChangelogScreenshot
                                     src={getScreenshotPath(modelId, entry.date)}
                                     alt={`Screenshot ${formatTimeDisplay(entry.date)}`}
                                     className="w-full h-auto"
-                                    loading="lazy"
-                                    onError={(e) => {
-                                        const target = e.target as HTMLImageElement;
-                                        target.style.display = 'none';
-                                        const parent = target.parentElement?.parentElement;
-                                        if (parent) {
-                                            parent.innerHTML = '<p class="text-gray-500 text-[10px] p-2 text-center">画像なし</p>';
-                                        }
-                                    }}
                                 />
                             </a>
                         </div>

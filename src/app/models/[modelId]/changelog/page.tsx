@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getModel, MODELS } from "@/lib/models";
 import { IconChangelog, IconEmpty } from "@/components/icons/Icons";
+import ChangelogScreenshot from "@/components/changelog/ChangelogScreenshot";
 import Link from "next/link";
 import fs from "fs";
 import path from "path";
@@ -297,19 +298,10 @@ export default async function ChangelogPage({ params }: PageProps) {
                                                     rel="noopener noreferrer"
                                                     className="block max-w-2xl rounded-lg overflow-hidden border border-purple-500/30 hover:border-purple-500/60 transition-colors"
                                                 >
-                                                    <img
+                                                    <ChangelogScreenshot
                                                         src={getScreenshotPath(modelId, entry.date)}
                                                         alt={`Screenshot from ${formatDate(entry.date)}`}
                                                         className="w-full h-auto"
-                                                        loading="lazy"
-                                                        onError={(e) => {
-                                                            const target = e.target as HTMLImageElement;
-                                                            target.style.display = 'none';
-                                                            const parent = target.parentElement?.parentElement;
-                                                            if (parent) {
-                                                                parent.innerHTML = '<p class="text-gray-500 text-xs p-4 text-center">スクリーンショットが見つかりません</p>';
-                                                            }
-                                                        }}
                                                     />
                                                 </a>
                                             </div>
