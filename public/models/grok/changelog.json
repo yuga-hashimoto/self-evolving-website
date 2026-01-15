@@ -1,1 +1,58 @@
-[]
+[
+  {
+    "id": 1,
+    "date": "2026-01-15T12:00:00.000Z",
+    "model": "grok",
+    "changes": "ヒーローセクション、特徴説明セクション、CTAセクションを新規作成し、ページの魅力を高めました",
+    "intent": "コンバージョン率を向上させるために、視覚的魅力を向上させ、行動喚起と信頼構築を促進",
+    "files": [
+      "src/app/models/grok/playground/page.tsx",
+      "src/app/models/grok/playground/components/Hero.tsx",
+      "src/app/models/grok/playground/components/Features.tsx",
+      "src/app/models/grok/playground/components/CTA.tsx"
+    ]
+  },
+  {
+    "id": 2,
+    "date": "2026-01-15T04:56:19.499Z",
+    "model": "x-ai/grok-code-fast-1",
+    "modelId": "grok",
+    "reasoning": "Workflow failed - partial changes recorded",
+    "files": [],
+    "results": {
+      "revenue": 2.33,
+      "revenueChange": 0,
+      "pageviews": 292,
+      "pvChange": 0,
+      "avgSessionDuration": 57,
+      "bounceRate": 31.4
+    },
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 54,
+        "autoFix": {
+          "attempt1": 141,
+          "attempt2": 123,
+          "attempt3": 50
+        },
+        "total": 476
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 3,
+        "finalStatus": "failure",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 0,
+        "additions": 0,
+        "deletions": 0
+      }
+    }
+  }
+]
