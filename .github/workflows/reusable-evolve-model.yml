@@ -83,6 +83,26 @@ jobs:
           echo "$FULL_PROMPT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Start Dev Server
+        id: start-dev-server
+        run: |
+          # Start dev server in background for search API
+          npm run dev &
+          DEV_PID=$!
+          echo "dev_pid=$DEV_PID" >> $GITHUB_OUTPUT
+
+          # Wait for server to start
+          echo "Waiting for dev server to start..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3131 > /dev/null; then
+              echo "✅ Dev server is ready (PID: $DEV_PID)"
+              break
+            fi
+            sleep 2
+          done
+        env:
+          SERPER_API_KEY: ${{ secrets.serper_api_key }}
+
       - name: Claude Code Execution
         uses: anthropics/claude-code-action@v1
         with:
@@ -313,25 +333,11 @@ jobs:
       - name: Take Screenshot
         if: steps.changes.outputs.has_changes == 'true'
         run: |
-          # Start dev server in background
-          npm run dev &
-          DEV_PID=$!
-
-          # Wait for server to start
-          echo "Waiting for dev server to start..."
-          for i in {1..30}; do
-            if curl -s http://localhost:3131 > /dev/null; then
-              echo "✅ Dev server is ready"
-              break
-            fi
-            sleep 2
-          done
+          # Dev server is already running from "Start Dev Server" step
+          echo "Using existing dev server..."
 
           # Take screenshot
           node scripts/take-screenshot.js
-
-          # Cleanup
-          kill $DEV_PID || true
         env:
           MODEL_ID: ${{ inputs.model_id }}
           TZ: Asia/Tokyo
@@ -379,3 +385,12 @@ jobs:
           git stash
           git pull --rebase origin main
           git push origin main
+
+      - name: Cleanup Dev Server
+        if: always()
+        run: |
+          # Kill dev server if it's still running
+          if [ -n "${{ steps.start-dev-server.outputs.dev_pid }}" ]; then
+            kill ${{ steps.start-dev-server.outputs.dev_pid }} || true
+            echo "✅ Dev server stopped"
+          fi
