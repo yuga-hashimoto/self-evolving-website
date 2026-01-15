@@ -7,6 +7,10 @@ on:
   #   - cron: '30 21 * * *'  # UTC 21:30 (JST 翌6:30)
   workflow_dispatch:
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
   evolve-mimo-skill:
     uses: ./.github/workflows/reusable-evolve-model-skill.yml

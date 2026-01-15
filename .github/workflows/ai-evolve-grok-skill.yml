@@ -7,6 +7,10 @@ on:
   #   - cron: '0 22 * * *'   # UTC 22:00 (JST 翌7:00)
   workflow_dispatch:
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
   evolve-grok-skill:
     uses: ./.github/workflows/reusable-evolve-model-skill.yml
