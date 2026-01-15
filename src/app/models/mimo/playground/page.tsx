@@ -48,10 +48,30 @@ interface Game2048State {
   gridSize: number;
 }
 
+// Tap Rush Interfaces
+interface TapRushState {
+  barPosition: number;
+  barSpeed: number;
+  greenZoneStart: number;
+  greenZoneWidth: number;
+  score: number;
+  highScore: number;
+  combo: number;
+  maxCombo: number;
+  totalTaps: number;
+  perfectTaps: number;
+  isPlaying: boolean;
+  isGameOver: boolean;
+}
+
 const INITIAL_BLOCK_WIDTH = 200;
 const BLOCK_HEIGHT = 30;
 const BASE_SPEED = 2;
-const GRAVITY = 0.5;
+
+// Tap Rush Constants
+const TAP_RUSH_BASE_SPEED = 1.5;
+const TAP_RUSH_GREEN_WIDTH = 20;
+const TAP_RUSH_SPEED_INCREASE = 0.05;
 
 // 2048 Constants
 const TILE_COLORS: Record<number, string> = {
@@ -73,7 +93,7 @@ const TILE_COLORS: Record<number, string> = {
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'taprush'>('menu');
 
   const [gameState, setGameState] = useState<InfinityDropState>({
     blocks: [],
@@ -96,10 +116,31 @@ export default function MimoPlayground() {
     gridSize: 4,
   });
 
+  const [tapRushState, setTapRushState] = useState<TapRushState>({
+    barPosition: 0,
+    barSpeed: TAP_RUSH_BASE_SPEED,
+    greenZoneStart: 30,
+    greenZoneWidth: TAP_RUSH_GREEN_WIDTH,
+    score: 0,
+    highScore: 0,
+    combo: 0,
+    maxCombo: 0,
+    totalTaps: 0,
+    perfectTaps: 0,
+    isPlaying: false,
+    isGameOver: false,
+  });
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const tapRushCanvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { trackClick } = useAnalytics();
+
+  // Idle detection for demo mode
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [showDemo, setShowDemo] = useState(false);
+  const isIdleRef = useRef(false);
 
   // Canvas用翻訳テキストをrefで保持
   const canvasTextsRef = useRef({
@@ -110,6 +151,8 @@ export default function MimoPlayground() {
     tapToStart: 'TAP TO START',
     placeBlockPerfectly: 'Place blocks perfectly to stack higher!',
     combo: 'COMBO',
+    demoMode: 'DEMO',
+    tapToPlay: 'TAP TO PLAY!',
   });
 
   // 翻訳が変更されたらrefを更新
@@ -122,6 +165,8 @@ export default function MimoPlayground() {
       tapToStart: tc('tapToStart'),
       placeBlockPerfectly: t('infinityDrop.placeBlockPerfectly'),
       combo: t('infinityDrop.combo'),
+      demoMode: t('infinityDrop.demoMode'),
+      tapToPlay: t('infinityDrop.tapToPlay'),
     };
   }, [t, tc]);
 
@@ -141,6 +186,12 @@ export default function MimoPlayground() {
     highestValue: 2,
   });
 
+  // Tap Rush統計
+  const tapRushStatsRef = useRef({
+    sessionStartTime: 0,
+    playCount: 0,
+  });
+
   // ハイスコアの読み込みと保存
   useEffect(() => {
     const infinitySaved = localStorage.getItem('infinityDrop_highScore');
@@ -151,7 +202,6 @@ export default function MimoPlayground() {
     // 2048ハイスコア読み込み
     const load2048Scores = () => {
       const normalSaved = localStorage.getItem('game2048_highScore_normal');
-      const hardSaved = localStorage.getItem('game2048_highScore_hard');
       const bestTileSaved = localStorage.getItem('game2048_bestTile');
 
       setGame2048State((prev) => ({
@@ -161,7 +211,57 @@ export default function MimoPlayground() {
       }));
     };
     load2048Scores();
+
+    // Tap Rushハイスコア読み込み
+    const tapRushSaved = localStorage.getItem('tapRush_highScore');
+    if (tapRushSaved) {
+      setTapRushState((prev) => ({ ...prev, highScore: parseInt(tapRushSaved) }));
+    }
   }, []);
+
+  // 画面遷移時のアイドルタイマーリセット
+  useEffect(() => {
+    setShowDemo(false);
+    isIdleRef.current = false;
+
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+    }
+  }, [currentGame]);
+
+  // メニュー画面でのアイドル検出
+  useEffect(() => {
+    if (currentGame !== 'menu') return;
+
+    const resetIdleTimer = () => {
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+      }
+      isIdleRef.current = false;
+      setShowDemo(false);
+
+      idleTimerRef.current = setTimeout(() => {
+        isIdleRef.current = true;
+        setShowDemo(true);
+      }, 5000);
+    };
+
+    const events = ['mousedown', 'touchstart', 'keydown', 'scroll', 'mousemove'];
+    events.forEach(event => {
+      window.addEventListener(event, resetIdleTimer);
+    });
+
+    resetIdleTimer();
+
+    return () => {
+      events.forEach(event => {
+        window.removeEventListener(event, resetIdleTimer);
+      });
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+      }
+    };
+  }, [currentGame]);
 
   // キャンバスの描画
   const draw = useCallback(() => {
@@ -196,7 +296,6 @@ export default function MimoPlayground() {
 
     // ブロックを描画
     gameState.blocks.forEach((block, index) => {
-      // ブロック本体
       const gradient = ctx.createLinearGradient(block.x, block.y, block.x + block.width, block.y);
       gradient.addColorStop(0, block.color);
       gradient.addColorStop(1, adjustColor(block.color, -30));
@@ -204,12 +303,10 @@ export default function MimoPlayground() {
       ctx.fillStyle = gradient;
       ctx.fillRect(block.x, block.y, block.width, block.height);
 
-      // 枠線
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
       ctx.lineWidth = 2;
       ctx.strokeRect(block.x, block.y, block.width, block.height);
 
-      // スコア表示（最初のブロック）
       if (index === 0) {
         ctx.fillStyle = '#fff';
         ctx.font = 'bold 20px Arial';
@@ -221,7 +318,6 @@ export default function MimoPlayground() {
         );
       }
 
-      // コンボ表示
       if (gameState.combo > 1 && index === gameState.blocks.length - 1) {
         ctx.fillStyle = '#fbbf24';
         ctx.font = 'bold 16px Arial';
@@ -233,6 +329,21 @@ export default function MimoPlayground() {
         );
       }
     });
+
+    // デモモード表示
+    if (showDemo && !gameState.isPlaying && !gameState.isGameOver) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = '#22d3ee';
+      ctx.font = 'bold 24px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(canvasTextsRef.current.demoMode, width / 2, height / 2 - 30);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = '20px Arial';
+      ctx.fillText(canvasTextsRef.current.tapToPlay, width / 2, height / 2 + 10);
+    }
 
     // ゲームオーバー時のオーバーレイ
     if (gameState.isGameOver) {
@@ -257,7 +368,7 @@ export default function MimoPlayground() {
     }
 
     // プレイ中でない時のメッセージ
-    if (!gameState.isPlaying && !gameState.isGameOver) {
+    if (!gameState.isPlaying && !gameState.isGameOver && !showDemo) {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.font = 'bold 32px Arial';
       ctx.textAlign = 'center';
@@ -267,7 +378,7 @@ export default function MimoPlayground() {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.fillText(canvasTextsRef.current.placeBlockPerfectly, width / 2, height / 2 + 20);
     }
-  }, [gameState]);
+  }, [gameState, showDemo]);
 
   // カラー調整関数
   const adjustColor = (color: string, amount: number): string => {
@@ -278,6 +389,107 @@ export default function MimoPlayground() {
     return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
   };
 
+  // デモ用AI（簡易的なブロック配置）
+  const demoAI = useCallback(() => {
+    if (!showDemo || !isIdleRef.current || gameState.isPlaying) return;
+
+    setGameState((prev) => {
+      if (prev.blocks.length === 0) {
+        const containerWidth = containerRef.current?.clientWidth || 360;
+        const initialBlock: Block = {
+          id: 0,
+          x: (containerWidth - INITIAL_BLOCK_WIDTH) / 2,
+          y: 50,
+          width: INITIAL_BLOCK_WIDTH,
+          height: BLOCK_HEIGHT,
+          velocityX: BASE_SPEED,
+          color: '#3b82f6',
+        };
+        return { ...prev, blocks: [initialBlock], isPlaying: true };
+      }
+
+      // デモプレイ
+      if (prev.isPlaying && !prev.isGameOver) {
+        const lastBlock = prev.blocks[prev.blocks.length - 1];
+        const containerWidth = containerRef.current?.clientWidth || 360;
+
+        // 簡易AI: 常に中央付近に配置
+        const baseBlock = prev.blocks.length > 1
+          ? prev.blocks[prev.blocks.length - 2]
+          : { x: containerWidth / 2 - INITIAL_BLOCK_WIDTH / 2, width: INITIAL_BLOCK_WIDTH };
+
+        // 画面端で反射
+        let newVelocityX = lastBlock.velocityX;
+        if (lastBlock.x <= 0 || lastBlock.x + lastBlock.width >= containerWidth) {
+          newVelocityX = -lastBlock.velocityX;
+        }
+
+        // バーが中央付近の時に自動で配置
+        const isNearCenter = Math.abs(lastBlock.x - baseBlock.x) < 10;
+        if (isNearCenter) {
+          // 自動でブロックを配置
+          const overlap = calculateOverlap(lastBlock, baseBlock);
+          const accuracy = overlap / lastBlock.width;
+          const matchedX = baseBlock.x;
+
+          const accuracyBonus = Math.floor(accuracy * 100);
+          const comboBonus = prev.combo * 5;
+          const points = 10 + accuracyBonus + comboBonus;
+          let newCombo = accuracy > 0.9 ? prev.combo + 1 : 1;
+
+          const newBlock: Block = {
+            id: prev.blocks.length,
+            x: lastBlock.x,
+            y: lastBlock.y + BLOCK_HEIGHT + 2,
+            width: lastBlock.width,
+            height: BLOCK_HEIGHT,
+            velocityX: lastBlock.velocityX * 1.03,
+            color: `hsl(${(prev.blocks.length * 30) % 360}, 70%, 60%)`,
+          };
+
+          return {
+            ...prev,
+            blocks: [...prev.blocks, newBlock],
+            score: prev.score + points,
+            accuracy: accuracy,
+            combo: newCombo,
+            highScore: Math.max(prev.highScore, prev.score + points),
+          };
+        } else {
+          // ブロックを移動させる
+          const updatedBlocks = prev.blocks.map((block) => {
+            if (block.velocityX !== 0) {
+              let newX = block.x + block.velocityX;
+              if (containerRef.current) {
+                const containerWidth = containerRef.current.clientWidth;
+                if (newX <= 0 || newX + block.width >= containerWidth) {
+                  block.velocityX = -block.velocityX;
+                  newX = Math.max(0, Math.min(containerWidth - block.width, newX));
+                }
+              }
+              return { ...block, x: newX };
+            }
+            return block;
+          });
+          return { ...prev, blocks: updatedBlocks };
+        }
+      }
+
+      return prev;
+    });
+  }, [showDemo, gameState.isPlaying]);
+
+  // デモAIループ
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (showDemo && !gameState.isPlaying && !gameState.isGameOver) {
+      interval = setInterval(demoAI, 50);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [showDemo, gameState.isPlaying, gameState.isGameOver, demoAI]);
+
   // ゲームループ
   const gameLoop = useCallback(() => {
     setGameState((prev) => {
@@ -287,7 +499,6 @@ export default function MimoPlayground() {
         if (block.velocityX !== 0) {
           let newX = block.x + block.velocityX;
 
-          // 壁での跳ね返り
           if (containerRef.current) {
             const containerWidth = containerRef.current.clientWidth;
             if (newX <= 0 || newX + block.width >= containerWidth) {
@@ -561,6 +772,11 @@ export default function MimoPlayground() {
       if (currentGame === 'infinity') {
         if (e.code === 'Space' || e.code === 'Enter') {
           e.preventDefault();
+          if (showDemo) {
+            setShowDemo(false);
+            isIdleRef.current = false;
+            return;
+          }
           if (!gameState.isPlaying && !gameState.isGameOver) {
             startGame();
           } else if (gameState.isPlaying && !gameState.isGameOver) {
@@ -587,11 +803,18 @@ export default function MimoPlayground() {
           move2048(dirMap[e.code]);
         }
       }
+      // Tap Rush
+      else if (currentGame === 'taprush' && !tapRushState.isGameOver) {
+        if (e.code === 'Space' || e.code === 'Enter') {
+          e.preventDefault();
+          handleTapRushTap();
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver]);
+  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, tapRushState.isGameOver, showDemo]);
 
   // スコア表示用フォーマット
   const formatScore = (score: number): string => {
@@ -884,6 +1107,194 @@ export default function MimoPlayground() {
     );
   };
 
+  // ==================== TAP RUSH GAME LOGIC ====================
+
+  // Tap Rush: 新しいゲーム開始
+  const startTapRushGame = useCallback(() => {
+    tapRushStatsRef.current.playCount += 1;
+    tapRushStatsRef.current.sessionStartTime = Date.now();
+
+    setTapRushState((prev) => ({
+      ...prev,
+      isPlaying: true,
+      isGameOver: false,
+      score: 0,
+      combo: 0,
+      maxCombo: 0,
+      totalTaps: 0,
+      perfectTaps: 0,
+      barPosition: 0,
+      barSpeed: TAP_RUSH_BASE_SPEED,
+      greenZoneStart: Math.random() * 70 + 10,
+    }));
+
+    trackClick();
+    storeGameEvent('tapRush_start', {});
+  }, [trackClick]);
+
+  // Tap Rush: リセット
+  const resetTapRush = useCallback(() => {
+    setTapRushState((prev) => ({
+      ...prev,
+      isGameOver: false,
+    }));
+    startTapRushGame();
+  }, [startTapRushGame]);
+
+  // Tap Rush: タップ処理
+  const handleTapRushTap = useCallback(() => {
+    if (!tapRushState.isPlaying || tapRushState.isGameOver) return;
+
+    setTapRushState((prev) => {
+      const barCenter = prev.barPosition;
+      const greenCenter = prev.greenZoneStart + prev.greenZoneWidth / 2;
+      const distance = Math.abs(barCenter - greenCenter);
+      const maxDistance = prev.greenZoneWidth / 2;
+
+      // 精度計算
+      let accuracy = Math.max(0, 1 - distance / maxDistance);
+      let points = 0;
+      let newCombo = prev.combo;
+      let isPerfect = false;
+
+      if (accuracy >= 0.9) {
+        // パーフェクト
+        isPerfect = true;
+        newCombo += 1;
+        points = 100 + newCombo * 20;
+        vibrate(15);
+        playSound('success');
+      } else if (accuracy >= 0.5) {
+        // グッド
+        newCombo += 1;
+        points = 50 + newCombo * 10;
+        vibrate(8);
+      } else {
+        // ミス
+        newCombo = 0;
+        vibrate(30);
+      }
+
+      const newMaxCombo = Math.max(prev.maxCombo, newCombo);
+
+      // ゲームオーバー判定（連続ミス3回）
+      if (newCombo === 0 && prev.combo === 0 && prev.totalTaps > 0) {
+        const sessionDuration = tapRushStatsRef.current.sessionStartTime > 0
+          ? Math.floor((Date.now() - tapRushStatsRef.current.sessionStartTime) / 1000)
+          : 0;
+        storeGameEvent('tapRush_over', {
+          score: prev.score,
+          maxCombo: newMaxCombo,
+          totalTaps: prev.totalTaps + 1,
+          perfectTaps: prev.perfectTaps + (isPerfect ? 1 : 0),
+          duration: sessionDuration,
+        });
+
+        return {
+          ...prev,
+          isPlaying: false,
+          isGameOver: true,
+        };
+      }
+
+      // 次のグリーンゾーン位置を変更
+      const newGreenZoneStart = Math.random() * 75 + 5;
+
+      const newTotalTaps = prev.totalTaps + 1;
+      const newPerfectTaps = prev.perfectTaps + (isPerfect ? 1 : 0);
+
+      // ハイスコア更新
+      const newScore = prev.score + points;
+      const newHighScore = Math.max(prev.highScore, newScore);
+
+      // ハイスコア保存
+      if (newHighScore > prev.highScore) {
+        localStorage.setItem('tapRush_highScore', newHighScore.toString());
+      }
+
+      return {
+        ...prev,
+        score: newScore,
+        highScore: newHighScore,
+        combo: newCombo,
+        maxCombo: newMaxCombo,
+        totalTaps: newTotalTaps,
+        perfectTaps: newPerfectTaps,
+        greenZoneStart: newGreenZoneStart,
+        barSpeed: prev.barSpeed + TAP_RUSH_SPEED_INCREASE,
+      };
+    });
+  }, [tapRushState, trackClick]);
+
+  // Tap Rush: ゲームループ
+  const tapRushGameLoop = useCallback(() => {
+    setTapRushState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver) return prev;
+
+      const containerWidth = containerRef.current?.clientWidth || 360;
+      let newBarPosition = prev.barPosition + prev.barSpeed;
+
+      // 画面端で反射
+      if (newBarPosition <= 0 || newBarPosition >= containerWidth - 20) {
+        newBarPosition = prev.barPosition - prev.barSpeed;
+      }
+
+      return { ...prev, barPosition: Math.max(0, Math.min(containerWidth - 20, newBarPosition)) };
+    });
+
+    if (tapRushCanvasRef.current) {
+      const canvas = tapRushCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const width = canvas.width;
+        const height = canvas.height;
+
+        // 背景クリア
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, width, height);
+
+        const containerWidth = containerRef.current?.clientWidth || 360;
+        const scale = width / containerWidth;
+
+        // グリーンゾーン
+        const greenStartX = tapRushState.greenZoneStart * scale;
+        const greenWidth = tapRushState.greenZoneWidth * scale;
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+        ctx.fillRect(greenStartX, 20, greenWidth, height - 40);
+
+        // 移動バー
+        const barX = tapRushState.barPosition * scale;
+        ctx.fillStyle = '#3b82f6';
+        ctx.fillRect(barX, 20, 15 * scale, height - 40);
+
+        // 精度表示
+        if (tapRushState.combo > 0) {
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = 'bold 20px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText(`COMBO x${tapRushState.combo}!`, width / 2, 25);
+        }
+      }
+    }
+
+    requestRef.current = requestAnimationFrame(tapRushGameLoop);
+  }, [tapRushState]);
+
+  // Tap Rush: ゲームループ制御
+  useEffect(() => {
+    if (tapRushState.isPlaying && !tapRushState.isGameOver) {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+      requestRef.current = requestAnimationFrame(tapRushGameLoop);
+    }
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, [tapRushState.isPlaying, tapRushState.isGameOver, tapRushGameLoop]);
+
   // ==================== UI RENDERING ====================
 
   return (
@@ -893,7 +1304,7 @@ export default function MimoPlayground() {
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              {currentGame === 'menu' ? t('title') : currentGame === 'infinity' ? t('infinityDrop.title') : t('slide2048.title')}
+              {currentGame === 'menu' ? t('title') : currentGame === 'infinity' ? t('infinityDrop.title') : currentGame === '2048' ? t('slide2048.title') : t('tapRush.title')}
             </h1>
           </div>
 
@@ -905,6 +1316,8 @@ export default function MimoPlayground() {
                 ? formatScore(gameState.score)
                 : currentGame === '2048'
                 ? formatScore(game2048State.score)
+                : currentGame === 'taprush'
+                ? formatScore(tapRushState.score)
                 : '-'}
             </div>
           </div>
@@ -959,6 +1372,24 @@ export default function MimoPlayground() {
                 </p>
                 <div className="text-xs text-slate-400">
                   {tc('highScore')}: {formatScore(game2048State.highScore)} / {t('slide2048.bestLabel')}: {game2048State.bestTile}
+                </div>
+              </button>
+
+              {/* Tap Rush カード */}
+              <button
+                onClick={() => {
+                  setCurrentGame('taprush');
+                  trackClick();
+                }}
+                className="bg-gradient-to-br from-cyan-600 to-cyan-800 p-6 rounded-xl border-2 border-cyan-500 hover:border-cyan-400 hover:scale-105 transition-all text-left group"
+              >
+                <div className="text-2xl font-bold mb-2 group-hover:text-cyan-200">{t('tapRush.title')}</div>
+                <div className="text-cyan-200 text-sm mb-3">{t('tapRush.subtitle')}</div>
+                <p className="text-slate-300 text-xs mb-3">
+                  {t('tapRush.description')}
+                </p>
+                <div className="text-xs text-slate-400">
+                  {tc('highScore')}: {formatScore(tapRushState.highScore)}
                 </div>
               </button>
             </div>
@@ -1165,8 +1596,102 @@ export default function MimoPlayground() {
           </div>
         )}
 
+        {/* ==================== TAP RUSH GAME ==================== */}
+        {currentGame === 'taprush' && (
+          <div className="w-full max-w-md">
+            {/* Tap Rush HUD */}
+            <div className="flex justify-between items-center mb-4 gap-2">
+              <div className="flex-1 bg-slate-800 p-3 rounded-lg text-center border border-slate-700">
+                <div className="text-xs text-slate-400">{tc('score')}</div>
+                <div className="text-xl font-bold text-yellow-400">{formatScore(tapRushState.score)}</div>
+              </div>
+              <div className="flex-1 bg-slate-800 p-3 rounded-lg text-center border border-slate-700">
+                <div className="text-xs text-slate-400">{tc('highScore')}</div>
+                <div className="text-xl font-bold text-yellow-400">{formatScore(tapRushState.highScore)}</div>
+              </div>
+              <div className="flex-1 bg-slate-800 p-3 rounded-lg text-center border border-slate-700">
+                <div className="text-xs text-slate-400">{t('tapRush.combo')}</div>
+                <div className="text-xl font-bold text-cyan-400">{tapRushState.combo}</div>
+              </div>
+            </div>
+
+            {/* ゲームボード */}
+            <div
+              ref={containerRef}
+              className="w-full bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden"
+            >
+              <div className="relative">
+                <canvas
+                  ref={tapRushCanvasRef}
+                  className="w-full block cursor-pointer touch-none"
+                  onClick={handleTapRushTap}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    handleTapRushTap();
+                  }}
+                />
+
+                {/* 開始/ゲームオーバー画面 */}
+                {!tapRushState.isPlaying && !tapRushState.isGameOver && (
+                  <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                    <div className="text-2xl font-bold text-cyan-400 mb-2">{t('tapRush.tapToStart')}</div>
+                    <button
+                      onClick={startTapRushGame}
+                      className="px-6 py-2 bg-cyan-600 hover:bg-cyan-500 rounded border border-cyan-400 font-bold mt-2"
+                    >
+                      {tc('tapToStart')}
+                    </button>
+                  </div>
+                )}
+
+                {tapRushState.isGameOver && (
+                  <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center rounded-lg">
+                    <div className="text-3xl font-bold text-red-500 mb-2">{tc('gameOver')}</div>
+                    <div className="text-slate-300 mb-1">{tc('score')}: <span className="text-yellow-400 font-bold">{formatScore(tapRushState.score)}</span></div>
+                    <div className="text-slate-300 mb-1">{t('tapRush.maxCombo')}: <span className="text-cyan-400 font-bold">{tapRushState.maxCombo}</span></div>
+                    <div className="text-slate-300 mb-1">{t('tapRush.perfectTaps')}: <span className="text-green-400 font-bold">{tapRushState.perfectTaps}</span></div>
+                    <div className="text-slate-300 mb-4">{t('tapRush.totalTaps')}: <span className="text-slate-200 font-bold">{tapRushState.totalTaps}</span></div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={resetTapRush}
+                        className="px-6 py-2 bg-cyan-600 hover:bg-cyan-500 rounded border border-cyan-400 font-bold"
+                      >
+                        {tc('playAgain')}
+                      </button>
+                      <button
+                        onClick={() => setCurrentGame('menu')}
+                        className="px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded border border-slate-600"
+                      >
+                        {t('tapRush.backToMenu')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 操作説明 */}
+            <div className="mt-4 text-center text-slate-400 text-sm space-y-1">
+              <p>🎯 {t('tapRush.tapToTap')}</p>
+              <p className="text-xs">⚡ {t('tapRush.perfect')}: +100 + Combo bonus!</p>
+            </div>
+
+            {/* 戻るボタン */}
+            {tapRushState.isPlaying && !tapRushState.isGameOver && (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={() => setCurrentGame('menu')}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+                >
+                  ← {t('tapRush.backToMenu')}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* 広告スペース（ゲームプレイ画面のみ） */}
-        {(currentGame === 'infinity' || currentGame === '2048') && (
+        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'taprush') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
               {t('adArea')}
@@ -1190,6 +1715,7 @@ export default function MimoPlayground() {
         <div className="mt-1 flex justify-center gap-4">
           <span>{t('infinityDrop.title')}: {formatScore(gameState.highScore)}</span>
           <span>{t('slide2048.title')}: {formatScore(game2048State.highScore)}</span>
+          <span>{t('tapRush.title')}: {formatScore(tapRushState.highScore)}</span>
         </div>
       </footer>
 

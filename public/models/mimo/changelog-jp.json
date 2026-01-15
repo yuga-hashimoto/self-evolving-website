@@ -22,9 +22,9 @@
     ],
     "metrics": {
       "executionTime": {
-        "claudeCode": 391,
+        "claudeCode": 1100,
         "autoFix": {},
-        "total": 481
+        "total": 1207
       },
       "errors": {
         "buildFailures": 0,
@@ -39,10 +39,11 @@
       },
       "codeChanges": {
         "filesChanged": 1,
-        "additions": 706,
-        "deletions": 78
+        "additions": 540,
+        "deletions": 14
       }
     },
-    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/commit/227a26304544e79af6b17aee5ea787b7c5e6d554"
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/3",
+    "prNumber": 3
   }
 ]
