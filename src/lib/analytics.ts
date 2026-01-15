@@ -2,8 +2,8 @@
 
 import { useEffect, useCallback } from "react";
 
-// ローカル環境でも動くアナリティクス
-// localStorageに保存、本番ではGA4も併用可能
+// Analytics that work in local environment
+// Stored in localStorage, can be used with GA4 in production
 
 interface PageViewData {
     path: string;

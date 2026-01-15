@@ -1,8 +1,9 @@
 import { MODELS } from "@/lib/models";
-import { IconChangelog, IconEmpty } from "@/components/icons/Icons";
+import { IconChangelog, IconEmpty, IconGithub } from "@/components/icons/Icons";
 import ChangelogScreenshot from "@/components/changelog/ChangelogScreenshot";
 import fs from "fs";
 import path from "path";
+import { getLocale, getTranslations } from 'next-intl/server';
 
 interface ChangelogEntry {
     id: number;
@@ -12,6 +13,8 @@ interface ChangelogEntry {
     intent?: string;
     reasoning?: string;
     files?: string[];
+    prUrl?: string;
+    prNumber?: number;
     results?: {
         revenue: number;
         revenueChange: number;
@@ -55,13 +58,15 @@ interface GroupedEntry {
     grok: ChangelogEntry[]; // 配列に変更
 }
 
-async function getChangelog(modelId: string): Promise<ChangelogEntry[]> {
+async function getChangelog(modelId: string, locale: string): Promise<ChangelogEntry[]> {
     try {
-        const filePath = path.join(process.cwd(), "public", "models", modelId, "changelog.json");
+        // Select changelog file based on locale
+        const fileName = locale === 'en' ? 'changelog-en.json' : 'changelog-jp.json';
+        const filePath = path.join(process.cwd(), "public", "models", modelId, fileName);
         const content = fs.readFileSync(filePath, "utf-8");
         const entries = JSON.parse(content) as ChangelogEntry[];
 
-        // files プロパティが undefined の場合は空配列をデフォルトとして設定
+        // Set empty array as default if files property is undefined
         return entries.map((entry, index) => {
             if (!entry.files) {
                 console.warn(`⚠️  Changelog entry ${index} for ${modelId} is missing 'files' property (date: ${entry.date})`);
@@ -176,8 +181,11 @@ function parseIntent(intent: string) {
 }
 
 export default async function CompareChangelogPage() {
-    const mimoChangelog = await getChangelog("mimo");
-    const grokChangelog = await getChangelog("grok");
+    const locale = await getLocale();
+    const t = await getTranslations('compare');
+    const tChangelog = await getTranslations('changelog');
+    const mimoChangelog = await getChangelog("mimo", locale);
+    const grokChangelog = await getChangelog("grok", locale);
 
     // 日付ごとにグループ化
     const groups: Record<string, GroupedEntry> = {};
@@ -236,17 +244,17 @@ export default async function CompareChangelogPage() {
                 <div className="text-center mb-16">
                     <div className="flex items-center justify-center gap-3 mb-4">
                         <IconChangelog size={48} />
-                        <h1 className="text-3xl sm:text-4xl font-bold gradient-text">進化のタイムライン</h1>
+                        <h1 className="text-3xl sm:text-4xl font-bold gradient-text">{t('title')}</h1>
                     </div>
                     <p className="text-gray-400">
-                        日付ごとにMimoとGrokの成長を比較します
+                        {t('subtitle')}
                     </p>
                 </div>
 
                 {sortedDates.length === 0 ? (
                     <div className="glass-card p-12 text-center max-w-lg mx-auto">
                         <IconEmpty size={64} className="mx-auto mb-4 opacity-50" />
-                        <p className="text-gray-400">比較できる履歴がまだありません</p>
+                        <p className="text-gray-400">{t('noHistory')}</p>
                     </div>
                 ) : (
                     <div className="space-y-12 relative">
@@ -268,14 +276,14 @@ export default async function CompareChangelogPage() {
                                         {/* Mimo Content */}
                                         <div className="flex flex-col items-end w-full">
                                             {group.mimo.length === 0 ? (
-                                                <EmptyModelCard modelId="mimo" align="right" />
+                                                <EmptyModelCard modelId="mimo" align="right" t={t} />
                                             ) : group.mimo.length === 1 ? (
-                                                <ModelCard entry={group.mimo[0]} modelId="mimo" align="right" allEntries={mimoChangelog} />
+                                                <ModelCard entry={group.mimo[0]} modelId="mimo" align="right" allEntries={mimoChangelog} t={t} tChangelog={tChangelog} />
                                             ) : (
                                                 <details className="w-full" open={false}>
                                                     <summary className="glass-card p-3 cursor-pointer hover:bg-white/10 list-none flex items-center justify-between transition-colors border border-purple-500/30 rounded-2xl">
                                                         <div className="flex-1 text-right mr-3">
-                                                            <span className="text-sm font-bold text-purple-400">{group.mimo.length}件の更新</span>
+                                                            <span className="text-sm font-bold text-purple-400">{t('updatesCount', { count: group.mimo.length })}</span>
                                                             {group.mimo[0].changes && (
                                                                 <p className="text-xs text-gray-400 mt-1 line-clamp-1">
                                                                     {parseChanges(group.mimo[0].changes).after || parseChanges(group.mimo[0].changes).raw}
@@ -286,7 +294,7 @@ export default async function CompareChangelogPage() {
                                                     </summary>
                                                     <div className="mt-4 space-y-4">
                                                         {group.mimo.map(entry => (
-                                                            <ModelCard key={entry.id} entry={entry} modelId="mimo" align="right" allEntries={mimoChangelog} />
+                                                            <ModelCard key={entry.id} entry={entry} modelId="mimo" align="right" allEntries={mimoChangelog} t={t} tChangelog={tChangelog} />
                                                         ))}
                                                     </div>
                                                 </details>
@@ -296,14 +304,14 @@ export default async function CompareChangelogPage() {
                                         {/* Grok Content */}
                                         <div className="flex flex-col items-end w-full">
                                             {group.grok.length === 0 ? (
-                                                <EmptyModelCard modelId="grok" align="right" />
+                                                <EmptyModelCard modelId="grok" align="right" t={t} />
                                             ) : group.grok.length === 1 ? (
-                                                <ModelCard entry={group.grok[0]} modelId="grok" align="right" allEntries={grokChangelog} />
+                                                <ModelCard entry={group.grok[0]} modelId="grok" align="right" allEntries={grokChangelog} t={t} tChangelog={tChangelog} />
                                             ) : (
                                                 <details className="w-full" open={false}>
                                                     <summary className="glass-card p-3 cursor-pointer hover:bg-white/10 list-none flex items-center justify-between transition-colors border border-blue-500/30 rounded-2xl">
                                                         <div className="flex-1 text-right mr-3">
-                                                            <span className="text-sm font-bold text-blue-400">{group.grok.length}件の更新</span>
+                                                            <span className="text-sm font-bold text-blue-400">{t('updatesCount', { count: group.grok.length })}</span>
                                                             {group.grok[0].changes && (
                                                                 <p className="text-xs text-gray-400 mt-1 line-clamp-1">
                                                                     {parseChanges(group.grok[0].changes).after || parseChanges(group.grok[0].changes).raw}
@@ -314,7 +322,7 @@ export default async function CompareChangelogPage() {
                                                     </summary>
                                                     <div className="mt-4 space-y-4">
                                                         {group.grok.map(entry => (
-                                                            <ModelCard key={entry.id} entry={entry} modelId="grok" align="right" allEntries={grokChangelog} />
+                                                            <ModelCard key={entry.id} entry={entry} modelId="grok" align="right" allEntries={grokChangelog} t={t} tChangelog={tChangelog} />
                                                         ))}
                                                     </div>
                                                 </details>
@@ -331,7 +339,7 @@ export default async function CompareChangelogPage() {
     );
 }
 
-function ModelCard({ entry, modelId, align, allEntries }: { entry: ChangelogEntry; modelId: "mimo" | "grok"; align: "left" | "right"; allEntries: ChangelogEntry[] }) {
+function ModelCard({ entry, modelId, align, allEntries, t, tChangelog }: { entry: ChangelogEntry; modelId: "mimo" | "grok"; align: "left" | "right"; allEntries: ChangelogEntry[]; t: any; tChangelog: any }) {
     const model = MODELS[modelId];
     const isMimo = modelId === "mimo";
     const colorClass = isMimo ? "text-purple-400" : "text-blue-400";
@@ -346,10 +354,26 @@ function ModelCard({ entry, modelId, align, allEntries }: { entry: ChangelogEntr
 
     return (
         <div className={`w-full glass-card p-5 ${finalAccentBorder} ${bgClass} ${borderClass} shadow-lg transition-transform hover:scale-[1.02] duration-300`}>
-            <div className={`flex items-center gap-2 mb-3 ${align === "right" ? "md:flex-row-reverse" : ""}`}>
+            <div className="flex items-center gap-2 mb-3">
                 <span className="text-xl">{isMimo ? "🟣" : "🔵"}</span>
                 <span className={`text-sm font-bold ${colorClass}`}>{model.name}</span>
-                <span className="text-[10px] text-gray-500 ml-auto md:ml-0 md:mx-2">{formatTimeDisplay(entry.date)}</span>
+                <span className="text-[10px] text-gray-500 ml-auto">{formatTimeDisplay(entry.date)}</span>
+                {entry.prUrl && (
+                    <a
+                        href={entry.prUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`text-[10px] hover:underline flex items-center gap-1 ${colorClass} opacity-70 hover:opacity-100 transition-opacity relative z-10`}
+                        title={entry.prNumber ? `Pull Request #${entry.prNumber}` : 'Commit'}
+                    >
+                        <IconGithub size={12} className={colorClass} />
+                        {entry.prNumber ? (
+                            <span>#{entry.prNumber}</span>
+                        ) : (
+                            <span>{entry.prUrl.split('/').pop()?.substring(0, 7)}</span>
+                        )}
+                    </a>
+                )}
             </div>
 
             <div className={align === "right" ? "md:text-right" : "text-left"}>
@@ -377,7 +401,7 @@ function ModelCard({ entry, modelId, align, allEntries }: { entry: ChangelogEntr
                     const intent = parseIntent(entry.intent);
                     return (
                         <div className="mb-3 bg-black/20 p-2 rounded-lg">
-                            <h4 className={`text-[10px] uppercase font-bold mb-1 opacity-70 ${colorClass}`}>狙い</h4>
+                            <h4 className={`text-[10px] uppercase font-bold mb-1 opacity-70 ${colorClass}`}>{tChangelog('intent')}</h4>
                             {intent.raw ? (
                                 <p className="text-xs text-gray-400 italic">"{intent.raw}"</p>
                             ) : (
@@ -386,7 +410,7 @@ function ModelCard({ entry, modelId, align, allEntries }: { entry: ChangelogEntr
                                         <p className="text-xs text-gray-300">{intent.hypothesis}</p>
                                     )}
                                     {intent.metric && (
-                                        <p className="text-xs text-purple-300 font-medium">目標: {intent.metric}</p>
+                                        <p className="text-xs text-purple-300 font-medium">{tChangelog('goal')}: {intent.metric}</p>
                                     )}
                                 </div>
                             )}
@@ -403,7 +427,7 @@ function ModelCard({ entry, modelId, align, allEntries }: { entry: ChangelogEntr
                     <details className="group">
                         <summary className={`text-[10px] text-gray-500 cursor-pointer hover:text-${isMimo ? 'purple' : 'blue'}-300 transition-colors list-none flex items-center gap-1 ${align === "right" ? "md:justify-end" : "justify-start"}`}>
                             <span className="group-open:rotate-90 transition-transform">▶</span>
-                            スクショ
+                            {t('screenshot')}
                         </summary>
                         <div className="mt-2">
                             <a
@@ -430,7 +454,7 @@ function ModelCard({ entry, modelId, align, allEntries }: { entry: ChangelogEntr
                                 <span className="group-open:rotate-90 transition-transform">▶</span>
                                 <span className="flex items-center gap-2">
                                     <span className="opacity-50">⏱️</span>
-                                    <span>{Math.floor(entry.metrics.executionTime.total / 60)}分</span>
+                                    <span>{Math.floor(entry.metrics.executionTime.total / 60)}{t('minutesShort')}</span>
                                     {entry.metrics.errors.finalStatus === 'success' ? (
                                         <span className="text-green-400">✓</span>
                                     ) : (
@@ -442,51 +466,51 @@ function ModelCard({ entry, modelId, align, allEntries }: { entry: ChangelogEntr
                             </summary>
                             <div className="mt-3 p-3 bg-black/20 rounded-lg">
                                 <div className="grid grid-cols-2 gap-3 text-[10px]">
-                                    {/* 実行時間 */}
+                                    {/* Execution Time */}
                                     <div>
-                                        <p className="text-gray-400 mb-1">実行時間</p>
+                                        <p className="text-gray-400 mb-1">{tChangelog('executionTime')}</p>
                                         <p className="font-mono text-white font-bold">
-                                            {Math.floor(entry.metrics.executionTime.total / 60)}分{entry.metrics.executionTime.total % 60}秒
+                                            {Math.floor(entry.metrics.executionTime.total / 60)}{t('minutesShort')}{entry.metrics.executionTime.total % 60}{t('secondsShort')}
                                         </p>
                                         {entry.metrics.executionTime.claudeCode > 0 && (
                                             <p className="text-gray-500 mt-1">
-                                                Claude: {entry.metrics.executionTime.claudeCode}秒
+                                                Claude: {entry.metrics.executionTime.claudeCode}{t('secondsShort')}
                                             </p>
                                         )}
                                         {entry.metrics.executionTime.autoFix && Object.keys(entry.metrics.executionTime.autoFix).length > 0 && (
                                             <p className="text-gray-500">
-                                                修正: {Object.values(entry.metrics.executionTime.autoFix).reduce((a, b) => a + (b || 0), 0)}秒
+                                                Fix: {Object.values(entry.metrics.executionTime.autoFix).reduce((a, b) => a + (b || 0), 0)}{t('secondsShort')}
                                             </p>
                                         )}
                                     </div>
 
-                                    {/* エラー・リトライ */}
+                                    {/* Build Status */}
                                     <div>
-                                        <p className="text-gray-400 mb-1">ビルド状態</p>
+                                        <p className="text-gray-400 mb-1">{tChangelog('buildStatus')}</p>
                                         <div className="flex items-center gap-2">
                                             {entry.metrics.errors.finalStatus === 'success' ? (
-                                                <span className="text-green-400 font-bold">✓ 成功</span>
+                                                <span className="text-green-400 font-bold">✓ {tChangelog('success')}</span>
                                             ) : (
-                                                <span className="text-red-400 font-bold">✗ 失敗</span>
+                                                <span className="text-red-400 font-bold">✗ {tChangelog('failure')}</span>
                                             )}
                                         </div>
                                         {entry.metrics.errors.retryCount > 0 && (
                                             <p className="text-yellow-400 mt-1">
-                                                リトライ: {entry.metrics.errors.retryCount}回
+                                                {tChangelog('retry')}: {entry.metrics.errors.retryCount}{t('timesCount')}
                                             </p>
                                         )}
                                         {entry.metrics.errors.buildFailures > 0 && (
                                             <p className="text-gray-500">
-                                                失敗: {entry.metrics.errors.buildFailures}回
+                                                {tChangelog('failure')}: {entry.metrics.errors.buildFailures}{t('timesCount')}
                                             </p>
                                         )}
                                     </div>
 
-                                    {/* コード変更量 */}
+                                    {/* Code Changes */}
                                     <div>
-                                        <p className="text-gray-400 mb-1">コード変更</p>
+                                        <p className="text-gray-400 mb-1">{tChangelog('codeChanges')}</p>
                                         <p className="font-mono text-white">
-                                            {entry.metrics.codeChanges.filesChanged} ファイル
+                                            {entry.metrics.codeChanges.filesChanged} {tChangelog('files')}
                                         </p>
                                         <div className="flex gap-3 mt-1">
                                             <span className="text-green-400 font-mono">
@@ -499,22 +523,22 @@ function ModelCard({ entry, modelId, align, allEntries }: { entry: ChangelogEntr
                                     </div>
                                 </div>
 
-                                {/* エラー詳細 */}
+                                {/* Error Details */}
                                 {entry.metrics.errors.errorTypes &&
                                  ((entry.metrics.errors.errorTypes.typescript ?? 0) > 0 ||
                                   (entry.metrics.errors.errorTypes.build ?? 0) > 0 ||
                                   (entry.metrics.errors.errorTypes.security ?? 0) > 0) && (
                                     <div className="mt-3 pt-3 border-t border-white/5">
-                                        <p className="text-gray-400 text-[9px] mb-2">エラー詳細</p>
+                                        <p className="text-gray-400 text-[9px] mb-2">{tChangelog('errorDetails')}</p>
                                         <div className="space-y-1 text-[9px] font-mono">
                                             {(entry.metrics.errors.errorTypes?.typescript ?? 0) > 0 && (
-                                                <p className="text-blue-400">TypeScript: {entry.metrics.errors.errorTypes.typescript}件</p>
+                                                <p className="text-blue-400">TypeScript: {entry.metrics.errors.errorTypes.typescript}</p>
                                             )}
                                             {(entry.metrics.errors.errorTypes?.build ?? 0) > 0 && (
-                                                <p className="text-yellow-400">Build: {entry.metrics.errors.errorTypes.build}件</p>
+                                                <p className="text-yellow-400">Build: {entry.metrics.errors.errorTypes.build}</p>
                                             )}
                                             {(entry.metrics.errors.errorTypes?.security ?? 0) > 0 && (
-                                                <p className="text-red-400">Security: {entry.metrics.errors.errorTypes.security}件</p>
+                                                <p className="text-red-400">Security: {entry.metrics.errors.errorTypes.security}</p>
                                             )}
                                         </div>
                                     </div>
@@ -536,11 +560,11 @@ function ModelCard({ entry, modelId, align, allEntries }: { entry: ChangelogEntr
     );
 }
 
-function EmptyModelCard({ modelId, align }: { modelId: "mimo" | "grok"; align: "left" | "right" }) {
+function EmptyModelCard({ modelId, align, t }: { modelId: "mimo" | "grok"; align: "left" | "right"; t: any }) {
     const isMimo = modelId === "mimo";
     return (
         <div className={`w-full p-5 border border-dashed border-white/5 rounded-2xl flex items-center justify-center opacity-30 h-full min-h-[100px] ${align === "right" ? "md:text-right" : "text-left"}`}>
-            <p className="text-[10px] text-gray-500 italic">この日の{MODELS[modelId].name}による更新はありません</p>
+            <p className="text-[10px] text-gray-500 italic">{t('noUpdatesThisDay', { modelName: MODELS[modelId].name })}</p>
         </div>
     );
 }

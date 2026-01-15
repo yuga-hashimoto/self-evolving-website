@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import { getModel, MODELS } from "@/lib/models";
-import { IconChangelog, IconEmpty } from "@/components/icons/Icons";
+import { IconChangelog, IconEmpty, IconGithub } from "@/components/icons/Icons";
 import ChangelogScreenshot from "@/components/changelog/ChangelogScreenshot";
 import Link from "next/link";
 import fs from "fs";
 import path from "path";
+import { getLocale, getTranslations } from 'next-intl/server';
 
 export function generateStaticParams() {
     return Object.keys(MODELS).map((modelId) => ({
@@ -30,6 +31,8 @@ interface ChangelogEntry {
     changes?: string;
     intent?: string;
     files?: string[];
+    prUrl?: string;
+    prNumber?: number;
     // Workflow metrics
     metrics?: {
         executionTime: {
@@ -96,13 +99,15 @@ interface PageProps {
     params: Promise<{ modelId: string }>;
 }
 
-async function getChangelog(modelId: string): Promise<ChangelogEntry[]> {
+async function getChangelog(modelId: string, locale: string): Promise<ChangelogEntry[]> {
     try {
-        const filePath = path.join(process.cwd(), "public", "models", modelId, "changelog.json");
+        // Select changelog file based on locale
+        const fileName = locale === 'en' ? 'changelog-en.json' : 'changelog-jp.json';
+        const filePath = path.join(process.cwd(), "public", "models", modelId, fileName);
         const content = fs.readFileSync(filePath, "utf-8");
         const entries = JSON.parse(content) as ChangelogEntry[];
 
-        // files プロパティが undefined の場合は空配列をデフォルトとして設定
+        // Set empty array as default if files property is undefined
         return entries.map((entry, index) => {
             if (!entry.files) {
                 console.warn(`⚠️  Changelog entry ${index} for ${modelId} is missing 'files' property (date: ${entry.date})`);
@@ -182,7 +187,9 @@ export default async function ChangelogPage({ params }: PageProps) {
         notFound();
     }
 
-    const changelog = await getChangelog(modelId);
+    const locale = await getLocale();
+    const t = await getTranslations('changelog');
+    const changelog = await getChangelog(modelId, locale);
     const sortedChangelog = [...changelog].reverse().slice(0, 50);
 
     return (
@@ -192,10 +199,10 @@ export default async function ChangelogPage({ params }: PageProps) {
                 <div className="text-center mb-12">
                     <div className="flex items-center justify-center gap-3 mb-4">
                         <IconChangelog size={48} />
-                        <h1 className="text-4xl font-bold gradient-text">{model.name} 更新履歴</h1>
+                        <h1 className="text-4xl font-bold gradient-text">{t('title', { modelName: model.name })}</h1>
                     </div>
                     <p className="text-gray-400">
-                        {model.name}が行ったすべての変更を記録しています
+                        {t('subtitle', { modelName: model.name })}
                     </p>
                 </div>
 
@@ -205,9 +212,9 @@ export default async function ChangelogPage({ params }: PageProps) {
                         <div className="flex justify-center mb-4">
                             <IconEmpty size={80} />
                         </div>
-                        <p className="text-gray-400 text-lg">まだ変更履歴がありません</p>
+                        <p className="text-gray-400 text-lg">{t('noChanges')}</p>
                         <p className="text-gray-500 text-sm mt-2">
-                            {model.name}の最初の進化を待っています...
+                            {t('waitingFirst', { modelName: model.name })}
                         </p>
                     </div>
                 ) : (
@@ -226,12 +233,31 @@ export default async function ChangelogPage({ params }: PageProps) {
                                     {/* Date */}
                                     <div className="flex flex-wrap items-center gap-2 mb-2">
                                         <div className="text-sm text-purple-300">
-                                            #{entry.id} · {formatDate(entry.date)}
+                                            #{entry.id}
                                         </div>
                                         {entry.model && (
                                             <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-gray-400">
                                                 {entry.model}
                                             </span>
+                                        )}
+                                        <div className="text-sm text-purple-300 ml-auto">
+                                            {formatDate(entry.date)}
+                                        </div>
+                                        {entry.prUrl && (
+                                            <a
+                                                href={entry.prUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-[10px] text-purple-300 hover:underline flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity relative z-10"
+                                                title={entry.prNumber ? `Pull Request #${entry.prNumber}` : 'Commit'}
+                                            >
+                                                <IconGithub size={12} className="text-purple-300" />
+                                                {entry.prNumber ? (
+                                                    <span>#{entry.prNumber}</span>
+                                                ) : (
+                                                    <span>{entry.prUrl.split('/').pop()?.substring(0, 7)}</span>
+                                                )}
+                                            </a>
                                         )}
                                     </div>
 
@@ -240,26 +266,26 @@ export default async function ChangelogPage({ params }: PageProps) {
                                         const changes = parseChanges(entry.changes);
                                         return (
                                             <div className="mb-4">
-                                                <h4 className="text-sm text-purple-400 font-bold mb-2">変更内容</h4>
+                                                <h4 className="text-sm text-purple-400 font-bold mb-2">{t('changes')}</h4>
                                                 {changes.raw ? (
                                                     <p className="text-white font-medium">{changes.raw}</p>
                                                 ) : (
                                                     <div className="space-y-2">
                                                         {changes.before && (
                                                             <div>
-                                                                <span className="text-xs text-gray-500">変更前: </span>
+                                                                <span className="text-xs text-gray-500">{t('before')}: </span>
                                                                 <span className="text-gray-300">{changes.before}</span>
                                                             </div>
                                                         )}
                                                         {changes.after && (
                                                             <div>
-                                                                <span className="text-xs text-gray-500">変更後: </span>
+                                                                <span className="text-xs text-gray-500">{t('after')}: </span>
                                                                 <span className="text-white font-medium">{changes.after}</span>
                                                             </div>
                                                         )}
                                                         {changes.implementation && (
                                                             <div>
-                                                                <span className="text-xs text-gray-500">実装: </span>
+                                                                <span className="text-xs text-gray-500">{t('implementation')}: </span>
                                                                 <span className="text-gray-300">{changes.implementation}</span>
                                                             </div>
                                                         )}
@@ -272,26 +298,26 @@ export default async function ChangelogPage({ params }: PageProps) {
                                         const intent = parseIntent(entry.intent);
                                         return (
                                             <div className="mb-4">
-                                                <h4 className="text-sm text-purple-400 font-bold mb-2">変更の狙い</h4>
+                                                <h4 className="text-sm text-purple-400 font-bold mb-2">{t('intent')}</h4>
                                                 {intent.raw ? (
                                                     <p className="text-gray-300">{intent.raw}</p>
                                                 ) : (
                                                     <div className="space-y-2">
                                                         {intent.hypothesis && (
                                                             <div>
-                                                                <span className="text-xs text-gray-500">仮説: </span>
+                                                                <span className="text-xs text-gray-500">{t('hypothesis')}: </span>
                                                                 <span className="text-gray-300">{intent.hypothesis}</span>
                                                             </div>
                                                         )}
                                                         {intent.principle && (
                                                             <div>
-                                                                <span className="text-xs text-gray-500">原理: </span>
+                                                                <span className="text-xs text-gray-500">{t('principle')}: </span>
                                                                 <span className="text-gray-300">{intent.principle}</span>
                                                             </div>
                                                         )}
                                                         {intent.metric && (
                                                             <div>
-                                                                <span className="text-xs text-purple-300 font-medium">目標: </span>
+                                                                <span className="text-xs text-purple-300 font-medium">{t('goal')}: </span>
                                                                 <span className="text-purple-200 font-medium">{intent.metric}</span>
                                                             </div>
                                                         )}
@@ -310,7 +336,7 @@ export default async function ChangelogPage({ params }: PageProps) {
                                         <details className="group">
                                             <summary className="text-sm text-gray-400 cursor-pointer hover:text-purple-300 transition-colors list-none flex items-center gap-2">
                                                 <span className="group-open:rotate-90 transition-transform">▶</span>
-                                                スクリーンショットを表示
+                                                {t('showScreenshot')}
                                             </summary>
                                             <div className="mt-3">
                                                 <a
@@ -331,7 +357,7 @@ export default async function ChangelogPage({ params }: PageProps) {
 
                                     {/* Changed Files */}
                                     <div className="mb-4">
-                                        <p className="text-sm text-gray-400 mb-2">変更ファイル:</p>
+                                        <p className="text-sm text-gray-400 mb-2">{t('changedFiles')}:</p>
                                         <div className="flex flex-wrap gap-2">
                                             {(entry.files || []).map((file, i) => (
                                                 <span
@@ -347,54 +373,54 @@ export default async function ChangelogPage({ params }: PageProps) {
                                     {/* Workflow Metrics */}
                                     {entry.metrics && (
                                         <div className="mt-4 p-4 bg-black/20 rounded-lg">
-                                            <h4 className="text-sm text-purple-400 font-bold mb-3">ワークフローメトリクス</h4>
+                                            <h4 className="text-sm text-purple-400 font-bold mb-3">{t('workflowMetrics')}</h4>
 
                                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
-                                                {/* 実行時間 */}
+                                                {/* Execution Time */}
                                                 <div>
-                                                    <p className="text-gray-400 mb-1">実行時間</p>
+                                                    <p className="text-gray-400 mb-1">{t('executionTime')}</p>
                                                     <p className="font-mono text-white font-bold">
-                                                        {Math.floor(entry.metrics.executionTime.total / 60)}分{entry.metrics.executionTime.total % 60}秒
+                                                        {Math.floor(entry.metrics.executionTime.total / 60)}{t('minutesShort')}{entry.metrics.executionTime.total % 60}{t('secondsShort')}
                                                     </p>
                                                     {entry.metrics.executionTime.claudeCode > 0 && (
                                                         <p className="text-gray-500 mt-1">
-                                                            Claude: {entry.metrics.executionTime.claudeCode}秒
+                                                            Claude: {entry.metrics.executionTime.claudeCode}{t('secondsShort')}
                                                         </p>
                                                     )}
                                                     {entry.metrics.executionTime.autoFix && Object.keys(entry.metrics.executionTime.autoFix).length > 0 && (
                                                         <p className="text-gray-500">
-                                                            修正: {Object.values(entry.metrics.executionTime.autoFix).reduce((a, b) => a + (b || 0), 0)}秒
+                                                            {t('fix')}: {Object.values(entry.metrics.executionTime.autoFix).reduce((a, b) => a + (b || 0), 0)}{t('secondsShort')}
                                                         </p>
                                                     )}
                                                 </div>
 
-                                                {/* エラー・リトライ */}
+                                                {/* Build Status */}
                                                 <div>
-                                                    <p className="text-gray-400 mb-1">ビルド状態</p>
+                                                    <p className="text-gray-400 mb-1">{t('buildStatus')}</p>
                                                     <div className="flex items-center gap-2">
                                                         {entry.metrics.errors.finalStatus === 'success' ? (
-                                                            <span className="text-green-400 font-bold">✓ 成功</span>
+                                                            <span className="text-green-400 font-bold">✓ {t('success')}</span>
                                                         ) : (
-                                                            <span className="text-red-400 font-bold">✗ 失敗</span>
+                                                            <span className="text-red-400 font-bold">✗ {t('failure')}</span>
                                                         )}
                                                     </div>
                                                     {entry.metrics.errors.retryCount > 0 && (
                                                         <p className="text-yellow-400 mt-1">
-                                                            リトライ: {entry.metrics.errors.retryCount}回
+                                                            {t('retry')}: {entry.metrics.errors.retryCount}{t('timesCount')}
                                                         </p>
                                                     )}
                                                     {entry.metrics.errors.buildFailures > 0 && (
                                                         <p className="text-gray-500">
-                                                            失敗: {entry.metrics.errors.buildFailures}回
+                                                            {t('failure')}: {entry.metrics.errors.buildFailures}{t('timesCount')}
                                                         </p>
                                                     )}
                                                 </div>
 
-                                                {/* コード変更量 */}
+                                                {/* Code Changes */}
                                                 <div>
-                                                    <p className="text-gray-400 mb-1">コード変更</p>
+                                                    <p className="text-gray-400 mb-1">{t('codeChanges')}</p>
                                                     <p className="font-mono text-white">
-                                                        {entry.metrics.codeChanges.filesChanged} ファイル
+                                                        {entry.metrics.codeChanges.filesChanged} {t('files')}
                                                     </p>
                                                     <div className="flex gap-3 mt-1">
                                                         <span className="text-green-400 font-mono">
@@ -406,10 +432,10 @@ export default async function ChangelogPage({ params }: PageProps) {
                                                     </div>
                                                 </div>
 
-                                                {/* スクリーンショット差分 */}
+                                                {/* Screen Diff */}
                                                 {entry.metrics.screenshot && (
                                                     <div>
-                                                        <p className="text-gray-400 mb-1">画面差分</p>
+                                                        <p className="text-gray-400 mb-1">{t('screenDiff')}</p>
                                                         <p className="font-mono text-white font-bold">
                                                             {entry.metrics.screenshot.pixelDiffPercent}%
                                                         </p>
@@ -419,7 +445,7 @@ export default async function ChangelogPage({ params }: PageProps) {
                                                     </div>
                                                 )}
 
-                                                {/* エラー詳細（展開可能） */}
+                                                {/* Error Details */}
                                                 {entry.metrics.errors.errorTypes &&
                                                  ((entry.metrics.errors.errorTypes.typescript ?? 0) > 0 ||
                                                   (entry.metrics.errors.errorTypes.build ?? 0) > 0 ||
@@ -428,17 +454,17 @@ export default async function ChangelogPage({ params }: PageProps) {
                                                         <details className="group mt-2">
                                                             <summary className="text-gray-400 cursor-pointer hover:text-purple-300 transition-colors list-none flex items-center gap-2">
                                                                 <span className="group-open:rotate-90 transition-transform">▶</span>
-                                                                エラー詳細
+                                                                {t('errorDetails')}
                                                             </summary>
                                                             <div className="mt-2 p-2 bg-black/30 rounded text-[10px] font-mono">
                                                                 {(entry.metrics.errors.errorTypes?.typescript ?? 0) > 0 && (
-                                                                    <p className="text-blue-400">TypeScript: {entry.metrics.errors.errorTypes.typescript}件</p>
+                                                                    <p className="text-blue-400">TypeScript: {entry.metrics.errors.errorTypes.typescript}</p>
                                                                 )}
                                                                 {(entry.metrics.errors.errorTypes?.build ?? 0) > 0 && (
-                                                                    <p className="text-yellow-400">Build: {entry.metrics.errors.errorTypes.build}件</p>
+                                                                    <p className="text-yellow-400">Build: {entry.metrics.errors.errorTypes.build}</p>
                                                                 )}
                                                                 {(entry.metrics.errors.errorTypes?.security ?? 0) > 0 && (
-                                                                    <p className="text-red-400">Security: {entry.metrics.errors.errorTypes.security}件</p>
+                                                                    <p className="text-red-400">Security: {entry.metrics.errors.errorTypes.security}</p>
                                                                 )}
                                                             </div>
                                                         </details>
@@ -460,7 +486,7 @@ export default async function ChangelogPage({ params }: PageProps) {
                         href={`/models/${modelId}`}
                         className="text-gray-400 hover:text-white transition-colors"
                     >
-                        ← {model.name}トップに戻る
+                        {t('backToModel', { modelName: model.name })}
                     </Link>
                 </div>
             </div>

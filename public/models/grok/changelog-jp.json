@@ -8,7 +8,8 @@
     "files": [
       "src/app/models/grok/playground/page.tsx",
       "src/app/models/grok/playground/components/Game.tsx"
-    ]
+    ],
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/commit/b58663351e179d72b0379a5cc2c8b3bc22ba89d4"
   },
   {
     "id": 2,
@@ -42,6 +43,7 @@
         "additions": 334,
         "deletions": 3
       }
-    }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/commit/ec15d866353cefbf19af2e2e009cc45463161099"
   }
 ]

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { useTranslations } from 'next-intl';
 
 interface DailyData {
     date: string;
@@ -19,8 +20,9 @@ type Period = 7 | 30 | 90;
 
 export function PageviewsChart({ data }: PageviewsChartProps) {
     const [selectedPeriod, setSelectedPeriod] = useState<Period>(30);
+    const t = useTranslations('analytics');
 
-    // 選択された期間のデータをフィルタリング
+    // Filter data for the selected period
     const filteredData = data.slice(-selectedPeriod);
 
     const formattedData = filteredData.map(d => ({
@@ -28,7 +30,7 @@ export function PageviewsChart({ data }: PageviewsChartProps) {
         dateLabel: `${d.date.slice(4, 6)}/${d.date.slice(6, 8)}`
     }));
 
-    // 期間の統計情報を計算
+    // Calculate period statistics
     const totalPageviews = filteredData.reduce((sum, d) => sum + d.pageviews, 0);
     const totalSessions = filteredData.reduce((sum, d) => sum + d.sessions, 0);
     const avgDuration = Math.round(
@@ -38,15 +40,15 @@ export function PageviewsChart({ data }: PageviewsChartProps) {
         filteredData.reduce((sum, d) => sum + d.bounceRate, 0) / filteredData.length
     ).toFixed(1);
 
-    const periods: { value: Period; label: string }[] = [
-        { value: 7, label: '7 days' },
-        { value: 30, label: '30 days' },
-        { value: 90, label: '90 days' }
+    const periods: { value: Period; labelKey: 'days7' | 'days30' | 'days90' }[] = [
+        { value: 7, labelKey: 'days7' },
+        { value: 30, labelKey: 'days30' },
+        { value: 90, labelKey: 'days90' }
     ];
 
     return (
         <div className="glass-card p-6">
-            {/* 期間選択タブ */}
+            {/* Period selector tabs */}
             <div className="flex justify-end mb-6">
                 <div className="flex gap-2">
                     {periods.map((period) => (
@@ -59,13 +61,13 @@ export function PageviewsChart({ data }: PageviewsChartProps) {
                                     : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-300'
                             }`}
                         >
-                            {period.label}
+                            {t(period.labelKey)}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* グラフ */}
+            {/* Chart */}
             <div>
                 <ResponsiveContainer width="100%" height={400}>
                     <LineChart data={formattedData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
@@ -96,7 +98,7 @@ export function PageviewsChart({ data }: PageviewsChartProps) {
                             labelStyle={{ color: '#a855f7' }}
                             formatter={(value, name) => {
                                 if (!value) return [0, name || ''];
-                                if (name === 'pageviews') return [value.toLocaleString(), 'ページビュー'];
+                                if (name === 'pageviews') return [value.toLocaleString(), t('pageviews')];
                                 return [value, name || ''];
                             }}
                         />
@@ -113,23 +115,23 @@ export function PageviewsChart({ data }: PageviewsChartProps) {
                 </ResponsiveContainer>
             </div>
 
-            {/* 統計サマリー */}
+            {/* Statistics summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
                 <div className="text-center p-3 bg-white/5 rounded-lg">
                     <p className="text-xl font-bold gradient-text">{totalPageviews.toLocaleString()}</p>
-                    <p className="text-xs text-gray-400 mt-1">総ページビュー</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('totalPageviews')}</p>
                 </div>
                 <div className="text-center p-3 bg-white/5 rounded-lg">
                     <p className="text-xl font-bold gradient-text">{totalSessions.toLocaleString()}</p>
-                    <p className="text-xs text-gray-400 mt-1">総セッション</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('totalSessions')}</p>
                 </div>
                 <div className="text-center p-3 bg-white/5 rounded-lg">
-                    <p className="text-xl font-bold gradient-text">{avgDuration}秒</p>
-                    <p className="text-xs text-gray-400 mt-1">平均滞在時間</p>
+                    <p className="text-xl font-bold gradient-text">{t('avgSessionDurationValue', { value: avgDuration })}</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('avgSessionDuration')}</p>
                 </div>
                 <div className="text-center p-3 bg-white/5 rounded-lg">
-                    <p className="text-xl font-bold gradient-text">{avgBounceRate}%</p>
-                    <p className="text-xs text-gray-400 mt-1">平均直帰率</p>
+                    <p className="text-xl font-bold gradient-text">{t('avgBounceRateValue', { value: avgBounceRate })}</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('bounceRate')}</p>
                 </div>
             </div>
         </div>

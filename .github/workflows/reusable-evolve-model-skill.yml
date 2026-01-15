@@ -71,6 +71,74 @@ jobs:
           echo "build_failures=0" >> $GITHUB_ENV
           echo "retry_count=0" >> $GITHUB_ENV
 
+      - name: Create Evolution Branch
+        id: create-branch
+        run: |
+          TIMESTAMP=$(TZ=Asia/Tokyo date +'%Y%m%d-%H%M%S')
+          BRANCH_NAME="ai-evolution/${{ inputs.model_id }}-${TIMESTAMP}"
+
+          # Git configuration
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          # Create branch
+          git checkout -b "$BRANCH_NAME"
+
+          # Create empty commit (to enable PR creation)
+          git commit --allow-empty -m "🚀 AI Evolution Started - ${{ inputs.model_display_name }}" \
+            -m "Timestamp: $(TZ=Asia/Tokyo date +'%Y-%m-%d %H:%M JST')" \
+            -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "✅ Created branch: $BRANCH_NAME"
+        env:
+          TZ: Asia/Tokyo
+
+      - name: Create Draft PR
+        id: create-pr
+        run: |
+          # Create PR body (placeholder)
+          cat > /tmp/pr-body.md <<'EOF'
+          ## AI Evolution - ${{ inputs.model_display_name }}
+
+          **Status:** 🔄 Implementation in Progress
+
+          ### Context
+          Current analytics data shows opportunities for improvement.
+
+          ### Implementation
+          Claude Code is analyzing metrics and implementing changes...
+
+          ### Screenshots
+          Will be added after implementation completes.
+
+          ---
+          🤖 Generated with [Claude Code](https://claude.com/claude-code)
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EOF
+
+          # Push branch to remote
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin "${{ steps.create-branch.outputs.branch_name }}"
+
+          # Create Draft PR
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "${{ steps.create-branch.outputs.branch_name }}" \
+            --title "🤖 AI Evolution (${{ inputs.model_display_name }}) - $(TZ=Asia/Tokyo date +'%Y-%m-%d %H:%M JST')" \
+            --body-file /tmp/pr-body.md \
+            --draft)
+
+          PR_NUMBER=$(gh pr view "$PR_URL" --json number -q '.number')
+
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "✅ Created PR #$PR_NUMBER: $PR_URL"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TZ: Asia/Tokyo
+
       - name: Fetch Analytics
         run: node scripts/fetch-analytics.js
         env:
@@ -81,16 +149,16 @@ jobs:
       - name: Prepare Skill Context
         id: prepare-skill
         run: |
-          # Skillファイルの内容を読み込み（YAMLフロントマターを除外）
+          # Read skill file content (excluding YAML frontmatter)
           SKILL_CONTENT=$(awk '/^---$/{count++; next} count>=2' .claude/skills/evolve-game/SKILL.md)
 
-          # アナリティクスデータを読み込み
+          # Read analytics data
           ANALYTICS_DATA=$(cat public/models/${{ inputs.model_id }}/analytics.json 2>/dev/null || echo '{}')
 
-          # Changelogデータを読み込み（最新3件のみ）
-          CHANGELOG_DATA=$(cat public/models/${{ inputs.model_id }}/changelog.json 2>/dev/null | jq '.[0:3]' || echo '[]')
+          # Read changelog data (latest 3 entries only)
+          CHANGELOG_DATA=$(cat public/models/${{ inputs.model_id }}/changelog-jp.json 2>/dev/null | jq '.[0:3]' || echo '[]')
 
-          # Skillの内容とコンテキストデータを含むプロンプトを構成
+          # Compose prompt with skill content and context data
           SKILL_PROMPT="$SKILL_CONTENT
 
           ---
@@ -101,7 +169,8 @@ jobs:
           You may also edit:
           - src/app/api/${{ inputs.model_id }}/ - Your dedicated API Routes namespace
           - src/components/icons/Icons.tsx - Icon definitions
-          - public/models/${{ inputs.model_id }}/changelog.json - Change history
+          - public/models/${{ inputs.model_id }}/changelog-jp.json - Change history (Japanese)
+          - public/models/${{ inputs.model_id }}/changelog-en.json - Change history (English)
 
           ## Current Analytics Data:
           $ANALYTICS_DATA
@@ -111,21 +180,21 @@ jobs:
 
           ---
 
-          # 🚨 重要: スマホ対応チェックリスト
+          # 🚨 IMPORTANT: Mobile Compatibility Checklist
 
-          **実装前に必ず確認してください：**
+          **Before implementation, confirm:**
 
-          ✅ Canvasサイズは画面サイズに応じて動的に設定していますか？
-          ✅ タッチ操作は直感的で快適ですか？
-          ✅ 小さい画面でも見やすく操作しやすいですか？
-          ✅ フィードバックはありますか？
+          ✅ Is canvas size dynamically set according to screen size?
+          ✅ Are touch controls intuitive and comfortable?
+          ✅ Is it easy to see and operate on small screens?
+          ✅ Is there feedback?
 
-          **実装後に確認してください：**
+          **After implementation, confirm:**
 
-          ✅ 画面サイズを取得して動的にサイズ設定していますか？
-          ✅ タッチイベントは連続的に処理されますか？
-          ✅ スワイプ判定は画面サイズに応じていますか？
-          ✅ 固定値を使っていませんか？
+          ✅ Are you getting screen size and setting size dynamically?
+          ✅ Are touch events processed continuously?
+          ✅ Is swipe detection adjusted according to screen size?
+          ✅ Are you not using hardcoded values?
           "
 
 
@@ -196,7 +265,7 @@ jobs:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare-skill.outputs.skill_prompt }}
           claude_args: |
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite"
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
@@ -249,7 +318,7 @@ jobs:
             echo "NEEDS_FIX=true" >> $GITHUB_ENV
             echo "$OUTPUT" > error_log.txt
 
-            # エラー分析
+            # Error analysis
             TYPESCRIPT_ERRORS=$(grep -c "TS[0-9]\+:" error_log.txt || echo 0)
             BUILD_ERRORS=$(grep -c "error:" error_log.txt || echo 0)
 
@@ -294,7 +363,7 @@ jobs:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_1.outputs.fix_prompt }}
           claude_args: |
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
@@ -326,7 +395,7 @@ jobs:
             echo "NEEDS_FIX=true" >> $GITHUB_ENV
             echo "$OUTPUT" > error_log.txt
 
-            # エラー分析
+            # Error analysis
             TYPESCRIPT_ERRORS=$(grep -c "TS[0-9]\+:" error_log.txt || echo 0)
             BUILD_ERRORS=$(grep -c "error:" error_log.txt || echo 0)
 
@@ -370,7 +439,7 @@ jobs:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_2.outputs.fix_prompt }}
           claude_args: |
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
@@ -402,7 +471,7 @@ jobs:
             echo "NEEDS_FIX=true" >> $GITHUB_ENV
             echo "$OUTPUT" > error_log.txt
 
-            # エラー分析
+            # Error analysis
             TYPESCRIPT_ERRORS=$(grep -c "TS[0-9]\+:" error_log.txt || echo 0)
             BUILD_ERRORS=$(grep -c "error:" error_log.txt || echo 0)
 
@@ -446,7 +515,7 @@ jobs:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_3.outputs.fix_prompt }}
           claude_args: |
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
@@ -568,7 +637,7 @@ jobs:
       - name: Record Failure Metrics
         if: failure() && steps.changes.outputs.has_changes == 'true'
         run: |
-          # 失敗時もメトリクスを記録
+          # Record metrics even on failure
           WORKFLOW_END=$(date +%s)
           TOTAL_DURATION=$((WORKFLOW_END - ${workflow_start:-0}))
           echo "total_duration=$TOTAL_DURATION" >> $GITHUB_ENV
@@ -594,7 +663,7 @@ jobs:
       - name: Collect Git Statistics (on Failure)
         if: failure() && steps.changes.outputs.has_changes == 'true'
         run: |
-          # アプリケーションコードのみを対象にした統計
+          # Statistics for application code only
           GIT_STATS=$(git diff --stat HEAD -- \
             src/app/models/${{ inputs.model_id }}/playground \
             src/app/api/${{ inputs.model_id }} \
@@ -611,7 +680,7 @@ jobs:
       - name: Update Changelog (on Failure)
         if: failure() && steps.changes.outputs.has_changes == 'true'
         run: |
-          # 失敗時でもchangelog.jsonを更新
+          # Update changelog.json even on failure
           echo "📝 Updating changelog with failure metrics..."
           node scripts/update-changelog.js || true
         env:
@@ -620,89 +689,79 @@ jobs:
           AI_REASONING: "Workflow failed - partial changes recorded"
           CHANGED_FILES: ""
 
-      - name: Configure Git (on Failure)
+      - name: Update PR with Failure Status
         if: failure() && steps.changes.outputs.has_changes == 'true'
         run: |
+          # Git configuration
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-      - name: Create Branch and Commit (on Failure)
-        if: failure() && steps.changes.outputs.has_changes == 'true'
-        run: |
-          # タイムスタンプ付きブランチ名生成
-          TIMESTAMP=$(TZ=Asia/Tokyo date +'%Y%m%d-%H%M%S')
-          BRANCH_NAME="ai-evolution/${{ inputs.model_id }}-${TIMESTAMP}"
-
-          echo "Creating branch: $BRANCH_NAME"
-          git checkout -b "$BRANCH_NAME"
-
-          # 許可されたディレクトリのみステージング
+          # Stage changes (as much as possible)
           git add src/app/models/${{ inputs.model_id }}/playground || true
           git add src/app/api/${{ inputs.model_id }} || true
           git add src/components/icons/Icons.tsx || true
-          git add public/models/${{ inputs.model_id }}/changelog.json || true
+          git add public/models/${{ inputs.model_id }}/changelog-jp.json || true
+          git add public/models/${{ inputs.model_id }}/changelog-en.json || true
           git add public/models/${{ inputs.model_id }}/analytics.json || true
           git add public/models/${{ inputs.model_id }}/analytics-previous.json || true
           git add public/models/${{ inputs.model_id }}/screenshots/ || true
 
-          # セキュリティチェック：許可外の変更を除外
+          # Security check: exclude changes outside allowed scope
           UNEXPECTED_CHANGES=$(git status --porcelain src/ | grep -vE "src/app/models/${{ inputs.model_id }}/playground(/|$)|src/app/api/${{ inputs.model_id }}(/|$)|src/components/icons/Icons.tsx" || true)
 
           if [[ -n "$UNEXPECTED_CHANGES" ]]; then
              echo "⚠️  WARNING: AI modified files outside of allowed scope!"
              echo "$UNEXPECTED_CHANGES"
-
-             # 修正・削除されたファイルを元に戻す（M, D）
              echo "$UNEXPECTED_CHANGES" | grep "^[MD]" | awk '{print $2}' | xargs -r git checkout -- 2>/dev/null || true
-
-             # ステージング済みの新規ファイルをリセット（A）
              echo "$UNEXPECTED_CHANGES" | grep "^A" | awk '{print $2}' | xargs -r git reset HEAD 2>/dev/null || true
-
-             # 新規追加・未追跡ファイルを削除（A, ??）
              echo "$UNEXPECTED_CHANGES" | grep -E "^(A|\?\?)" | awk '{print $2}' | xargs -r rm -f 2>/dev/null || true
           fi
 
-          # 変更がない場合は終了
-          if git diff --cached --quiet; then
-            echo "No changes to commit after filtering."
-            exit 0
+          # Commit only if there are changes
+          if ! git diff --cached --quiet; then
+            # Identify failure reason
+            FAILURE_REASON="Unknown error"
+            if [[ "${{ steps.check_3.outcome }}" == "failure" ]]; then
+              FAILURE_REASON="Build/Type check failed after 3 attempts"
+            elif [[ "${{ job.status }}" == "failure" ]]; then
+              FAILURE_REASON="Security check or final verification failed"
+            fi
+
+            git commit -m "🚧 AI Evolution (Incomplete) - ${{ inputs.model_display_name }}" \
+              -m "Workflow failed - manual review required" \
+              -m "Reason: ${FAILURE_REASON}" \
+              -m "PR: ${{ steps.create-pr.outputs.pr_url }}" \
+              -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            git push origin "${{ steps.create-branch.outputs.branch_name }}" || true
+
+            echo "✅ Partial changes committed to PR branch"
           fi
 
-          # 失敗理由の特定
-          FAILURE_REASON="Unknown error"
-          if [[ "${{ steps.check_3.outcome }}" == "failure" ]]; then
-            FAILURE_REASON="Build/Type check failed after 3 attempts"
-          elif [[ "${{ job.status }}" == "failure" ]]; then
-            FAILURE_REASON="Security check or final verification failed"
-          fi
+          # Mark PR with failure status
+          gh pr edit ${{ steps.create-pr.outputs.pr_number }} \
+            --add-label "failed" \
+            --body "## ⚠️ AI Evolution Failed
 
-          # コミットメッセージ作成
-          DATE=$(TZ=Asia/Tokyo date +'%Y-%m-%d %H:%M:%S JST')
-          echo "🚧 AI Evolution (Incomplete) - ${{ inputs.model_display_name }} - ${DATE}" > /tmp/commit_msg.txt
-          echo "" >> /tmp/commit_msg.txt
-          echo "Workflow failed: ${FAILURE_REASON}" >> /tmp/commit_msg.txt
-          echo "" >> /tmp/commit_msg.txt
-          echo "Branch: ${BRANCH_NAME}" >> /tmp/commit_msg.txt
-          echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> /tmp/commit_msg.txt
-          echo "" >> /tmp/commit_msg.txt
-          echo "⚠️  DO NOT MERGE - Review and fix issues first" >> /tmp/commit_msg.txt
+          **Status:** Failed
+          **Reason:** Build or test failures
 
-          git commit -F /tmp/commit_msg.txt
+          Please review workflow logs and fix issues manually.
 
-          # リモートにプッシュ
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git push origin "$BRANCH_NAME"
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          echo "✅ Changes saved to branch: $BRANCH_NAME"
-          echo "🔗 View at: ${{ github.server_url }}/${{ github.repository }}/tree/$BRANCH_NAME"
+          echo "⚠️ PR #${{ steps.create-pr.outputs.pr_number }} marked as failed"
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TZ: Asia/Tokyo
+        continue-on-error: true
 
       # === Success Handling ===
       - name: Collect Git Statistics
         if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
-          # アプリケーションコードのみを対象にした統計
+          # Statistics for application code only
           GIT_STATS=$(git diff --stat HEAD -- \
             src/app/models/${{ inputs.model_id }}/playground \
             src/app/api/${{ inputs.model_id }} \
@@ -719,15 +778,15 @@ jobs:
       - name: Record Workflow Metrics
         if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
-          # 総実行時間を計算
+          # Calculate total execution time
           WORKFLOW_END=$(date +%s)
           TOTAL_DURATION=$((WORKFLOW_END - ${{ env.workflow_start }}))
           echo "total_duration=$TOTAL_DURATION" >> $GITHUB_ENV
 
-          # 最終ステータス
+          # Final status
           echo "final_status=success" >> $GITHUB_ENV
 
-          # メトリクスをファイルに記録
+          # Record metrics to file
           node scripts/record-workflow-metrics.js
         env:
           MODEL_ID: ${{ inputs.model_id }}
@@ -746,13 +805,15 @@ jobs:
           ADDITIONS: ${{ env.additions }}
           DELETIONS: ${{ env.deletions }}
 
-      - name: Update Changelog with Metrics
+      - name: Update Changelog with PR Info
         if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
-          echo "📝 Adding workflow metrics to changelog..."
-          node scripts/add-metrics-to-changelog.js
+          echo "📝 Adding PR info and metrics to changelog..."
+          node scripts/update-changelog-with-pr.js
         env:
           MODEL_ID: ${{ inputs.model_id }}
+          PR_URL: ${{ steps.create-pr.outputs.pr_url }}
+          PR_NUMBER: ${{ steps.create-pr.outputs.pr_number }}
 
       - name: Configure Git
         if: success() && steps.changes.outputs.has_changes == 'true'
@@ -760,7 +821,7 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-      - name: Commit & Push
+      - name: Commit to Branch
         if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
           # Add allowed directories
@@ -768,7 +829,8 @@ jobs:
           git add src/app/api/${{ inputs.model_id }} || true
           git add src/components/icons/Icons.tsx || true
 
-          git add public/models/${{ inputs.model_id }}/changelog.json || echo "No changelog update"
+          git add public/models/${{ inputs.model_id }}/changelog-jp.json || echo "No Japanese changelog update"
+          git add public/models/${{ inputs.model_id }}/changelog-en.json || echo "No English changelog update"
           git add public/models/${{ inputs.model_id }}/analytics.json || echo "No analytics update"
           git add public/models/${{ inputs.model_id }}/analytics-previous.json || echo "No prev analytics update"
           git add public/models/${{ inputs.model_id }}/screenshots/ || echo "No screenshot update"
@@ -783,23 +845,48 @@ jobs:
              echo "Blocking push to prevent security issues."
              exit 1
           fi
-          
-          DATE=$(date +'%Y-%m-%d')
-          git commit -m "${{ inputs.commit_prefix }} (${{ inputs.model_display_name }}) - $DATE"
+
+          DATE=$(TZ=Asia/Tokyo date +'%Y-%m-%d %H:%M JST')
+          git commit -m "${{ inputs.commit_prefix }} (${{ inputs.model_display_name }}) - $DATE" \
+            -m "PR: ${{ steps.create-pr.outputs.pr_url }}" \
+            -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin "${{ steps.create-branch.outputs.branch_name }}"
 
-          # Fetch latest changes and rebase
-          git fetch origin main
-          git rebase origin/main
+          echo "✅ Changes committed and pushed to branch: ${{ steps.create-branch.outputs.branch_name }}"
+        env:
+          TZ: Asia/Tokyo
 
-          # If rebase fails due to conflicts, abort and exit
-          if [ $? -ne 0 ]; then
-            git rebase --abort
-            echo "❌ Rebase failed - conflicts detected. Manual intervention required."
-            exit 1
-          fi
+      - name: Update PR with Final Results
+        if: success() && steps.changes.outputs.has_changes == 'true'
+        run: node scripts/update-pr-body.js
+        env:
+          MODEL_ID: ${{ inputs.model_id }}
+          PR_NUMBER: ${{ steps.create-pr.outputs.pr_number }}
+          BRANCH_NAME: ${{ steps.create-branch.outputs.branch_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          git push origin main
+      - name: Merge PR (Squash)
+        if: success() && steps.changes.outputs.has_changes == 'true'
+        run: |
+          # Mark PR as ready (remove draft status)
+          gh pr ready ${{ steps.create-pr.outputs.pr_number }}
+
+          # Squash merge
+          gh pr merge ${{ steps.create-pr.outputs.pr_number }} \
+            --squash \
+            --delete-branch \
+            --subject "${{ inputs.commit_prefix }} (${{ inputs.model_display_name }}) - $(TZ=Asia/Tokyo date +'%Y-%m-%d')" \
+            --body "Automated AI evolution completed successfully.
+
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          echo "✅ PR #${{ steps.create-pr.outputs.pr_number }} merged successfully"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TZ: Asia/Tokyo
 
       - name: Cleanup Dev Server
         if: always()

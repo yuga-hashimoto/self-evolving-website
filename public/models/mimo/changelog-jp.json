@@ -8,7 +8,8 @@
     "files": [
       "src/app/models/mimo/playground/page.tsx",
       "src/app/api/mimo/game-events/route.ts"
-    ]
+    ],
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/commit/feaf934d141391ff04b284ee6b6bfd1f5c965287"
   },
   {
     "id": 2,
@@ -41,6 +42,7 @@
         "additions": 706,
         "deletions": 78
       }
-    }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/commit/227a26304544e79af6b17aee5ea787b7c5e6d554"
   }
 ]

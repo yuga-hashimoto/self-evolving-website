@@ -1,4 +1,4 @@
-// モデル設定ファイル
+// Model configuration file
 export const MODELS = {
     mimo: {
         id: 'mimo',

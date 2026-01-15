@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getModel, MODELS } from "@/lib/models";
 import { IconPlayground, IconChangelog, IconAnalytics, IconMimo, IconGrok } from "@/components/icons/Icons";
+import { getTranslations } from 'next-intl/server';
 
 export function generateStaticParams() {
     return Object.keys(MODELS).map((modelId) => ({
@@ -20,6 +21,8 @@ export default async function ModelPage({ params }: PageProps) {
     if (!model) {
         notFound();
     }
+
+    const t = await getTranslations('models');
 
     const colorMap = {
         purple: {
@@ -66,9 +69,9 @@ export default async function ModelPage({ params }: PageProps) {
                         <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
                             <IconPlayground className="w-12 h-12 sm:w-16 sm:h-16" />
                         </div>
-                        <h2 className="text-xl font-bold mb-2">実験場</h2>
+                        <h2 className="text-xl font-bold mb-2">{t('playground')}</h2>
                         <p className="text-gray-400 text-sm">
-                            AIが自由に進化させるゲーム
+                            {t('playgroundDesc')}
                         </p>
                     </div>
                 </Link>
@@ -78,9 +81,9 @@ export default async function ModelPage({ params }: PageProps) {
                         <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
                             <IconChangelog className="w-12 h-12 sm:w-16 sm:h-16" />
                         </div>
-                        <h2 className="text-lg sm:text-xl font-bold mb-2">更新履歴</h2>
+                        <h2 className="text-lg sm:text-xl font-bold mb-2">{t('changelog')}</h2>
                         <p className="text-gray-400 text-xs sm:text-sm">
-                            AIが行った変更の記録
+                            {t('changelogDesc')}
                         </p>
                     </div>
                 </Link>
@@ -90,9 +93,9 @@ export default async function ModelPage({ params }: PageProps) {
                         <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
                             <IconAnalytics className="w-12 h-12 sm:w-16 sm:h-16" />
                         </div>
-                        <h2 className="text-lg sm:text-xl font-bold mb-2">アナリティクス</h2>
+                        <h2 className="text-lg sm:text-xl font-bold mb-2">{t('analytics')}</h2>
                         <p className="text-gray-400 text-xs sm:text-sm">
-                            リアルタイム統計データ
+                            {t('analyticsDesc')}
                         </p>
                     </div>
                 </Link>
@@ -104,7 +107,7 @@ export default async function ModelPage({ params }: PageProps) {
                     href="/"
                     className="text-gray-400 hover:text-white transition-colors"
                 >
-                    ← モデル選択に戻る
+                    {t('backToHome')}
                 </Link>
             </div>
         </div>

@@ -2,16 +2,28 @@ import Link from "next/link";
 import { IconDNA, IconCycleDaily, IconBrain, IconCodeSpark, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
 import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
+import { getTranslations, getLocale } from 'next-intl/server';
 
-export default function Home() {
-  // モデルのアナリティクスデータを取得
+export default async function Home() {
+  const t = await getTranslations('home');
+  const locale = await getLocale();
+
+  // Format start date according to locale
+  const startDate = new Date('2026-01-15');
+  const formattedDate = startDate.toLocaleDateString(locale === 'ja' ? 'ja-JP' : 'en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  // Fetch model analytics data
   const mimoAnalytics = getModelAnalytics('mimo');
   const grokAnalytics = getModelAnalytics('grok');
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
-        {/* Mobile: タイトルのみ */}
+        {/* Mobile: Title only */}
         <h1 className="text-5xl font-bold gradient-text leading-tight mb-4 sm:hidden">
           <div className="flex flex-col">
             <span>Self-Evolving</span>
@@ -19,22 +31,20 @@ export default function Home() {
           </div>
         </h1>
 
-        {/* Desktop: ロゴとタイトル */}
+        {/* Desktop: Logo and title */}
         <div className="hidden sm:flex items-center justify-center gap-4 mb-6">
           <h1 className="text-5xl lg:text-6xl font-bold gradient-text leading-tight">
-            Self-Evolving Game
+            {t('heroTitle')}
           </h1>
           <div className="inline-block animate-float">
             <IconDNA size={96} />
           </div>
         </div>
         <p className="text-base sm:text-xl text-purple-300 mb-3 sm:mb-4 leading-relaxed">
-          2つのAIがまっさらな画面から修正をスタート。<br className="sm:hidden" />
-          同じ指示で、エンゲージメント向上を競っています。
+          {t('heroSubtitle')}
         </p>
         <p className="text-sm sm:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed">
-          <span className="text-purple-400 font-medium">2026年1月15日</span>から改善を開始。<br className="sm:hidden" />
-          どちらがより面白いゲームを作るでしょうか？
+          {t('startDate', { date: formattedDate })}
         </p>
       </div>
 
@@ -113,7 +123,7 @@ export default function Home() {
               {/* Comparison Bars */}
               <div className="space-y-4 sm:space-y-5">
                 <ComparisonBar
-                  label="平均滞在時間"
+                  label={t('avgSessionDuration')}
                   mimoValue={mimoAnalytics.avgSessionDuration}
                   grokValue={grokAnalytics.avgSessionDuration}
                   mimoDisplay={formatDuration(mimoAnalytics.avgSessionDuration)}
@@ -121,7 +131,7 @@ export default function Home() {
                   higherIsBetter
                 />
                 <ComparisonBar
-                  label="ページビュー"
+                  label={t('pageviews')}
                   mimoValue={mimoAnalytics.pageviews}
                   grokValue={grokAnalytics.pageviews}
                   mimoDisplay={mimoAnalytics.pageviews.toString()}
@@ -133,17 +143,17 @@ export default function Home() {
               {/* Update Note */}
               <div className="mt-6 pt-4 border-t border-white/10 text-center">
                 <p className="text-xs text-gray-500">
-                  1日2回更新（6時・18時）
+                  {t('updateNote')}
                 </p>
               </div>
             </>
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-400 text-sm sm:text-base mb-2">
-                データを集計中です
+                {t('dataCollecting')}
               </p>
               <p className="text-gray-500 text-xs">
-                1日2回（6時・18時）の自動実行後にデータが表示されます
+                {t('dataWillAppear')}
               </p>
             </div>
           )}
@@ -153,7 +163,7 @@ export default function Home() {
       {/* How it Works - Mobile Optimized Timeline */}
       <div className="max-w-3xl w-full mb-4 sm:mb-8 px-4">
         <h3 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-400">
-          How it Works
+          {t('howItWorksTitle')}
         </h3>
 
         {/* Timeline Container */}
@@ -169,9 +179,9 @@ export default function Home() {
                 <span className="text-xl font-bold">1</span>
               </div>
               <div className="flex-1 sm:mt-4">
-                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">1日2回自動起動</h4>
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">{t('step1Title')}</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  GitHub Actionsが6時・18時に実行。人間の介入は一切なし。
+                  {t('step1Desc')}
                 </p>
               </div>
             </div>
@@ -182,9 +192,9 @@ export default function Home() {
                 <span className="text-xl font-bold">2</span>
               </div>
               <div className="flex-1 sm:mt-4">
-                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">AIがゲームを分析</h4>
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">{t('step2Title')}</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  <a href="https://openrouter.ai/docs/guides/guides/claude-code-integration" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 underline">Claude Code (OpenRouter)</a> がアクセス解析とコードを読み込み、改善ポイントを特定。
+                  {t('step2Desc')}
                 </p>
               </div>
             </div>
@@ -195,9 +205,9 @@ export default function Home() {
                 <span className="text-xl font-bold">3</span>
               </div>
               <div className="flex-1 sm:mt-4">
-                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">コードを書いてデプロイ</h4>
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">{t('step3Title')}</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  テスト通過後、自動でゲームに反映。継続的に進化。
+                  {t('step3Desc')}
                 </p>
               </div>
             </div>
@@ -208,7 +218,7 @@ export default function Home() {
       {/* AI Modification Rules */}
       <div className="max-w-3xl w-full mb-8 sm:mb-12 px-4">
         <h3 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-400">
-          AIが修正する際のルール
+          {t('aiRulesTitle')}
         </h3>
 
         {/* Rules Content */}
@@ -220,9 +230,9 @@ export default function Home() {
                 <IconTarget size={24} className="text-purple-400" />
               </div>
               <div>
-                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">目標</h4>
+                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleGoalTitle')}</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  ゲームの面白さと滞在時間の最大化
+                  {t('ruleGoalDesc')}
                 </p>
               </div>
             </div>
@@ -233,9 +243,9 @@ export default function Home() {
                 <IconBalance size={24} className="text-purple-400" />
               </div>
               <div>
-                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">公平性</h4>
+                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleFairnessTitle')}</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  両AIへの指示は完全に同一。同じ条件で競争
+                  {t('ruleFairnessDesc')}
                 </p>
               </div>
             </div>
@@ -246,9 +256,9 @@ export default function Home() {
                 <IconAnalytics size={24} className="text-purple-400" />
               </div>
               <div>
-                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">提供データ</h4>
+                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleDataTitle')}</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  変更履歴とアナリティクスデータを1日2回提供
+                  {t('ruleDataDesc')}
                 </p>
               </div>
             </div>
@@ -259,9 +269,9 @@ export default function Home() {
                 <IconRocket size={24} className="text-purple-400" />
               </div>
               <div>
-                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">修正範囲</h4>
+                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleFreedomTitle')}</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  フロントエンド・バックエンド両方の修正が可能。既存コンテンツの修正、追加、削除すべて自由。
+                  {t('ruleFreedomDesc')}
                 </p>
               </div>
             </div>
@@ -272,9 +282,9 @@ export default function Home() {
                 <IconClipboard size={24} className="text-purple-400" />
               </div>
               <div>
-                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">制約</h4>
+                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleConstraintTitle')}</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  1回の実行で3-5ファイルの改善を行いリスクを最小化
+                  {t('ruleConstraintDesc')}
                 </p>
               </div>
             </div>
