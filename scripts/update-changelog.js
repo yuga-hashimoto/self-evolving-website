@@ -15,7 +15,8 @@ const changedFiles = process.env.CHANGED_FILES?.split(',') || [];
 const modelDataDir = `public/models/${MODEL_ID}`;
 const analyticsPath = path.join(modelDataDir, 'analytics.json');
 const analyticsPrevPath = path.join(modelDataDir, 'analytics-previous.json');
-const changelogPath = path.join(modelDataDir, 'changelog.json');
+const changelogJpPath = path.join(modelDataDir, 'changelog-jp.json');
+const changelogEnPath = path.join(modelDataDir, 'changelog-en.json');
 
 // Read Analytics
 let analytics = { revenue: '0', pageviews: 0, avgSessionDuration: 0, bounceRate: '0' };
@@ -41,14 +42,6 @@ const pvChange = previous.pageviews > 0
     ? ((analytics.pageviews - previous.pageviews) / previous.pageviews * 100).toFixed(1)
     : '0';
 
-// Read Changelog
-let changelog = [];
-try {
-    changelog = JSON.parse(fs.readFileSync(changelogPath, 'utf-8'));
-} catch {
-    console.log(`📝 Creating new changelog for ${MODEL_ID}`);
-}
-
 // Read workflow metrics
 let metrics = null;
 try {
@@ -57,9 +50,9 @@ try {
     console.log('⚠️  No workflow metrics found');
 }
 
-// Add new entry
-const entry = {
-    id: changelog.length + 1,
+// Create new entry (base)
+const createEntry = (existingChangelog) => ({
+    id: existingChangelog.length + 1,
     date: new Date().toISOString(),
     model: process.env.AI_MODEL || 'unknown',
     modelId: MODEL_ID,
@@ -74,14 +67,31 @@ const entry = {
         bounceRate: parseFloat(analytics.bounceRate)
     },
     metrics: metrics
-};
+});
 
-changelog.push(entry);
+// Update both changelog files
+const changelogPaths = [changelogJpPath, changelogEnPath];
 
-// Keep only latest 100 entries
-if (changelog.length > 100) {
-    changelog = changelog.slice(-100);
+for (const changelogPath of changelogPaths) {
+    // Read Changelog
+    let changelog = [];
+    try {
+        changelog = JSON.parse(fs.readFileSync(changelogPath, 'utf-8'));
+    } catch {
+        console.log(`📝 Creating new changelog: ${changelogPath}`);
+    }
+
+    // Add new entry
+    const entry = createEntry(changelog);
+    changelog.push(entry);
+
+    // Keep only latest 100 entries
+    if (changelog.length > 100) {
+        changelog = changelog.slice(-100);
+    }
+
+    fs.writeFileSync(changelogPath, JSON.stringify(changelog, null, 2));
+    console.log(`📝 Changelog updated: ${changelogPath}`);
 }
 
-fs.writeFileSync(changelogPath, JSON.stringify(changelog, null, 2));
-console.log(`📝 Changelog updated for ${MODEL_ID}`);
+console.log(`✅ All changelogs updated for ${MODEL_ID}`);
