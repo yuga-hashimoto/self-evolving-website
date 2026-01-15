@@ -54,6 +54,17 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Cache Next.js Build
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
+            ${{ runner.os }}-nextjs-
+
       - name: Initialize Metrics
         run: |
           echo "workflow_start=$(date +%s)" >> $GITHUB_ENV
@@ -97,21 +108,43 @@ jobs:
           DEV_PID=$!
           echo "dev_pid=$DEV_PID" >> $GITHUB_OUTPUT
 
-          # Wait for server to start
+          # Wait for server to start with timeout
           echo "Waiting for dev server to start..."
-          for i in {1..30}; do
-            if curl -s http://localhost:3131 > /dev/null; then
-              echo "✅ Dev server is ready (PID: $DEV_PID)"
-              break
+          TIMEOUT=20
+          ELAPSED=0
+
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            if curl -s http://localhost:3131 > /dev/null 2>&1; then
+              echo "✅ Dev server is ready (PID: $DEV_PID) after ${ELAPSED}s"
+              exit 0
             fi
             sleep 2
+            ELAPSED=$((ELAPSED + 2))
           done
+
+          echo "❌ Dev server failed to start within ${TIMEOUT}s"
+          exit 1
         env:
           SERPER_API_KEY: ${{ secrets.serper_api_key }}
 
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
       - name: Install Playwright for Screenshots
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: |
           npx playwright install chromium --with-deps
+
+      - name: Install Playwright Dependencies Only
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: |
+          npx playwright install-deps chromium
 
       - name: Take Before Screenshot
         run: |
@@ -651,8 +684,18 @@ jobs:
           DATE=$(date +'%Y-%m-%d')
           git commit -m "${{ inputs.commit_prefix }} (${{ inputs.model_display_name }}) - $DATE"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git stash
-          git pull --rebase origin main
+
+          # Fetch latest changes and rebase
+          git fetch origin main
+          git rebase origin/main
+
+          # If rebase fails due to conflicts, abort and exit
+          if [ $? -ne 0 ]; then
+            git rebase --abort
+            echo "❌ Rebase failed - conflicts detected. Manual intervention required."
+            exit 1
+          fi
+
           git push origin main
 
       - name: Cleanup Dev Server

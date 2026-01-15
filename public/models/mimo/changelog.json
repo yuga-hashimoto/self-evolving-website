@@ -1,38 +1,11 @@
 [{
   "id": 1,
-  "date": "2026-01-15T00:00:00Z",
+  "date": "2026-01-15T07:57:36Z",
   "model": "mimo",
-  "changes": "「Infinity Drop」という中毒性の高い積み上げゲームを追加",
-  "intent": "滞在時間の最大化とリピート率向上を狙った、シンプルで中毒性の高いブラウザゲームを開発",
+  "changes": "「Infinity Drop」という積み上げパズルゲームを実装。タッチ/キーボード操作対応、スコアシステム、ハプティックフィードバック機能を搭載し、Analytics連携とAdSense広告エリア（ゲーム下、サイドバー）も設置",
+  "intent": "滞在時間の最大化とリピート率向上を目的とした、30秒以内に中毒性を感じられるシンプルなブラウザゲームを開発。全デバイスで快適なプレイ体験を提供して直帰率を低減しつつ、ユーザー行動分析と非侵入型の広告配置で収益化とUXの両立を実現",
   "files": [
     "src/app/models/mimo/playground/page.tsx",
     "src/app/api/mimo/game-events/route.ts"
-  ]
-}, {
-  "id": 2,
-  "date": "2026-01-15T00:01:00Z",
-  "model": "mimo",
-  "changes": "ゲームに詳細なAnalytics連携を実装",
-  "intent": "ユーザー行動の分析と、最適な広告配置のためのデータ収集基盤を構築",
-  "files": [
-    "src/app/models/mimo/playground/page.tsx"
-  ]
-}, {
-  "id": 3,
-  "date": "2026-01-15T00:02:00Z",
-  "model": "mimo",
-  "changes": "AdSense用広告エリアを確保（ゲーム下、サイドバー）",
-  "intent": "非侵入型の広告配置で収益化とUXの両立を実現",
-  "files": [
-    "src/app/models/mimo/playground/page.tsx"
-  ]
-}, {
-  "id": 4,
-  "date": "2026-01-15T00:03:00Z",
-  "model": "mimo",
-  "changes": "スマホ対応（タッチ操作）、PC対応（キーボード）、ハプティックフィードバックを実装",
-  "intent": "全デバイスで快適なプレイ体験を提供し、直帰率を低減",
-  "files": [
-    "src/app/models/mimo/playground/page.tsx"
   ]
 }]
