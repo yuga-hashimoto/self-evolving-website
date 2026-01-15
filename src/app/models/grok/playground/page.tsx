@@ -1,7 +1,12 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Game from './components/Game';
+import Two048Game from './components/Two048Game';
 
 export default function GrokPlayground() {
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048'>('doodle');
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Ad space at top */}
@@ -9,10 +14,27 @@ export default function GrokPlayground() {
         Ad Space
       </div>
 
-      {/* Game container */}
+      {/* Game selection */}
       <div className="flex justify-center p-4">
         <div className="max-w-md w-full">
-          <Game />
+          <div className="flex justify-center space-x-4 mb-4">
+            <button
+              onClick={() => setSelectedGame('doodle')}
+              className={`px-4 py-2 rounded ${selectedGame === 'doodle' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              Doodle Leap
+            </button>
+            <button
+              onClick={() => setSelectedGame('2048')}
+              className={`px-4 py-2 rounded ${selectedGame === '2048' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              2048
+            </button>
+          </div>
+
+          {/* Game container */}
+          {selectedGame === 'doodle' && <Game />}
+          {selectedGame === '2048' && <Two048Game />}
         </div>
       </div>
 
