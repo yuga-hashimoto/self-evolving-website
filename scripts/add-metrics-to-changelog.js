@@ -8,7 +8,7 @@ if (!MODEL_ID) {
 }
 
 const modelDataDir = `public/models/${MODEL_ID}`;
-const changelogPath = path.join(modelDataDir, 'changelog.json');
+const changelogPath = path.join(modelDataDir, 'changelog-jp.json');
 
 // Changelogを読み込み
 let changelog = [];

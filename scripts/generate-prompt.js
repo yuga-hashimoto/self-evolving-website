@@ -20,7 +20,7 @@ const MODEL_NAME = MODEL_NAMES[MODEL_ID] || MODEL_ID;
 const projectRoot = path.resolve(__dirname, '..');
 const templatePath = path.join(projectRoot, '.github/prompts/daily-improvement-template.txt');
 const analyticsPath = path.join(projectRoot, `public/models/${MODEL_ID}/analytics.json`);
-const changelogPath = path.join(projectRoot, `public/models/${MODEL_ID}/changelog.json`);
+const changelogPath = path.join(projectRoot, `public/models/${MODEL_ID}/changelog-jp.json`);
 const outputPath = path.join(projectRoot, `.github/prompts/generated-${MODEL_ID}.txt`);
 
 // Read Data

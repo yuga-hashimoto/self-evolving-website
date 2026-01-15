@@ -68,7 +68,7 @@ async function main() {
     }
 
     // 3. Read model-specific changelog (past history)
-    const changelogPath = path.join(modelDataDir, 'changelog.json');
+    const changelogPath = path.join(modelDataDir, 'changelog-jp.json');
     let changelog = [];
     try {
         changelog = JSON.parse(fs.readFileSync(changelogPath, 'utf-8'));

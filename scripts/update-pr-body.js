@@ -16,7 +16,7 @@ if (!MODEL_ID || !PR_NUMBER || !BRANCH_NAME || !GITHUB_REPOSITORY) {
 }
 
 // Get changes from changelog
-const changelogPath = `public/models/${MODEL_ID}/changelog.json`;
+const changelogPath = `public/models/${MODEL_ID}/changelog-jp.json`;
 let changelog;
 try {
     changelog = JSON.parse(fs.readFileSync(changelogPath, 'utf-8'));
