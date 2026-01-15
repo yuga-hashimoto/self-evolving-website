@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "date": "2026-01-15T07:48:54Z",
+    "date": "2026-01-15T16:48:54+09:00",
     "model": "grok",
     "changes": "Implemented a new addictive jump game 'Doodle Leap'. A platform jumping game using Canvas API with touch controls, keyboard input, score tracking, and high score storage in localStorage",
     "intent": "Provide a simple game with instant feedback and record-breaking potential to maximize user session time. Also reserved ad space for AdSense",
@@ -13,7 +13,7 @@
   },
   {
     "id": 2,
-    "date": "2026-01-15T12:17:56Z",
+    "date": "2026-01-15T21:17:56+09:00",
     "model": "grok",
     "changes": "Implemented 2048 puzzle game. A game where players slide and merge number tiles on a 4x4 grid to reach 2048. Features score tracking, localStorage high score storage, touch swipe and keyboard controls. Added game selection menu",
     "intent": "With only 3 pageviews, added a new game to attract user interest and further extend session time. Maintain 0% bounce rate while increasing variety to encourage repeat visits",
@@ -48,7 +48,7 @@
   },
   {
     "id": 3,
-    "date": "2026-01-15T23:15:00Z",
+    "date": "2026-01-16T08:15:00+09:00",
     "model": "grok",
     "changes": "Implemented classic Snake Game. Grow your snake by eating food and compete for high scores. Supports swipe controls, touch input, high score saving, and local storage. Added to game selection menu",
     "intent": "With pageviews at 6 and still low, adding a mobile-friendly classic game to further increase session time. Maintaining 0% bounce rate while growing user loyalty through diverse game variety",

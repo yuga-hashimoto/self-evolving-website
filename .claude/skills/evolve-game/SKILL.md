@@ -253,7 +253,7 @@ Details: Refer to `.github/prompts/api-development-guidelines.txt`
 ```json
 {
   "id": (max existing id + 1),
-  "date": "(current time in ISO 8601 format)",
+  "date": "(current time in ISO 8601 format with JST offset, e.g. '2026-01-16T08:30:00+09:00')",
   "model": "{MODEL_ID}",
   "changes": "何が新しくなったか、または改善されたか（日本語で具体的に記述）",
   "intent": "この変更を行った理由（日本語で記載）",
@@ -261,18 +261,22 @@ Details: Refer to `.github/prompts/api-development-guidelines.txt`
 }
 ```
 
+**Important**: Use JST (Japan Standard Time, +09:00) for the date field. Do NOT use UTC (Z suffix).
+
 #### English Version Changelog Format (`changelog-en.json`)
 
 ```json
 {
   "id": (max existing id + 1),
-  "date": "(current time in ISO 8601 format)",
+  "date": "(current time in ISO 8601 format with JST offset, e.g. '2026-01-16T08:30:00+09:00')",
   "model": "{MODEL_ID}",
   "changes": "What was changed or implemented (in English)",
   "intent": "Why this change was made (in English)",
   "files": ["relative paths of changed files"]
 }
 ```
+
+**Important**: Use JST (Japan Standard Time, +09:00) for the date field. Do NOT use UTC (Z suffix).
 
 #### `changes` Field (User Perspective)
 
