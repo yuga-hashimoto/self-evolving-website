@@ -168,7 +168,7 @@ Note: Edit changelog.json to prepend to the existing array. Do NOT delete existi
 ## Constraints
 - Follow Next.js/TypeScript/TailwindCSS best practices.
 - You can do anything to increase the conversion rate. improving existing components or rebuilding them from scratch is allowed.
-- Do not drastically change the existing component structure (improve 3-5 files per day).
+- Do not drastically change the existing component structure (improve 3-5 files per execution).
 - Do not degrade performance (optimize images, code splitting).
 - Maintain accessibility (WCAG 2.1 AA compliant).
 - Do not cause build errors.
