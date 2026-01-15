@@ -1,32 +1,32 @@
-# API Development Guidelines
+# API開発ガイドライン
 
-When creating or modifying API routes to improve conversion or user experience:
+コンバージョンやユーザー体験を向上させるためにAPIルートを作成・修正する際の注意事項：
 
-## 1. Security First
-- **Input Validation**: Always validate request inputs using Zod or similar
-- **Environment Variables**: Use process.env for secrets (NEVER hardcode API keys)
-- **Sanitization**: Sanitize user inputs to prevent injection attacks
-- **Error Messages**: Provide helpful errors for debugging but hide sensitive details
+## 1. セキュリティ最優先
+- **入力検証**: Zodなどでリクエストのバリデーションを必ず行う
+- **環境変数**: シークレットはprocess.envを使用（APIキーのハードコード禁止）
+- **サニタイゼーション**: インジェクション攻撃を防ぐため、ユーザー入力をサニタイズ
+- **エラーメッセージ**: デバッグに役立つエラーメッセージを返すが、機密情報は隠す
 
-## 2. Error Handling
-- Return appropriate HTTP status codes:
-  - 200: Success
-  - 400: Bad Request (invalid input)
-  - 401: Unauthorized
-  - 404: Not Found
-  - 500: Internal Server Error
-- Use `NextResponse.json()` for JSON responses
-- Implement try-catch blocks for all async operations
+## 2. エラーハンドリング
+- 適切なHTTPステータスコードを返す:
+  - 200: 成功
+  - 400: 不正なリクエスト（無効な入力）
+  - 401: 認証エラー
+  - 404: 見つからない
+  - 500: サーバー内部エラー
+- JSON レスポンスには `NextResponse.json()` を使用
+- すべての非同期処理に try-catch ブロックを実装
 
-## 3. Performance
-- Use Edge Runtime where possible: `export const runtime = 'edge'`
-- Implement caching with appropriate headers
-- Avoid N+1 queries
-- Use streaming for large responses
+## 3. パフォーマンス
+- 可能な限り Edge Runtime を使用: `export const runtime = 'edge'`
+- 適切なヘッダーでキャッシュを実装
+- N+1クエリを避ける
+- 大きなレスポンスにはストリーミングを使用
 
-## 4. Code Examples
+## 4. コード例
 
-**Good: Input validation**
+**良い例: 入力検証**
 ```typescript
 const searchParams = request.nextUrl.searchParams;
 const id = searchParams.get('id');
@@ -35,7 +35,7 @@ if (!id || !/^[a-zA-Z0-9-]+$/.test(id)) {
 }
 ```
 
-**Good: Error handling**
+**良い例: エラーハンドリング**
 ```typescript
 try {
   const data = await fetchData(id);
@@ -49,4 +49,4 @@ try {
 }
 ```
 
-**Reference**: See `src/app/api/analytics/route.ts` for a well-structured example.
+**参考**: `src/app/api/analytics/route.ts` を参照してください。適切に構造化された例があります。
