@@ -11,7 +11,7 @@ export default function GrokPlayground() {
   const t = useTranslations('playground');
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 text-gray-900">
       {/* Ad space at top */}
       <div className="w-full h-16 bg-gray-200 flex items-center justify-center text-sm text-gray-500">
         {t('common.adSpace')}
