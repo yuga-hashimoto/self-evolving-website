@@ -5,9 +5,10 @@ import { useTranslations } from 'next-intl';
 import Game from './components/Game';
 import Two048Game from './components/Two048Game';
 import SnakeGame from './components/SnakeGame';
+import TetrisGame from './components/TetrisGame';
 
 export default function GrokPlayground() {
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -39,12 +40,19 @@ export default function GrokPlayground() {
             >
               {t('grok.snakeTitle')}
             </button>
+            <button
+              onClick={() => setSelectedGame('tetris')}
+              className={`px-4 py-2 rounded ${selectedGame === 'tetris' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.tetrisTitle') || 'Tetris'}
+            </button>
           </div>
 
           {/* Game container */}
           {selectedGame === 'doodle' && <Game />}
           {selectedGame === '2048' && <Two048Game />}
           {selectedGame === 'snake' && <SnakeGame />}
+          {selectedGame === 'tetris' && <TetrisGame />}
         </div>
       </div>
 
