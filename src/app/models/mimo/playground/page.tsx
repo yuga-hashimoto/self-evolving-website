@@ -1368,13 +1368,15 @@ export default function MimoPlayground() {
       ctx.textAlign = 'center';
       ctx.shadowBlur = 15;
       ctx.shadowColor = '#00ffff';
-      ctx.fillText('TAP TO START', width / 2, height / 2 - 20);
+      ctx.fillText('TAP TO START', width / 2, height / 2 - 30);
 
       ctx.fillStyle = '#aaa';
-      ctx.font = '16px Arial';
+      ctx.font = '14px Arial';
       ctx.shadowBlur = 0;
-      ctx.fillText('UP: Jump | DOWN: Slide', width / 2, height / 2 + 30);
-      ctx.fillText('Touch or Arrow Keys', width / 2, height / 2 + 55);
+      ctx.fillText('↑ Swipe UP: Jump', width / 2, height / 2 + 10);
+      ctx.fillText('↓ Swipe DOWN: Slide', width / 2, height / 2 + 32);
+      ctx.fillText('Or tap UP/DOWN half of screen', width / 2, height / 2 + 54);
+      ctx.fillText('Arrow Keys on keyboard', width / 2, height / 2 + 76);
     }
   }, [neonState]);
 
@@ -2178,29 +2180,60 @@ export default function MimoPlayground() {
         />
       )}
 
-      {/* Neon Dash ジャンプ/スライドイベント用（画面全体） */}
+      {/* Neon Dash ジャンプ/スライドイベント用（画面全体・スワイプ対応） */}
       {currentGame === 'neon' && (
         <div
           onTouchStart={(e) => {
             e.preventDefault();
+            const touch = e.touches[0];
+            (e.target as any)._touchStart = {
+              x: touch.clientX,
+              y: touch.clientY,
+              time: Date.now(),
+            };
+
+            // ゲーム開始/リスタート処理
             if (!neonState.isPlaying || neonState.isGameOver) {
               if (neonState.isGameOver || !neonState.isPlaying) {
                 startNeonDashGame();
               }
               return;
             }
-            // 上部タップ = ジャンプ, 下部タップ = スライド
-            const touchY = e.touches[0].clientY;
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            if (!neonState.isPlaying || neonState.isGameOver) return;
+
+            const touchStart = (e.target as any)._touchStart;
+            if (!touchStart) return;
+
+            const touchEnd = e.changedTouches[0];
+            const dx = touchEnd.clientX - touchStart.x;
+            const dy = touchEnd.clientY - touchStart.y;
             const rect = containerRef.current?.getBoundingClientRect();
             const containerHeight = rect?.height || 400;
-            const relativeY = touchY - (rect?.top || 0);
 
-            if (relativeY < containerHeight * 0.4) {
-              // 上部40% = ジャンプ
-              jump();
-            } else {
-              // 下部 = スライド
-              slide();
+            // 垂直スワイプを優先（横スワイプは無視）
+            const swipeThreshold = containerHeight * 0.15; // 15% of screen height
+
+            if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > swipeThreshold) {
+              if (dy < 0) {
+                // 上にスワイプ = ジャンプ
+                jump();
+              } else {
+                // 下にスライド = スライド
+                slide();
+              }
+            } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+              // タップ（微小な移動）- 上部タップでジャンプ、下部タップでスライド
+              const touchY = touchEnd.clientY;
+              const relativeY = touchY - (rect?.top || 0);
+
+              if (relativeY < containerHeight * 0.5) {
+                jump();
+              } else {
+                slide();
+              }
             }
           }}
           className="fixed inset-0 z-50 pointer-events-none"
