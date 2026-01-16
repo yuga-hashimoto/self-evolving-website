@@ -4,10 +4,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 
 const GRID_SIZE = 4;
-const TILE_SIZE = 75;
 const GAP = 10;
-const CANVAS_WIDTH = GRID_SIZE * TILE_SIZE + (GRID_SIZE + 1) * GAP;
-const CANVAS_HEIGHT = CANVAS_WIDTH;
 
 interface Tile {
   value: number;
@@ -23,9 +20,26 @@ export default function Two048Game() {
   const [highScore, setHighScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
+  const [canvasSize, setCanvasSize] = useState({ width: 350, height: 350 });
   const startX = useRef<number>(0);
   const startY = useRef<number>(0);
   const t = useTranslations('playground');
+
+  const canvasSizeRef = useRef(canvasSize);
+  useEffect(() => {
+    canvasSizeRef.current = canvasSize;
+  }, [canvasSize]);
+
+  // Responsive canvas sizing
+  useEffect(() => {
+    const updateSize = () => {
+      const side = Math.min(window.innerWidth - 32, 400);
+      setCanvasSize({ width: side, height: side });
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('2048HighScore');
@@ -154,14 +168,17 @@ export default function Two048Game() {
   };
 
   const render = () => {
+    const { width, height } = canvasSizeRef.current;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    const TILE_SIZE = (width - (GRID_SIZE + 1) * GAP) / GRID_SIZE;
+
+    ctx.clearRect(0, 0, width, height);
     ctx.fillStyle = '#bbada0';
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.fillRect(0, 0, width, height);
 
     for (let i = 0; i < GRID_SIZE; i++) {
       for (let j = 0; j < GRID_SIZE; j++) {
@@ -177,7 +194,7 @@ export default function Two048Game() {
           ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
 
           ctx.fillStyle = '#776e65';
-          ctx.font = 'bold 20px Arial';
+          ctx.font = `bold ${Math.min(20, TILE_SIZE / 4)}px Arial`;
           ctx.textAlign = 'center';
           ctx.fillText(val.toString(), x + TILE_SIZE / 2, y + TILE_SIZE / 2 + 8);
         }
@@ -276,8 +293,8 @@ export default function Two048Game() {
       </div>
       <canvas
         ref={canvasRef}
-        width={CANVAS_WIDTH}
-        height={CANVAS_HEIGHT}
+        width={canvasSize.width}
+        height={canvasSize.height}
         className="border border-gray-300 bg-white mx-auto block"
       />
       {gameOver && (
