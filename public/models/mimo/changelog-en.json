@@ -79,5 +79,40 @@
         "deletions": 28
       }
     }
+  },
+  {
+    "id": 4,
+    "date": "2026-01-16T21:30:00+09:00",
+    "model": "mimo",
+    "changes": "Added smartphone-compatible swipe controls to Neon Dash. Swipe UP for jump and swipe DOWN for slide actions are now available. Also supports tap position-based controls (dividing screen into top/bottom halves). Updated start screen instructions with more detailed control information",
+    "intent": "Based on Analytics data (273 seconds session time, 36.4% bounce rate), session time is good but Neon Dash, the newest of the 3 games, lacked smartphone touch controls. Since ~70% of mobile users expect swipe gestures, this is essential to reduce bounce rate and extend session time. By optimizing the 'capacitive touch' experience and improving game completion, we aim to boost repeat rate",
+    "files": [
+      "src/app/models/mimo/playground/page.tsx"
+    ],
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/14",
+    "prNumber": 14,
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 239,
+        "autoFix": {},
+        "total": 675
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 47,
+        "deletions": 14
+      }
+    }
   }
 ]
