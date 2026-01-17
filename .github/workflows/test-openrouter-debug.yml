@@ -44,37 +44,9 @@ jobs:
           fi
 
       # ========================================
-      # Test 2: Claude Code CLI directly
+      # Test 2: claude-code-action
       # ========================================
-      - name: Install Claude Code CLI
-        run: |
-          curl -fsSL https://claude.ai/install.sh | sh
-          echo "$HOME/.claude/bin" >> $GITHUB_PATH
-
-      - name: "Test 2: Claude Code CLI directly"
-        id: test_cli
-        continue-on-error: true
-        run: |
-          echo "🧪 Testing Claude Code CLI directly..."
-
-          # Create a simple test
-          claude --version || echo "Version check failed"
-
-          # Try a simple prompt
-          echo "Say hello" | timeout 60 claude --print \
-            --model "xiaomi/mimo-v2-flash:free" \
-            --dangerously-skip-permissions \
-            2>&1 || true
-
-          echo "result=attempted" >> $GITHUB_OUTPUT
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.MIMO_API_KEY }}
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api/v1
-
-      # ========================================
-      # Test 3: claude-code-action
-      # ========================================
-      - name: "Test 3: claude-code-action"
+      - name: "Test 2: claude-code-action"
         id: test_action
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
@@ -98,8 +70,7 @@ jobs:
           echo "           TEST SUMMARY"
           echo "======================================"
           echo ""
-          echo "Test 1 (curl):            ${{ steps.test_curl.outputs.result }}"
-          echo "Test 2 (CLI):             ${{ steps.test_cli.outputs.result }}"
-          echo "Test 3 (claude-code-action): ${{ steps.test_action.outcome }}"
+          echo "Test 1 (curl):               ${{ steps.test_curl.outputs.result }}"
+          echo "Test 2 (claude-code-action): ${{ steps.test_action.outcome }}"
           echo ""
           echo "======================================"
