@@ -68,24 +68,28 @@ interface ChangelogEntry {
     };
 }
 
+// Helper function to extract JST date string from ISO date
+function getJSTDateString(isoDate: string): string {
+    const dateObj = new Date(isoDate);
+    const formatter = new Intl.DateTimeFormat('ja-JP', {
+        timeZone: 'Asia/Tokyo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    });
+    const parts = formatter.formatToParts(dateObj);
+    const getVal = (type: Intl.DateTimeFormatPartTypes) => parts.find(p => p.type === type)?.value || '00';
+    return `${getVal('year')}-${getVal('month')}-${getVal('day')}`;
+}
+
 // Generate screenshot path from date and changelog entries
 function getScreenshotPath(modelId: string, date: string, allEntries: ChangelogEntry[]): string {
-    // Extract date in YYYY-MM-DD format
-    const dateObj = new Date(date);
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    const dateStr = `${year}-${month}-${day}`;
+    // Extract date in YYYY-MM-DD format (JST)
+    const dateStr = getJSTDateString(date);
 
     // Find all entries for the same date and sort by time (earliest first)
     const sameDate = allEntries
-        .filter(entry => {
-            const entryDate = new Date(entry.date);
-            const entryYear = entryDate.getFullYear();
-            const entryMonth = String(entryDate.getMonth() + 1).padStart(2, '0');
-            const entryDay = String(entryDate.getDate()).padStart(2, '0');
-            return `${entryYear}-${entryMonth}-${entryDay}` === dateStr;
-        })
+        .filter(entry => getJSTDateString(entry.date) === dateStr)
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     // Find the index of current entry (1-based)
@@ -126,6 +130,7 @@ async function getChangelog(modelId: string, locale: string): Promise<ChangelogE
 function formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleString("ja-JP", {
+        timeZone: "Asia/Tokyo",
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
