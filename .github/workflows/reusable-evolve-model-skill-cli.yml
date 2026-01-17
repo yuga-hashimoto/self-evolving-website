@@ -574,41 +574,8 @@ jobs:
           npx tsc --noEmit
           npm run build
 
-          # Security pattern checks
-          echo "🔒 Running security checks..."
-
-          # Check for dangerouslySetInnerHTML (warning only)
-          if grep -r "dangerouslySetInnerHTML" src/app/models/${{ inputs.model_id }}/playground src/app/api 2>/dev/null; then
-            echo "⚠️  Warning: dangerouslySetInnerHTML detected"
-          fi
-
-          # Check for eval/Function in API routes (CRITICAL - blocks push)
-          if grep -rE "eval\(|new Function\(|Function\(" src/app/api 2>/dev/null; then
-            echo "❌ CRITICAL: Code execution patterns detected in API routes!"
-            echo "Detected patterns: eval(), new Function(), or Function() constructor"
-            exit 1
-          fi
-
-          # Check for process.env exposure in client components (warning only)
-          if grep -r "process\.env\." src/app/models/${{ inputs.model_id }}/playground --include="*.tsx" --include="*.ts" 2>/dev/null | grep -v "NEXT_PUBLIC_"; then
-            echo "⚠️  Warning: Non-public environment variable may be exposed in client code"
-          fi
-
-          # Check for SQL injection patterns (CRITICAL - blocks push)
-          if grep -rE "db\.query\(.*\$\{|execute\(.*\$\{|raw\(.*\$\{" src/app/api 2>/dev/null; then
-            echo "❌ CRITICAL: Potential SQL injection vulnerability!"
-            echo "Detected string interpolation in database queries"
-            exit 1
-          fi
-
-          # Check for unauthorized file system access (CRITICAL - blocks push)
-          if grep -rE "fs\.writeFileSync|fs\.unlinkSync|fs\.rmdirSync|child_process\.exec" src/app/api 2>/dev/null; then
-            echo "❌ CRITICAL: Unauthorized file system/process operations!"
-            echo "File system writes and process execution are not allowed"
-            exit 1
-          fi
-
-          echo "✅ Security checks passed"
+          # Run security checks via dedicated script
+          ./scripts/security-check.sh ${{ inputs.model_id }}
 
       # === Mobile Compatibility Check & Auto-Fix Loop ===
       - name: Mobile Compatibility Check (Attempt 1)

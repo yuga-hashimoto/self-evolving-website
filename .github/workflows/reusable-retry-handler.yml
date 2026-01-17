@@ -1,0 +1,87 @@
+name: Reusable Retry Handler
+
+on:
+  workflow_call:
+    inputs:
+      workflow_name:
+        description: 'Name of the workflow to retry'
+        required: true
+        type: string
+      job_result:
+        description: 'Result of the main job (success, failure, cancelled)'
+        required: true
+        type: string
+      retry_count:
+        description: 'Current retry attempt (0-based)'
+        required: false
+        type: string
+        default: '0'
+      max_retries:
+        description: 'Maximum number of retry attempts'
+        required: false
+        type: number
+        default: 2
+      base_wait_seconds:
+        description: 'Base wait time before retry (seconds)'
+        required: false
+        type: number
+        default: 60
+      backoff_multiplier:
+        description: 'Multiplier for exponential backoff'
+        required: false
+        type: number
+        default: 2
+
+jobs:
+  retry:
+    name: Retry on Failure
+    if: inputs.job_result == 'failure' && fromJSON(inputs.retry_count) < inputs.max_retries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Calculate wait time (exponential backoff)
+        id: calc
+        run: |
+          CURRENT=${{ inputs.retry_count }}
+          NEXT=$((CURRENT + 1))
+
+          # Exponential backoff: base * multiplier^attempt
+          # Attempt 0: 60s, Attempt 1: 120s, Attempt 2: 240s
+          MULTIPLIER=${{ inputs.backoff_multiplier }}
+          BASE=${{ inputs.base_wait_seconds }}
+
+          # Calculate: base * (multiplier ^ current_attempt)
+          POWER=1
+          for ((i=0; i<CURRENT; i++)); do
+            POWER=$((POWER * MULTIPLIER))
+          done
+          WAIT=$((BASE * POWER))
+
+          echo "next_count=$NEXT" >> $GITHUB_OUTPUT
+          echo "wait_time=$WAIT" >> $GITHUB_OUTPUT
+          echo "🔄 Retry attempt $NEXT of $((inputs.max_retries + 1))"
+          echo "⏳ Will wait $WAIT seconds before retry"
+
+      - name: Wait before retry
+        run: |
+          echo "⏳ Waiting ${{ steps.calc.outputs.wait_time }} seconds before retry..."
+          sleep ${{ steps.calc.outputs.wait_time }}
+
+      - name: Trigger retry
+        run: |
+          gh workflow run "${{ inputs.workflow_name }}" \
+            --repo ${{ github.repository }} \
+            -f retry_count=${{ steps.calc.outputs.next_count }}
+          echo "✅ Retry triggered (attempt ${{ steps.calc.outputs.next_count }})"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  report-failure:
+    name: Report Final Failure
+    if: inputs.job_result == 'failure' && fromJSON(inputs.retry_count) >= inputs.max_retries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report final failure
+        run: |
+          echo "❌ All $((inputs.max_retries + 1)) attempts failed for ${{ inputs.workflow_name }}"
+          echo "Manual intervention required."
+          echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
