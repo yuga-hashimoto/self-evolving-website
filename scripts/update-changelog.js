@@ -8,39 +8,33 @@ if (!MODEL_ID) {
     process.exit(1);
 }
 
-const reasoning = process.env.AI_REASONING || 'No reasoning provided';
-const changedFiles = process.env.CHANGED_FILES?.split(',') || [];
-
 // Model-specific paths
 const modelDataDir = `public/models/${MODEL_ID}`;
-const analyticsPath = path.join(modelDataDir, 'analytics.json');
-const analyticsPrevPath = path.join(modelDataDir, 'analytics-previous.json');
 const changelogJpPath = path.join(modelDataDir, 'changelog-jp.json');
 const changelogEnPath = path.join(modelDataDir, 'changelog-en.json');
 
-// Read Analytics
-let analytics = { revenue: '0', pageviews: 0, avgSessionDuration: 0, bounceRate: '0' };
+// Read AI changes from /tmp/ai-changes.json
+let aiChanges = null;
 try {
-    analytics = JSON.parse(fs.readFileSync(analyticsPath, 'utf-8'));
+    aiChanges = JSON.parse(fs.readFileSync('/tmp/ai-changes.json', 'utf-8'));
+    console.log('✅ Read AI changes from /tmp/ai-changes.json');
 } catch {
-    console.log(`📊 No analytics found for ${MODEL_ID}`);
+    console.log('⚠️  No AI changes file found at /tmp/ai-changes.json');
+    console.log('⚠️  Skipping changelog update');
+    process.exit(0);
 }
 
-// Read previous day's data
-let previous = { revenue: '0', pageviews: 0 };
-try {
-    previous = JSON.parse(fs.readFileSync(analyticsPrevPath, 'utf-8'));
-} catch {
-    console.log(`📊 No previous analytics for ${MODEL_ID}`);
+// Validate AI changes
+if (!aiChanges.changes_jp || !aiChanges.changes_en) {
+    console.error('❌ AI changes file missing required fields (changes_jp, changes_en)');
+    process.exit(1);
 }
 
-// Calculate change rates
-const revenueChange = parseFloat(previous.revenue) > 0
-    ? ((parseFloat(analytics.revenue) - parseFloat(previous.revenue)) / parseFloat(previous.revenue) * 100).toFixed(1)
-    : '0';
-const pvChange = previous.pageviews > 0
-    ? ((analytics.pageviews - previous.pageviews) / previous.pageviews * 100).toFixed(1)
-    : '0';
+// Generate JST date in ISO 8601 format
+const now = new Date();
+const jstOffset = 9 * 60; // JST is UTC+9
+const jstDate = new Date(now.getTime() + jstOffset * 60 * 1000);
+const isoDate = jstDate.toISOString().replace('Z', '').split('.')[0] + '+09:00';
 
 // Read workflow metrics
 let metrics = null;
@@ -50,48 +44,60 @@ try {
     console.log('⚠️  No workflow metrics found');
 }
 
-// Create new entry (base)
-const createEntry = (existingChangelog) => ({
-    id: existingChangelog.length + 1,
-    date: new Date().toISOString(),
-    model: process.env.AI_MODEL || 'unknown',
-    modelId: MODEL_ID,
-    reasoning: reasoning,
-    files: changedFiles.filter(f => f.length > 0),
-    results: {
-        revenue: parseFloat(analytics.revenue),
-        revenueChange: parseFloat(revenueChange),
-        pageviews: analytics.pageviews,
-        pvChange: parseFloat(pvChange),
-        avgSessionDuration: analytics.avgSessionDuration,
-        bounceRate: parseFloat(analytics.bounceRate)
-    },
-    metrics: metrics
-});
-
-// Update both changelog files
-const changelogPaths = [changelogJpPath, changelogEnPath];
-
-for (const changelogPath of changelogPaths) {
-    // Read Changelog
-    let changelog = [];
-    try {
-        changelog = JSON.parse(fs.readFileSync(changelogPath, 'utf-8'));
-    } catch {
-        console.log(`📝 Creating new changelog: ${changelogPath}`);
-    }
-
-    // Add new entry
-    const entry = createEntry(changelog);
-    changelog.push(entry);
-
-    // Keep only latest 100 entries
-    if (changelog.length > 100) {
-        changelog = changelog.slice(-100);
-    }
-
-    fs.writeFileSync(changelogPath, JSON.stringify(changelog, null, 2));
-    console.log(`📝 Changelog updated: ${changelogPath}`);
+// Update Japanese changelog
+let changelogJp = [];
+try {
+    changelogJp = JSON.parse(fs.readFileSync(changelogJpPath, 'utf-8'));
+} catch {
+    console.log(`📝 Creating new Japanese changelog: ${changelogJpPath}`);
 }
+
+const entryJp = {
+    id: changelogJp.length + 1,
+    date: isoDate,
+    model: MODEL_ID,
+    changes: aiChanges.changes_jp,
+    intent: aiChanges.intent_jp || '',
+    files: aiChanges.files || [],
+    metrics: metrics
+};
+
+changelogJp.push(entryJp);
+
+// Keep only latest 100 entries
+if (changelogJp.length > 100) {
+    changelogJp = changelogJp.slice(-100);
+}
+
+fs.writeFileSync(changelogJpPath, JSON.stringify(changelogJp, null, 2));
+console.log(`📝 Japanese changelog updated: ${changelogJpPath}`);
+
+// Update English changelog
+let changelogEn = [];
+try {
+    changelogEn = JSON.parse(fs.readFileSync(changelogEnPath, 'utf-8'));
+} catch {
+    console.log(`📝 Creating new English changelog: ${changelogEnPath}`);
+}
+
+const entryEn = {
+    id: changelogEn.length + 1,
+    date: isoDate,
+    model: MODEL_ID,
+    changes: aiChanges.changes_en,
+    intent: aiChanges.intent_en || '',
+    files: aiChanges.files || [],
+    metrics: metrics
+};
+
+changelogEn.push(entryEn);
+
+// Keep only latest 100 entries
+if (changelogEn.length > 100) {
+    changelogEn = changelogEn.slice(-100);
+}
+
+fs.writeFileSync(changelogEnPath, JSON.stringify(changelogEn, null, 2));
+console.log(`📝 English changelog updated: ${changelogEnPath}`);
 
 console.log(`✅ All changelogs updated for ${MODEL_ID}`);

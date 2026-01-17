@@ -270,7 +270,7 @@ jobs:
           echo "🤖 Starting Claude Code CLI execution..."
           claude --print \
             --dangerously-skip-permissions \
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite" \
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite" \
             -p "$SKILL_PROMPT"
           echo "✅ Claude Code CLI execution completed"
         env:
@@ -291,6 +291,18 @@ jobs:
           CLAUDE_CODE_DURATION=$((CLAUDE_CODE_END - ${{ env.claude_code_start }}))
           echo "claude_code_duration=$CLAUDE_CODE_DURATION" >> $GITHUB_ENV
           echo "✅ Claude Code execution took ${CLAUDE_CODE_DURATION}s"
+
+      - name: Update Changelog from AI Changes
+        if: always()
+        run: |
+          if [ -f /tmp/ai-changes.json ]; then
+            echo "📝 Updating changelog from AI changes..."
+            node scripts/update-changelog.js
+          else
+            echo "⚠️  No AI changes file found, skipping changelog update"
+          fi
+        env:
+          MODEL_ID: ${{ inputs.model_id }}
 
       - name: Check for Changes
         id: changes
@@ -371,7 +383,7 @@ jobs:
           echo "🔧 Starting Auto-Fix Attempt 1..."
           claude --print \
             --dangerously-skip-permissions \
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
             -p "$FIX_PROMPT"
           echo "✅ Auto-Fix Attempt 1 completed"
         env:
@@ -450,7 +462,7 @@ jobs:
           echo "🔧 Starting Auto-Fix Attempt 2..."
           claude --print \
             --dangerously-skip-permissions \
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
             -p "$FIX_PROMPT"
           echo "✅ Auto-Fix Attempt 2 completed"
         env:
@@ -529,7 +541,7 @@ jobs:
           echo "🔧 Starting Auto-Fix Attempt 3..."
           claude --print \
             --dangerously-skip-permissions \
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
             -p "$FIX_PROMPT"
           echo "✅ Auto-Fix Attempt 3 completed"
         env:
@@ -952,6 +964,8 @@ jobs:
           git add src/app/models/${{ inputs.model_id }}/playground || true
           git add src/app/api/${{ inputs.model_id }} || true
           git add src/components/icons/Icons.tsx || true
+          git add messages/ja.json || echo "No Japanese language file update"
+          git add messages/en.json || echo "No English language file update"
 
           git add public/models/${{ inputs.model_id }}/changelog-jp.json || echo "No Japanese changelog update"
           git add public/models/${{ inputs.model_id }}/changelog-en.json || echo "No English changelog update"
@@ -961,6 +975,7 @@ jobs:
 
           # Safety Check: Fail if files outside allowed scope are modified
           UNEXPECTED_CHANGES=$(git status --porcelain src/ | grep -vE "src/app/models/${{ inputs.model_id }}/playground(/|$)|src/app/api/${{ inputs.model_id }}(/|$)|src/components/icons/Icons.tsx" || true)
+          UNEXPECTED_MSG_CHANGES=$(git status --porcelain messages/ | grep -vE "messages/(ja|en)\.json" || true)
 
           if [[ -n "$UNEXPECTED_CHANGES" ]]; then
              echo "❌ CRITICAL ERROR: AI modified files outside of allowed scope!"

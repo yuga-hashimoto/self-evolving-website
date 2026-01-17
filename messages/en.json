@@ -145,7 +145,10 @@
     "grok": {
       "doodleLeap": "Doodle Leap",
       "game2048": "2048",
-      "youWin": "You Win! Continue playing?"
+      "youWin": "You Win! Continue playing?",
+      "snakeTitle": "Snake",
+      "tetrisTitle": "Tetris",
+      "endlessJumper": "Endless Jumper"
     },
     "mimo": {
       "title": "Mimo Games",

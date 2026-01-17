@@ -93,6 +93,42 @@
       "src/app/models/grok/playground/components/Two048Game.tsx",
       "src/app/models/grok/playground/components/TetrisGame.tsx"
     ],
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/12",
+    "prNumber": 12,
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 339,
+        "autoFix": {},
+        "total": 425
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 2,
+        "additions": 34,
+        "deletions": 9
+      }
+    }
+  },
+  {
+    "id": 5,
+    "date": "2026-01-17T22:30:00+09:00",
+    "model": "grok",
+    "changes": "エンドレスジャンパーゲームを追加。プラットフォームを飛び移りながらスコアを競う縦スクロールゲーム",
+    "intent": "ゲームバリエーションを増やしユーザー滞在時間を延長",
+    "files": [
+      "src/app/models/grok/playground/page.tsx",
+      "src/app/models/grok/playground/components/EndlessJumperGame.tsx"
+    ],
     "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/46",
     "prNumber": 46,
     "metrics": {

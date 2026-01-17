@@ -1,7 +1,7 @@
 ---
 name: evolve-game
 description: Improves browser games based on analytics data and change history. Analyzes user metrics (session time, bounce rate) and implements game features to maximize engagement time. Use when evolving games, analyzing game metrics, or implementing game improvements.
-allowed-tools: Edit(src/app/models/**), Edit(src/app/api/**), Edit(src/components/icons/Icons.tsx), Edit(public/models/**/changelog-jp.json), Edit(public/models/**/changelog-en.json), Write(src/app/models/**), Write(src/app/api/**), Read, Bash(npm:*), Bash(npx:*), Bash(git:*), Bash(jq:*), Bash(bash scripts/web-search.sh*), Glob, Grep, TodoWrite, Skill
+allowed-tools: Edit(src/app/models/**), Edit(src/app/api/**), Edit(src/components/icons/Icons.tsx), Edit(messages/ja.json), Edit(messages/en.json), Write(src/app/models/**), Write(src/app/api/**), Write(/tmp/ai-changes.json), Read, Bash(npm:*), Bash(npx:*), Bash(git:*), Bash(jq:*), Bash(bash scripts/web-search.sh*), Glob, Grep, TodoWrite, Skill
 ---
 
 # Game Evolution Skill
@@ -27,9 +27,10 @@ Create highly addictive browser games that are comfortable to play on smartphone
 
 【Implementation Phase】
 6. Code implementation
+6.5. Update language files (if needed)
 
 【Verification & Testing Phase】
-7. Record changelog
+7. Record changes for changelog
 8. Build validation & testing
 ```
 
@@ -179,9 +180,9 @@ Implement code based on the chosen approach.
 - Main game implementation: `src/app/models/{MODEL_ID}/playground/`
 - API implementation: `src/app/api/{MODEL_ID}/`
 - Icons: `src/components/icons/Icons.tsx`
-- Changelog: `public/models/{MODEL_ID}/changelog-jp.json` (日本語) and `public/models/{MODEL_ID}/changelog-en.json` (English)
+- Language files: `messages/ja.json` and `messages/en.json`
 
-**Important**: Do not edit files outside of these.
+**Important**: Do not edit files outside of these. Changelogs are managed by the workflow automatically.
 
 #### Implementation Requirements
 
@@ -239,44 +240,55 @@ Implement code based on the chosen approach.
 
 Details: Refer to `.github/prompts/api-development-guidelines.txt`
 
-### Task 7: Record Changelog
+### Task 6.5: Update Language Files (if needed)
 
-**Important**: Add all changes made in this execution as **one entry** to **both** of the following files.
+When adding new games or UI elements with translatable text, update the language files.
 
-1. `public/models/{MODEL_ID}/changelog-jp.json` (日本語バージョン)
-2. `public/models/{MODEL_ID}/changelog-en.json` (English version)
+**Files to update:**
+1. `messages/ja.json` - Japanese translations
+2. `messages/en.json` - English translations
 
-**Note**: Record the same content in both files, changing the language.
+**Add keys under `playground.{MODEL_ID}` namespace:**
 
-#### 日本語 バージョン Changelog Format (`changelog-jp.json`)
-
+Example for adding a new game "Space Invaders":
 ```json
-{
-  "id": (max existing id + 1),
-  "date": "(current time in ISO 8601 format with JST offset, e.g. '2026-01-16T08:30:00+09:00')",
-  "model": "{MODEL_ID}",
-  "changes": "何が新しくなったか、または改善されたか（日本語で具体的に記述）",
-  "intent": "この変更を行った理由（日本語で記載）",
-  "files": ["変更されたファイルの相対パス"]
+// messages/ja.json
+"playground": {
+  "grok": {
+    "spaceInvaders": "スペースインベーダー"
+  }
+}
+
+// messages/en.json
+"playground": {
+  "grok": {
+    "spaceInvaders": "Space Invaders"
+  }
 }
 ```
 
-**Important**: Use JST (Japan Standard Time, +09:00) for the date field. Do NOT use UTC (Z suffix).
+**Important**:
+- Always add keys to BOTH language files
+- Use consistent key naming (camelCase)
+- Keep existing keys unchanged
 
-#### English Version Changelog Format (`changelog-en.json`)
+### Task 7: Record Changes for Changelog
+
+**Important**: Write a JSON file with your changes information to `/tmp/ai-changes.json`.
+
+**Do NOT edit changelog files directly.** The workflow will automatically update changelogs.
+
+#### Format
 
 ```json
 {
-  "id": (max existing id + 1),
-  "date": "(current time in ISO 8601 format with JST offset, e.g. '2026-01-16T08:30:00+09:00')",
-  "model": "{MODEL_ID}",
-  "changes": "What was changed or implemented (in English)",
-  "intent": "Why this change was made (in English)",
+  "changes_jp": "何が新しくなったか（日本語で具体的に記述）",
+  "changes_en": "What was changed or implemented (in English)",
+  "intent_jp": "この変更を行った理由（日本語で記載）",
+  "intent_en": "Why this change was made (in English)",
   "files": ["relative paths of changed files"]
 }
 ```
-
-**Important**: Use JST (Japan Standard Time, +09:00) for the date field. Do NOT use UTC (Z suffix).
 
 #### `changes` Field (User Perspective)
 
@@ -302,10 +314,16 @@ List the relative paths of all changed files in an array.
 
 **Example:**
 ```json
-"files": [
-  "src/app/models/mimo/playground/page.tsx",
-  "src/app/api/mimo/game-events/route.ts"
-]
+{
+  "changes_jp": "新しいブロック崩しゲームを追加。タッチ操作対応、スコア保存機能付き",
+  "changes_en": "Added new Breakout game with touch controls and score saving",
+  "intent_jp": "ゲームバリエーションを増やしユーザー滞在時間を延長",
+  "intent_en": "Increase game variety to extend user session time",
+  "files": [
+    "src/app/models/grok/playground/page.tsx",
+    "src/app/models/grok/playground/components/BreakoutGame.tsx"
+  ]
+}
 ```
 
 ### Task 8: Build Validation & Testing
