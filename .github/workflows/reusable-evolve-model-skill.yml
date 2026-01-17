@@ -268,7 +268,9 @@ jobs:
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api/v1
+          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          ANTHROPIC_API_KEY: ""
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ inputs.anthropic_model }}
@@ -366,7 +368,9 @@ jobs:
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api/v1
+          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          ANTHROPIC_API_KEY: ""
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ inputs.anthropic_model }}
@@ -442,7 +446,9 @@ jobs:
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api/v1
+          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          ANTHROPIC_API_KEY: ""
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ inputs.anthropic_model }}
@@ -518,7 +524,9 @@ jobs:
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api/v1
+          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          ANTHROPIC_API_KEY: ""
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ inputs.anthropic_model }}
@@ -662,7 +670,9 @@ jobs:
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Glob,Grep,TodoWrite"
           show_full_output: true
         env:
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api/v1
+          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          ANTHROPIC_API_KEY: ""
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ inputs.anthropic_model }}
