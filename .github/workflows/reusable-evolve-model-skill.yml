@@ -300,8 +300,20 @@ jobs:
             git status --short
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "ℹ️  No changes"
+            echo "❌ No changes detected - Claude Code did not modify any files"
+            echo "Closing PR and failing workflow..."
+
+            # Close the draft PR since no changes were made
+            gh pr close ${{ steps.create-pr.outputs.pr_number }} --comment "🚫 No changes were made by AI. Closing PR automatically." || true
+
+            # Delete the branch
+            git push origin --delete "${{ steps.create-branch.outputs.branch_name }}" || true
+
+            # Exit with error to fail the workflow
+            exit 1
           fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # === Safety Check & Auto-Fix Loop (Attempt 1) ===
       - name: Safety Check (Attempt 1)
@@ -973,11 +985,14 @@ jobs:
 
       - name: Merge PR (Squash)
         if: success() && steps.changes.outputs.has_changes == 'true'
+        id: merge-pr
         run: |
-          # Mark PR as ready (remove draft status)
+          set -e
+
+          echo "📋 Marking PR #${{ steps.create-pr.outputs.pr_number }} as ready..."
           gh pr ready ${{ steps.create-pr.outputs.pr_number }}
 
-          # Squash merge
+          echo "🔀 Merging PR #${{ steps.create-pr.outputs.pr_number }}..."
           gh pr merge ${{ steps.create-pr.outputs.pr_number }} \
             --squash \
             --delete-branch \

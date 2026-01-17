@@ -8,9 +8,17 @@ async function compareScreenshots(modelId) {
   const pixelmatch = pixelmatchModule.default || pixelmatchModule;
   const screenshotDir = path.join(__dirname, `../public/models/${modelId}/screenshots`);
 
-  // 日付を取得（JST）
+  // 日付を取得（JST - Intl API使用）
   const now = new Date();
-  const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const formatter = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const parts = formatter.formatToParts(now);
+  const getVal = (type) => parts.find(p => p.type === type)?.value || '00';
+  const dateStr = `${getVal('year')}-${getVal('month')}-${getVal('day')}`;
 
   const beforePath = path.join(screenshotDir, `${dateStr}-before.png`);
   const afterPath = path.join(screenshotDir, `${dateStr}.png`);

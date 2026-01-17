@@ -27,12 +27,17 @@ try {
 
 const latestEntry = changelog[changelog.length - 1];
 
-// Get screenshot path
+// Get screenshot path (use JST timezone)
 const now = new Date();
-const year = now.getFullYear();
-const month = String(now.getMonth() + 1).padStart(2, '0');
-const day = String(now.getDate()).padStart(2, '0');
-const date = `${year}-${month}-${day}`;
+const formatter = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+});
+const parts = formatter.formatToParts(now);
+const getVal = (type) => parts.find(p => p.type === type)?.value || '00';
+const date = `${getVal('year')}-${getVal('month')}-${getVal('day')}`;
 
 const beforePath = `public/models/${MODEL_ID}/screenshots/${date}-before.png`;
 
