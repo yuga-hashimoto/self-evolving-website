@@ -6,6 +6,7 @@ import EndlessJumperGame from './components/EndlessJumperGame';
 import Game from './components/Game';
 import Two048Game from './components/Two048Game';
 import SnakeGame from './components/SnakeGame';
+import EndlessRunnerGame from './components/EndlessRunnerGame';
 import TetrisGame from './components/TetrisGame';
 
 export default function GrokPlayground() {
@@ -60,7 +61,7 @@ export default function GrokPlayground() {
           {selectedGame === 'endlessJumper' && <EndlessJumperGame />}
           {selectedGame === '2048' && <Two048Game />}
           {selectedGame === 'snake' && <SnakeGame />}
-          {selectedGame === 'tetris' && <TetrisGame />}
+                    {selectedGame === 'tetris' && <TetrisGame />}
         </div>
       </div>
 
