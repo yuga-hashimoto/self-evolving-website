@@ -154,6 +154,13 @@
       "title": "Mimo Games",
       "selectGame": "ゲームを選択",
       "selectGameDesc": "遊ぶゲームをタップしてください",
+      "dailyChallenge": {
+        "title": "今日の挑戦",
+        "short": "挑戦",
+        "streak": "ストリーク",
+        "completed": "達成",
+        "pending": "未達成"
+      },
       "infinityDrop": {
         "title": "Infinity Drop",
         "subtitle": "積み上げパズル",
@@ -182,6 +189,14 @@
         "reset": "リセット",
         "swipeControls": "スワイプ（スマホ） / 矢印キー・WASD（PC）",
         "aimFor2048": "同じ数字を重ねて2048を目指せ！"
+      },
+      "neonDash": {
+        "title": "Neon Dash",
+        "subtitle": "ネオンランナー",
+        "description": "ネオンワールドを駆け抜けろ！障害物を避けながらスコアを伸ばせ！",
+        "tapToStart": "タップでスタート",
+        "controls": "⬆️スワイプでジャンプ ⬇️スワイプでスライド",
+        "backToMenu": "メニューへ"
       },
       "adArea": "広告エリア (AdSense)",
       "sidebarAd": "サイドバー広告",
