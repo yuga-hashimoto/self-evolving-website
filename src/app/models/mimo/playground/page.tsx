@@ -967,6 +967,15 @@ export default function MimoPlayground() {
       } else if (type === 'combo') {
         oscillator.frequency.value = 659.25; // E5
         oscillator.type = 'triangle';
+      } else if (type === 'jump') {
+        oscillator.frequency.value = 440; // A4
+        oscillator.type = 'sine';
+      } else if (type === 'slide') {
+        oscillator.frequency.value = 330; // E4
+        oscillator.type = 'sine';
+      } else if (type === 'hit') {
+        oscillator.frequency.value = 110; // A2
+        oscillator.type = 'sawtooth';
       } else {
         oscillator.frequency.value = 220;
         oscillator.type = 'square';
@@ -1259,9 +1268,15 @@ export default function MimoPlayground() {
         playerState: 'jumping',
       }));
       neonStatsRef.current.jumps += 1;
-      vibrate(10);
+      vibrate(15); // Increased from 10ms for better feedback
       playSound('jump');
       createNeonParticles(groundY, '#00ff88');
+      // Add extra particle burst for visual feedback
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        createNeonParticles(groundY, '#00ffaa');
+      }
     }
   }, [neonState.isPlaying, neonState.isGameOver, neonState.playerState, neonState.playerY, createNeonParticles]);
 
@@ -1280,7 +1295,7 @@ export default function MimoPlayground() {
         slideTimer: 30, // 30フレーム（約0.5秒）
       }));
       neonStatsRef.current.slides += 1;
-      vibrate(5);
+      vibrate(8); // Increased from 5ms for better feedback
       playSound('slide');
       createNeonParticles(groundY, '#00ddff');
     }
@@ -1944,7 +1959,9 @@ export default function MimoPlayground() {
     if (!tile) return null;
     const color = TILE_COLORS[tile.value] || '#3c3a32';
     const textColor = tile.value >= 8 ? '#f9f6f2' : '#776e65';
-    const fontSize = tile.value >= 1024 ? '1rem' : tile.value >= 128 ? '1.25rem' : '1.5rem';
+    const fontSize = tile.value >= 1024 ? '0.8rem' : tile.value >= 256 ? '1rem' : tile.value >= 128 ? '1.25rem' : '1.5rem';
+    const gridSize = game2048State.gridSize;
+    const cellSize = 100 / gridSize;
 
     return (
       <div
@@ -1953,10 +1970,10 @@ export default function MimoPlayground() {
           tile.isNew ? 'animate-ping' : ''
         } ${tile.isMerged ? 'scale-110' : ''}`}
         style={{
-          left: `${tile.x * 25}%`,
-          top: `${tile.y * 25}%`,
-          width: '23%',
-          height: '23%',
+          left: `${tile.x * cellSize}%`,
+          top: `${tile.y * cellSize}%`,
+          width: `${cellSize - 1}%`,
+          height: `${cellSize - 1}%`,
           backgroundColor: color,
           color: textColor,
           fontSize: fontSize,
@@ -2409,14 +2426,6 @@ export default function MimoPlayground() {
                       startNeonDashGame();
                     }
                   }}
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    if (!neonState.isPlaying && !neonState.isGameOver) {
-                      startNeonDashGame();
-                    } else if (neonState.isGameOver) {
-                      startNeonDashGame();
-                    }
-                  }}
                 />
 
                 {neonState.isPlaying && !neonState.isGameOver && (
@@ -2492,8 +2501,12 @@ export default function MimoPlayground() {
             const dx = touchEndX - touchStart.x;
             const dy = touchEndY - touchStart.y;
 
-            // デッドゾーン
-            if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+            // デッドゾーン - スクリーンサイズに基づいて動的に計算
+            const rect = containerRef.current?.getBoundingClientRect();
+            const containerWidth = rect?.width || 300;
+            const swipeThreshold = Math.max(20, containerWidth * 0.05); // 最小20px、または5%の幅
+
+            if (Math.abs(dx) < swipeThreshold && Math.abs(dy) < swipeThreshold) return;
 
             // 方向判定
             if (Math.abs(dx) > Math.abs(dy)) {
@@ -2510,7 +2523,6 @@ export default function MimoPlayground() {
       {currentGame === 'neon' && (
         <div
           onTouchStart={(e) => {
-            e.preventDefault();
             const touch = e.touches[0];
             (e.target as any)._touchStart = {
               x: touch.clientX,
@@ -2527,7 +2539,6 @@ export default function MimoPlayground() {
             }
           }}
           onTouchEnd={(e) => {
-            e.preventDefault();
             if (!neonState.isPlaying || neonState.isGameOver) return;
 
             const touchStart = (e.target as any)._touchStart;
@@ -2539,8 +2550,8 @@ export default function MimoPlayground() {
             const rect = containerRef.current?.getBoundingClientRect();
             const containerHeight = rect?.height || 400;
 
-            // 垂直スワイプを優先（横スワイプは無視）
-            const swipeThreshold = containerHeight * 0.15; // 15% of screen height
+            // スワイプ閾値 - スクリーンサイズに基づいて動的に計算
+            const swipeThreshold = Math.max(30, containerHeight * 0.1); // 最小30px、または10%の高さ
 
             if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > swipeThreshold) {
               if (dy < 0) {
@@ -2550,7 +2561,7 @@ export default function MimoPlayground() {
                 // 下にスライド = スライド
                 slide();
               }
-            } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+            } else if (Math.abs(dx) < 15 && Math.abs(dy) < 15) {
               // タップ（微小な移動）- 上部タップでジャンプ、下部タップでスライド
               const touchY = touchEnd.clientY;
               const relativeY = touchY - (rect?.top || 0);
@@ -2562,7 +2573,8 @@ export default function MimoPlayground() {
               }
             }
           }}
-          className="fixed inset-0 z-50 pointer-events-none"
+          className="fixed inset-0 z-50"
+          style={{ touchAction: 'none' }}
         />
       )}
 
