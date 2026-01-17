@@ -262,7 +262,6 @@ jobs:
       - name: Claude Code Execution (Skill-Based)
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare-skill.outputs.skill_prompt }}
           claude_args: |
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite"
@@ -362,7 +361,6 @@ jobs:
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_1.outputs.fix_prompt }}
           claude_args: |
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
@@ -440,7 +438,6 @@ jobs:
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_2.outputs.fix_prompt }}
           claude_args: |
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
@@ -518,7 +515,6 @@ jobs:
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_3.outputs.fix_prompt }}
           claude_args: |
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(public/models/${{ inputs.model_id }}/changelog-jp.json),Edit(public/models/${{ inputs.model_id }}/changelog-en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite"
@@ -664,7 +660,6 @@ jobs:
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_mobile_fix_1.outputs.mobile_fix_prompt }}
           claude_args: |
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Glob,Grep,TodoWrite"
