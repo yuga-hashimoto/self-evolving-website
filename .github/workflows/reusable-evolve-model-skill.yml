@@ -260,7 +260,7 @@ jobs:
         run: echo "claude_code_start=$(date +%s)" >> $GITHUB_ENV
 
       - name: Claude Code Execution (Skill-Based)
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@1b8ee3b94104046d71fde52ec3557651ad8c0d71
         with:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare-skill.outputs.skill_prompt }}
@@ -358,7 +358,7 @@ jobs:
       - name: Auto-Fix (Attempt 1)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
         continue-on-error: true
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@1b8ee3b94104046d71fde52ec3557651ad8c0d71
         with:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_1.outputs.fix_prompt }}
@@ -434,7 +434,7 @@ jobs:
       - name: Auto-Fix (Attempt 2)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
         continue-on-error: true
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@1b8ee3b94104046d71fde52ec3557651ad8c0d71
         with:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_2.outputs.fix_prompt }}
@@ -510,7 +510,7 @@ jobs:
       - name: Auto-Fix (Attempt 3)
         if: steps.changes.outputs.has_changes == 'true' && env.NEEDS_FIX == 'true'
         continue-on-error: true
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@1b8ee3b94104046d71fde52ec3557651ad8c0d71
         with:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_fix_3.outputs.fix_prompt }}
@@ -654,7 +654,7 @@ jobs:
       - name: Auto-Fix Mobile (Attempt 1)
         if: steps.changes.outputs.has_changes == 'true' && steps.mobile_check_1.outcome == 'failure'
         continue-on-error: true
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@1b8ee3b94104046d71fde52ec3557651ad8c0d71
         with:
           anthropic_api_key: ${{ secrets.model_api_key }}
           prompt: ${{ steps.prepare_mobile_fix_1.outputs.mobile_fix_prompt }}
