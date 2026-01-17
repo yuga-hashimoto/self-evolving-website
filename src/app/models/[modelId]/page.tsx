@@ -45,8 +45,8 @@ export default async function ModelPage({ params }: PageProps) {
     return (
         <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-4 sm:py-16">
             <div className="text-center max-w-4xl mx-auto mb-4 sm:mb-16">
-                <div className="inline-block mb-2 sm:mb-6 animate-float">
-                    <ModelIcon size={96} className="w-12 h-12 sm:w-24 sm:h-24" />
+                <div className="inline-block mb-2 sm:mb-6 animate-float" aria-hidden="true">
+                    <ModelIcon size={96} className="w-12 h-12 sm:w-24 sm:h-24" aria-hidden="true" />
                 </div>
                 <h1 className={`text-2xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-8 bg-gradient-to-r ${colors.gradient} bg-clip-text text-transparent`}>
                     {model.name} Evolution
@@ -63,11 +63,11 @@ export default async function ModelPage({ params }: PageProps) {
             </div>
 
             {/* Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl w-full">
-                <Link href={`/models/${modelId}/playground`} className="group col-span-2 sm:col-span-1">
+            <nav className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl w-full" aria-label={`${model.name} navigation`}>
+                <Link href={`/models/${modelId}/playground`} className="group col-span-2 sm:col-span-1" aria-label={`${model.name} ${t('playground')}`}>
                     <div className={`glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 ${colors.glow}`}>
-                        <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <IconPlayground className="w-12 h-12 sm:w-16 sm:h-16" />
+                        <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform" aria-hidden="true">
+                            <IconPlayground className="w-12 h-12 sm:w-16 sm:h-16" aria-hidden="true" />
                         </div>
                         <h2 className="text-xl font-bold mb-2">{t('playground')}</h2>
                         <p className="text-gray-400 text-sm">
@@ -76,10 +76,10 @@ export default async function ModelPage({ params }: PageProps) {
                     </div>
                 </Link>
 
-                <Link href={`/models/${modelId}/changelog`} className="group col-span-1">
+                <Link href={`/models/${modelId}/changelog`} className="group col-span-1" aria-label={`${model.name} ${t('changelog')}`}>
                     <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105">
-                        <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <IconChangelog className="w-12 h-12 sm:w-16 sm:h-16" />
+                        <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform" aria-hidden="true">
+                            <IconChangelog className="w-12 h-12 sm:w-16 sm:h-16" aria-hidden="true" />
                         </div>
                         <h2 className="text-lg sm:text-xl font-bold mb-2">{t('changelog')}</h2>
                         <p className="text-gray-400 text-xs sm:text-sm">
@@ -88,10 +88,10 @@ export default async function ModelPage({ params }: PageProps) {
                     </div>
                 </Link>
 
-                <Link href={`/models/${modelId}/analytics`} className="group col-span-1">
+                <Link href={`/models/${modelId}/analytics`} className="group col-span-1" aria-label={`${model.name} ${t('analytics')}`}>
                     <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105">
-                        <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <IconAnalytics className="w-12 h-12 sm:w-16 sm:h-16" />
+                        <div className="flex justify-center mb-4 group-hover:scale-110 transition-transform" aria-hidden="true">
+                            <IconAnalytics className="w-12 h-12 sm:w-16 sm:h-16" aria-hidden="true" />
                         </div>
                         <h2 className="text-lg sm:text-xl font-bold mb-2">{t('analytics')}</h2>
                         <p className="text-gray-400 text-xs sm:text-sm">
@@ -99,7 +99,7 @@ export default async function ModelPage({ params }: PageProps) {
                         </p>
                     </div>
                 </Link>
-            </div>
+            </nav>
 
             {/* Back Link */}
             <div className="mt-8 sm:mt-12">

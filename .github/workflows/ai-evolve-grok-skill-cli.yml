@@ -1,9 +1,9 @@
 name: AI Evolution (Grok) - CLI Version
 
 on:
-  # schedule:
-  #   - cron: '30 9 * * *'   # UTC 9:30 (JST 18:30)
-  #   - cron: '30 21 * * *'  # UTC 21:30 (JST 6:30)
+  schedule:
+    - cron: '30 9 * * *'   # UTC 9:30 (JST 18:30)
+    - cron: '30 21 * * *'  # UTC 21:30 (JST 6:30)
   workflow_dispatch:
     inputs:
       retry_count:

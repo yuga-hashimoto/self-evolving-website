@@ -36,8 +36,8 @@ export default async function Home() {
           <h1 className="text-5xl lg:text-6xl font-bold gradient-text leading-tight">
             {t('heroTitle')}
           </h1>
-          <div className="inline-block animate-float">
-            <IconDNA size={96} />
+          <div className="inline-block animate-float" aria-hidden="true">
+            <IconDNA size={96} aria-hidden="true" />
           </div>
         </div>
         <p className="text-base sm:text-xl text-purple-300 mb-3 sm:mb-4 leading-relaxed">
@@ -54,7 +54,7 @@ export default async function Home() {
         <Link href="/models/mimo" className="group block active:scale-95 transition-transform" aria-label="Mimoモデルの進化を見る">
           <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 border-purple-500/30 hover:border-purple-500/60 active:bg-white/15">
             <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-              <IconMimo size={80} className="w-14 h-14 sm:w-20 sm:h-20" />
+              <IconMimo size={80} className="w-14 h-14 sm:w-20 sm:h-20" aria-hidden="true" />
             </div>
             <h2 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               {MODELS.mimo.name}
@@ -75,7 +75,7 @@ export default async function Home() {
         <Link href="/models/grok" className="group block active:scale-95 transition-transform" aria-label="Grokモデルの進化を見る">
           <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 border-blue-500/30 hover:border-blue-500/60 active:bg-white/15">
             <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-              <IconGrok size={80} className="w-14 h-14 sm:w-20 sm:h-20" />
+              <IconGrok size={80} className="w-14 h-14 sm:w-20 sm:h-20" aria-hidden="true" />
             </div>
             <h2 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
               {MODELS.grok.name}
@@ -101,7 +101,7 @@ export default async function Home() {
               {/* Model Headers */}
               <div className="flex items-center justify-center gap-6 mb-6">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <IconMimo size={48} className="w-8 h-8 sm:w-10 sm:h-10" />
+                  <IconMimo size={48} className="w-8 h-8 sm:w-10 sm:h-10" aria-hidden="true" />
                   <div>
                     <h4 className="text-base sm:text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                       Mimo
@@ -116,7 +116,7 @@ export default async function Home() {
                     </h4>
                     <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">{MODELS.grok.openrouterModel}</p>
                   </div>
-                  <IconGrok size={48} className="w-8 h-8 sm:w-10 sm:h-10" />
+                  <IconGrok size={48} className="w-8 h-8 sm:w-10 sm:h-10" aria-hidden="true" />
                 </div>
               </div>
 
@@ -226,8 +226,8 @@ export default async function Home() {
           <div className="space-y-4 sm:space-y-5">
             {/* Goal */}
             <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
-                <IconTarget size={24} className="text-purple-400" />
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20" aria-hidden="true">
+                <IconTarget size={24} className="text-purple-400" aria-hidden="true" />
               </div>
               <div>
                 <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleGoalTitle')}</h4>
@@ -239,8 +239,8 @@ export default async function Home() {
 
             {/* Fairness */}
             <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
-                <IconBalance size={24} className="text-purple-400" />
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20" aria-hidden="true">
+                <IconBalance size={24} className="text-purple-400" aria-hidden="true" />
               </div>
               <div>
                 <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleFairnessTitle')}</h4>
@@ -252,8 +252,8 @@ export default async function Home() {
 
             {/* Data */}
             <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
-                <IconAnalytics size={24} className="text-purple-400" />
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20" aria-hidden="true">
+                <IconAnalytics size={24} className="text-purple-400" aria-hidden="true" />
               </div>
               <div>
                 <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleDataTitle')}</h4>
@@ -265,8 +265,8 @@ export default async function Home() {
 
             {/* Freedom */}
             <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
-                <IconRocket size={24} className="text-purple-400" />
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20" aria-hidden="true">
+                <IconRocket size={24} className="text-purple-400" aria-hidden="true" />
               </div>
               <div>
                 <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleFreedomTitle')}</h4>
@@ -278,8 +278,8 @@ export default async function Home() {
 
             {/* Constraint */}
             <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
-                <IconClipboard size={24} className="text-purple-400" />
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20" aria-hidden="true">
+                <IconClipboard size={24} className="text-purple-400" aria-hidden="true" />
               </div>
               <div>
                 <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleConstraintTitle')}</h4>
@@ -293,7 +293,7 @@ export default async function Home() {
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl"></div>
       </div>

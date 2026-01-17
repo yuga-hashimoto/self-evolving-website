@@ -91,6 +91,42 @@ body {
   z-index: -9999 !important;
 }
 
+/* Accessibility: Focus styles for keyboard navigation */
+:focus-visible {
+  outline: 2px solid #a855f7;
+  outline-offset: 2px;
+}
+
+/* Skip link for screen readers */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.75rem 1.5rem;
+  background: #a855f7;
+  color: white;
+  font-weight: 600;
+  border-radius: 0 0 0.5rem 0.5rem;
+  z-index: 9999;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Mobile safe area and tap targets */
 @supports (padding: env(safe-area-inset-bottom)) {
   .safe-area-bottom {
@@ -98,8 +134,28 @@ body {
   }
 }
 
+/* Minimum tap targets (44px) for interactive elements */
 @media (max-width: 640px) {
   .glass-card {
     min-height: 44px;
+  }
+
+  button,
+  [role="button"],
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .glass-card {
+    border-width: 2px;
+  }
+
+  .gradient-text {
+    -webkit-text-fill-color: currentColor;
+    background: none;
   }
 }

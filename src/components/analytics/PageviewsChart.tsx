@@ -47,14 +47,15 @@ export function PageviewsChart({ data }: PageviewsChartProps) {
     ];
 
     return (
-        <div className="glass-card p-6">
+        <div className="glass-card p-6" role="region" aria-label={t('pageviewsChartTitle') || 'Pageviews Chart'}>
             {/* Period selector tabs */}
             <div className="flex justify-end mb-6">
-                <div className="flex gap-2">
+                <div className="flex gap-2" role="group" aria-label={t('selectPeriod') || 'Select period'}>
                     {periods.map((period) => (
                         <button
                             key={period.value}
                             onClick={() => setSelectedPeriod(period.value)}
+                            aria-pressed={selectedPeriod === period.value}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                                 selectedPeriod === period.value
                                     ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50'
@@ -68,7 +69,7 @@ export function PageviewsChart({ data }: PageviewsChartProps) {
             </div>
 
             {/* Chart */}
-            <div>
+            <div role="img" aria-label={`Pageviews trend chart showing ${totalPageviews.toLocaleString()} total pageviews over the last ${selectedPeriod} days`}>
                 <ResponsiveContainer width="100%" height={400}>
                     <LineChart data={formattedData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                         <defs>

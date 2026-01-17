@@ -30,11 +30,22 @@ if (!aiChanges.changes_jp || !aiChanges.changes_en) {
     process.exit(1);
 }
 
-// Generate JST date in ISO 8601 format
+// Generate JST date in ISO 8601 format using Intl.DateTimeFormat
+// (TZ environment variable does NOT affect Node.js Date methods, so we use Intl API)
 const now = new Date();
-const jstOffset = 9 * 60; // JST is UTC+9
-const jstDate = new Date(now.getTime() + jstOffset * 60 * 1000);
-const isoDate = jstDate.toISOString().replace('Z', '').split('.')[0] + '+09:00';
+const formatter = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+});
+const parts = formatter.formatToParts(now);
+const getVal = (type) => parts.find(p => p.type === type)?.value || '00';
+const isoDate = `${getVal('year')}-${getVal('month')}-${getVal('day')}T${getVal('hour')}:${getVal('minute')}:${getVal('second')}+09:00`;
 
 // Read workflow metrics
 let metrics = null;

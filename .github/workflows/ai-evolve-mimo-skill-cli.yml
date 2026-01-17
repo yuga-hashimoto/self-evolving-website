@@ -1,9 +1,9 @@
 name: AI Evolution (MiMo) - CLI Version
 
 on:
-  # schedule:
-  #   - cron: '0 9 * * *'   # UTC 9:00 (JST 18:00)
-  #   - cron: '0 21 * * *'  # UTC 21:00 (JST 6:00)
+  schedule:
+    - cron: '0 9 * * *'   # UTC 9:00 (JST 18:00)
+    - cron: '0 21 * * *'  # UTC 21:00 (JST 6:00)
   workflow_dispatch:
     inputs:
       retry_count:

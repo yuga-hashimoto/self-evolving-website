@@ -11,12 +11,18 @@ async function takeScreenshot() {
 
   const url = `http://localhost:3131/models/${modelId}/playground`;
 
-  // Use local timezone date (TZ environment variable should be set to Asia/Tokyo in GitHub Actions)
+  // Use JST timezone for date using Intl.DateTimeFormat
+  // (TZ environment variable does NOT affect Node.js Date methods, so we use Intl API)
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const date = `${year}-${month}-${day}`;
+  const formatter = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const parts = formatter.formatToParts(now);
+  const getVal = (type) => parts.find(p => p.type === type)?.value || '00';
+  const date = `${getVal('year')}-${getVal('month')}-${getVal('day')}`;
 
   const screenshotDir = path.join(__dirname, `../public/models/${modelId}/screenshots`);
 

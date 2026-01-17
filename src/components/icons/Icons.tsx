@@ -4,12 +4,14 @@
 interface IconProps {
     size?: number;
     className?: string;
+    "aria-hidden"?: boolean | "true" | "false";
+    "aria-label"?: string;
 }
 
 // DNA/Evolution icon - Main logo
-export function IconDNA({ size = 48, className = "" }: IconProps) {
+export function IconDNA({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <path d="M32 8C24 8 18 14 18 22C18 30 24 36 32 36C40 36 46 42 46 50C46 58 40 56 32 56" stroke="url(#dna-grad)" strokeWidth="4" strokeLinecap="round" />
             <path d="M32 8C40 8 46 14 46 22C46 30 40 36 32 36C24 36 18 42 18 50C18 58 24 56 32 56" stroke="url(#dna-grad2)" strokeWidth="4" strokeLinecap="round" />
             <circle cx="32" cy="22" r="4" fill="#FFD93D" />
@@ -30,9 +32,9 @@ export function IconDNA({ size = 48, className = "" }: IconProps) {
 }
 
 // Home icon for navigation
-export function IconHome({ size = 48, className = "" }: IconProps) {
+export function IconHome({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <path d="M32 10L8 32H16V54H28V40H36V54H48V32H56L32 10Z" fill="#a855f7" />
             <rect x="28" y="28" width="8" height="8" rx="1" fill="#FFD93D" />
         </svg>
@@ -40,9 +42,9 @@ export function IconHome({ size = 48, className = "" }: IconProps) {
 }
 
 // Playground/Game icon
-export function IconPlayground({ size = 48, className = "" }: IconProps) {
+export function IconPlayground({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <rect x="12" y="20" width="40" height="28" rx="4" fill="#FFD93D" />
             <rect x="16" y="24" width="12" height="8" rx="2" fill="#1a1a2e" />
             <circle cx="44" cy="32" r="4" fill="#a855f7" />
@@ -56,9 +58,9 @@ export function IconPlayground({ size = 48, className = "" }: IconProps) {
 }
 
 // Changelog/Notes icon
-export function IconChangelog({ size = 48, className = "" }: IconProps) {
+export function IconChangelog({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <rect x="14" y="10" width="36" height="44" rx="4" fill="#FFD93D" />
             <rect x="20" y="18" width="20" height="3" rx="1" fill="#1a1a2e" />
             <rect x="20" y="26" width="24" height="3" rx="1" fill="#1a1a2e" />
@@ -71,9 +73,9 @@ export function IconChangelog({ size = 48, className = "" }: IconProps) {
 }
 
 // Analytics/Chart icon
-export function IconAnalytics({ size = 48, className = "" }: IconProps) {
+export function IconAnalytics({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <rect x="10" y="44" width="10" height="12" rx="2" fill="#3b82f6" />
             <rect x="24" y="32" width="10" height="24" rx="2" fill="#6366f1" />
             <rect x="38" y="20" width="10" height="36" rx="2" fill="#a855f7" />
@@ -86,9 +88,9 @@ export function IconAnalytics({ size = 48, className = "" }: IconProps) {
 }
 
 // Click/Pointer icon
-export function IconClick({ size = 48, className = "" }: IconProps) {
+export function IconClick({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <ellipse cx="32" cy="36" rx="20" ry="22" fill="#FFD93D" />
             <ellipse cx="28" cy="30" rx="3" ry="4" fill="#1a1a2e" />
             <ellipse cx="38" cy="30" rx="3" ry="4" fill="#1a1a2e" />
@@ -112,9 +114,9 @@ export function IconWarning({ size = 48, className = "" }: IconProps) {
 }
 
 // Celebration icon
-export function IconCelebration({ size = 48, className = "" }: IconProps) {
+export function IconCelebration({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <ellipse cx="32" cy="38" rx="18" ry="20" fill="#FFD93D" />
             <path d="M24 22L28 32" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" />
             <path d="M40 22L36 32" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" />
@@ -131,9 +133,9 @@ export function IconCelebration({ size = 48, className = "" }: IconProps) {
 }
 
 // Fire icon
-export function IconFire({ size = 48, className = "" }: IconProps) {
+export function IconFire({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <ellipse cx="32" cy="42" rx="16" ry="18" fill="#FFD93D" />
             <path d="M20 30C20 18 32 8 32 8C32 8 44 18 44 30C44 36 40 42 36 44C38 40 36 36 32 36C28 36 26 40 28 44C24 42 20 36 20 30Z" fill="#f97316" />
             <path d="M26 34C26 26 32 20 32 20C32 20 38 26 38 34C38 38 36 42 32 44C28 42 26 38 26 34Z" fill="#fbbf24" />
@@ -145,9 +147,9 @@ export function IconFire({ size = 48, className = "" }: IconProps) {
 }
 
 // Crown icon
-export function IconCrown({ size = 48, className = "" }: IconProps) {
+export function IconCrown({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <ellipse cx="32" cy="44" rx="16" ry="14" fill="#FFD93D" />
             <path d="M14 22L22 32L32 18L42 32L50 22L46 36H18L14 22Z" fill="#f59e0b" />
             <circle cx="14" cy="20" r="4" fill="#fbbf24" />
@@ -279,9 +281,9 @@ export function IconCodeSpark({ size = 48, className = "" }: IconProps) {
 }
 
 // Cycle/Daily/Verify icon
-export function IconCycleDaily({ size = 48, className = "" }: IconProps) {
+export function IconCycleDaily({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <path d="M32 12V8M32 56V52M52 32H56M8 32H12" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
             <path d="M46.14 17.86L43.31 20.69M17.86 46.14L20.69 43.31M17.86 17.86L20.69 20.69M46.14 46.14L43.31 43.31" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
             <path d="M32 18C24.268 18 18 24.268 18 32C18 39.732 24.268 46 32 46C39.732 46 46 39.732 46 32" stroke="#f9a8d4" strokeWidth="3" strokeLinecap="round" />
@@ -293,9 +295,9 @@ export function IconCycleDaily({ size = 48, className = "" }: IconProps) {
 
 
 // Mimo Icon
-export function IconMimo({ size = 48, className = "" }: IconProps) {
+export function IconMimo({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <circle cx="32" cy="32" r="28" fill="#a855f7" fillOpacity="0.1" stroke="#a855f7" strokeWidth="2" />
             <path d="M20 44V20L32 32L44 20V44" stroke="#a855f7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
@@ -303,9 +305,9 @@ export function IconMimo({ size = 48, className = "" }: IconProps) {
 }
 
 // Grok Icon
-export function IconGrok({ size = 48, className = "" }: IconProps) {
+export function IconGrok({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <circle cx="32" cy="32" r="28" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" strokeWidth="2" />
             <path d="M44 26V20H20V44H44V34H32" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
@@ -313,9 +315,9 @@ export function IconGrok({ size = 48, className = "" }: IconProps) {
 }
 
 // Balance/Fairness icon
-export function IconBalance({ size = 48, className = "" }: IconProps) {
+export function IconBalance({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <path d="M32 8V24" stroke="#eab308" strokeWidth="3" strokeLinecap="round" />
             <path d="M12 24H52" stroke="#eab308" strokeWidth="3" strokeLinecap="round" />
             <path d="M16 24L8 44H24L16 24Z" fill="#eab308" fillOpacity="0.2" stroke="#eab308" strokeWidth="2" strokeLinejoin="round" />
@@ -328,9 +330,9 @@ export function IconBalance({ size = 48, className = "" }: IconProps) {
 }
 
 // Target/Goal icon
-export function IconTarget({ size = 48, className = "" }: IconProps) {
+export function IconTarget({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <circle cx="32" cy="32" r="24" stroke="#a855f7" strokeWidth="2" fill="#a855f7" fillOpacity="0.05" />
             <circle cx="32" cy="32" r="16" stroke="#6366f1" strokeWidth="2" />
             <circle cx="32" cy="32" r="8" fill="#FFD93D" />
@@ -341,9 +343,9 @@ export function IconTarget({ size = 48, className = "" }: IconProps) {
 }
 
 // Rocket/Launch icon
-export function IconRocket({ size = 48, className = "" }: IconProps) {
+export function IconRocket({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <path d="M32 6C32 6 20 18 20 34C20 44 16 48 12 50V54H24L26 48H38L40 54H52V50C48 48 44 44 44 34C44 18 32 6 32 6Z" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             <circle cx="32" cy="24" r="6" fill="#FFD93D" stroke="#1a1a2e" strokeWidth="2" />
             <path d="M26 48L24 54M38 48L40 54" stroke="#1a1a2e" strokeWidth="2" />
@@ -354,9 +356,9 @@ export function IconRocket({ size = 48, className = "" }: IconProps) {
 }
 
 // Clipboard/Rules icon
-export function IconClipboard({ size = 48, className = "" }: IconProps) {
+export function IconClipboard({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className}>
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <rect x="14" y="10" width="36" height="46" rx="4" fill="#1a1a2e" fillOpacity="0.05" stroke="#22c55e" strokeWidth="2" />
             <path d="M22 6H42V14H22V6Z" fill="#22c55e" />
             <circle cx="32" cy="10" r="2" fill="#1a1a2e" />
@@ -408,8 +410,8 @@ export const iconMap = {
 
 export type IconName = keyof typeof iconMap;
 
-export function Icon({ name, size = 48, className = "" }: { name: IconName } & IconProps) {
+export function Icon({ name, size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: { name: IconName } & IconProps) {
     const IconComponent = iconMap[name];
-    return <IconComponent size={size} className={className} />;
+    return <IconComponent size={size} className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} />;
 }
 
