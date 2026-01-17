@@ -154,6 +154,13 @@
       "title": "Mimo Games",
       "selectGame": "Select Game",
       "selectGameDesc": "Tap on a game to play",
+      "dailyChallenge": {
+        "title": "Today's Challenge",
+        "short": "Challenge",
+        "streak": "Streak",
+        "completed": "Completed",
+        "pending": "Pending"
+      },
       "infinityDrop": {
         "title": "Infinity Drop",
         "subtitle": "Stack Puzzle",
@@ -182,6 +189,14 @@
         "reset": "Reset",
         "swipeControls": "Swipe (mobile) / Arrow keys/WASD (PC)",
         "aimFor2048": "Aim for 2048 by merging same numbers!"
+      },
+      "neonDash": {
+        "title": "Neon Dash",
+        "subtitle": "Neon Runner",
+        "description": "Dash through the neon world! Dodge obstacles and extend your score!",
+        "tapToStart": "TAP TO START",
+        "controls": "⬆️Swipe UP: Jump ⬇️Swipe DOWN: Slide",
+        "backToMenu": "Back to Menu"
       },
       "adArea": "Ad Area (AdSense)",
       "sidebarAd": "Sidebar Ad",

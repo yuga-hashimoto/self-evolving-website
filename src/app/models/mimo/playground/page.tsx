@@ -114,6 +114,24 @@ interface NeonDashState {
   slideTimer: number;
 }
 
+// Daily Challenge Interfaces
+interface DailyChallenge {
+  id: string; // YYYY-MM-DD
+  date: string;
+  game: 'infinity' | '2048' | 'neon';
+  target: number; // Target score to beat
+  description: string;
+  completed: boolean;
+  reward: number; // Coins to reward
+}
+
+interface DailyChallengeState {
+  currentChallenge: DailyChallenge | null;
+  streak: number;
+  lastCompletedDate: string | null;
+  showChallengeModal: boolean;
+}
+
 const INITIAL_BLOCK_WIDTH = 200;
 const BLOCK_HEIGHT = 30;
 const BASE_SPEED = 2;
@@ -196,6 +214,13 @@ export default function MimoPlayground() {
     slideTimer: 0,
   });
 
+  const [dailyChallenge, setDailyChallenge] = useState<DailyChallengeState>({
+    currentChallenge: null,
+    streak: 0,
+    lastCompletedDate: null,
+    showChallengeModal: false,
+  });
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -255,6 +280,124 @@ export default function MimoPlayground() {
       wideDesc: t('infinityDrop.wideDesc'),
     };
   }, [t, tc]);
+
+  // Get today's date in YYYY-MM-DD format (local time)
+  const getTodayDate = useCallback((): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  // Generate deterministic daily challenge based on date
+  const generateDailyChallenge = useCallback((dateStr: string): DailyChallenge => {
+    // Simple hash function for deterministic generation
+    const hash = dateStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+    // Cycle through games
+    const games: ('infinity' | '2048' | 'neon')[] = ['infinity', '2048', 'neon'];
+    const game = games[hash % games.length];
+
+    // Generate target based on game type
+    let target: number;
+    let description: string;
+    let reward: number;
+
+    switch (game) {
+      case 'infinity':
+        target = 200 + (hash % 200); // 200-400 points
+        description = `Score ${target}+ in Infinity Drop`;
+        reward = 50;
+        break;
+      case '2048':
+        target = 1024 + (hash % 1024); // 1024-2048 value
+        description = `Reach ${target} tile in 2048`;
+        reward = 75;
+        break;
+      case 'neon':
+        target = 300 + (hash % 300); // 300-600 points
+        description = `Score ${target}+ in Neon Dash`;
+        reward = 60;
+        break;
+    }
+
+    return {
+      id: dateStr,
+      date: dateStr,
+      game,
+      target,
+      description,
+      completed: false,
+      reward,
+    };
+  }, []);
+
+  // Check and update daily challenge
+  useEffect(() => {
+    const savedData = localStorage.getItem('dailyChallenge_data');
+    const today = getTodayDate();
+
+    if (savedData) {
+      try {
+        const parsed: DailyChallengeState = JSON.parse(savedData);
+
+        // Check if challenge is from today
+        if (parsed.currentChallenge?.id === today) {
+          setDailyChallenge(parsed);
+          return;
+        }
+
+        // Check streak (if last completed was yesterday, increment)
+        if (parsed.lastCompletedDate) {
+          const lastDate = new Date(parsed.lastCompletedDate);
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+
+          if (lastDate.toDateString() === yesterday.toDateString()) {
+            // Streak continues
+            const newChallenge = generateDailyChallenge(today);
+            setDailyChallenge({
+              currentChallenge: newChallenge,
+              streak: parsed.streak,
+              lastCompletedDate: parsed.lastCompletedDate,
+              showChallengeModal: true,
+            });
+            return;
+          } else if (lastDate.toDateString() !== today) {
+            // Streak broken
+            const newChallenge = generateDailyChallenge(today);
+            setDailyChallenge({
+              currentChallenge: newChallenge,
+              streak: 0,
+              lastCompletedDate: null,
+              showChallengeModal: true,
+            });
+            return;
+          }
+        }
+      } catch (e) {
+        // Parse error - create new
+        console.error('Failed to parse daily challenge data', e);
+      }
+    }
+
+    // No saved data or invalid - create new
+    const newChallenge = generateDailyChallenge(today);
+    setDailyChallenge({
+      currentChallenge: newChallenge,
+      streak: 0,
+      lastCompletedDate: null,
+      showChallengeModal: true,
+    });
+  }, [getTodayDate, generateDailyChallenge]);
+
+  // Save daily challenge state
+  useEffect(() => {
+    if (dailyChallenge.currentChallenge) {
+      localStorage.setItem('dailyChallenge_data', JSON.stringify(dailyChallenge));
+    }
+  }, [dailyChallenge]);
 
   // 追跡用のゲーム统计
   const gameStatsRef = useRef({
@@ -537,7 +680,7 @@ export default function MimoPlayground() {
       return { ...prev, blocks: updatedBlocks };
     });
 
-    // Update particles
+    // Update particles (with stricter limits for performance)
     setInfinityParticles((prev) =>
       prev
         .map((p) => ({
@@ -548,6 +691,7 @@ export default function MimoPlayground() {
           life: p.life - 1,
         }))
         .filter((p) => p.life > 0)
+        .slice(-60) // Keep only last 60 particles
     );
 
     draw();
@@ -557,8 +701,10 @@ export default function MimoPlayground() {
   // リサイズ時のキャンバス設定
   const handleResize = useCallback(() => {
     if (containerRef.current && canvasRef.current) {
-      canvasRef.current.width = containerRef.current.clientWidth;
-      canvasRef.current.height = Math.min(600, containerRef.current.clientWidth * 1.5);
+      const maxWidth = Math.min(window.innerWidth - 32, 400);
+      const maxHeight = Math.min(window.innerHeight - 200, 600);
+      canvasRef.current.width = maxWidth;
+      canvasRef.current.height = maxHeight;
     }
     draw();
   }, [draw]);
@@ -642,18 +788,10 @@ export default function MimoPlayground() {
         isPlaying: true,
       }));
 
-      // Reset wide skill after use
+      // Wide skill is passive - it applies at game start but stays owned
+      // Player keeps the wide block bonus as long as they have the skill
+      // No need to reset owned status - this is a permanent upgrade
       if (wideOwned) {
-        setShopItems((prev) =>
-          prev.map((item) =>
-            item.key === 'wide' ? { ...item, owned: false } : item
-          )
-        );
-        // Save to localStorage
-        const updatedItems = shopItems.map((item) =>
-          item.key === 'wide' ? { ...item, owned: false } : item
-        );
-        localStorage.setItem('infinityDrop_shopItems', JSON.stringify(updatedItems));
         playSound('success');
         createParticles(containerWidth / 2, 50, '#00ff88', 10);
       }
@@ -709,6 +847,9 @@ export default function MimoPlayground() {
         isPlaying: false,
         isGameOver: true,
       }));
+
+      // Check daily challenge completion
+      checkDailyChallengeCompletion('infinity', gameState.score);
       return;
     }
 
@@ -886,7 +1027,77 @@ export default function MimoPlayground() {
     }
   };
 
-  // スキルをアクティブ化する関数
+  // Check and complete daily challenge if criteria met
+  const checkDailyChallengeCompletion = useCallback((gameType: 'infinity' | '2048' | 'neon', score: number) => {
+    if (!dailyChallenge.currentChallenge || dailyChallenge.currentChallenge.completed) return;
+    if (dailyChallenge.currentChallenge.game !== gameType) return;
+
+    const challenge = dailyChallenge.currentChallenge;
+    const targetScore = challenge.target;
+
+    // Check if score meets target
+    let completed = false;
+
+    if (gameType === 'infinity' && score >= targetScore) {
+      completed = true;
+    } else if (gameType === '2048' && score >= targetScore) {
+      completed = true;
+    } else if (gameType === 'neon' && score >= targetScore) {
+      completed = true;
+    }
+
+    if (completed) {
+      // Update streak
+      let newStreak = dailyChallenge.streak;
+      const today = getTodayDate();
+
+      // Check if completing for the first time today
+      if (dailyChallenge.lastCompletedDate !== today) {
+        // If we completed yesterday, increment streak
+        if (dailyChallenge.lastCompletedDate) {
+          const lastDate = new Date(dailyChallenge.lastCompletedDate);
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+
+          if (lastDate.toDateString() === yesterday.toDateString()) {
+            newStreak = dailyChallenge.streak + 1;
+          } else if (lastDate.toDateString() !== today) {
+            newStreak = 1; // New streak
+          }
+        } else {
+          newStreak = 1;
+        }
+      }
+
+      // Award coins
+      setGameState((prev) => ({
+        ...prev,
+        coins: prev.coins + challenge.reward,
+      }));
+
+      // Save coins to localStorage
+      const currentCoins = parseInt(localStorage.getItem('infinityDrop_coins') || '0');
+      localStorage.setItem('infinityDrop_coins', (currentCoins + challenge.reward).toString());
+
+      // Update challenge state
+      const updatedChallenge: DailyChallenge = {
+        ...challenge,
+        completed: true,
+      };
+
+      setDailyChallenge({
+        currentChallenge: updatedChallenge,
+        streak: newStreak,
+        lastCompletedDate: today,
+        showChallengeModal: false,
+      });
+
+      // Play success feedback
+      playSound('success');
+      vibrate(100);
+    }
+  }, [dailyChallenge, getTodayDate, playSound, vibrate]);
+
   const activateSkill = useCallback((skillKey: 'boost' | 'slow' | 'wide') => {
     if (skillKey === 'wide') {
       // Wide skill is passive (applied on game start)
@@ -1004,7 +1215,10 @@ export default function MimoPlayground() {
       jumps: neonStatsRef.current.jumps,
       slides: neonStatsRef.current.slides,
     });
-  }, [neonState.highScore, neonState.score, trackClick]);
+
+    // Check daily challenge completion
+    checkDailyChallengeCompletion('neon', neonState.score);
+  }, [neonState.highScore, neonState.score, trackClick, checkDailyChallengeCompletion]);
 
   // Neon Dash: パーティクル生成
   const createNeonParticles = useCallback((y: number, color: string) => {
@@ -1095,15 +1309,21 @@ export default function MimoPlayground() {
     }));
   }, []);
 
-  // Neon Dash: 確認当たったか
+  // Neon Dash: 確認当たったか (Fixed collision detection)
   const checkCollision = useCallback((playerY: number, playerState: 'running' | 'jumping' | 'sliding'): boolean => {
     const containerHeight = containerRef.current?.clientHeight || 400;
     const groundY = containerHeight - 100;
+
+    // Player dimensions based on state
     const playerHeight = playerState === 'sliding' ? 20 : 40;
     const playerWidth = 30;
 
-    const playerLeft = containerRef.current!.clientWidth / 2 - playerWidth / 2;
-    const playerRight = containerRef.current!.clientWidth / 2 + playerWidth / 2;
+    // Player position (centered horizontally)
+    const playerCenterX = containerRef.current!.clientWidth / 2;
+    const playerLeft = playerCenterX - playerWidth / 2;
+    const playerRight = playerCenterX + playerWidth / 2;
+
+    // Player vertical bounds (playerY is bottom of player)
     const playerTop = playerY - playerHeight;
     const playerBottom = playerY;
 
@@ -1113,13 +1333,12 @@ export default function MimoPlayground() {
       const obstacleTop = obstacle.y - obstacle.height;
       const obstacleBottom = obstacle.y;
 
-      // AABB collision detection
-      if (
-        playerLeft < obstacleRight &&
-        playerRight > obstacleLeft &&
-        playerTop < obstacleBottom &&
-        playerBottom > obstacleTop
-      ) {
+      // AABB collision detection with explicit bounds
+      // Check if player and obstacle rectangles overlap
+      const horizontalOverlap = playerLeft < obstacleRight && playerRight > obstacleLeft;
+      const verticalOverlap = playerTop < obstacleBottom && playerBottom > obstacleTop;
+
+      if (horizontalOverlap && verticalOverlap) {
         return true;
       }
     }
@@ -1657,6 +1876,9 @@ export default function MimoPlayground() {
           duration: sessionDuration,
           difficulty: prev.difficulty,
         });
+
+        // Check daily challenge completion (score-based, not tile-based)
+        setTimeout(() => checkDailyChallengeCompletion('2048', score), 0);
       }
 
       return {
@@ -1791,6 +2013,38 @@ export default function MimoPlayground() {
               <p className="text-slate-400">{t('selectGameDesc')}</p>
             </div>
 
+            {/* Daily Challenge Banner */}
+            {dailyChallenge.currentChallenge && (
+              <div className="mb-6 p-4 rounded-xl border-2 border-amber-500 bg-gradient-to-r from-amber-900/30 to-orange-900/30">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🏆</span>
+                    <div className="text-left">
+                      <div className="font-bold text-amber-400">{t('dailyChallenge.title')}</div>
+                      <div className="text-sm text-slate-300">
+                        {dailyChallenge.currentChallenge.description}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <div className="text-xs text-slate-400">{t('dailyChallenge.streak')}</div>
+                      <div className="text-lg font-bold text-amber-400">🔥 {dailyChallenge.streak}</div>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                      dailyChallenge.currentChallenge.completed
+                        ? 'bg-green-600 text-white'
+                        : 'bg-amber-600 text-white'
+                    }`}>
+                      {dailyChallenge.currentChallenge.completed
+                        ? t('dailyChallenge.completed')
+                        : t('dailyChallenge.pending')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Infinity Drop カード */}
               <button
@@ -1868,6 +2122,30 @@ export default function MimoPlayground() {
         {/* ==================== INFINITY DROP ==================== */}
         {currentGame === 'infinity' && (
           <>
+            {/* Daily Challenge Status for Infinity Drop */}
+            {dailyChallenge.currentChallenge && dailyChallenge.currentChallenge.game === 'infinity' && (
+              <div className="mb-4 w-full max-w-md p-3 rounded-lg border border-amber-500/50 bg-amber-900/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <div className="text-sm">
+                      <span className="text-amber-400 font-bold">{t('dailyChallenge.short')}:</span>{' '}
+                      <span className="text-slate-300">{dailyChallenge.currentChallenge.target}+</span>
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-bold ${
+                    dailyChallenge.currentChallenge.completed
+                      ? 'bg-green-600 text-white'
+                      : 'bg-amber-600/50 text-amber-200'
+                  }`}>
+                    {dailyChallenge.currentChallenge.completed
+                      ? t('dailyChallenge.completed')
+                      : `${dailyChallenge.currentChallenge.reward} 💰`}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div
               ref={containerRef}
               className="w-full max-w-md bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden shadow-2xl shadow-blue-900/10 relative"
@@ -1941,6 +2219,30 @@ export default function MimoPlayground() {
         {/* ==================== 2048 GAME ==================== */}
         {currentGame === '2048' && (
           <div className="w-full max-w-md">
+            {/* Daily Challenge Status for 2048 */}
+            {dailyChallenge.currentChallenge && dailyChallenge.currentChallenge.game === '2048' && (
+              <div className="mb-4 w-full p-3 rounded-lg border border-amber-500/50 bg-amber-900/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <div className="text-sm">
+                      <span className="text-amber-400 font-bold">{t('dailyChallenge.short')}:</span>{' '}
+                      <span className="text-slate-300">Tile {dailyChallenge.currentChallenge.target}+</span>
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-bold ${
+                    dailyChallenge.currentChallenge.completed
+                      ? 'bg-green-600 text-white'
+                      : 'bg-amber-600/50 text-amber-200'
+                  }`}>
+                    {dailyChallenge.currentChallenge.completed
+                      ? t('dailyChallenge.completed')
+                      : `${dailyChallenge.currentChallenge.reward} 💰`}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* 2048 HUD */}
             <div className="flex justify-between items-center mb-4 gap-2">
               <div className="flex-1 bg-slate-800 p-3 rounded-lg text-center border border-slate-700">
@@ -2068,6 +2370,30 @@ export default function MimoPlayground() {
         {/* ==================== NEON DASH GAME ==================== */}
         {currentGame === 'neon' && (
           <>
+            {/* Daily Challenge Status for Neon Dash */}
+            {dailyChallenge.currentChallenge && dailyChallenge.currentChallenge.game === 'neon' && (
+              <div className="mb-4 w-full max-w-md p-3 rounded-lg border border-amber-500/50 bg-amber-900/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <div className="text-sm">
+                      <span className="text-amber-400 font-bold">{t('dailyChallenge.short')}:</span>{' '}
+                      <span className="text-slate-300">{dailyChallenge.currentChallenge.target}+</span>
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-bold ${
+                    dailyChallenge.currentChallenge.completed
+                      ? 'bg-green-600 text-white'
+                      : 'bg-amber-600/50 text-amber-200'
+                  }`}>
+                    {dailyChallenge.currentChallenge.completed
+                      ? t('dailyChallenge.completed')
+                      : `${dailyChallenge.currentChallenge.reward} 💰`}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div
               ref={containerRef}
               className="w-full max-w-md bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden shadow-2xl shadow-cyan-900/10 relative"
