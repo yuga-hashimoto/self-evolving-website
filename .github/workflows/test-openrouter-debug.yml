@@ -87,13 +87,12 @@ jobs:
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
+          anthropic_api_key: ${{ secrets.MIMO_API_KEY }}
           prompt: "Say hello in one word. Do not use any tools."
           claude_args: |
             --allowedTools ""
           show_full_output: true
         env:
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.MIMO_API_KEY }}
-          ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
           ANTHROPIC_MODEL: xiaomi/mimo-v2-flash:free
           ANTHROPIC_DEFAULT_SONNET_MODEL: xiaomi/mimo-v2-flash:free
