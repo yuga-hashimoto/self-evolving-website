@@ -93,13 +93,13 @@
       "src/app/models/grok/playground/components/Two048Game.tsx",
       "src/app/models/grok/playground/components/TetrisGame.tsx"
     ],
-    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/12",
-    "prNumber": 12,
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/46",
+    "prNumber": 46,
     "metrics": {
       "executionTime": {
-        "claudeCode": 339,
+        "claudeCode": 136,
         "autoFix": {},
-        "total": 425
+        "total": 230
       },
       "errors": {
         "buildFailures": 0,
@@ -113,9 +113,9 @@
         "errorDetails": ""
       },
       "codeChanges": {
-        "filesChanged": 2,
-        "additions": 34,
-        "deletions": 9
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
       }
     }
   }

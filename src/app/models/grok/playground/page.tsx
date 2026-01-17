@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import EndlessJumperGame from './components/EndlessJumperGame';
 import Game from './components/Game';
 import Two048Game from './components/Two048Game';
 import SnakeGame from './components/SnakeGame';
 import TetrisGame from './components/TetrisGame';
 
 export default function GrokPlayground() {
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -27,6 +28,12 @@ export default function GrokPlayground() {
               className={`px-4 py-2 rounded ${selectedGame === 'doodle' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
             >
               {t('grok.doodleLeap')}
+            <button
+              onClick={() => setSelectedGame('endlessJumper')}
+              className={`px-4 py-2 rounded ${selectedGame === 'endlessJumper' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.endlessJumper') || 'Endless Jumper'}
+            </button>
             </button>
             <button
               onClick={() => setSelectedGame('2048')}
@@ -50,6 +57,7 @@ export default function GrokPlayground() {
 
           {/* Game container */}
           {selectedGame === 'doodle' && <Game />}
+          {selectedGame === 'endlessJumper' && <EndlessJumperGame />}
           {selectedGame === '2048' && <Two048Game />}
           {selectedGame === 'snake' && <SnakeGame />}
           {selectedGame === 'tetris' && <TetrisGame />}
