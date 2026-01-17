@@ -269,7 +269,7 @@ jobs:
         run: |
           echo "🤖 Starting Claude Code CLI execution..."
           claude --print \
-            --verbose \
+            --debug \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite" \
             -p "$SKILL_PROMPT"
@@ -383,7 +383,7 @@ jobs:
         run: |
           echo "🔧 Starting Auto-Fix Attempt 1..."
           claude --print \
-            --verbose \
+            --debug \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
             -p "$FIX_PROMPT"
@@ -463,7 +463,7 @@ jobs:
         run: |
           echo "🔧 Starting Auto-Fix Attempt 2..."
           claude --print \
-            --verbose \
+            --debug \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
             -p "$FIX_PROMPT"
@@ -543,7 +543,7 @@ jobs:
         run: |
           echo "🔧 Starting Auto-Fix Attempt 3..."
           claude --print \
-            --verbose \
+            --debug \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
             -p "$FIX_PROMPT"
