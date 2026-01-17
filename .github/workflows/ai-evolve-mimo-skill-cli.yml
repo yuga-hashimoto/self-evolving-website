@@ -1,0 +1,26 @@
+name: AI Evolution (MiMo) - CLI Version
+
+on:
+  # schedule:
+  #   - cron: '0 9 * * *'   # UTC 9:00 (JST 18:00)
+  #   - cron: '0 21 * * *'  # UTC 21:00 (JST 6:00)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  evolve-mimo-cli:
+    uses: ./.github/workflows/reusable-evolve-model-skill-cli.yml
+    with:
+      model_id: 'mimo'
+      model_display_name: 'MiMo (CLI)'
+      anthropic_model: 'mistralai/devstral-2512:free'
+      commit_prefix: '🆓 AI Evolution (CLI)'
+    secrets:
+      model_api_key: ${{ secrets.MIMO_API_KEY }}
+      ga4_property_id: ${{ secrets.GA4_PROPERTY_ID }}
+      google_application_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+      serper_api_key: ${{ secrets.SERPER_API_KEY }}
