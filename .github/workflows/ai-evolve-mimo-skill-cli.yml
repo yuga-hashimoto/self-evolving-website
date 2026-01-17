@@ -5,11 +5,18 @@ on:
   #   - cron: '0 9 * * *'   # UTC 9:00 (JST 18:00)
   #   - cron: '0 21 * * *'  # UTC 21:00 (JST 6:00)
   workflow_dispatch:
+    inputs:
+      retry_count:
+        description: 'Current retry attempt (0-2)'
+        required: false
+        default: '0'
+        type: string
 
 permissions:
   contents: write
   pull-requests: write
   id-token: write
+  actions: write  # Required for workflow re-trigger
 
 jobs:
   evolve-mimo-cli:
@@ -17,10 +24,48 @@ jobs:
     with:
       model_id: 'mimo'
       model_display_name: 'MiMo (CLI)'
-      anthropic_model: 'mistralai/devstral-2512:free'
+      anthropic_model: 'xiaomi/mimo-v2-flash:free'
       commit_prefix: '🆓 AI Evolution (CLI)'
     secrets:
       model_api_key: ${{ secrets.MIMO_API_KEY }}
       ga4_property_id: ${{ secrets.GA4_PROPERTY_ID }}
       google_application_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
       serper_api_key: ${{ secrets.SERPER_API_KEY }}
+
+  retry-on-failure:
+    needs: evolve-mimo-cli
+    if: failure() && fromJSON(inputs.retry_count || '0') < 2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Calculate next retry count
+        id: calc
+        run: |
+          CURRENT=${{ inputs.retry_count || '0' }}
+          NEXT=$((CURRENT + 1))
+          echo "next_count=$NEXT" >> $GITHUB_OUTPUT
+          echo "🔄 Retry attempt $NEXT of 3"
+
+      - name: Wait before retry
+        run: |
+          echo "⏳ Waiting 60 seconds before retry..."
+          sleep 60
+
+      - name: Trigger retry
+        run: |
+          gh workflow run "AI Evolution (MiMo) - CLI Version" \
+            --repo ${{ github.repository }} \
+            -f retry_count=${{ steps.calc.outputs.next_count }}
+          echo "✅ Retry triggered (attempt ${{ steps.calc.outputs.next_count }})"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  report-final-failure:
+    needs: evolve-mimo-cli
+    if: failure() && fromJSON(inputs.retry_count || '0') >= 2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report final failure
+        run: |
+          echo "❌ All 3 attempts failed for MiMo CLI Evolution"
+          echo "Manual intervention required."
+          echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
