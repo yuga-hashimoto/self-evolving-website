@@ -1,6 +1,6 @@
 ---
-name: evolve-game
-description: Improves browser games based on analytics data and change history. Analyzes user metrics (session time, bounce rate) and implements game features to maximize engagement time. Use when evolving games, analyzing game metrics, or implementing game improvements.
+name: evolving-games
+description: Evolves browser games based on analytics data and change history to maximize session time. Use when the user asks to improve games, analyze game metrics, add new games, or fix gameplay issues.
 allowed-tools: Edit(src/app/models/**), Edit(src/app/api/**), Edit(src/components/icons/Icons.tsx), Edit(messages/ja.json), Edit(messages/en.json), Write(src/app/models/**), Write(src/app/api/**), Write(/tmp/ai-changes.json), Read, Bash(npm:*), Bash(npx:*), Bash(git:*), Bash(jq:*), Bash(bash scripts/web-search.sh*), Glob, Grep, TodoWrite, Skill
 ---
 
@@ -226,31 +226,11 @@ Implement code based on the chosen approach.
 
 #### Monetization (AdSense Support)
 
-**Ad placement policy:**
-- ✅ Display ads between games (game over, loading, before retry)
-- ❌ No ads during gameplay
-- ✅ Reserve ad areas (`.ad-container`, etc.)
-
-**Important:**
-- Ads should not interfere with game experience
-- Do not induce accidental clicks
-- Comply with AdSense policy (no gambling, violent content)
+See [MONETIZATION.md](MONETIZATION.md) for ad placement guidelines.
 
 #### Security Requirements (When Developing APIs)
 
-**Mandatory:**
-- ✅ Validate requests with Zod
-- ✅ Error handling with try-catch
-- ✅ Use NextResponse.json()
-- ✅ Manage secrets with environment variables (process.env)
-
-**Prohibited:**
-- ❌ eval(), new Function()
-- ❌ File operations (fs.writeFileSync, fs.unlinkSync, etc.)
-- ❌ Shell command execution (child_process.exec, etc.)
-- ❌ SQL injection (db.query(`${...}`))
-
-Details: Refer to `.github/prompts/api-development-guidelines.txt`
+See [SECURITY.md](SECURITY.md) for security requirements and prohibited patterns.
 
 ### Task 6.5: Update Language Files (if needed)
 
@@ -280,9 +260,19 @@ Example for adding a new game "Space Invaders":
 ```
 
 **Important**:
-- Always add keys to BOTH language files
+- **MUST** add keys to BOTH language files (ja.json AND en.json)
 - Use consistent key naming (camelCase)
 - Keep existing keys unchanged
+
+**Verification (run after adding keys):**
+```bash
+# Compare keys between language files to ensure consistency
+jq -r '[paths(scalars)] | map(join(".")) | sort[]' messages/ja.json > /tmp/ja-keys.txt
+jq -r '[paths(scalars)] | map(join(".")) | sort[]' messages/en.json > /tmp/en-keys.txt
+diff /tmp/ja-keys.txt /tmp/en-keys.txt
+```
+
+If diff shows differences, add missing keys before proceeding.
 
 ### Task 7: Record Changes for Changelog
 

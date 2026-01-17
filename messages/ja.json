@@ -148,7 +148,8 @@
       "youWin": "おめでとう！続けますか？",
       "snakeTitle": "スネーク",
       "tetrisTitle": "テトリス",
-      "endlessJumper": "エンドレスジャンパー"
+      "endlessJumper": "エンドレスジャンパー",
+      "endlessRunner": "エンドレスランナー"
     },
     "mimo": {
       "title": "Mimo Games",
