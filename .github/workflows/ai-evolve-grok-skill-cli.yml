@@ -1,0 +1,26 @@
+name: AI Evolution (Grok) - CLI Version
+
+on:
+  # schedule:
+  #   - cron: '30 9 * * *'   # UTC 9:30 (JST 18:30)
+  #   - cron: '30 21 * * *'  # UTC 21:30 (JST 6:30)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  evolve-grok-cli:
+    uses: ./.github/workflows/reusable-evolve-model-skill-cli.yml
+    with:
+      model_id: 'grok'
+      model_display_name: 'Grok (CLI)'
+      anthropic_model: 'x-ai/grok-3-mini-beta'
+      commit_prefix: '🤖 AI Evolution (CLI)'
+    secrets:
+      model_api_key: ${{ secrets.GROK_API_KEY }}
+      ga4_property_id: ${{ secrets.GA4_PROPERTY_ID }}
+      google_application_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+      serper_api_key: ${{ secrets.SERPER_API_KEY }}
