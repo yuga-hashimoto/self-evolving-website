@@ -198,6 +198,14 @@
         "controls": "⬆️スワイプでジャンプ ⬇️スワイプでスライド",
         "backToMenu": "メニューへ"
       },
+      "cosmicCatch": {
+        "title": "Cosmic Catch",
+        "subtitle": "スペースアクション",
+        "description": "重力に逆らって宇宙を飛翔！アステロイドを避け、スターを集めろ！",
+        "tapToStart": "タップ/ホールドで飛翔",
+        "controls": "ホールドで上昇 ⬆️ スペース/クリックでもOK",
+        "backToMenu": "メニューへ"
+      },
       "adArea": "広告エリア (AdSense)",
       "sidebarAd": "サイドバー広告",
       "footer": "無料でいつでも遊べます",
