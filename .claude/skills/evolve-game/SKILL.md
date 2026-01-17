@@ -85,6 +85,18 @@ Found issues in existing games:
 ...
 ```
 
+#### 3-1. Incomplete/Stub Game Detection
+
+**Stub Detection Criteria:**
+- Files with less than 100 lines of code
+- Contains placeholder comments like "Add your game logic here"
+- Missing core features: score system, game over condition, or game loop
+
+**When Stubs are Found:**
+- Mark as **Priority: Critical** in the findings list
+- In Task 4, you MUST choose to complete these stubs before adding new games
+- **Rule: Never add new games while incomplete stubs exist**
+
 ### Task 4: Decide Improvement Direction
 
 Based on data analysis AND code review findings:
@@ -189,7 +201,7 @@ Implement code based on the chosen approach.
 **Mandatory requirements:**
 - ✅ Mobile support (touch events, responsive) ← Especially important!
 - ✅ Use only LocalStorage/IndexedDB (no external DB)
-- ✅ Lightweight & fast (maintain 60fps)
+- ✅ Lightweight & fast
 - ✅ No build errors
 
 #### 🚨 Mobile Support Requirements (Mandatory)
