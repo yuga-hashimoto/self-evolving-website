@@ -199,6 +199,14 @@
         "controls": "⬆️Swipe UP: Jump ⬇️Swipe DOWN: Slide",
         "backToMenu": "Back to Menu"
       },
+      "cosmicCatch": {
+        "title": "Cosmic Catch",
+        "subtitle": "Space Action",
+        "description": "Fly against gravity in space! Avoid asteroids and collect stars!",
+        "tapToStart": "TAP/HOLD to fly",
+        "controls": "HOLD to rise ⬆️ Space/Click works too",
+        "backToMenu": "Back to Menu"
+      },
       "adArea": "Ad Area (AdSense)",
       "sidebarAd": "Sidebar Ad",
       "footer": "Free to play anytime",

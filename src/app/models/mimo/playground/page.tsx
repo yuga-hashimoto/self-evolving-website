@@ -114,11 +114,60 @@ interface NeonDashState {
   slideTimer: number;
 }
 
+// Cosmic Catch Interfaces
+interface CosmicShip {
+  x: number;
+  y: number;
+  velocityY: number;
+  isBoosting: boolean;
+}
+
+interface CosmicObstacle {
+  id: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface CosmicStar {
+  id: number;
+  x: number;
+  y: number;
+  collected: boolean;
+}
+
+interface CosmicParticle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  color: string;
+}
+
+interface CosmicCatchState {
+  isPlaying: boolean;
+  isGameOver: boolean;
+  score: number;
+  highScore: number;
+  bestCombo: number;
+  combo: number;
+  ship: CosmicShip;
+  obstacles: CosmicObstacle[];
+  stars: CosmicStar[];
+  particles: CosmicParticle[];
+  speed: number;
+  spawnTimer: number;
+  starSpawnTimer: number;
+}
+
 // Daily Challenge Interfaces
 interface DailyChallenge {
   id: string; // YYYY-MM-DD
   date: string;
-  game: 'infinity' | '2048' | 'neon';
+  game: 'infinity' | '2048' | 'neon' | 'cosmic';
   target: number; // Target score to beat
   description: string;
   completed: boolean;
@@ -157,7 +206,7 @@ const TILE_COLORS: Record<number, string> = {
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic'>('menu');
   const [shopOpen, setShopOpen] = useState(false);
 
   const [gameState, setGameState] = useState<InfinityDropState>({
@@ -212,6 +261,27 @@ export default function MimoPlayground() {
     distance: 0,
     obstacleTimer: 0,
     slideTimer: 0,
+  });
+
+  const [cosmicState, setCosmicState] = useState<CosmicCatchState>({
+    isPlaying: false,
+    isGameOver: false,
+    score: 0,
+    highScore: 0,
+    bestCombo: 0,
+    combo: 0,
+    ship: {
+      x: 100,
+      y: 0,
+      velocityY: 0,
+      isBoosting: false,
+    },
+    obstacles: [],
+    stars: [],
+    particles: [],
+    speed: 5,
+    spawnTimer: 0,
+    starSpawnTimer: 0,
   });
 
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallengeState>({
@@ -465,6 +535,12 @@ export default function MimoPlayground() {
     const neonSaved = localStorage.getItem('neonDash_highScore');
     if (neonSaved) {
       setNeonState((prev) => ({ ...prev, highScore: parseInt(neonSaved) }));
+    }
+
+    // Cosmic Catchハイスコア読み込み
+    const cosmicSaved = localStorage.getItem('cosmicCatch_highScore');
+    if (cosmicSaved) {
+      setCosmicState((prev) => ({ ...prev, highScore: parseInt(cosmicSaved) }));
     }
   }, []);
 
@@ -1037,7 +1113,7 @@ export default function MimoPlayground() {
   };
 
   // Check and complete daily challenge if criteria met
-  const checkDailyChallengeCompletion = useCallback((gameType: 'infinity' | '2048' | 'neon', score: number) => {
+  const checkDailyChallengeCompletion = useCallback((gameType: 'infinity' | '2048' | 'neon' | 'cosmic', score: number) => {
     if (!dailyChallenge.currentChallenge || dailyChallenge.currentChallenge.completed) return;
     if (dailyChallenge.currentChallenge.game !== gameType) return;
 
@@ -1052,6 +1128,8 @@ export default function MimoPlayground() {
     } else if (gameType === '2048' && score >= targetScore) {
       completed = true;
     } else if (gameType === 'neon' && score >= targetScore) {
+      completed = true;
+    } else if (gameType === 'cosmic' && score >= targetScore) {
       completed = true;
     }
 
@@ -1360,100 +1438,7 @@ export default function MimoPlayground() {
     return false;
   }, [neonState.obstacles]);
 
-  // Neon Dash: ゲームループ
-  const neonGameLoop = useCallback(() => {
-    setNeonState((prev) => {
-      if (!prev.isPlaying || prev.isGameOver) return prev;
-
-      const containerHeight = containerRef.current?.clientHeight || 400;
-      const containerWidth = containerRef.current?.clientWidth || 300;
-      const groundY = containerHeight - 100;
-
-      let newState = { ...prev };
-
-      // プレイヤーの重力と移動
-      newState.playerVelocityY += 0.8; // 重力
-      newState.playerY += newState.playerVelocityY;
-
-      // 地面チェック
-      if (newState.playerY >= groundY) {
-        newState.playerY = groundY;
-        newState.playerVelocityY = 0;
-        if (newState.playerState !== 'sliding') {
-          newState.playerState = 'running';
-        }
-      }
-
-      // スライドタイマー
-      if (newState.playerState === 'sliding') {
-        newState.slideTimer -= 1;
-        if (newState.slideTimer <= 0) {
-          newState.playerState = 'running';
-        }
-      }
-
-      // スコアと距離
-      newState.score += 1;
-      newState.distance += newState.speed;
-
-      // 障害物生成
-      newState.obstacleTimer += 1;
-      const obstacleInterval = Math.max(60, 120 - Math.floor(newState.speed * 2));
-      if (newState.obstacleTimer >= obstacleInterval) {
-        generateObstacle();
-        newState.obstacleTimer = 0;
-      }
-
-      // 障害物移動
-      newState.obstacles = newState.obstacles
-        .map((obs) => ({
-          ...obs,
-          x: obs.x - newState.speed,
-        }))
-        .filter((obs) => obs.x + obs.width > 0);
-
-      // 障害物を通り抜けたかチェック
-      for (const obs of newState.obstacles) {
-        const playerX = containerWidth / 2;
-        if (obs.x + obs.width < playerX && !obs.passed) {
-          obs.passed = true;
-          newState.score += 10;
-          neonStatsRef.current.obstaclesPassed += 1;
-        }
-      }
-
-      // 障害物とプレイヤーの衝突判定
-      if (checkCollision(newState.playerY, newState.playerState)) {
-        vibrate(200);
-        playSound('hit');
-        gameOverNeonDash();
-        return newState;
-      }
-
-      // パーティクル更新
-      newState.particles = newState.particles
-        .map((p) => ({
-          ...p,
-          x: p.x + p.vx,
-          y: p.y + p.vy,
-          life: p.life - 1,
-          vy: p.vy + 0.3, // 重力
-        }))
-        .filter((p) => p.life > 0);
-
-      // スコアによる速度上昇
-      if (newState.score > 0 && newState.score % 100 === 0) {
-        newState.speed = Math.min(newState.speed + 0.1, 15);
-      }
-
-      return newState;
-    });
-
-    drawNeon();
-    requestRef.current = requestAnimationFrame(neonGameLoop);
-  }, [checkCollision, gameOverNeonDash, generateObstacle]);
-
-  // Neon Dash: 描画
+  // Neon Dash: 描画 (定義をゲームループより前に移動)
   const drawNeon = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -1614,6 +1599,99 @@ export default function MimoPlayground() {
     }
   }, [neonState]);
 
+  // Neon Dash: ゲームループ
+  const neonGameLoop = useCallback(() => {
+    setNeonState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver) return prev;
+
+      const containerHeight = containerRef.current?.clientHeight || 400;
+      const containerWidth = containerRef.current?.clientWidth || 300;
+      const groundY = containerHeight - 100;
+
+      let newState = { ...prev };
+
+      // プレイヤーの重力と移動
+      newState.playerVelocityY += 0.8; // 重力
+      newState.playerY += newState.playerVelocityY;
+
+      // 地面チェック
+      if (newState.playerY >= groundY) {
+        newState.playerY = groundY;
+        newState.playerVelocityY = 0;
+        if (newState.playerState !== 'sliding') {
+          newState.playerState = 'running';
+        }
+      }
+
+      // スライドタイマー
+      if (newState.playerState === 'sliding') {
+        newState.slideTimer -= 1;
+        if (newState.slideTimer <= 0) {
+          newState.playerState = 'running';
+        }
+      }
+
+      // スコアと距離
+      newState.score += 1;
+      newState.distance += newState.speed;
+
+      // 障害物生成
+      newState.obstacleTimer += 1;
+      const obstacleInterval = Math.max(60, 120 - Math.floor(newState.speed * 2));
+      if (newState.obstacleTimer >= obstacleInterval) {
+        generateObstacle();
+        newState.obstacleTimer = 0;
+      }
+
+      // 障害物移動
+      newState.obstacles = newState.obstacles
+        .map((obs) => ({
+          ...obs,
+          x: obs.x - newState.speed,
+        }))
+        .filter((obs) => obs.x + obs.width > 0);
+
+      // 障害物を通り抜けたかチェック
+      for (const obs of newState.obstacles) {
+        const playerX = containerWidth / 2;
+        if (obs.x + obs.width < playerX && !obs.passed) {
+          obs.passed = true;
+          newState.score += 10;
+          neonStatsRef.current.obstaclesPassed += 1;
+        }
+      }
+
+      // 障害物とプレイヤーの衝突判定
+      if (checkCollision(newState.playerY, newState.playerState)) {
+        vibrate(200);
+        playSound('hit');
+        gameOverNeonDash();
+        return newState;
+      }
+
+      // パーティクル更新
+      newState.particles = newState.particles
+        .map((p) => ({
+          ...p,
+          x: p.x + p.vx,
+          y: p.y + p.vy,
+          life: p.life - 1,
+          vy: p.vy + 0.3, // 重力
+        }))
+        .filter((p) => p.life > 0);
+
+      // スコアによる速度上昇
+      if (newState.score > 0 && newState.score % 100 === 0) {
+        newState.speed = Math.min(newState.speed + 0.1, 15);
+      }
+
+      return newState;
+    });
+
+    drawNeon();
+    requestRef.current = requestAnimationFrame(neonGameLoop);
+  }, [checkCollision, gameOverNeonDash, generateObstacle, neonState.obstacles]);
+
   // Neon Dashゲームループ
   useEffect(() => {
     if (neonState.isPlaying && !neonState.isGameOver) {
@@ -1628,6 +1706,532 @@ export default function MimoPlayground() {
       }
     };
   }, [neonState.isPlaying, neonState.isGameOver, neonGameLoop]);
+
+  // ==================== COSMIC CATCH GAME LOGIC ====================
+
+  // Cosmic Catch: 新しいゲーム開始
+  const startCosmicGame = useCallback(() => {
+    const containerHeight = containerRef.current?.clientHeight || 400;
+    const containerWidth = containerRef.current?.clientWidth || 300;
+    const groundY = containerHeight - 100;
+
+    setCosmicState({
+      isPlaying: true,
+      isGameOver: false,
+      score: 0,
+      highScore: cosmicState.highScore,
+      bestCombo: cosmicState.bestCombo,
+      combo: 0,
+      ship: {
+        x: containerWidth * 0.2,
+        y: groundY,
+        velocityY: 0,
+        isBoosting: false,
+      },
+      obstacles: [],
+      stars: [],
+      particles: [],
+      speed: 5,
+      spawnTimer: 0,
+      starSpawnTimer: 0,
+    });
+
+    // Track game start
+    trackClick();
+    storeGameEvent('cosmic_game_start', {});
+  }, [cosmicState.highScore, cosmicState.bestCombo, trackClick]);
+
+  // Cosmic Catch: ゲームオーバー
+  const gameOverCosmic = useCallback(() => {
+    setCosmicState((prev) => {
+      const newHighScore = Math.max(prev.highScore, prev.score);
+      const newBestCombo = Math.max(prev.bestCombo, prev.combo);
+
+      // Save to localStorage
+      localStorage.setItem('cosmicCatch_highScore', newHighScore.toString());
+
+      // Track game over
+      const sessionDuration = 0; // Would need tracking ref
+      storeGameEvent('cosmic_game_over', {
+        score: prev.score,
+        duration: sessionDuration,
+        combo: prev.combo,
+        obstacles: prev.obstacles.length,
+      });
+
+      // Check daily challenge completion
+      checkDailyChallengeCompletion('cosmic', prev.score);
+
+      return {
+        ...prev,
+        isPlaying: false,
+        isGameOver: true,
+        highScore: newHighScore,
+        bestCombo: newBestCombo,
+      };
+    });
+
+    vibrate(200);
+    playSound('hit');
+  }, [checkDailyChallengeCompletion]);
+
+  // Cosmic Catch: パーティクル生成
+  const createCosmicParticles = useCallback((x: number, y: number, color: string, count: number = 10) => {
+    setCosmicState((prev) => {
+      const newParticles: CosmicParticle[] = [];
+      for (let i = 0; i < count; i++) {
+        newParticles.push({
+          id: Date.now() + Math.random(),
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * 4,
+          vy: (Math.random() - 0.5) * 4,
+          life: 20 + Math.random() * 10,
+          color: color,
+        });
+      }
+      return {
+        ...prev,
+        particles: [...prev.particles, ...newParticles].slice(-50),
+      };
+    });
+  }, []);
+
+  // Cosmic Catch: 生成障害物
+  const generateCosmicObstacle = useCallback(() => {
+    const containerWidth = containerRef.current?.clientWidth || 300;
+    const containerHeight = containerRef.current?.clientHeight || 400;
+    const groundY = containerHeight - 100;
+
+    // Random height for obstacle (40-120)
+    const height = 40 + Math.random() * 80;
+
+    const newObstacle: CosmicObstacle = {
+      id: Date.now() + Math.random(),
+      x: containerWidth,
+      y: groundY - height,
+      width: 30 + Math.random() * 20, // 30-50 width
+      height: height,
+    };
+
+    setCosmicState((prev) => ({
+      ...prev,
+      obstacles: [...prev.obstacles, newObstacle].slice(-10),
+    }));
+  }, []);
+
+  // Cosmic Catch: 生成スター
+  const generateCosmicStar = useCallback(() => {
+    const containerWidth = containerRef.current?.clientWidth || 300;
+    const containerHeight = containerRef.current?.clientHeight || 400;
+    const groundY = containerHeight - 100;
+
+    // Random y position (100-300, avoiding ground)
+    const y = 100 + Math.random() * 200;
+
+    const newStar: CosmicStar = {
+      id: Date.now() + Math.random(),
+      x: containerWidth,
+      y: y,
+      collected: false,
+    };
+
+    setCosmicState((prev) => ({
+      ...prev,
+      stars: [...prev.stars, newStar].slice(-10),
+    }));
+  }, []);
+
+  // Cosmic Catch: 衝突判定
+  const checkCosmicCollision = useCallback((): boolean => {
+    const containerHeight = containerRef.current?.clientHeight || 400;
+    const groundY = containerHeight - 100;
+    const ship = cosmicState.ship;
+
+    // Ship dimensions
+    const shipWidth = 25;
+    const shipHeight = cosmicState.ship.isBoosting ? 35 : 25;
+
+    // Ship bounds
+    const shipLeft = ship.x - shipWidth / 2;
+    const shipRight = ship.x + shipWidth / 2;
+    const shipTop = ship.y - shipHeight;
+    const shipBottom = ship.y;
+
+    // Ground collision
+    if (shipBottom >= groundY) {
+      return true;
+    }
+
+    // Obstacle collision
+    for (const obstacle of cosmicState.obstacles) {
+      const obstacleLeft = obstacle.x;
+      const obstacleRight = obstacle.x + obstacle.width;
+      const obstacleTop = obstacle.y - obstacle.height;
+      const obstacleBottom = obstacle.y;
+
+      // AABB collision
+      const horizontalOverlap = shipLeft < obstacleRight && shipRight > obstacleLeft;
+      const verticalOverlap = shipTop < obstacleBottom && shipBottom > obstacleTop;
+
+      if (horizontalOverlap && verticalOverlap) {
+        return true;
+      }
+    }
+
+    // Ceiling collision
+    if (shipTop <= 0) {
+      return true;
+    }
+
+    return false;
+  }, [cosmicState.ship, cosmicState.obstacles]);
+
+  // Cosmic Catch: ゲームループ
+  const cosmicGameLoop = useCallback(() => {
+    setCosmicState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver) return prev;
+
+      const containerHeight = containerRef.current?.clientHeight || 400;
+      const containerWidth = containerRef.current?.clientWidth || 300;
+      const groundY = containerHeight - 100;
+
+      let newState = { ...prev };
+
+      // 重力と移動
+      const gravity = 0.5;
+      const boostPower = -12;
+      const maxVelocity = 10;
+      const minVelocity = -10;
+
+      // Apply boost if boosting
+      if (prev.ship.isBoosting) {
+        newState.ship.velocityY += boostPower * 0.3; // Smoother boost
+      } else {
+        newState.ship.velocityY += gravity;
+      }
+
+      // Clamp velocity
+      newState.ship.velocityY = Math.max(minVelocity, Math.min(maxVelocity, newState.ship.velocityY));
+      newState.ship.y += newState.ship.velocityY;
+
+      // Ground clamp
+      if (newState.ship.y >= groundY) {
+        newState.ship.y = groundY;
+        newState.ship.velocityY = 0;
+      }
+
+      // Score increment
+      newState.score += 1;
+
+      // Speed increase
+      if (newState.score > 0 && newState.score % 50 === 0) {
+        newState.speed = Math.min(newState.speed + 0.2, 12);
+      }
+
+      // Spawn obstacles
+      newState.spawnTimer += 1;
+      const obstacleInterval = Math.max(50, 90 - Math.floor(newState.speed * 2));
+      if (newState.spawnTimer >= obstacleInterval) {
+        generateCosmicObstacle();
+        newState.spawnTimer = 0;
+      }
+
+      // Spawn stars
+      newState.starSpawnTimer += 1;
+      const starInterval = Math.max(60, 120 - Math.floor(newState.speed * 1.5));
+      if (newState.starSpawnTimer >= starInterval) {
+        generateCosmicStar();
+        newState.starSpawnTimer = 0;
+      }
+
+      // Move obstacles
+      newState.obstacles = newState.obstacles
+        .map((obs) => ({
+          ...obs,
+          x: obs.x - newState.speed,
+        }))
+        .filter((obs) => obs.x + obs.width > 0);
+
+      // Move stars
+      newState.stars = newState.stars
+        .map((star) => ({
+          ...star,
+          x: star.x - newState.speed,
+        }))
+        .filter((star) => star.x > -20);
+
+      // Check star collection
+      for (const star of newState.stars) {
+        if (!star.collected) {
+          const dx = Math.abs(prev.ship.x - star.x);
+          const dy = Math.abs(prev.ship.y - star.y);
+          if (dx < 30 && dy < 30) {
+            star.collected = true;
+            newState.score += 10;
+            newState.combo += 1;
+            vibrate(15);
+            playSound('success');
+            createCosmicParticles(star.x, star.y, '#ffff00', 15);
+          }
+        }
+      }
+
+      // Clean up collected stars
+      newState.stars = newState.stars.filter((s) => !s.collected);
+
+      // Reset combo if no stars collected for a while
+      if (newState.score > 0 && newState.score % 100 === 0) {
+        newState.combo = Math.max(0, newState.combo - 1);
+      }
+
+      // Update best combo
+      newState.bestCombo = Math.max(newState.bestCombo, newState.combo);
+
+      // Move particles
+      newState.particles = newState.particles
+        .map((p) => ({
+          ...p,
+          x: p.x + p.vx,
+          y: p.y + p.vy,
+          life: p.life - 1,
+          vy: p.vy + 0.2, // gravity on particles
+        }))
+        .filter((p) => p.life > 0);
+
+      // Collision check
+      if (checkCosmicCollision()) {
+        gameOverCosmic();
+        return newState;
+      }
+
+      // Trail particles from ship
+      if (Math.random() < 0.3) {
+        createCosmicParticles(
+          newState.ship.x - 15,
+          newState.ship.y - 10,
+          newState.ship.isBoosting ? '#00ffff' : '#8888ff',
+          3
+        );
+      }
+
+      return newState;
+    });
+
+    requestRef.current = requestAnimationFrame(cosmicGameLoop);
+  }, [checkCosmicCollision, createCosmicParticles, generateCosmicObstacle, generateCosmicStar, gameOverCosmic]);
+
+  // Cosmic Catch: 描画
+  const drawCosmic = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const groundY = height - 100;
+
+    // Space background (gradient)
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, '#0a0015');
+    gradient.addColorStop(0.5, '#150520');
+    gradient.addColorStop(1, '#0a0510');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Stars in background
+    ctx.fillStyle = '#ffffff';
+    for (let i = 0; i < 50; i++) {
+      const x = (i * 73) % width;
+      const y = (i * 47) % height;
+      const size = (i % 3) + 1;
+      ctx.fillRect(x, y, size, size);
+    }
+
+    // Ground
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, groundY, width, height - groundY);
+
+    // Ground glow line
+    ctx.strokeStyle = '#00ffff';
+    ctx.lineWidth = 2;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#00ffff';
+    ctx.beginPath();
+    ctx.moveTo(0, groundY);
+    ctx.lineTo(width, groundY);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Obstacles (rocks/asteroids)
+    cosmicState.obstacles.forEach((obs) => {
+      ctx.fillStyle = '#ff3366';
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#ff3366';
+      ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+
+      ctx.strokeStyle = '#ff88aa';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
+      ctx.shadowBlur = 0;
+    });
+
+    // Stars (collectibles)
+    cosmicState.stars.forEach((star) => {
+      if (!star.collected) {
+        ctx.fillStyle = '#ffff00';
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#ffff00';
+
+        // Draw star shape
+        const size = 8;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, size, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#fff';
+        ctx.shadowBlur = 5;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    });
+
+    // Particles
+    cosmicState.particles.forEach((p) => {
+      const alpha = p.life / 30;
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = alpha;
+      ctx.fillRect(p.x, p.y, 4, 4);
+      ctx.globalAlpha = 1;
+    });
+
+    // Ship
+    const ship = cosmicState.ship;
+    const shipWidth = 25;
+    const shipHeight = ship.isBoosting ? 35 : 25;
+
+    // Ship glow
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = ship.isBoosting ? '#00ffff' : '#8888ff';
+
+    // Ship body
+    ctx.fillStyle = ship.isBoosting ? '#00ffff' : '#8888ff';
+    ctx.fillRect(ship.x - shipWidth / 2, ship.y - shipHeight, shipWidth, shipHeight);
+
+    // Ship cockpit
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(ship.x - 8, ship.y - shipHeight + 5, 16, 10);
+
+    // Ship wings
+    ctx.fillStyle = ship.isBoosting ? '#0088aa' : '#6666cc';
+    ctx.fillRect(ship.x - 15, ship.y - 8, 8, 6);
+    ctx.fillRect(ship.x + 7, ship.y - 8, 8, 6);
+
+    ctx.shadowBlur = 0;
+
+    // UI: Score
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${cosmicState.score}`, 15, 35);
+
+    ctx.fillStyle = '#666';
+    ctx.font = '14px Arial';
+    ctx.fillText('SCORE', 15, 55);
+
+    // UI: High Score
+    ctx.fillStyle = '#ffff00';
+    ctx.font = 'bold 18px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(`HI: ${cosmicState.highScore}`, width - 15, 30);
+
+    // UI: Speed
+    ctx.fillStyle = '#00ffff';
+    ctx.font = '14px Arial';
+    ctx.fillText(`SPD: ${cosmicState.speed.toFixed(1)}`, width - 15, 55);
+
+    // UI: Combo
+    if (cosmicState.combo > 0) {
+      ctx.fillStyle = '#ffaa00';
+      ctx.font = 'bold 20px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`COMBO x${cosmicState.combo}`, width / 2, 35);
+    }
+
+    // Game Over Screen
+    if (cosmicState.isGameOver) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = '#ff3366';
+      ctx.font = 'bold 48px Arial';
+      ctx.textAlign = 'center';
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#ff3366';
+      ctx.fillText('GAME OVER', width / 2, height / 2 - 50);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = '24px Arial';
+      ctx.shadowBlur = 0;
+      ctx.fillText(`Score: ${cosmicState.score}`, width / 2, height / 2);
+      ctx.fillText(`High: ${cosmicState.highScore}`, width / 2, height / 2 + 35);
+
+      if (cosmicState.combo > 1) {
+        ctx.fillStyle = '#ffaa00';
+        ctx.font = '20px Arial';
+        ctx.fillText(`Best Combo: ${cosmicState.bestCombo}`, width / 2, height / 2 + 70);
+      }
+    }
+
+    // Start Screen
+    if (!cosmicState.isPlaying && !cosmicState.isGameOver) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = '#00ffff';
+      ctx.font = 'bold 48px Arial';
+      ctx.textAlign = 'center';
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#00ffff';
+      ctx.fillText('COSMIC CATCH', width / 2, height / 2 - 60);
+
+      ctx.font = 'bold 36px Arial';
+      ctx.fillText('TAP TO START', width / 2, height / 2 - 10);
+
+      ctx.fillStyle = '#aaa';
+      ctx.font = '14px Arial';
+      ctx.shadowBlur = 0;
+      ctx.fillText('Hold to boost upward', width / 2, height / 2 + 30);
+      ctx.fillText('Avoid asteroids • Collect stars', width / 2, height / 2 + 50);
+      ctx.fillText('Space / Click to control', width / 2, height / 2 + 70);
+
+      // Show high score if exists
+      if (cosmicState.highScore > 0) {
+        ctx.fillStyle = '#ffff00';
+        ctx.font = '18px Arial';
+        ctx.fillText(`High Score: ${cosmicState.highScore}`, width / 2, height / 2 + 100);
+      }
+    }
+  }, [cosmicState]);
+
+  // Cosmic Catchゲームループ
+  useEffect(() => {
+    if (cosmicState.isPlaying && !cosmicState.isGameOver) {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+      requestRef.current = requestAnimationFrame(cosmicGameLoop);
+    }
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, [cosmicState.isPlaying, cosmicState.isGameOver, cosmicGameLoop]);
 
   // キーコントロール（PC用）
   useEffect(() => {
@@ -1683,11 +2287,51 @@ export default function MimoPlayground() {
           }
         }
       }
+      // Cosmic Catch
+      else if (currentGame === 'cosmic') {
+        if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+          e.preventDefault();
+          if (!cosmicState.isPlaying && !cosmicState.isGameOver) {
+            startCosmicGame();
+          } else if (cosmicState.isGameOver) {
+            startCosmicGame();
+          } else {
+            // Start boosting
+            setCosmicState((prev) => ({
+              ...prev,
+              ship: {
+                ...prev.ship,
+                isBoosting: true,
+              },
+            }));
+          }
+        }
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (currentGame === 'cosmic') {
+        if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+          e.preventDefault();
+          // Stop boosting
+          setCosmicState((prev) => ({
+            ...prev,
+            ship: {
+              ...prev.ship,
+              isBoosting: false,
+            },
+          }));
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, neonState.isPlaying, neonState.isGameOver, startNeonDashGame, jump, slide]);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, neonState.isPlaying, neonState.isGameOver, startNeonDashGame, jump, slide, cosmicState.isPlaying, cosmicState.isGameOver, startCosmicGame]);
 
   // スコア表示用フォーマット
   const formatScore = (score: number): string => {
@@ -1994,7 +2638,7 @@ export default function MimoPlayground() {
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              {currentGame === 'menu' ? t('title') : currentGame === 'infinity' ? t('infinityDrop.title') : currentGame === '2048' ? t('slide2048.title') : t('neonDash.title')}
+              {currentGame === 'menu' ? t('title') : currentGame === 'infinity' ? t('infinityDrop.title') : currentGame === '2048' ? t('slide2048.title') : currentGame === 'neon' ? t('neonDash.title') : t('cosmicCatch.title')}
             </h1>
           </div>
 
@@ -2120,10 +2764,23 @@ export default function MimoPlayground() {
                 </div>
               </button>
 
-              {/* Next Game カード (Locked) */}
-              <div className="bg-gradient-to-br from-slate-700 to-slate-800 p-6 rounded-xl border-2 border-dashed border-slate-600 opacity-60 flex items-center justify-center">
-                <span className="text-slate-400 text-sm">🔒 Coming Soon</span>
-              </div>
+              {/* Cosmic Catch カード */}
+              <button
+                onClick={() => {
+                  setCurrentGame('cosmic');
+                  trackClick();
+                }}
+                className="bg-gradient-to-br from-indigo-600 to-purple-800 p-6 rounded-xl border-2 border-indigo-500 hover:border-indigo-400 hover:scale-105 transition-all text-left group"
+              >
+                <div className="text-2xl font-bold mb-2 group-hover:text-indigo-200">{t('cosmicCatch.title')}</div>
+                <div className="text-indigo-200 text-sm mb-3">{t('cosmicCatch.subtitle')}</div>
+                <p className="text-slate-300 text-xs mb-3">
+                  {t('cosmicCatch.description')}
+                </p>
+                <div className="text-xs text-slate-400">
+                  {tc('highScore')}: {formatScore(cosmicState.highScore)}
+                </div>
+              </button>
             </div>
 
             {/* 広告スペース */}
@@ -2453,8 +3110,77 @@ export default function MimoPlayground() {
           </>
         )}
 
+        {/* ==================== COSMIC CATCH GAME ==================== */}
+        {currentGame === 'cosmic' && (
+          <>
+            {/* Daily Challenge Status for Cosmic Catch */}
+            {dailyChallenge.currentChallenge && dailyChallenge.currentChallenge.game === 'cosmic' && (
+              <div className="mb-4 w-full max-w-md p-3 rounded-lg border border-amber-500/50 bg-amber-900/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <div className="text-sm">
+                      <span className="text-amber-400 font-bold">{t('dailyChallenge.short')}:</span>{' '}
+                      <span className="text-slate-300">{dailyChallenge.currentChallenge.target}+</span>
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-bold ${
+                    dailyChallenge.currentChallenge.completed
+                      ? 'bg-green-600 text-white'
+                      : 'bg-amber-600/50 text-amber-200'
+                  }`}>
+                    {dailyChallenge.currentChallenge.completed
+                      ? t('dailyChallenge.completed')
+                      : `${dailyChallenge.currentChallenge.reward} 💰`}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div
+              ref={containerRef}
+              className="w-full max-w-md bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden shadow-2xl shadow-indigo-900/10 relative"
+            >
+              <div className="relative">
+                <canvas
+                  ref={canvasRef}
+                  className="w-full block cursor-pointer touch-none"
+                  onClick={() => {
+                    if (!cosmicState.isPlaying && !cosmicState.isGameOver) {
+                      startCosmicGame();
+                    } else if (cosmicState.isGameOver) {
+                      startCosmicGame();
+                    }
+                  }}
+                />
+
+                {cosmicState.isPlaying && !cosmicState.isGameOver && (
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
+                      <span className="text-slate-400">{tc('score')}</span>{' '}
+                      <span className="text-yellow-400 font-bold">{formatScore(cosmicState.score)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 text-center text-slate-400 text-sm">
+              <p className="mb-2">🚀 {t('cosmicCatch.tapToStart')}</p>
+              <p className="text-xs">🎮 {t('cosmicCatch.controls')}</p>
+            </div>
+
+            <button
+              onClick={() => setCurrentGame('menu')}
+              className="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+            >
+              ← {t('cosmicCatch.backToMenu')}
+            </button>
+          </>
+        )}
+
         {/* 広告スペース（ゲームプレイ画面のみ） */}
-        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon') && (
+        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
               {t('adArea')}
@@ -2572,6 +3298,59 @@ export default function MimoPlayground() {
                 slide();
               }
             }
+          }}
+          className="fixed inset-0 z-50"
+          style={{ touchAction: 'none' }}
+        />
+      )}
+
+      {/* Cosmic Catch 入力イベント用（画面全体） */}
+      {currentGame === 'cosmic' && (
+        <div
+          onTouchStart={(e) => {
+            const touch = e.touches[0];
+            (e.target as any)._touchStart = {
+              x: touch.clientX,
+              y: touch.clientY,
+              time: Date.now(),
+            };
+
+            // ゲーム開始/リスタート処理
+            if (!cosmicState.isPlaying || cosmicState.isGameOver) {
+              if (cosmicState.isGameOver || !cosmicState.isPlaying) {
+                startCosmicGame();
+              }
+              return;
+            }
+
+            // プレイ中はブースト
+            setCosmicState((prev) => ({
+              ...prev,
+              ship: {
+                ...prev.ship,
+                isBoosting: true,
+              },
+            }));
+          }}
+          onTouchEnd={(e) => {
+            // ブースト解除
+            setCosmicState((prev) => ({
+              ...prev,
+              ship: {
+                ...prev.ship,
+                isBoosting: false,
+              },
+            }));
+          }}
+          onTouchCancel={(e) => {
+            // ブースト解除
+            setCosmicState((prev) => ({
+              ...prev,
+              ship: {
+                ...prev.ship,
+                isBoosting: false,
+              },
+            }));
           }}
           className="fixed inset-0 z-50"
           style={{ touchAction: 'none' }}
