@@ -180,12 +180,19 @@ interface DailyChallengeState {
   streak: number;
   lastCompletedDate: string | null;
   showChallengeModal: boolean;
+  celebrationActive: boolean;
 }
 
 const INITIAL_BLOCK_WIDTH = 200;
 const BLOCK_HEIGHT = 30;
 const BASE_SPEED = 2;
 const GRAVITY = 0.5;
+
+// Mobile detection and optimization
+const isMobile = typeof window !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const MOBILE_PARTICLE_LIMIT = isMobile ? 30 : 60;
+const TOUCH_TARGET_MIN_SIZE = 60; // Increased from 44px for better mobile UX
+const SWIPE_THRESHOLD = 50; // Minimum swipe distance in pixels
 
 // 2048 Constants
 const TILE_COLORS: Record<number, string> = {
@@ -290,6 +297,7 @@ export default function MimoPlayground() {
     streak: 0,
     lastCompletedDate: null,
     showChallengeModal: false,
+    celebrationActive: false,
   });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -433,6 +441,7 @@ export default function MimoPlayground() {
               streak: parsed.streak,
               lastCompletedDate: parsed.lastCompletedDate,
               showChallengeModal: true,
+              celebrationActive: false,
             });
             return;
           } else if (lastDate.toDateString() !== today) {
@@ -443,6 +452,7 @@ export default function MimoPlayground() {
               streak: 0,
               lastCompletedDate: null,
               showChallengeModal: true,
+              celebrationActive: false,
             });
             return;
           }
@@ -460,6 +470,7 @@ export default function MimoPlayground() {
       streak: 0,
       lastCompletedDate: null,
       showChallengeModal: true,
+      celebrationActive: false,
     });
   }, [getTodayDate, generateDailyChallenge]);
 
@@ -1086,7 +1097,7 @@ export default function MimoPlayground() {
       });
     }
 
-    setInfinityParticles((prev) => [...prev, ...newParticles].slice(-100)); // 最新100個のみ保持
+    setInfinityParticles((prev) => [...prev, ...newParticles].slice(-MOBILE_PARTICLE_LIMIT)); // 最新N個のみ保持
   }, []);
 
   // ゲームイベントを保存
@@ -1178,11 +1189,20 @@ export default function MimoPlayground() {
         streak: newStreak,
         lastCompletedDate: today,
         showChallengeModal: false,
+        celebrationActive: true,
       });
 
       // Play success feedback
       playSound('success');
       vibrate(100);
+
+      // Auto-clear celebration after 3 seconds
+      setTimeout(() => {
+        setDailyChallenge((prev) => ({
+          ...prev,
+          celebrationActive: false,
+        }));
+      }, 3000);
     }
   }, [dailyChallenge, getTodayDate, playSound, vibrate]);
 
@@ -1327,7 +1347,7 @@ export default function MimoPlayground() {
       }
       return {
         ...prev,
-        particles: [...prev.particles, ...newParticles].slice(-50), // 最新50個のみ保持
+        particles: [...prev.particles, ...newParticles].slice(-MOBILE_PARTICLE_LIMIT), // 最新N個のみ保持
       };
     });
   }, []);
@@ -1793,7 +1813,7 @@ export default function MimoPlayground() {
       }
       return {
         ...prev,
-        particles: [...prev.particles, ...newParticles].slice(-50),
+        particles: [...prev.particles, ...newParticles].slice(-MOBILE_PARTICLE_LIMIT),
       };
     });
   }, []);
@@ -2677,12 +2697,26 @@ export default function MimoPlayground() {
 
             {/* Daily Challenge Banner */}
             {dailyChallenge.currentChallenge && (
-              <div className="mb-6 p-4 rounded-xl border-2 border-amber-500 bg-gradient-to-r from-amber-900/30 to-orange-900/30">
-                <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className={`mb-6 p-4 rounded-xl border-2 border-amber-500 bg-gradient-to-r from-amber-900/30 to-orange-900/30 relative overflow-hidden ${
+                dailyChallenge.celebrationActive ? 'animate-pulse ring-4 ring-amber-400/50' : ''
+              }`}>
+                {/* Celebration Effect */}
+                {dailyChallenge.celebrationActive && (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 via-transparent to-amber-400/20 animate-ping"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-amber-400/10 via-transparent to-amber-400/10 animate-pulse"></div>
+                  </>
+                )}
+                <div className="flex items-center justify-between flex-wrap gap-2 relative">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">🏆</span>
                     <div className="text-left">
-                      <div className="font-bold text-amber-400">{t('dailyChallenge.title')}</div>
+                      <div className="font-bold text-amber-400 flex items-center gap-2">
+                        {t('dailyChallenge.title')}
+                        {dailyChallenge.celebrationActive && (
+                          <span className="text-lg animate-bounce">🎉</span>
+                        )}
+                      </div>
                       <div className="text-sm text-slate-300">
                         {dailyChallenge.currentChallenge.description}
                       </div>
@@ -2695,11 +2729,11 @@ export default function MimoPlayground() {
                     </div>
                     <div className={`px-3 py-1 rounded-full text-sm font-bold ${
                       dailyChallenge.currentChallenge.completed
-                        ? 'bg-green-600 text-white'
+                        ? 'bg-green-600 text-white animate-pulse'
                         : 'bg-amber-600 text-white'
                     }`}>
                       {dailyChallenge.currentChallenge.completed
-                        ? t('dailyChallenge.completed')
+                        ? `${t('dailyChallenge.completed')} +${dailyChallenge.currentChallenge.reward}💰`
                         : t('dailyChallenge.pending')}
                     </div>
                   </div>
@@ -2713,14 +2747,23 @@ export default function MimoPlayground() {
                 onClick={() => {
                   setCurrentGame('infinity');
                   trackClick();
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
                 }}
-                className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl border-2 border-blue-500 hover:border-blue-400 hover:scale-105 transition-all text-left group"
+                className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl border-2 border-blue-500 hover:border-blue-400 active:scale-95 active:bg-blue-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                style={{
+                  minHeight: '140px',
+                  touchAction: 'manipulation',
+                }}
               >
-                <div className="text-2xl font-bold mb-2 group-hover:text-blue-200">{t('infinityDrop.title')}</div>
-                <div className="text-blue-200 text-sm mb-3">{t('infinityDrop.subtitle')}</div>
-                <p className="text-slate-300 text-xs mb-3">
-                  {t('infinityDrop.description')}
-                </p>
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-blue-200 group-active:text-blue-100">{t('infinityDrop.title')}</div>
+                  <div className="text-blue-200 text-sm mb-3">{t('infinityDrop.subtitle')}</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    {t('infinityDrop.description')}
+                  </p>
+                </div>
                 <div className="text-xs text-slate-400">
                   {tc('highScore')}: {formatScore(gameState.highScore)}
                 </div>
@@ -2734,14 +2777,23 @@ export default function MimoPlayground() {
                     start2048Game(game2048State.difficulty);
                   }
                   trackClick();
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
                 }}
-                className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl border-2 border-purple-500 hover:border-purple-400 hover:scale-105 transition-all text-left group"
+                className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl border-2 border-purple-500 hover:border-purple-400 active:scale-95 active:bg-purple-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                style={{
+                  minHeight: '140px',
+                  touchAction: 'manipulation',
+                }}
               >
-                <div className="text-2xl font-bold mb-2 group-hover:text-purple-200">{t('slide2048.title')}</div>
-                <div className="text-purple-200 text-sm mb-3">{t('slide2048.subtitle')}</div>
-                <p className="text-slate-300 text-xs mb-3">
-                  {t('slide2048.description')}
-                </p>
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-purple-200 group-active:text-purple-100">{t('slide2048.title')}</div>
+                  <div className="text-purple-200 text-sm mb-3">{t('slide2048.subtitle')}</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    {t('slide2048.description')}
+                  </p>
+                </div>
                 <div className="text-xs text-slate-400">
                   {tc('highScore')}: {formatScore(game2048State.highScore)} / {t('slide2048.bestLabel')}: {game2048State.bestTile}
                 </div>
@@ -2752,14 +2804,23 @@ export default function MimoPlayground() {
                 onClick={() => {
                   setCurrentGame('neon');
                   trackClick();
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
                 }}
-                className="bg-gradient-to-br from-cyan-600 to-teal-800 p-6 rounded-xl border-2 border-cyan-500 hover:border-cyan-400 hover:scale-105 transition-all text-left group"
+                className="bg-gradient-to-br from-cyan-600 to-teal-800 p-6 rounded-xl border-2 border-cyan-500 hover:border-cyan-400 active:scale-95 active:bg-cyan-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                style={{
+                  minHeight: '140px',
+                  touchAction: 'manipulation',
+                }}
               >
-                <div className="text-2xl font-bold mb-2 group-hover:text-cyan-200">{t('neonDash.title')}</div>
-                <div className="text-cyan-200 text-sm mb-3">{t('neonDash.subtitle')}</div>
-                <p className="text-slate-300 text-xs mb-3">
-                  {t('neonDash.description')}
-                </p>
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-cyan-200 group-active:text-cyan-100">{t('neonDash.title')}</div>
+                  <div className="text-cyan-200 text-sm mb-3">{t('neonDash.subtitle')}</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    {t('neonDash.description')}
+                  </p>
+                </div>
                 <div className="text-xs text-slate-400">
                   {tc('highScore')}: {formatScore(neonState.highScore)}
                 </div>
@@ -2770,14 +2831,23 @@ export default function MimoPlayground() {
                 onClick={() => {
                   setCurrentGame('cosmic');
                   trackClick();
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
                 }}
-                className="bg-gradient-to-br from-indigo-600 to-purple-800 p-6 rounded-xl border-2 border-indigo-500 hover:border-indigo-400 hover:scale-105 transition-all text-left group"
+                className="bg-gradient-to-br from-indigo-600 to-purple-800 p-6 rounded-xl border-2 border-indigo-500 hover:border-indigo-400 active:scale-95 active:bg-indigo-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                style={{
+                  minHeight: '140px',
+                  touchAction: 'manipulation',
+                }}
               >
-                <div className="text-2xl font-bold mb-2 group-hover:text-indigo-200">{t('cosmicCatch.title')}</div>
-                <div className="text-indigo-200 text-sm mb-3">{t('cosmicCatch.subtitle')}</div>
-                <p className="text-slate-300 text-xs mb-3">
-                  {t('cosmicCatch.description')}
-                </p>
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-indigo-200 group-active:text-indigo-100">{t('cosmicCatch.title')}</div>
+                  <div className="text-indigo-200 text-sm mb-3">{t('cosmicCatch.subtitle')}</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    {t('cosmicCatch.description')}
+                  </p>
+                </div>
                 <div className="text-xs text-slate-400">
                   {tc('highScore')}: {formatScore(cosmicState.highScore)}
                 </div>
@@ -3445,6 +3515,19 @@ export default function MimoPlayground() {
           </div>
         </div>
       )}
+
+      {/* Screen reader announcements for accessibility */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {dailyChallenge.celebrationActive && `Daily challenge completed! Streak: ${dailyChallenge.streak}`}
+        {gameState.isGameOver && `Game over. Score: ${gameState.score}`}
+        {neonState.isGameOver && `Game over. Score: ${neonState.score}`}
+        {cosmicState.isGameOver && `Game over. Score: ${cosmicState.score}`}
+        {game2048State.isGameOver && `Game over. Score: ${game2048State.score}`}
+      </div>
     </div>
   );
 }
