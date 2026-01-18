@@ -35,7 +35,12 @@
     "pageviews": "ページビュー",
     "updateNote": "1日2回更新（6時・18時 JST）",
     "dataCollecting": "データを集計中です",
-    "dataWillAppear": "1日2回（6時・18時 JST）の自動実行後にデータが表示されます"
+    "dataWillAppear": "1日2回（6時・18時 JST）の自動実行後にデータが表示されます",
+    "detailedAnalytics": "詳細アナリティクス",
+    "expandAnalytics": "詳細を表示",
+    "collapseAnalytics": "閉じる",
+    "loading": "読み込み中...",
+    "noData": "データがありません"
   },
   "models": {
     "backToHome": "← モデル選択に戻る",
@@ -124,7 +129,10 @@
     "noUpdatesThisDay": "この日の{modelName}による更新はありません",
     "minutesShort": "分",
     "secondsShort": "秒",
-    "timesCount": "回"
+    "timesCount": "回",
+    "filterAll": "すべて",
+    "filterMimo": "Mimoのみ",
+    "filterGrok": "Grokのみ"
   },
   "common": {
     "loading": "読み込み中...",

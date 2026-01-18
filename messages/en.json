@@ -35,7 +35,12 @@
     "pageviews": "Pageviews",
     "updateNote": "Updated twice daily (6:00 & 18:00 JST)",
     "dataCollecting": "Collecting data",
-    "dataWillAppear": "Data will appear after auto-runs (twice daily at 6:00 & 18:00 JST)"
+    "dataWillAppear": "Data will appear after auto-runs (twice daily at 6:00 & 18:00 JST)",
+    "detailedAnalytics": "Detailed Analytics",
+    "expandAnalytics": "Show Details",
+    "collapseAnalytics": "Close",
+    "loading": "Loading...",
+    "noData": "No data available"
   },
   "models": {
     "backToHome": "← Back to model selection",
@@ -124,7 +129,10 @@
     "noUpdatesThisDay": "No updates from {modelName} on this day",
     "minutesShort": "min",
     "secondsShort": "sec",
-    "timesCount": "times"
+    "timesCount": "times",
+    "filterAll": "All",
+    "filterMimo": "Mimo Only",
+    "filterGrok": "Grok Only"
   },
   "common": {
     "loading": "Loading...",
