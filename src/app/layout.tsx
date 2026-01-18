@@ -22,8 +22,9 @@ export default async function RootLayout({
   const locale = await getLocale();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} style={{ colorScheme: 'dark' }}>
       <head>
+        <meta name="theme-color" content="#0f0f1a" />
         <AdSenseAutoAds />
         <GoogleAnalytics />
       </head>

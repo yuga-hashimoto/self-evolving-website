@@ -345,13 +345,13 @@ function ComparisonBar({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           {mimoWins && <span className="text-base sm:text-lg">🏆</span>}
-          <span className={`text-sm sm:text-base font-bold ${mimoWins ? 'text-purple-300' : 'text-gray-400'}`}>
+          <span className={`text-sm sm:text-base font-bold tabular-nums ${mimoWins ? 'text-purple-300' : 'text-gray-400'}`}>
             {mimoDisplay}
           </span>
         </div>
         <span className="text-xs sm:text-sm text-gray-400">{label}</span>
         <div className="flex items-center gap-1.5">
-          <span className={`text-sm sm:text-base font-bold ${grokWins ? 'text-blue-300' : 'text-gray-400'}`}>
+          <span className={`text-sm sm:text-base font-bold tabular-nums ${grokWins ? 'text-blue-300' : 'text-gray-400'}`}>
             {grokDisplay}
           </span>
           {grokWins && <span className="text-base sm:text-lg">🏆</span>}

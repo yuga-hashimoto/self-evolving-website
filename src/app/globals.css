@@ -148,6 +148,16 @@ body {
   }
 }
 
+/* Prevent double-tap zoom on interactive elements */
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .glass-card {

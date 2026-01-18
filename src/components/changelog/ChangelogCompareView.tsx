@@ -507,30 +507,30 @@ function ModelCard({
                                 <span className="group-open:rotate-90 transition-transform">▶</span>
                                 <span className="flex items-center gap-2">
                                     <span className="opacity-50">⏱️</span>
-                                    <span>{Math.floor(entry.metrics.executionTime.total / 60)}{t.minutesShort}</span>
+                                    <span className="tabular-nums">{Math.floor(entry.metrics.executionTime.total / 60)}{t.minutesShort}</span>
                                     {entry.metrics.errors.finalStatus === 'success' ? (
                                         <span className="text-green-400">✓</span>
                                     ) : (
                                         <span className="text-red-400">✗</span>
                                     )}
-                                    <span className="text-green-400 font-mono">+{entry.metrics.codeChanges.additions}</span>
-                                    <span className="text-red-400 font-mono">-{entry.metrics.codeChanges.deletions}</span>
+                                    <span className="text-green-400 font-mono tabular-nums">+{entry.metrics.codeChanges.additions}</span>
+                                    <span className="text-red-400 font-mono tabular-nums">-{entry.metrics.codeChanges.deletions}</span>
                                 </span>
                             </summary>
                             <div className="mt-3 p-3 bg-black/20 rounded-lg">
                                 <div className="grid grid-cols-2 gap-3 text-[10px]">
                                     <div>
                                         <p className="text-gray-400 mb-1">{tChangelog.executionTime}</p>
-                                        <p className="font-mono text-white font-bold">
+                                        <p className="font-mono text-white font-bold tabular-nums">
                                             {Math.floor(entry.metrics.executionTime.total / 60)}{t.minutesShort}{entry.metrics.executionTime.total % 60}{t.secondsShort}
                                         </p>
                                         {entry.metrics.executionTime.claudeCode > 0 && (
-                                            <p className="text-gray-500 mt-1">
+                                            <p className="text-gray-500 mt-1 tabular-nums">
                                                 Claude: {entry.metrics.executionTime.claudeCode}{t.secondsShort}
                                             </p>
                                         )}
                                         {entry.metrics.executionTime.autoFix && Object.keys(entry.metrics.executionTime.autoFix).length > 0 && (
-                                            <p className="text-gray-500">
+                                            <p className="text-gray-500 tabular-nums">
                                                 Fix: {Object.values(entry.metrics.executionTime.autoFix).reduce((a, b) => a + (b || 0), 0)}{t.secondsShort}
                                             </p>
                                         )}
@@ -557,14 +557,14 @@ function ModelCard({
                                     </div>
                                     <div>
                                         <p className="text-gray-400 mb-1">{tChangelog.codeChanges}</p>
-                                        <p className="font-mono text-white">
+                                        <p className="font-mono text-white tabular-nums">
                                             {entry.metrics.codeChanges.filesChanged} {tChangelog.files}
                                         </p>
                                         <div className="flex gap-3 mt-1">
-                                            <span className="text-green-400 font-mono">
+                                            <span className="text-green-400 font-mono tabular-nums">
                                                 +{entry.metrics.codeChanges.additions}
                                             </span>
-                                            <span className="text-red-400 font-mono">
+                                            <span className="text-red-400 font-mono tabular-nums">
                                                 -{entry.metrics.codeChanges.deletions}
                                             </span>
                                         </div>
