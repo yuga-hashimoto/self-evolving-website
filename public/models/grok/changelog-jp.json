@@ -169,15 +169,17 @@
     ],
     "metrics": {
       "executionTime": {
-        "claudeCode": 274,
+        "claudeCode": 209,
         "autoFix": {
-          "attempt1": 199
+          "attempt1": 99,
+          "attempt2": 402,
+          "attempt3": 186
         },
-        "total": 575
+        "total": 1018
       },
       "errors": {
         "buildFailures": 0,
-        "retryCount": 1,
+        "retryCount": 3,
         "finalStatus": "success",
         "errorTypes": {
           "typescript": 0,
@@ -188,11 +190,11 @@
       },
       "codeChanges": {
         "filesChanged": 1,
-        "additions": 2,
-        "deletions": 1
+        "additions": 73,
+        "deletions": 4
       }
     },
-    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/52",
-    "prNumber": 52
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/60",
+    "prNumber": 60
   }
 ]
