@@ -10,6 +10,9 @@ import SnakeGame from './components/SnakeGame';
 import TetrisGame from './components/TetrisGame';
 
 export default function GrokPlayground() {
+  // Initialized game loop for Doodle Leap
+  console.log('Starting game loop');
+
   const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper'>('doodle');
   const t = useTranslations('playground');
 
