@@ -179,7 +179,21 @@
         "tapToPlace": "Tap/click to place block",
         "aimForCombo": "Aim for high combos by stacking perfectly!",
         "backToMenu": "Back to game selection",
-        "placeBlockPerfectly": "Place blocks perfectly to stack higher!"
+        "placeBlockPerfectly": "Place blocks perfectly to stack higher!",
+        "coins": "Coins",
+        "level": "Level",
+        "newCombo": "New Combo",
+        "skillActive": "Skill Active",
+        "shop": "Shop",
+        "boostSkill": "Boost",
+        "slowSkill": "Slow",
+        "shopTitle": "Skill Shop",
+        "buy": "Buy",
+        "owned": "Owned",
+        "activate": "Activate",
+        "boostDesc": "Increase block speed",
+        "slowDesc": "Decrease block speed",
+        "wideDesc": "Widen block size"
       },
       "slide2048": {
         "title": "Slide 2048",

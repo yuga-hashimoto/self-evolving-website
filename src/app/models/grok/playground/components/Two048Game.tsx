@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
@@ -5,13 +6,6 @@ import { useTranslations } from 'next-intl';
 
 const GRID_SIZE = 4;
 const GAP = 10;
-
-interface Tile {
-  value: number;
-  x: number;
-  y: number;
-  merged?: boolean;
-}
 
 export default function Two048Game() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -47,6 +41,7 @@ export default function Two048Game() {
       setHighScore(parseInt(saved));
     }
     initializeGame();
+     
   }, []);
 
   const initializeGame = useCallback(() => {
@@ -204,6 +199,7 @@ export default function Two048Game() {
 
   useEffect(() => {
     render();
+     
   }, [grid]);
 
   const getTileColor = (value: number): string => {
@@ -282,6 +278,7 @@ export default function Two048Game() {
         canvas.removeEventListener('touchend', handleTouchEnd);
       }
     };
+     
   }, [handleKeyDown]);
 
   return (

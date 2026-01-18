@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 const CELL_SIZE = 20;
@@ -43,14 +44,6 @@ export default function SnakeGame() {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('snakeHighScore');
-    if (saved) {
-      setHighScore(parseInt(saved));
-    }
-    generateFood();
-  }, []);
-
   const generateFood = () => {
     const { width, height } = canvasSizeRef.current;
     const gridWidth = Math.floor(width / CELL_SIZE);
@@ -64,6 +57,15 @@ export default function SnakeGame() {
       generateFood();
     }
   };
+
+  useEffect(() => {
+    const saved = localStorage.getItem('snakeHighScore');
+    if (saved) {
+      setHighScore(parseInt(saved));
+    }
+    generateFood();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only run on mount
+  }, []);
 
   const startGame = () => {
     const gridWidth = Math.floor(canvasSizeRef.current.width / CELL_SIZE);
@@ -230,6 +232,7 @@ export default function SnakeGame() {
         canvas.removeEventListener('touchend', handleTouchEnd);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Touch handlers use refs
   }, [playing]);
 
   return (

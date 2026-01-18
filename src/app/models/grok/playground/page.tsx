@@ -6,7 +6,7 @@ import EndlessJumperGame from './components/EndlessJumperGame';
 import Game from './components/Game';
 import Two048Game from './components/Two048Game';
 import SnakeGame from './components/SnakeGame';
-import EndlessRunnerGame from './components/EndlessRunnerGame';
+// EndlessRunnerGame is available but not currently used in the UI
 import TetrisGame from './components/TetrisGame';
 
 export default function GrokPlayground() {
@@ -29,12 +29,12 @@ export default function GrokPlayground() {
               className={`px-4 py-2 rounded ${selectedGame === 'doodle' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
             >
               {t('grok.doodleLeap')}
+            </button>
             <button
               onClick={() => setSelectedGame('endlessJumper')}
               className={`px-4 py-2 rounded ${selectedGame === 'endlessJumper' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
             >
               {t('grok.endlessJumper') || 'Endless Jumper'}
-            </button>
             </button>
             <button
               onClick={() => setSelectedGame('2048')}

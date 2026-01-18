@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link"; // Assuming Link is used or needed, otherwise just add KofiWidget
 import KofiWidget from "@/components/KofiWidget";
 import { useTranslations } from 'next-intl';
 

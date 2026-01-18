@@ -179,7 +179,21 @@
         "tapToPlace": "タップ/クリックでブロックを配置",
         "aimForCombo": "完全に重ねて高いコンボを狙え！",
         "backToMenu": "ゲーム選択へ戻る",
-        "placeBlockPerfectly": "ブロックを完璧に配置して高く積み上げろ！"
+        "placeBlockPerfectly": "ブロックを完璧に配置して高く積み上げろ！",
+        "coins": "コイン",
+        "level": "レベル",
+        "newCombo": "新コンボ",
+        "skillActive": "スキル発動中",
+        "shop": "ショップ",
+        "boostSkill": "ブースト",
+        "slowSkill": "スロー",
+        "shopTitle": "スキルショップ",
+        "buy": "購入",
+        "owned": "所持",
+        "activate": "発動",
+        "boostDesc": "ブロック速度アップ",
+        "slowDesc": "ブロック速度ダウン",
+        "wideDesc": "ブロック幅拡大"
       },
       "slide2048": {
         "title": "Slide 2048",

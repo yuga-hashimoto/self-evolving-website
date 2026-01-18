@@ -7,6 +7,7 @@ export default function KofiWidget() {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard hydration pattern
         setMounted(true);
     }, []);
 
@@ -19,9 +20,9 @@ export default function KofiWidget() {
                 src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'
                 strategy='lazyOnload'
                 onLoad={() => {
-                    // @ts-ignore
+                    // @ts-expect-error Ko-fi widget types not available
                     if (window.kofiWidgetOverlay) {
-                        // @ts-ignore
+                        // @ts-expect-error Ko-fi widget types not available
                         window.kofiWidgetOverlay.draw('yugahashimoto', {
                             'type': 'floating-chat',
                             'floating-chat.donateButton.text': 'Tip Me',

@@ -212,6 +212,7 @@ export default function TetrisGame() {
 
   useEffect(() => {
     render();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- render uses refs
   }, [board, currentPiece]);
 
   const startGame = () => {
@@ -260,7 +261,7 @@ export default function TetrisGame() {
 
   const hardDrop = () => {
     if (!currentPiece || gameOver) return;
-    let newPiece = { ...currentPiece };
+    const newPiece = { ...currentPiece };
     while (isValidMove(board, { ...newPiece, y: newPiece.y + 1 })) {
       newPiece.y += 1;
     }
@@ -345,6 +346,7 @@ export default function TetrisGame() {
         canvas.removeEventListener('touchend', handleTouchEnd);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handlers use refs
   }, [playing, currentPiece]);
 
   return (

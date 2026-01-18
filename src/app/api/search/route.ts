@@ -98,7 +98,7 @@ export async function GET(request: Request) {
     const data = await response.json();
 
     // Format results
-    const results = (data.organic || []).slice(0, 5).map((item: any) => ({
+    const results = (data.organic || []).slice(0, 5).map((item: { title: string; snippet: string; link: string }) => ({
       title: item.title,
       description: item.snippet,
       url: item.link,

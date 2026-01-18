@@ -379,7 +379,22 @@ List the relative paths of all changed files in an array.
 
 After completing changes, be sure to execute the following:
 
-#### Step 1: TypeScript Type Check
+#### Step 1: ESLint Check
+
+```bash
+npm run lint
+```
+
+Fix all errors. Warnings are optional but recommended to fix.
+
+**Common issues to fix:**
+- `@typescript-eslint/no-unused-vars` - Remove unused imports/variables
+- `@typescript-eslint/no-explicit-any` - Use specific types instead of `any`
+- `react-hooks/exhaustive-deps` - Add missing dependencies to useEffect
+- `react-hooks/rules-of-hooks` - Ensure hooks are called correctly
+- `@next/next/no-img-element` - Use `next/image` instead of `<img>`
+
+#### Step 2: TypeScript Type Check
 
 ```bash
 npx tsc --noEmit
@@ -387,7 +402,7 @@ npx tsc --noEmit
 
 If errors occur, fix them.
 
-#### Step 2: Build Verification
+#### Step 3: Build Verification
 
 ```bash
 npm run build
@@ -395,7 +410,7 @@ npm run build
 
 If build errors occur, fix them.
 
-#### Step 3: Operation Verification (Recommended)
+#### Step 4: Operation Verification (Recommended)
 
 If possible, verify the following:
 - Does the game work properly?
@@ -404,6 +419,15 @@ If possible, verify the following:
 - Is data being saved correctly?
 
 **Important**: Fix all errors and confirm that the build passes before recording the changelog.
+
+#### Note: Runtime Errors
+
+Static analysis (lint, tsc, build) cannot detect all errors. The following types of errors can only be detected at runtime:
+- Hydration mismatch (SSR/CSR inconsistency)
+- null access during DOM operations
+- Missing error handling in async operations
+
+**Recommended**: After making changes, start the development server (`npm run dev`) and open the page in a browser. Check the DevTools > Console for any errors.
 
 ## Data Sources
 

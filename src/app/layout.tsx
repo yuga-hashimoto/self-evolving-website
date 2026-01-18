@@ -3,7 +3,7 @@ import "./globals.css";
 import Header from "@/components/protected/Header";
 import Footer from "@/components/protected/Footer";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
-import { AdSenseAutoAds, AdDevNotice } from "@/components/ads/AdBanner";
+import { AdSenseAutoAds } from "@/components/ads/AdBanner";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
@@ -22,9 +22,8 @@ export default async function RootLayout({
   const locale = await getLocale();
 
   return (
-    <html lang={locale} style={{ colorScheme: 'dark' }}>
+    <html lang={locale}>
       <head>
-        <meta name="theme-color" content="#0f0f1a" />
         <AdSenseAutoAds />
         <GoogleAnalytics />
       </head>

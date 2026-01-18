@@ -9,9 +9,9 @@ declare global {
         gtag: (
             command: string,
             targetId: string,
-            config?: { [key: string]: any }
+            config?: Record<string, string | number | boolean>
         ) => void;
-        dataLayer: any[];
+        dataLayer: unknown[];
     }
 }
 

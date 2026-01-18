@@ -24,6 +24,7 @@ export default function ChangelogScreenshot({
     }
 
     return (
+        // eslint-disable-next-line @next/next/no-img-element -- Dynamic external screenshots
         <img
             src={src}
             alt={alt}

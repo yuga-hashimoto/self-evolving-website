@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/immutability, react-hooks/exhaustive-deps */
 'use client';
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 const PLAYER_SIZE = 20;
@@ -53,13 +54,23 @@ export default function Game() {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
+   
   useEffect(() => {
     const saved = localStorage.getItem('doodleLeapHighScore');
     if (saved) {
       setHighScore(parseInt(saved));
     }
-    initializePlatforms();
-    startGame();
+    // Initialize platforms inline
+    const { width, height } = canvasSizeRef.current;
+    platformsRef.current = [];
+    for (let i = 0; i < 10; i++) {
+      platformsRef.current.push({
+        x: Math.random() * (width - PLATFORM_WIDTH),
+        y: height - i * 80 - 50,
+      });
+    }
+    // Start game
+    setPlaying(true);
   }, []);
 
   const initializePlatforms = () => {

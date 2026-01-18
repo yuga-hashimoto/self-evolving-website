@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 
 export default function EndlessRunnerGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [width, setWidth] = React.useState(window.innerWidth);
+  const [width] = React.useState(window.innerWidth);
 const height = window.innerHeight; // Dynamic sizing based on window
 
   useEffect(() => {

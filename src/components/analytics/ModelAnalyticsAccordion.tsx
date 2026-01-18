@@ -59,6 +59,7 @@ export function ModelAnalyticsAccordion({ modelId, translations: t }: ModelAnaly
 
     useEffect(() => {
         if (isOpen && !hasFetched) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard data fetching pattern
             setLoading(true);
             fetch(`/api/analytics?model=${modelId}`)
                 .then(res => res.json())
