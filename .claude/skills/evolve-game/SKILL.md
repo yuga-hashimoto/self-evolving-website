@@ -321,9 +321,16 @@ diff /tmp/ja-keys.txt /tmp/en-keys.txt
 
 If diff shows differences, add missing keys before proceeding.
 
-### Task 7: Record Changes for Changelog
+### Task 7: Record Changes for Changelog (CRITICAL - MANDATORY)
 
-**Important**: Write a JSON file with your changes information to `/tmp/ai-changes.json`.
+🚨 **This task is MANDATORY. The workflow will FAIL if you skip this step.**
+
+**You MUST write a JSON file to `/tmp/ai-changes.json` with your changes information.**
+
+⚠️ **WARNING**: If `/tmp/ai-changes.json` is not created, the workflow will fail with error:
+```
+❌ CRITICAL ERROR: Changelog was not updated!
+```
 
 **Do NOT edit changelog files directly.** The workflow will automatically update changelogs.
 

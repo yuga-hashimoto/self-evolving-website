@@ -20,6 +20,13 @@ try {
     console.log('✅ Read AI changes from /tmp/ai-changes.json');
 } catch {
     console.log('⚠️  No AI changes file found at /tmp/ai-changes.json');
+    // REQUIRE_AI_CHANGES=true makes missing file a fatal error
+    // This ensures the workflow fails if Claude Code didn't create the file
+    if (process.env.REQUIRE_AI_CHANGES === 'true') {
+        console.error('❌ AI changes file is required but not found');
+        console.error('Claude Code must write /tmp/ai-changes.json (see SKILL.md Task 7)');
+        process.exit(1);
+    }
     console.log('⚠️  Skipping changelog update');
     process.exit(0);
 }

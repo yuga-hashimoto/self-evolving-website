@@ -306,6 +306,25 @@ jobs:
         env:
           MODEL_ID: ${{ inputs.model_id }}
 
+      - name: Verify Changelog Updated
+        run: |
+          # Check if changelog files were modified
+          CHANGELOG_JP_CHANGED=$(git status --porcelain public/models/${{ inputs.model_id }}/changelog-jp.json)
+          CHANGELOG_EN_CHANGED=$(git status --porcelain public/models/${{ inputs.model_id }}/changelog-en.json)
+
+          if [[ -z "$CHANGELOG_JP_CHANGED" ]] || [[ -z "$CHANGELOG_EN_CHANGED" ]]; then
+            echo "❌ CRITICAL ERROR: Changelog was not updated!"
+            echo ""
+            echo "Claude Code must write /tmp/ai-changes.json with the following format:"
+            echo '{"changes_jp": "...", "changes_en": "...", "intent_jp": "...", "intent_en": "...", "files": [...]}'
+            echo ""
+            echo "This is required by SKILL.md Task 7."
+            echo "The workflow will now fail to prevent PRs without changelogs."
+            exit 1
+          fi
+
+          echo "✅ Changelog files were updated successfully"
+
       - name: Check for Changes
         id: changes
         run: |
