@@ -435,7 +435,7 @@ function ModelCard({
                     return (
                         <div className="mb-3">
                             {changes.raw ? (
-                                <p className="text-white text-sm font-semibold leading-relaxed">{changes.raw}</p>
+                                <p className="text-white text-sm font-semibold leading-relaxed whitespace-pre-line">{changes.raw}</p>
                             ) : (
                                 <div className="space-y-1 text-sm">
                                     {changes.after && (
@@ -456,7 +456,7 @@ function ModelCard({
                         <div className="mb-3 bg-black/20 p-2 rounded-lg">
                             <h4 className={`text-[10px] uppercase font-bold mb-1 opacity-70 ${colorClass}`}>{tChangelog.intent}</h4>
                             {intent.raw ? (
-                                <p className="text-xs text-gray-400 italic">&quot;{intent.raw}&quot;</p>
+                                <p className="text-xs text-gray-400 italic whitespace-pre-line">&quot;{intent.raw}&quot;</p>
                             ) : (
                                 <div className="space-y-1">
                                     {intent.hypothesis && (
@@ -472,7 +472,7 @@ function ModelCard({
                 })()}
 
                 {!entry.changes && entry.reasoning && (
-                    <p className="text-sm text-gray-200 mb-3 leading-relaxed">{entry.reasoning}</p>
+                    <p className="text-sm text-gray-200 mb-3 leading-relaxed whitespace-pre-line">{entry.reasoning}</p>
                 )}
 
                 {/* Screenshot */}
