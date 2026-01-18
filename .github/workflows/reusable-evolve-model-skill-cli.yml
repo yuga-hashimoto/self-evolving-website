@@ -269,6 +269,7 @@ jobs:
         run: |
           echo "🤖 Starting Claude Code CLI execution..."
           claude --print \
+            --verbose \
             --output-format stream-json \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/playground/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/playground/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite" \
@@ -414,6 +415,7 @@ jobs:
         run: |
           echo "🔧 Starting Auto-Fix Attempt 1..."
           claude --print \
+            --verbose \
             --output-format stream-json \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/playground/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/playground/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
@@ -494,6 +496,7 @@ jobs:
         run: |
           echo "🔧 Starting Auto-Fix Attempt 2..."
           claude --print \
+            --verbose \
             --output-format stream-json \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/playground/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/playground/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
@@ -574,6 +577,7 @@ jobs:
         run: |
           echo "🔧 Starting Auto-Fix Attempt 3..."
           claude --print \
+            --verbose \
             --output-format stream-json \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/playground/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/playground/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
@@ -689,6 +693,7 @@ jobs:
         run: |
           echo "📱 Starting Mobile Fix Attempt 1..."
           claude --print \
+            --verbose \
             --output-format stream-json \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/playground/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Glob,Grep,TodoWrite" \
