@@ -229,6 +229,28 @@
         "controls": "HOLD to rise ⬆️ Space/Click works too",
         "backToMenu": "Back to Menu"
       },
+      "achievements": {
+        "title": "Achievements",
+        "description": "Play games to unlock achievements!",
+        "unlocked": "Unlocked",
+        "reward": "Reward"
+      },
+      "tutorial": {
+        "title": "Tutorial",
+        "welcome": "Welcome to Mimo Games!",
+        "step1Title": "1️⃣ Game Selection",
+        "step1Desc": "Choose from 4 different games. Each has unique features - you'll find your favorite!",
+        "step2Title": "2️⃣ Daily Challenges",
+        "step2Desc": "New challenges every day! Clear them to earn coins, and maintain your streak for bonuses!",
+        "step3Title": "3️⃣ Achievements",
+        "step3Desc": "Achieve goals to unlock achievements! Earn coins while experiencing your growth.",
+        "tipTitle": "💡 Tips",
+        "tip1": "• Perfect stacking triggers combo!",
+        "tip2": "• You can open skill shop with coins (Press S)",
+        "tip3": "• Play comfortably on mobile with touch controls",
+        "tip4": "• Keep your daily streak going!",
+        "startButton": "Start!"
+      },
       "adArea": "Ad Area (AdSense)",
       "sidebarAd": "Sidebar Ad",
       "footer": "Free to play anytime",

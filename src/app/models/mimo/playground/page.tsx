@@ -183,6 +183,39 @@ interface DailyChallengeState {
   celebrationActive: boolean;
 }
 
+// Achievement Interfaces
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  unlocked: boolean;
+  icon: string;
+  reward: number; // Coins reward
+  condition: (stats: GameStats) => boolean;
+}
+
+interface GameStats {
+  infinityFirstPlay: boolean;
+  infinity100Score: boolean;
+  infinity500Score: boolean;
+  infinity1000Score: boolean;
+  neonFirstPlay: boolean;
+  neon100Score: boolean;
+  neon500Score: boolean;
+  cosmicFirstPlay: boolean;
+  cosmic100Score: boolean;
+  cosmicBestCombo3: boolean;
+  dailyStreak3: boolean;
+  dailyStreak7: boolean;
+  allGamesPlayed: boolean;
+}
+
+interface AchievementState {
+  unlocked: string[]; // Achievement IDs
+  showAchievementPopup: boolean;
+  currentPopup: Achievement | null;
+}
+
 const INITIAL_BLOCK_WIDTH = 200;
 const BLOCK_HEIGHT = 30;
 const BASE_SPEED = 2;
@@ -210,6 +243,109 @@ const TILE_COLORS: Record<number, string> = {
   4096: '#3c3a32',
   8192: '#1e1d18',
 };
+
+// Achievement Definitions
+const ACHIEVEMENTS: Achievement[] = [
+  {
+    id: 'first_play',
+    name: 'Welcome!',
+    description: 'Play your first game',
+    unlocked: false,
+    icon: '🎉',
+    reward: 10,
+    condition: (stats) => stats.infinityFirstPlay || stats.neonFirstPlay || stats.cosmicFirstPlay,
+  },
+  {
+    id: 'infinity_100',
+    name: 'Infinity Starter',
+    description: 'Score 100+ in Infinity Drop',
+    unlocked: false,
+    icon: '🚀',
+    reward: 20,
+    condition: (stats) => stats.infinity100Score,
+  },
+  {
+    id: 'infinity_500',
+    name: 'Infinity Expert',
+    description: 'Score 500+ in Infinity Drop',
+    unlocked: false,
+    icon: '⚡',
+    reward: 50,
+    condition: (stats) => stats.infinity500Score,
+  },
+  {
+    id: 'infinity_1000',
+    name: 'Infinity Master',
+    description: 'Score 1000+ in Infinity Drop',
+    unlocked: false,
+    icon: '👑',
+    reward: 100,
+    condition: (stats) => stats.infinity1000Score,
+  },
+  {
+    id: 'neon_100',
+    name: 'Neon Runner',
+    description: 'Score 100+ in Neon Dash',
+    unlocked: false,
+    icon: '💨',
+    reward: 20,
+    condition: (stats) => stats.neon100Score,
+  },
+  {
+    id: 'neon_500',
+    name: 'Neon Sprinter',
+    description: 'Score 500+ in Neon Dash',
+    unlocked: false,
+    icon: '🌟',
+    reward: 50,
+    condition: (stats) => stats.neon500Score,
+  },
+  {
+    id: 'cosmic_100',
+    name: 'Space Explorer',
+    description: 'Score 100+ in Cosmic Catch',
+    unlocked: false,
+    icon: '🌌',
+    reward: 20,
+    condition: (stats) => stats.cosmic100Score,
+  },
+  {
+    id: 'cosmic_combo',
+    name: 'Cosmic Combo',
+    description: 'Get 3x combo in Cosmic Catch',
+    unlocked: false,
+    icon: '✨',
+    reward: 30,
+    condition: (stats) => stats.cosmicBestCombo3,
+  },
+  {
+    id: 'daily_streak_3',
+    name: 'Habit Builder',
+    description: '3-day daily challenge streak',
+    unlocked: false,
+    icon: '🔥',
+    reward: 50,
+    condition: (stats) => stats.dailyStreak3,
+  },
+  {
+    id: 'daily_streak_7',
+    name: 'Unstoppable',
+    description: '7-day daily challenge streak',
+    unlocked: false,
+    icon: '🏆',
+    reward: 100,
+    condition: (stats) => stats.dailyStreak7,
+  },
+  {
+    id: 'all_games',
+    name: 'Game Explorer',
+    description: 'Play all 4 games',
+    unlocked: false,
+    icon: '🎮',
+    reward: 30,
+    condition: (stats) => stats.allGamesPlayed,
+  },
+];
 
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
@@ -300,9 +436,37 @@ export default function MimoPlayground() {
     celebrationActive: false,
   });
 
+  const [achievementState, setAchievementState] = useState<AchievementState>({
+    unlocked: [],
+    showAchievementPopup: false,
+    currentPopup: null,
+  });
+
+  const [showAchievementsModal, setShowAchievementsModal] = useState(false);
+
+  const [gameStats, setGameStats] = useState<GameStats>({
+    infinityFirstPlay: false,
+    infinity100Score: false,
+    infinity500Score: false,
+    infinity1000Score: false,
+    neonFirstPlay: false,
+    neon100Score: false,
+    neon500Score: false,
+    cosmicFirstPlay: false,
+    cosmic100Score: false,
+    cosmicBestCombo3: false,
+    dailyStreak3: false,
+    dailyStreak7: false,
+    allGamesPlayed: false,
+  });
+
+  const [showTutorial, setShowTutorial] = useState(false);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const checkAchievementsRef = useRef<() => void>(() => {});
+  const updateScoreAchievementsRef = useRef<(gameType: 'infinity' | 'neon' | 'cosmic', score: number) => void>(() => {});
   const { trackClick } = useAnalytics();
 
   // Canvas用翻訳テキストをrefで保持
@@ -553,6 +717,38 @@ export default function MimoPlayground() {
     const cosmicSaved = localStorage.getItem('cosmicCatch_highScore');
     if (cosmicSaved) {
       setCosmicState((prev) => ({ ...prev, highScore: parseInt(cosmicSaved) }));
+    }
+
+    // Achievement data loading
+    const achievementSaved = localStorage.getItem('mimo_achievements');
+    if (achievementSaved) {
+      try {
+        const parsed: string[] = JSON.parse(achievementSaved);
+        setAchievementState((prev) => ({ ...prev, unlocked: parsed }));
+      } catch (e) {
+        // parse error - keep defaults
+      }
+    }
+
+    // Game stats loading
+    const statsSaved = localStorage.getItem('mimo_gameStats');
+    if (statsSaved) {
+      try {
+        const parsed: GameStats = JSON.parse(statsSaved);
+        setGameStats(parsed);
+        // Also update cosmic combo max if needed
+        if (parsed.cosmicBestCombo3) {
+          setCosmicState((prev) => ({ ...prev, bestCombo: Math.max(prev.bestCombo, 3) }));
+        }
+      } catch (e) {
+        // parse error - keep defaults
+      }
+    }
+
+    // Show tutorial on first visit
+    const tutorialShown = localStorage.getItem('mimo_tutorialShown');
+    if (!tutorialShown) {
+      setShowTutorial(true);
     }
   }, []);
 
@@ -876,6 +1072,15 @@ export default function MimoPlayground() {
         isPlaying: true,
       }));
 
+      // Set first play achievement
+      if (!gameStats.infinityFirstPlay) {
+        setGameStats((prev) => {
+          const newStats = { ...prev, infinityFirstPlay: true };
+          localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+          return newStats;
+        });
+      }
+
       // Wide skill is passive - it applies at game start but stays owned
       // Player keeps the wide block bonus as long as they have the skill
       // No need to reset owned status - this is a permanent upgrade
@@ -888,7 +1093,7 @@ export default function MimoPlayground() {
       trackClick();
       storeGameEvent('game_start', { wideModeUsed: wideOwned });
     }
-  }, [gameState, trackClick, shopItems]);
+  }, [gameState, trackClick, shopItems, gameStats]);
 
   // ブロックを配置
   const placeBlock = useCallback(() => {
@@ -938,6 +1143,12 @@ export default function MimoPlayground() {
 
       // Check daily challenge completion
       checkDailyChallengeCompletion('infinity', gameState.score);
+
+      // Update score achievements
+      updateScoreAchievementsRef.current('infinity', gameState.score);
+
+      // Check achievements
+      checkAchievementsRef.current();
       return;
     }
 
@@ -1148,6 +1359,7 @@ export default function MimoPlayground() {
     if (completed) {
       // Update streak
       let newStreak = dailyChallenge.streak;
+      let streakUpdated = false;
       const today = getTodayDate();
 
       // Check if completing for the first time today
@@ -1160,11 +1372,34 @@ export default function MimoPlayground() {
 
           if (lastDate.toDateString() === yesterday.toDateString()) {
             newStreak = dailyChallenge.streak + 1;
+            streakUpdated = true;
           } else if (lastDate.toDateString() !== today) {
             newStreak = 1; // New streak
+            streakUpdated = true;
           }
         } else {
           newStreak = 1;
+          streakUpdated = true;
+        }
+      }
+
+      // Update streak achievements
+      if (streakUpdated) {
+        let updatedStats = false;
+        const newStats = { ...gameStats };
+
+        if (newStreak >= 3 && !newStats.dailyStreak3) {
+          newStats.dailyStreak3 = true;
+          updatedStats = true;
+        }
+        if (newStreak >= 7 && !newStats.dailyStreak7) {
+          newStats.dailyStreak7 = true;
+          updatedStats = true;
+        }
+
+        if (updatedStats) {
+          setGameStats(newStats);
+          localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
         }
       }
 
@@ -1204,7 +1439,112 @@ export default function MimoPlayground() {
         }));
       }, 3000);
     }
-  }, [dailyChallenge, getTodayDate, playSound, vibrate]);
+
+    // Check achievements after challenge completion (even if already completed before)
+    checkAchievementsRef.current();
+  }, [dailyChallenge, getTodayDate, playSound, vibrate, gameStats]);
+
+  // Update score-based achievements
+  const updateScoreAchievements = useCallback((gameType: 'infinity' | 'neon' | 'cosmic', score: number) => {
+    let updated = false;
+    const newStats = { ...gameStats };
+
+    if (gameType === 'infinity') {
+      if (score >= 100 && !newStats.infinity100Score) {
+        newStats.infinity100Score = true;
+        updated = true;
+      }
+      if (score >= 500 && !newStats.infinity500Score) {
+        newStats.infinity500Score = true;
+        updated = true;
+      }
+      if (score >= 1000 && !newStats.infinity1000Score) {
+        newStats.infinity1000Score = true;
+        updated = true;
+      }
+    } else if (gameType === 'neon') {
+      if (score >= 100 && !newStats.neon100Score) {
+        newStats.neon100Score = true;
+        updated = true;
+      }
+      if (score >= 500 && !newStats.neon500Score) {
+        newStats.neon500Score = true;
+        updated = true;
+      }
+    } else if (gameType === 'cosmic') {
+      if (score >= 100 && !newStats.cosmic100Score) {
+        newStats.cosmic100Score = true;
+        updated = true;
+      }
+    }
+
+    // Check all games played
+    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && !newStats.allGamesPlayed) {
+      newStats.allGamesPlayed = true;
+      updated = true;
+    }
+
+    if (updated) {
+      setGameStats(newStats);
+      localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+    }
+  }, [gameStats]);
+
+  // Check and unlock achievements
+  const checkAchievements = useCallback(() => {
+    const newlyUnlocked: Achievement[] = [];
+
+    for (const achievement of ACHIEVEMENTS) {
+      // Skip if already unlocked
+      if (achievementState.unlocked.includes(achievement.id)) {
+        continue;
+      }
+
+      // Check if condition is met
+      if (achievement.condition(gameStats)) {
+        newlyUnlocked.push(achievement);
+      }
+    }
+
+    if (newlyUnlocked.length > 0) {
+      // Update state and show popup
+      const newUnlockedIds = [...achievementState.unlocked, ...newlyUnlocked.map(a => a.id)];
+      setAchievementState((prev) => ({
+        ...prev,
+        unlocked: newUnlockedIds,
+        showAchievementPopup: true,
+        currentPopup: newlyUnlocked[0],
+      }));
+
+      // Save to localStorage
+      localStorage.setItem('mimo_achievements', JSON.stringify(newUnlockedIds));
+
+      // Award coins
+      const totalReward = newlyUnlocked.reduce((sum, a) => sum + a.reward, 0);
+      setGameState((prev) => {
+        const newCoins = prev.coins + totalReward;
+        localStorage.setItem('infinityDrop_coins', newCoins.toString());
+        return { ...prev, coins: newCoins };
+      });
+
+      // Feedback
+      playSound('success');
+      vibrate(100);
+
+      // Auto-hide popup after 3 seconds
+      setTimeout(() => {
+        setAchievementState((prev) => ({
+          ...prev,
+          showAchievementPopup: false,
+          currentPopup: null,
+        }));
+      }, 3000);
+    }
+  }, [achievementState, gameStats, playSound, vibrate]);
+
+  // Update refs
+  checkAchievementsRef.current = checkAchievements;
+  updateScoreAchievementsRef.current = updateScoreAchievements;
 
   const activateSkill = useCallback((skillKey: 'boost' | 'slow' | 'wide') => {
     if (skillKey === 'wide') {
@@ -1326,7 +1666,22 @@ export default function MimoPlayground() {
 
     // Check daily challenge completion
     checkDailyChallengeCompletion('neon', neonState.score);
-  }, [neonState.highScore, neonState.score, trackClick, checkDailyChallengeCompletion]);
+
+    // Set first play achievement
+    if (!gameStats.neonFirstPlay) {
+      setGameStats((prev) => {
+        const newStats = { ...prev, neonFirstPlay: true };
+        localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+        return newStats;
+      });
+    }
+
+    // Update score achievements
+    updateScoreAchievementsRef.current('neon', neonState.score);
+
+    // Check achievements
+    checkAchievementsRef.current();
+  }, [neonState.highScore, neonState.score, trackClick, checkDailyChallengeCompletion, gameStats]);
 
   // Neon Dash: パーティクル生成
   const createNeonParticles = useCallback((y: number, color: string) => {
@@ -1792,9 +2147,36 @@ export default function MimoPlayground() {
       };
     });
 
+    // Set first play achievement
+    if (!gameStats.cosmicFirstPlay) {
+      setGameStats((prev) => {
+        const newStats = { ...prev, cosmicFirstPlay: true };
+        localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+        return newStats;
+      });
+    }
+
+    // Update cosmic combo achievement (bestCombo is updated in state first)
+    setTimeout(() => {
+      const currentStats = { ...gameStats };
+      if (cosmicState.combo >= 3 || cosmicState.bestCombo >= 3) {
+        if (!currentStats.cosmicBestCombo3) {
+          currentStats.cosmicBestCombo3 = true;
+          setGameStats(currentStats);
+          localStorage.setItem('mimo_gameStats', JSON.stringify(currentStats));
+        }
+      }
+
+      // Update score achievements
+      updateScoreAchievementsRef.current('cosmic', cosmicState.score);
+
+      // Check achievements
+      checkAchievementsRef.current();
+    }, 0);
+
     vibrate(200);
     playSound('hit');
-  }, [checkDailyChallengeCompletion]);
+  }, [checkDailyChallengeCompletion, gameStats, cosmicState.combo, cosmicState.bestCombo, cosmicState.score]);
 
   // Cosmic Catch: パーティクル生成
   const createCosmicParticles = useCallback((x: number, y: number, color: string, count: number = 10) => {
@@ -2854,6 +3236,22 @@ export default function MimoPlayground() {
               </button>
             </div>
 
+            {/* Action Buttons */}
+            <div className="mt-6 flex flex-wrap gap-3 justify-center">
+              <button
+                onClick={() => setShowAchievementsModal(true)}
+                className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 rounded-lg border border-amber-500 text-white font-bold flex items-center gap-2"
+              >
+                🏆 {t('achievements.title')}
+              </button>
+              <button
+                onClick={() => setShowTutorial(true)}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg border border-slate-600 text-white flex items-center gap-2"
+              >
+                📖 {t('tutorial.title')}
+              </button>
+            </div>
+
             {/* 広告スペース */}
             <div className="mt-8 w-full">
               <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
@@ -3511,6 +3909,155 @@ export default function MimoPlayground() {
               >
                 {t('playground.common.back')}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Achievements Modal */}
+      {showAchievementsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+          <div className="w-full max-w-md bg-slate-900 rounded-xl border-2 border-amber-500 shadow-2xl max-h-[80vh] flex flex-col">
+            {/* Header */}
+            <div className="p-4 bg-gradient-to-r from-amber-600 to-orange-600 rounded-t-xl border-b border-amber-500">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                🏆 {t('achievements.title')}
+              </h3>
+              <p className="text-amber-100 text-sm mt-1">
+                {t('achievements.description')}
+              </p>
+            </div>
+
+            {/* Achievement List */}
+            <div className="p-4 space-y-3 overflow-y-auto flex-1">
+              {ACHIEVEMENTS.map((achievement) => {
+                const isUnlocked = achievementState.unlocked.includes(achievement.id);
+                return (
+                  <div
+                    key={achievement.id}
+                    className={`p-3 rounded-lg border-2 ${
+                      isUnlocked
+                        ? 'border-green-500 bg-green-900/20'
+                        : 'border-slate-700 bg-slate-800/50 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-3xl">{achievement.icon}</div>
+                      <div className="flex-1">
+                        <div className="font-bold text-white">
+                          {achievement.name}
+                        </div>
+                        <div className="text-xs text-slate-400">
+                          {achievement.description}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-amber-400 font-bold text-sm">
+                          💰 {achievement.reward}
+                        </div>
+                        {isUnlocked && (
+                          <div className="text-xs text-green-400 font-bold mt-1">
+                            ✓ {t('achievements.unlocked')}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-700 flex justify-end gap-2">
+              <button
+                onClick={() => setShowAchievementsModal(false)}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded border border-slate-600 text-sm"
+              >
+                {t('playground.common.back')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tutorial Modal */}
+      {showTutorial && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
+          <div className="w-full max-w-md bg-slate-900 rounded-xl border-2 border-cyan-500 shadow-2xl max-h-[85vh] flex flex-col">
+            {/* Header */}
+            <div className="p-4 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-t-xl border-b border-cyan-500">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                📖 {t('tutorial.welcome')}
+              </h3>
+            </div>
+
+            {/* Tutorial Content */}
+            <div className="p-4 space-y-4 overflow-y-auto flex-1">
+              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                <h4 className="font-bold text-cyan-400 mb-2">{t('tutorial.step1Title')}</h4>
+                <p className="text-slate-300 text-sm">
+                  {t('tutorial.step1Desc')}
+                </p>
+              </div>
+
+              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                <h4 className="font-bold text-cyan-400 mb-2">{t('tutorial.step2Title')}</h4>
+                <p className="text-slate-300 text-sm">
+                  {t('tutorial.step2Desc')}
+                </p>
+              </div>
+
+              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                <h4 className="font-bold text-cyan-400 mb-2">{t('tutorial.step3Title')}</h4>
+                <p className="text-slate-300 text-sm">
+                  {t('tutorial.step3Desc')}
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 rounded-lg p-4 border border-amber-700/50">
+                <h4 className="font-bold text-amber-400 mb-2">{t('tutorial.tipTitle')}</h4>
+                <ul className="text-slate-300 text-sm space-y-1">
+                  <li>{t('tutorial.tip1')}</li>
+                  <li>{t('tutorial.tip2')}</li>
+                  <li>{t('tutorial.tip3')}</li>
+                  <li>{t('tutorial.tip4')}</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-700 flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowTutorial(false);
+                  localStorage.setItem('mimo_tutorialShown', 'true');
+                }}
+                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded border border-cyan-400 font-bold text-white"
+              >
+                {t('tutorial.startButton')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Achievement Popup */}
+      {achievementState.showAchievementPopup && achievementState.currentPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <div className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl border-2 border-amber-400 shadow-2xl p-4 animate-bounce">
+            <div className="flex items-center gap-3">
+              <div className="text-4xl">{achievementState.currentPopup.icon}</div>
+              <div>
+                <div className="font-bold text-white text-lg">
+                  🎉 アチーブメント解除！
+                </div>
+                <div className="text-amber-100 font-bold">
+                  {achievementState.currentPopup.name}
+                </div>
+                <div className="text-amber-200 text-sm">
+                  +{achievementState.currentPopup.reward}コイン獲得！
+                </div>
+              </div>
             </div>
           </div>
         </div>
