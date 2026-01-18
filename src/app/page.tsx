@@ -3,6 +3,7 @@ import { IconDNA, IconCycleDaily, IconBrain, IconCodeSpark, IconTarget, IconRock
 import { MODELS } from "@/lib/models";
 import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
 import { getTranslations, getLocale } from 'next-intl/server';
+import { AnalyticsAccordionSection } from "@/components/analytics/AnalyticsAccordionSection";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -159,6 +160,20 @@ export default async function Home() {
           )}
         </div>
       </div>
+
+      {/* Detailed Analytics - Accordion Style */}
+      <AnalyticsAccordionSection
+        title={t('detailedAnalytics')}
+        translations={{
+          detailedAnalytics: t('detailedAnalytics'),
+          expandAnalytics: t('expandAnalytics'),
+          collapseAnalytics: t('collapseAnalytics'),
+          loading: t('loading'),
+          noData: t('noData'),
+          pageviews: t('pageviews'),
+          avgSessionDuration: t('avgSessionDuration'),
+        }}
+      />
 
       {/* How it Works - Mobile Optimized Timeline */}
       <div className="max-w-3xl w-full mb-4 sm:mb-8 px-4">

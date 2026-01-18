@@ -1,7 +1,7 @@
 ---
 name: evolving-games
 description: Evolves browser games based on analytics data and change history to maximize session time. Use when the user asks to improve games, analyze game metrics, add new games, or fix gameplay issues.
-allowed-tools: Edit(src/app/models/**), Edit(src/app/api/**), Edit(src/components/icons/Icons.tsx), Edit(messages/ja.json), Edit(messages/en.json), Write(src/app/models/**), Write(src/app/api/**), Write(/tmp/ai-changes.json), Read, Bash(npm:*), Bash(npx:*), Bash(git:*), Bash(jq:*), Bash(bash scripts/web-search.sh*), Glob, Grep, TodoWrite, Skill
+allowed-tools: Edit(src/app/models/*/playground/**), Edit(src/app/api/**), Edit(src/components/icons/Icons.tsx), Edit(messages/ja.json), Edit(messages/en.json), Write(src/app/models/*/playground/**), Write(src/app/api/**), Write(/tmp/ai-changes.json), Read, Bash(npm:*), Bash(npx:*), Bash(git:*), Bash(jq:*), Bash(bash scripts/web-search.sh*), Glob, Grep, TodoWrite, Skill
 ---
 
 # Game Evolution Skill

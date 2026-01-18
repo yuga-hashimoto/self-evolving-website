@@ -272,7 +272,7 @@ jobs:
             --verbose \
             --debug \
             --dangerously-skip-permissions \
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite" \
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/playground/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/playground/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite" \
             -p "$SKILL_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Claude Code CLI execution completed"
         env:
@@ -399,7 +399,7 @@ jobs:
             --verbose \
             --debug \
             --dangerously-skip-permissions \
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/playground/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/playground/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
             -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 1 completed"
         env:
@@ -480,7 +480,7 @@ jobs:
             --verbose \
             --debug \
             --dangerously-skip-permissions \
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/playground/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/playground/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
             -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 2 completed"
         env:
@@ -561,7 +561,7 @@ jobs:
             --verbose \
             --debug \
             --dangerously-skip-permissions \
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/playground/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/playground/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
             -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 3 completed"
         env:
@@ -677,7 +677,7 @@ jobs:
             --verbose \
             --debug \
             --dangerously-skip-permissions \
-            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Glob,Grep,TodoWrite" \
+            --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/playground/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Glob,Grep,TodoWrite" \
             -p "$MOBILE_FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Mobile Fix Attempt 1 completed"
         env:
