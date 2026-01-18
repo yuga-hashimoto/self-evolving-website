@@ -1,0 +1,25 @@
+{
+  "name": "Self-Evolving Website",
+  "short_name": "Self-Evolving",
+  "description": "Watch AI models compete by evolving web games daily. Grok vs Mimo in an autonomous evolution experiment.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1b4b",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment", "technology"]
+}
