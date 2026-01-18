@@ -111,4 +111,9 @@ if (changelogEn.length > 100) {
 fs.writeFileSync(changelogEnPath, JSON.stringify(changelogEn, null, 2));
 console.log(`📝 English changelog updated: ${changelogEnPath}`);
 
+// Create marker file to indicate changelog was successfully updated
+// This prevents update-changelog-with-pr.js from updating wrong entry
+fs.writeFileSync('/tmp/ai-changes-processed', 'done');
+console.log(`✅ Marker file created: /tmp/ai-changes-processed`);
+
 console.log(`✅ All changelogs updated for ${MODEL_ID}`);

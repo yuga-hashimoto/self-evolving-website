@@ -206,15 +206,62 @@ Implement code based on the chosen approach.
 
 #### 🚨 Mobile Support Requirements (Mandatory)
 
-**Canvas Responsive Support (Mandatory)**
+##### CSS Required Settings
+Apply to canvas and game elements:
+```tsx
+<canvas
+  style={{
+    touchAction: 'manipulation',  // Prevent double-tap zoom
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    WebkitTapHighlightColor: 'transparent',
+  }}
+/>
+```
+- ✅ `touch-action: manipulation` - Prevent double-tap zoom
+- ✅ `user-select: none` - Prevent text selection
+- ✅ `-webkit-tap-highlight-color: transparent` - Disable tap highlight
+
+##### Canvas Responsive Support (Mandatory)
 - ❌ Fixed size is absolutely prohibited
 - ✅ Dynamically set size according to screen size
-- ✅ Support screen resize
+- ✅ Support screen resize and orientationchange
+- ✅ Consider device pixel ratio (Retina support)
 
-**Touch Controls (Mandatory)**
+```tsx
+// Retina display support
+const dpr = window.devicePixelRatio || 1;
+canvas.width = width * dpr;
+canvas.height = height * dpr;
+ctx.scale(dpr, dpr);
+```
+
+##### Touch Controls (Mandatory)
+- ✅ Touch target minimum **44px × 44px** (iOS/Android standard)
 - ✅ Intuitive and comfortable controls
 - ✅ Continuous input processing
 - ✅ Swipe detection adjusted according to screen size
+- ✅ Use `{ passive: false }` for touch events
+
+```tsx
+// Touch event registration
+canvas.addEventListener('touchstart', handleTouch, { passive: false });
+canvas.addEventListener('touchend', handleTouch, { passive: false });
+```
+
+##### Performance
+- ✅ Use requestAnimationFrame (maintain 60fps)
+- ✅ Handle orientationchange and resize events
+- ✅ Reduce effects/particles on mobile if needed
+
+##### Mobile Checklist
+Before finalizing changes, verify:
+- [ ] Touch targets are at least 44px
+- [ ] touch-action: manipulation is applied
+- [ ] Device pixel ratio (Retina) support
+- [ ] orientationchange handling
+- [ ] Maintains 60fps
+- [ ] Works on iOS Safari and Android Chrome
 
 **Other Recommendations**
 - Vibration feedback

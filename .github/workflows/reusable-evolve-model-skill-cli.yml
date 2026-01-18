@@ -933,8 +933,14 @@ jobs:
       - name: Update Changelog with PR Info
         if: success() && steps.changes.outputs.has_changes == 'true'
         run: |
-          echo "📝 Adding PR info and metrics to changelog..."
-          node scripts/update-changelog-with-pr.js
+          # Only update if ai-changes-processed marker exists (new entry was added)
+          if [ -f /tmp/ai-changes-processed ]; then
+            echo "📝 Adding PR info and metrics to changelog..."
+            node scripts/update-changelog-with-pr.js
+          else
+            echo "⚠️  Skipping PR info update - no new changelog entry was added"
+            echo "⚠️  This prevents overwriting existing changelog entries"
+          fi
         env:
           MODEL_ID: ${{ inputs.model_id }}
           PR_URL: ${{ steps.create-pr.outputs.pr_url }}
