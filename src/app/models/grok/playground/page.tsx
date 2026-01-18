@@ -26,7 +26,7 @@ export default function GrokPlayground() {
           <div className="flex flex-wrap justify-center gap-2 mb-4">
             <button
               onClick={() => setSelectedGame('doodle')}
-              className={`px-4 py-2 rounded ${selectedGame === 'doodle' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+              className={`px-4 py-2 min-w-[60px] min-h-[60px] rounded flex items-center justify-center ${selectedGame === 'doodle' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
             >
               {t('grok.doodleLeap')}
             </button>
@@ -38,7 +38,7 @@ export default function GrokPlayground() {
             </button>
             <button
               onClick={() => setSelectedGame('2048')}
-              className={`px-4 py-2 rounded ${selectedGame === '2048' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+              className={`px-4 py-2 min-w-[60px] min-h-[60px] rounded flex items-center justify-center ${selectedGame === '2048' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
             >
               {t('grok.game2048')}
             </button>
