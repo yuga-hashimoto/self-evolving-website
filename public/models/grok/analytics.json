@@ -1,12 +1,12 @@
 {
-  "date": "2026-01-17T14:56:01.362Z",
+  "date": "2026-01-18T00:02:15.186Z",
   "source": "ga4",
   "modelId": "grok",
-  "pageviews": 10,
-  "revenue": "0.02",
-  "avgSessionDuration": 36,
-  "bounceRate": "0.0",
-  "rpm": "2.00",
-  "ctr": "0.68",
-  "sessions": 7
+  "pageviews": 13,
+  "revenue": "0.03",
+  "avgSessionDuration": 32,
+  "bounceRate": "10.0",
+  "rpm": "2.31",
+  "ctr": "1.13",
+  "sessions": 10
 }
