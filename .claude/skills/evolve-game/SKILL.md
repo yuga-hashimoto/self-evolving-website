@@ -93,9 +93,12 @@ Found issues in existing games:
 - Missing core features: score system, game over condition, or game loop
 
 **When Stubs are Found:**
-- Mark as **Priority: Critical** in the findings list
-- In Task 4, you MUST choose to complete these stubs before adding new games
-- **Rule: Never add new games while incomplete stubs exist**
+- Mark as **Priority: High** in the findings list
+- Consider one of these approaches:
+  1. **Complete the stub** - Add missing features (score, game over, controls)
+  2. **Delete the stub** - Remove broken/incomplete games entirely
+  3. **Replace with new game** - Delete stub and add a new, fully-functional game
+- **Note**: You are NOT blocked from adding new games. Choose the approach that best improves user experience.
 
 ### Task 4: Decide Improvement Direction
 
