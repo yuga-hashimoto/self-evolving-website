@@ -269,10 +269,11 @@ jobs:
         run: |
           echo "🤖 Starting Claude Code CLI execution..."
           claude --print \
+            --verbose \
             --debug \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Bash(bash scripts/web-search.sh*),Bash(jq:*),Glob,Grep,TodoWrite" \
-            -p "$SKILL_PROMPT"
+            -p "$SKILL_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Claude Code CLI execution completed"
         env:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
@@ -395,10 +396,11 @@ jobs:
         run: |
           echo "🔧 Starting Auto-Fix Attempt 1..."
           claude --print \
+            --verbose \
             --debug \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
-            -p "$FIX_PROMPT"
+            -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 1 completed"
         env:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
@@ -475,10 +477,11 @@ jobs:
         run: |
           echo "🔧 Starting Auto-Fix Attempt 2..."
           claude --print \
+            --verbose \
             --debug \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
-            -p "$FIX_PROMPT"
+            -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 2 completed"
         env:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
@@ -555,10 +558,11 @@ jobs:
         run: |
           echo "🔧 Starting Auto-Fix Attempt 3..."
           claude --print \
+            --verbose \
             --debug \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Edit(messages/ja.json),Edit(messages/en.json),Write(src/app/models/${{ inputs.model_id }}/**),Write(src/app/api/${{ inputs.model_id }}/**),Write(src/components/icons/Icons.tsx),Write(/tmp/ai-changes.json),Read,Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*),Glob,Grep,TodoWrite" \
-            -p "$FIX_PROMPT"
+            -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 3 completed"
         env:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
@@ -670,9 +674,11 @@ jobs:
         run: |
           echo "📱 Starting Mobile Fix Attempt 1..."
           claude --print \
+            --verbose \
+            --debug \
             --dangerously-skip-permissions \
             --allowedTools "Edit(src/app/models/${{ inputs.model_id }}/**),Edit(src/app/api/${{ inputs.model_id }}/**),Edit(src/components/icons/Icons.tsx),Read,Bash(npm:*),Bash(npx:*),Glob,Grep,TodoWrite" \
-            -p "$MOBILE_FIX_PROMPT"
+            -p "$MOBILE_FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Mobile Fix Attempt 1 completed"
         env:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
@@ -1012,6 +1018,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TZ: Asia/Tokyo
+
+      - name: Save Claude Code Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-code-logs-${{ inputs.model_id }}-${{ github.run_id }}
+          path: /tmp/claude-code-output.log
+          retention-days: 7
+        continue-on-error: true
 
       - name: Cleanup Dev Server
         if: always()
