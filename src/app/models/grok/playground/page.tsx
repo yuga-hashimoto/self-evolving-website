@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import EndlessJumperGame from './components/EndlessJumperGame';
 import Game from './components/Game';
@@ -11,7 +11,17 @@ import TetrisGame from './components/TetrisGame';
 
 export default function GrokPlayground() {
   // Initialized game loop for Doodle Leap
-  console.log('Starting game loop');
+  console.log('Starting enhanced game loop for better engagement');
+
+function GameLoop() {
+  const [score, setScore] = useState(0);
+  useEffect(() => {
+    const handleGameTick = () => setScore(prev => prev + 1);
+    const interval = setInterval(handleGameTick, 1000);
+    return () => clearInterval(interval);
+  }, []);
+  return <div>Current Score: {score}</div>;
+}
 
   const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper'>('doodle');
   const t = useTranslations('playground');
