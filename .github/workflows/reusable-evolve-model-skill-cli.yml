@@ -301,10 +301,79 @@ jobs:
             echo "📝 Updating changelog from AI changes..."
             node scripts/update-changelog.js
           else
-            echo "⚠️  No AI changes file found, skipping changelog update"
+            echo "⚠️  No AI changes file found"
+
+            # コード変更があるか確認
+            PLAYGROUND_CHANGES=$(git status --porcelain src/app/models/${{ inputs.model_id }}/playground)
+            API_CHANGES=$(git status --porcelain src/app/api/${{ inputs.model_id }})
+
+            if [[ -n "$PLAYGROUND_CHANGES" ]] || [[ -n "$API_CHANGES" ]]; then
+              echo "🔄 Code changes detected but no changelog. Running fallback..."
+
+              # 変更されたファイル一覧
+              CHANGED_FILES=$(git diff --name-only HEAD -- src/app/models/${{ inputs.model_id }}/playground src/app/api/${{ inputs.model_id }})
+
+              # git diff を取得（最大500行）
+              GIT_DIFF=$(git diff HEAD -- src/app/models/${{ inputs.model_id }}/playground src/app/api/${{ inputs.model_id }} | head -500)
+
+              # フォールバック用プロンプト
+              FALLBACK_PROMPT="あなたはchangelog生成の専門家です。
+          以下のgit diffの内容を分析し、/tmp/ai-changes.json を作成してください。
+
+          ## 変更されたファイル:
+          $CHANGED_FILES
+
+          ## Git Diff:
+          \`\`\`diff
+          $GIT_DIFF
+          \`\`\`
+
+          ## 出力形式（必須）:
+          /tmp/ai-changes.json に以下のJSON形式で書き込んでください：
+
+          {
+            \"changes_jp\": \"ユーザー視点で何が新しくなったか（日本語で具体的に）\",
+            \"changes_en\": \"What was changed or implemented (in English)\",
+            \"intent_jp\": \"この変更を行った理由（日本語）\",
+            \"intent_en\": \"Why this change was made (in English)\",
+            \"files\": [\"変更されたファイルの相対パス\"]
+          }
+
+          重要:
+          - changes フィールドはユーザー向けの説明（機能追加、改善、修正など）
+          - intent フィールドはデータに基づいた理由（滞在時間向上、UX改善など）
+          - files フィールドは実際に変更されたファイルパス"
+
+              # Claude Code CLI でchangelogエントリを生成（同じモデルを使用）
+              claude --print \
+                --verbose \
+                --output-format stream-json \
+                --dangerously-skip-permissions \
+                --allowedTools "Write(/tmp/ai-changes.json),Read,Bash(git diff:*,git log:*,git show:*)" \
+                -p "$FALLBACK_PROMPT" 2>&1 | tee -a /tmp/claude-code-fallback.log || true
+
+              # 生成確認してchangelog更新
+              if [ -f /tmp/ai-changes.json ]; then
+                echo "✅ Changelog entry generated via fallback"
+                cat /tmp/ai-changes.json
+                node scripts/update-changelog.js
+              else
+                echo "❌ Fallback changelog generation failed"
+              fi
+            else
+              echo "ℹ️  No code changes detected, skipping changelog update"
+            fi
           fi
         env:
           MODEL_ID: ${{ inputs.model_id }}
+          # OpenRouter経由で同じモデルを使用（フォールバック用）
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          ANTHROPIC_API_KEY: ""
+          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
+          ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ inputs.anthropic_model }}
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ inputs.anthropic_model }}
+          ANTHROPIC_DEFAULT_OPUS_MODEL: ${{ inputs.anthropic_model }}
 
       - name: Verify Changelog Updated
         run: |

@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="64" height="64" rx="14" fill="#0f0f1a"/>
+    <path d="M32 8C24 8 18 14 18 22C18 30 24 36 32 36C40 36 46 42 46 50C46 58 40 56 32 56" stroke="url(#dna-grad)" stroke-width="4" stroke-linecap="round" />
+    <path d="M32 8C40 8 46 14 46 22C46 30 40 36 32 36C24 36 18 42 18 50C18 58 24 56 32 56" stroke="url(#dna-grad2)" stroke-width="4" stroke-linecap="round" />
+    <circle cx="32" cy="22" r="4" fill="#FFD93D" />
+    <circle cx="32" cy="50" r="4" fill="#FFD93D" />
+    <ellipse cx="32" cy="36" rx="6" ry="3" fill="#FFD93D" />
+    <defs>
+        <linearGradient id="dna-grad" x1="18" y1="8" x2="46" y2="56" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#a855f7" />
+            <stop offset="1" stop-color="#6366f1" />
+        </linearGradient>
+        <linearGradient id="dna-grad2" x1="46" y1="8" x2="18" y2="56" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#6366f1" />
+            <stop offset="1" stop-color="#3b82f6" />
+        </linearGradient>
+    </defs>
+</svg>
