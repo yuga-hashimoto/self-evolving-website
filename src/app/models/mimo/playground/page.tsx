@@ -985,10 +985,20 @@ export default function MimoPlayground() {
   // リサイズ時のキャンバス設定
   const handleResize = useCallback(() => {
     if (containerRef.current && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
       const maxWidth = Math.min(window.innerWidth - 32, 400);
       const maxHeight = Math.min(window.innerHeight - 200, 600);
-      canvasRef.current.width = maxWidth;
-      canvasRef.current.height = maxHeight;
+
+      // Support for high-DPI displays (Retina)
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = maxWidth * dpr;
+      canvas.height = maxHeight * dpr;
+      canvas.style.width = `${maxWidth}px`;
+      canvas.style.height = `${maxHeight}px`;
+      ctx.scale(dpr, dpr);
     }
     draw();
   }, [draw]);
@@ -996,7 +1006,11 @@ export default function MimoPlayground() {
   useEffect(() => {
     handleResize();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
   }, [handleResize]);
 
   useEffect(() => {
@@ -3297,6 +3311,12 @@ export default function MimoPlayground() {
                 <canvas
                   ref={canvasRef}
                   className="w-full block cursor-pointer touch-none"
+                  style={{
+                    touchAction: 'manipulation',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
                   onClick={() => {
                     if (!gameState.isPlaying && !gameState.isGameOver) {
                       startGame();
@@ -3420,7 +3440,11 @@ export default function MimoPlayground() {
             </div>
 
             {/* ゲームボード */}
-            <div className="w-full bg-slate-800 rounded-lg p-2 border-2 border-slate-700 relative">
+            <div className="w-full bg-slate-800 rounded-lg p-2 border-2 border-slate-700 relative" style={{
+              touchAction: 'none',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+            }}>
               <div className="relative w-full" style={{ aspectRatio: '1/1' }}>
                 {/* グリッド背景 */}
                 {Array.from({ length: game2048State.gridSize * game2048State.gridSize }).map((_, i) => {
@@ -3545,6 +3569,12 @@ export default function MimoPlayground() {
                 <canvas
                   ref={canvasRef}
                   className="w-full block cursor-pointer touch-none"
+                  style={{
+                    touchAction: 'manipulation',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
                   onClick={() => {
                     if (!neonState.isPlaying && !neonState.isGameOver) {
                       startNeonDashGame();
@@ -3614,6 +3644,12 @@ export default function MimoPlayground() {
                 <canvas
                   ref={canvasRef}
                   className="w-full block cursor-pointer touch-none"
+                  style={{
+                    touchAction: 'manipulation',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
                   onClick={() => {
                     if (!cosmicState.isPlaying && !cosmicState.isGameOver) {
                       startCosmicGame();
@@ -3710,6 +3746,12 @@ export default function MimoPlayground() {
               move2048(dy > 0 ? 'down' : 'up');
             }
           }}
+          style={{
+            touchAction: 'none',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTapHighlightColor: 'transparent',
+          }}
           className="fixed inset-0 z-50 pointer-events-none"
         />
       )}
@@ -3769,7 +3811,12 @@ export default function MimoPlayground() {
             }
           }}
           className="fixed inset-0 z-50"
-          style={{ touchAction: 'none' }}
+          style={{
+            touchAction: 'none',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTapHighlightColor: 'transparent',
+          }}
         />
       )}
 
@@ -3822,7 +3869,12 @@ export default function MimoPlayground() {
             }));
           }}
           className="fixed inset-0 z-50"
-          style={{ touchAction: 'none' }}
+          style={{
+            touchAction: 'none',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTapHighlightColor: 'transparent',
+          }}
         />
       )}
 
