@@ -233,7 +233,9 @@
         "title": "Achievements",
         "description": "Play games to unlock achievements!",
         "unlocked": "Unlocked",
-        "reward": "Reward"
+        "reward": "Reward",
+        "popupUnlocked": "Achievement Unlocked!",
+        "popupReward": "+{reward} coins earned!"
       },
       "tutorial": {
         "title": "Tutorial",
