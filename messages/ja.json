@@ -233,7 +233,9 @@
         "title": "アチーブメント",
         "description": "ゲームをプレイしてアチーブメントを解除しよう！",
         "unlocked": "解除済み",
-        "reward": "報酬"
+        "reward": "報酬",
+        "popupUnlocked": "アチーブメント解除！",
+        "popupReward": "+{reward}コイン獲得！"
       },
       "tutorial": {
         "title": "教程",

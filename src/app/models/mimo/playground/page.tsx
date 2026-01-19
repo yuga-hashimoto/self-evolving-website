@@ -76,6 +76,7 @@ interface Game2048State {
   isWon: boolean;
   difficulty: 'easy' | 'normal' | 'hard';
   gridSize: number;
+  invalidMoveFlash: boolean; // For visual feedback on invalid moves
 }
 
 // Neon Dash Interfaces
@@ -107,6 +108,7 @@ interface NeonDashState {
   playerY: number;
   playerVelocityY: number;
   playerState: 'running' | 'jumping' | 'sliding';
+  jumpCount: number; // For double jump mechanic
   obstacles: Obstacle[];
   particles: NeonParticle[];
   speed: number;
@@ -389,6 +391,7 @@ export default function MimoPlayground() {
     isWon: false,
     difficulty: 'normal',
     gridSize: 4,
+    invalidMoveFlash: false,
   });
 
   const [neonState, setNeonState] = useState<NeonDashState>({
@@ -399,6 +402,7 @@ export default function MimoPlayground() {
     playerY: 0,
     playerVelocityY: 0,
     playerState: 'running',
+    jumpCount: 0, // Track jumps for double jump
     obstacles: [],
     particles: [],
     speed: 5,
@@ -464,6 +468,10 @@ export default function MimoPlayground() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number | null>(null);
+  // Game-specific animation refs to prevent memory leaks when switching games
+  const infinityRequestRef = useRef<number | null>(null);
+  const neonRequestRef = useRef<number | null>(null);
+  const cosmicRequestRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const checkAchievementsRef = useRef<() => void>(() => {});
   const updateScoreAchievementsRef = useRef<(gameType: 'infinity' | 'neon' | 'cosmic', score: number) => void>(() => {});
@@ -1015,14 +1023,14 @@ export default function MimoPlayground() {
 
   useEffect(() => {
     if (gameState.isPlaying && !gameState.isGameOver) {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
+      if (infinityRequestRef.current) {
+        cancelAnimationFrame(infinityRequestRef.current);
       }
-      requestRef.current = requestAnimationFrame(gameLoop);
+      infinityRequestRef.current = requestAnimationFrame(gameLoop);
     }
     return () => {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
+      if (infinityRequestRef.current) {
+        cancelAnimationFrame(infinityRequestRef.current);
       }
     };
   }, [gameState.isPlaying, gameState.isGameOver, gameLoop]);
@@ -1179,10 +1187,12 @@ export default function MimoPlayground() {
     const newCombo = accuracy > 0.9 ? gameState.combo + 1 : 1;
     const newBestCombo = Math.max(gameState.bestCombo, newCombo);
 
-    // レベルアップ判定
-    const shouldLevelUp = gameState.blocks.length > 0 && gameState.blocks.length % 10 === 0;
+    // レベルアップ判定 - 減速で difficulty を 5 に変更、速度増加を緩やかに
+    const shouldLevelUp = gameState.blocks.length > 0 && gameState.blocks.length % 15 === 0;
     const newDifficultyLevel = shouldLevelUp ? gameState.difficultyLevel + 1 : gameState.difficultyLevel;
-    const speedMultiplier = shouldLevelUp ? 1.1 : 1.0;
+    // 線形速度増加: 最初は1.01、15ブロックごとに0.01増加、最大1.3まで
+    const baseSpeedMultiplier = 1.0 + Math.min(gameState.difficultyLevel * 0.01, 0.3);
+    const speedMultiplier = shouldLevelUp ? baseSpeedMultiplier : baseSpeedMultiplier;
 
     // 新しいブロック
     const newBlock: Block = {
@@ -1191,7 +1201,7 @@ export default function MimoPlayground() {
       y: lastBlock.y + BLOCK_HEIGHT + 2,
       width: lastBlock.width,
       height: BLOCK_HEIGHT,
-      velocityX: lastBlock.velocityX * 1.03 * speedMultiplier, // 少し速く、レベルアップ時はさらに速く
+      velocityX: lastBlock.velocityX * speedMultiplier, // 線形的な速度増加
       color: `hsl(${(gameState.blocks.length * 30) % 360}, 70%, 60%)`,
     };
 
@@ -1264,7 +1274,7 @@ export default function MimoPlayground() {
 
   // サウンド生成
   const playSound = (type: string) => {
-    if (typeof AudioContext === 'undefined' && typeof window === 'undefined') return;
+    if (typeof AudioContext === 'undefined' || typeof window === 'undefined') return;
 
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -1638,6 +1648,7 @@ export default function MimoPlayground() {
       playerY: containerHeight - 100,
       playerVelocityY: 0,
       playerState: 'running',
+      jumpCount: 0,
       obstacles: [],
       particles: [],
       speed: 6,
@@ -1721,32 +1732,41 @@ export default function MimoPlayground() {
     });
   }, []);
 
-  // Neon Dash: ジャンプ
+  // Neon Dash: ジャンプ（ダブルジャンプ対応）
   const jump = useCallback(() => {
     if (!neonState.isPlaying || neonState.isGameOver) return;
 
     const containerHeight = containerRef.current?.clientHeight || 400;
     const groundY = containerHeight - 100;
 
-    // 地面上にいる時のみジャンプ
+    // 地面上にいる時：通常ジャンプ
     if (neonState.playerState === 'running' && neonState.playerY >= groundY - 1) {
       setNeonState((prev) => ({
         ...prev,
         playerVelocityY: -18,
         playerState: 'jumping',
+        jumpCount: 1,
       }));
       neonStatsRef.current.jumps += 1;
-      vibrate(15); // Increased from 10ms for better feedback
+      vibrate(15);
       playSound('jump');
       createNeonParticles(groundY, '#00ff88');
-      // Add extra particle burst for visual feedback
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const centerX = rect.width / 2;
-        createNeonParticles(groundY, '#00ffaa');
-      }
+      createNeonParticles(groundY, '#00ffaa');
     }
-  }, [neonState.isPlaying, neonState.isGameOver, neonState.playerState, neonState.playerY, createNeonParticles]);
+    // 空中でダブルジャンプ（ジャンプ回数が1回のみ）
+    else if (neonState.playerState === 'jumping' && neonState.jumpCount === 1) {
+      setNeonState((prev) => ({
+        ...prev,
+        playerVelocityY: -15, // ダブルジャンプは少し弱く
+        jumpCount: 2,
+      }));
+      neonStatsRef.current.jumps += 1;
+      vibrate(20); // Stronger feedback for double jump
+      playSound('success'); // Different sound
+      createNeonParticles(neonState.playerY, '#00ddff');
+      createNeonParticles(neonState.playerY, '#00aaff');
+    }
+  }, [neonState.isPlaying, neonState.isGameOver, neonState.playerState, neonState.playerY, neonState.jumpCount, createNeonParticles]);
 
   // Neon Dash: スライド
   const slide = useCallback(() => {
@@ -2008,6 +2028,7 @@ export default function MimoPlayground() {
       if (newState.playerY >= groundY) {
         newState.playerY = groundY;
         newState.playerVelocityY = 0;
+        newState.jumpCount = 0; // Reset double jump count when landing
         if (newState.playerState !== 'sliding') {
           newState.playerState = 'running';
         }
@@ -2079,20 +2100,20 @@ export default function MimoPlayground() {
     });
 
     drawNeon();
-    requestRef.current = requestAnimationFrame(neonGameLoop);
+    neonRequestRef.current = requestAnimationFrame(neonGameLoop);
   }, [checkCollision, gameOverNeonDash, generateObstacle, neonState.obstacles]);
 
   // Neon Dashゲームループ
   useEffect(() => {
     if (neonState.isPlaying && !neonState.isGameOver) {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
+      if (neonRequestRef.current) {
+        cancelAnimationFrame(neonRequestRef.current);
       }
-      requestRef.current = requestAnimationFrame(neonGameLoop);
+      neonRequestRef.current = requestAnimationFrame(neonGameLoop);
     }
     return () => {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
+      if (neonRequestRef.current) {
+        cancelAnimationFrame(neonRequestRef.current);
       }
     };
   }, [neonState.isPlaying, neonState.isGameOver, neonGameLoop]);
@@ -2133,6 +2154,9 @@ export default function MimoPlayground() {
 
   // Cosmic Catch: ゲームオーバー
   const gameOverCosmic = useCallback(() => {
+    vibrate(200); // Haptic feedback on game over
+    playSound('hit');
+
     setCosmicState((prev) => {
       const newHighScore = Math.max(prev.highScore, prev.score);
       const newBestCombo = Math.max(prev.bestCombo, prev.combo);
@@ -2237,19 +2261,48 @@ export default function MimoPlayground() {
     }));
   }, []);
 
-  // Cosmic Catch: 生成スター
+  // Cosmic Catch: 生成スター（パターン多様化）
   const generateCosmicStar = useCallback(() => {
     const containerWidth = containerRef.current?.clientWidth || 300;
     const containerHeight = containerRef.current?.clientHeight || 400;
     const groundY = containerHeight - 100;
 
-    // Random y position (100-300, avoiding ground)
-    const y = 100 + Math.random() * 200;
+    // More varied spawn patterns based on score
+    const score = cosmicState.score;
+    let y: number;
+
+    if (score < 50) {
+      // Easy: middle area
+      y = 100 + Math.random() * 200;
+    } else if (score < 150) {
+      // Medium: wider range with some patterns
+      const pattern = Math.random();
+      if (pattern < 0.5) {
+        // High stars
+        y = 50 + Math.random() * 100;
+      } else {
+        // Low stars (challenging near ground)
+        y = groundY - 150 - Math.random() * 80;
+      }
+    } else {
+      // Hard: complex patterns and tight spaces
+      const pattern = Math.random();
+      if (pattern < 0.33) {
+        // Very high - requires boost
+        y = 30 + Math.random() * 80;
+      } else if (pattern < 0.66) {
+        // Very low - near danger zone
+        y = groundY - 100 - Math.random() * 60;
+      } else {
+        // Zigzag pattern simulation (alternating heights)
+        y = 50 + Math.random() * (groundY - 150);
+      }
+    }
 
     const newStar: CosmicStar = {
       id: Date.now() + Math.random(),
       x: containerWidth,
-      y: y,
+      y: Math.max(50, Math.min(groundY - 50, y)),
       collected: false,
     };
 
@@ -2257,7 +2310,7 @@ export default function MimoPlayground() {
       ...prev,
       stars: [...prev.stars, newStar].slice(-10),
     }));
-  }, []);
+  }, [cosmicState.score]);
 
   // Cosmic Catch: 衝突判定
   const checkCosmicCollision = useCallback((): boolean => {
@@ -2381,8 +2434,8 @@ export default function MimoPlayground() {
       // Check star collection
       for (const star of newState.stars) {
         if (!star.collected) {
-          const dx = Math.abs(prev.ship.x - star.x);
-          const dy = Math.abs(prev.ship.y - star.y);
+          const dx = Math.abs(newState.ship.x - star.x);
+          const dy = Math.abs(newState.ship.y - star.y);
           if (dx < 30 && dy < 30) {
             star.collected = true;
             newState.score += 10;
@@ -2638,14 +2691,14 @@ export default function MimoPlayground() {
   // Cosmic Catchゲームループ
   useEffect(() => {
     if (cosmicState.isPlaying && !cosmicState.isGameOver) {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
+      if (cosmicRequestRef.current) {
+        cancelAnimationFrame(cosmicRequestRef.current);
       }
-      requestRef.current = requestAnimationFrame(cosmicGameLoop);
+      cosmicRequestRef.current = requestAnimationFrame(cosmicGameLoop);
     }
     return () => {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
+      if (cosmicRequestRef.current) {
+        cancelAnimationFrame(cosmicRequestRef.current);
       }
     };
   }, [cosmicState.isPlaying, cosmicState.isGameOver, cosmicGameLoop]);
@@ -2786,6 +2839,7 @@ export default function MimoPlayground() {
       isWon: false,
       difficulty: diff,
       gridSize: gridSize,
+      invalidMoveFlash: false,
     });
 
     trackClick();
@@ -2899,18 +2953,23 @@ export default function MimoPlayground() {
       // 元の方向に戻す
       grid = rotateGrid(grid, (4 - rotations) % 4);
 
-      // タイルの位置を再計算（元の座標に戻す）
+      // タイルの位置を再計算（元の座標に戻す）とアニメーションフラグのクリア
       for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
           if (grid[y][x]) {
             grid[y][x]!.x = x;
             grid[y][x]!.y = y;
             grid[y][x]!.isNew = false;
+            grid[y][x]!.isMerged = false;
           }
         }
       }
 
-      if (!moved) return prev;
+      if (!moved) {
+        // Invalid move - trigger visual feedback
+        vibrate(20);
+        return { ...prev, invalidMoveFlash: true };
+      }
 
       // ランダムタイル追加
       const newGrid = addRandomTile(grid);
@@ -2965,9 +3024,20 @@ export default function MimoPlayground() {
         bestTile: newBestTile,
         isGameOver,
         isWon: hasWon,
+        invalidMoveFlash: false, // Clear flash on valid move
       };
     });
   }, [game2048State, currentGame, addRandomTile, trackClick]);
+
+  // Clear invalid move flash after animation
+  useEffect(() => {
+    if (game2048State.invalidMoveFlash) {
+      const timer = setTimeout(() => {
+        setGame2048State((prev) => ({ ...prev, invalidMoveFlash: false }));
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [game2048State.invalidMoveFlash]);
 
   // 2048: 移動可能判定
   const canMove = useCallback((grid: (Tile2048 | null)[][]): boolean => {
@@ -3069,6 +3139,8 @@ export default function MimoPlayground() {
                 ? formatScore(game2048State.score)
                 : currentGame === 'neon'
                 ? formatScore(neonState.score)
+                : currentGame === 'cosmic'
+                ? formatScore(cosmicState.score)
                 : '-'}
             </div>
             {currentGame === 'infinity' && gameState.coins > 0 && (
@@ -3147,6 +3219,7 @@ export default function MimoPlayground() {
                     navigator.vibrate(15);
                   }
                 }}
+                aria-label={`${t('infinityDrop.title')}. ${t('infinityDrop.description')}`}
                 className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl border-2 border-blue-500 hover:border-blue-400 active:scale-95 active:bg-blue-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
                 style={{
                   minHeight: '140px',
@@ -3177,6 +3250,7 @@ export default function MimoPlayground() {
                     navigator.vibrate(15);
                   }
                 }}
+                aria-label={`${t('slide2048.title')}. ${t('slide2048.description')}`}
                 className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl border-2 border-purple-500 hover:border-purple-400 active:scale-95 active:bg-purple-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
                 style={{
                   minHeight: '140px',
@@ -3204,6 +3278,7 @@ export default function MimoPlayground() {
                     navigator.vibrate(15);
                   }
                 }}
+                aria-label={`${t('neonDash.title')}. ${t('neonDash.description')}`}
                 className="bg-gradient-to-br from-cyan-600 to-teal-800 p-6 rounded-xl border-2 border-cyan-500 hover:border-cyan-400 active:scale-95 active:bg-cyan-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
                 style={{
                   minHeight: '140px',
@@ -3231,6 +3306,7 @@ export default function MimoPlayground() {
                     navigator.vibrate(15);
                   }
                 }}
+                aria-label={`${t('cosmicCatch.title')}. ${t('cosmicCatch.description')}`}
                 className="bg-gradient-to-br from-indigo-600 to-purple-800 p-6 rounded-xl border-2 border-indigo-500 hover:border-indigo-400 active:scale-95 active:bg-indigo-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
                 style={{
                   minHeight: '140px',
@@ -3440,11 +3516,16 @@ export default function MimoPlayground() {
             </div>
 
             {/* ゲームボード */}
-            <div className="w-full bg-slate-800 rounded-lg p-2 border-2 border-slate-700 relative" style={{
-              touchAction: 'none',
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-            }}>
+            <div
+              className={`w-full bg-slate-800 rounded-lg p-2 border-2 border-slate-700 relative transition-all duration-150 ${
+                game2048State.invalidMoveFlash ? 'ring-4 ring-red-500/50 scale-95' : ''
+              }`}
+              style={{
+                touchAction: 'none',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+              }}
+            >
               <div className="relative w-full" style={{ aspectRatio: '1/1' }}>
                 {/* グリッド背景 */}
                 {Array.from({ length: game2048State.gridSize * game2048State.gridSize }).map((_, i) => {
@@ -4101,13 +4182,13 @@ export default function MimoPlayground() {
               <div className="text-4xl">{achievementState.currentPopup.icon}</div>
               <div>
                 <div className="font-bold text-white text-lg">
-                  🎉 アチーブメント解除！
+                  🎉 {t('achievements.popupUnlocked')}
                 </div>
                 <div className="text-amber-100 font-bold">
                   {achievementState.currentPopup.name}
                 </div>
                 <div className="text-amber-200 text-sm">
-                  +{achievementState.currentPopup.reward}コイン獲得！
+                  {t('achievements.popupReward', { reward: achievementState.currentPopup.reward })}
                 </div>
               </div>
             </div>
