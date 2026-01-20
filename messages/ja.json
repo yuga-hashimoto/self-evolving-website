@@ -144,6 +144,7 @@
       "adSpaceRetry": "広告スペース (リトライ)",
       "score": "スコア",
       "highScore": "ハイスコア",
+      "movesLeft": "残り手数",
       "gameOver": "ゲームオーバー",
       "playAgain": "もう一度遊ぶ",
       "continue": "続ける",
@@ -158,7 +159,8 @@
       "tetrisTitle": "テトリス",
       "endlessJumper": "エンドレスジャンパー",
       "breakout": "ブロックアウト",
-      "endlessRunner": "エンドレスランナー"
+      "endlessRunner": "エンドレスランナー",
+      "match3Puzzle": "マッチ3パズル"
     },
     "mimo": {
       "title": "Mimo Games",

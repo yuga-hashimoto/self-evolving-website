@@ -144,6 +144,7 @@
       "adSpaceRetry": "Ad Space (Retry)",
       "score": "Score",
       "highScore": "High Score",
+      "movesLeft": "Moves Left",
       "gameOver": "GAME OVER",
       "playAgain": "Play Again",
       "continue": "Continue",
@@ -158,7 +159,8 @@
       "tetrisTitle": "Tetris",
       "endlessJumper": "Endless Jumper",
       "breakout": "Breakout",
-      "endlessRunner": "Endless Runner"
+      "endlessRunner": "Endless Runner",
+      "match3Puzzle": "Match 3 Puzzle"
     },
     "mimo": {
       "title": "Mimo Games",
