@@ -160,7 +160,8 @@
       "endlessJumper": "Endless Jumper",
       "breakout": "Breakout",
       "endlessRunner": "Endless Runner",
-      "match3Puzzle": "Match 3 Puzzle"
+      "match3Puzzle": "Match 3 Puzzle",
+      "spaceInvaders": "Space Invaders"
     },
     "mimo": {
       "title": "Mimo Games",
