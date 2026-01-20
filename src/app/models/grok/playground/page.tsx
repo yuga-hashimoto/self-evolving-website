@@ -6,13 +6,13 @@ import EndlessJumperGame from './components/EndlessJumperGame';
 import Game from './components/Game';
 import Two048Game from './components/Two048Game';
 import SnakeGame from './components/SnakeGame';
-// EndlessRunnerGame is available but not currently used in the UI
 import TetrisGame from './components/TetrisGame';
 import BreakoutGame from './components/BreakoutGame';
+import Match3PuzzleGame from './components/Match3PuzzleGame';
 
 export default function GrokPlayground() {
 
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -62,6 +62,12 @@ export default function GrokPlayground() {
             >
               {t('grok.breakout') || 'Breakout'}
             </button>
+            <button
+              onClick={() => setSelectedGame('match3')}
+              className={`px-4 py-2 rounded ${selectedGame === 'match3' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.match3Puzzle') || 'Match 3'}
+            </button>
           </div>
 
           {/* Game container */}
@@ -71,6 +77,7 @@ export default function GrokPlayground() {
           {selectedGame === 'snake' && <SnakeGame />}
           {selectedGame === 'tetris' && <TetrisGame />}
           {selectedGame === 'breakout' && <BreakoutGame />}
+          {selectedGame === 'match3' && <Match3PuzzleGame />}
         </div>
       </div>
 
