@@ -229,6 +229,22 @@
         "controls": "HOLD to rise ⬆️ Space/Click works too",
         "backToMenu": "Back to Menu"
       },
+      "rhythmTapper": {
+        "title": "Rhythm Tapper",
+        "subtitle": "Rhythm Game",
+        "description": "Tap falling color coins to the rhythm! Chase high scores with combos!",
+        "tapToStart": "Tap to match the colors!",
+        "controls": "Tap/Swipe in the 4 color zones to keep the rhythm!",
+        "backToMenu": "Back to Menu",
+        "perfect": "Perfect!",
+        "good": "Good!",
+        "miss": "Miss...",
+        "lives": "Lives",
+        "zoneRed": "Red",
+        "zoneBlue": "Blue",
+        "zoneGreen": "Green",
+        "zoneYellow": "Yellow"
+      },
       "achievements": {
         "title": "Achievements",
         "description": "Play games to unlock achievements!",
@@ -241,7 +257,7 @@
         "title": "Tutorial",
         "welcome": "Welcome to Mimo Games!",
         "step1Title": "1️⃣ Game Selection",
-        "step1Desc": "Choose from 4 different games. Each has unique features - you'll find your favorite!",
+        "step1Desc": "Choose from 5 different games. Each has unique features - you'll find your favorite!",
         "step2Title": "2️⃣ Daily Challenges",
         "step2Desc": "New challenges every day! Clear them to earn coins, and maintain your streak for bonuses!",
         "step3Title": "3️⃣ Achievements",

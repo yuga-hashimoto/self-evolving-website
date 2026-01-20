@@ -229,6 +229,22 @@
         "controls": "ホールドで上昇 ⬆️ スペース/クリックでもOK",
         "backToMenu": "メニューへ"
       },
+      "rhythmTapper": {
+        "title": "Rhythm Tapper",
+        "subtitle": "リズムタッパー",
+        "description": "落ちてくるカラーコインをリズムに合わせてタップ！ コンボで高得点狙え！",
+        "tapToStart": "色に合わせてタップ！",
+        "controls": "4色ゾーンをタップ/スワイプしてリズムを取れ！",
+        "backToMenu": "メニューへ",
+        "perfect": "パーフェクト！",
+        "good": "굿!",
+        "miss": "ミス...",
+        "lives": "ライフ",
+        "zoneRed": "赤",
+        "zoneBlue": "青",
+        "zoneGreen": "緑",
+        "zoneYellow": "黄"
+      },
       "achievements": {
         "title": "アチーブメント",
         "description": "ゲームをプレイしてアチーブメントを解除しよう！",
@@ -241,7 +257,7 @@
         "title": "教程",
         "welcome": "Mimo Games 初めての方へ",
         "step1Title": "1️⃣ ゲーム選択",
-        "step1Desc": "4つの異なるゲームから選んでください。それぞれ特色があるから、お気に入りが見つかるはず！",
+        "step1Desc": "5つの異なるゲームから選んでください。それぞれ特色があるから、お気に入りが見つかるはず！",
         "step2Title": "2️⃣ 日々の挑戦",
         "step2Desc": "毎日新しい挑戦が登場！クリアするとコインを獲得でき、ストリークを継続すればボーナスがもらえます。",
         "step3Title": "3️⃣ アチーブメント",
