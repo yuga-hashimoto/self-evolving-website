@@ -213,6 +213,7 @@ interface RhythmTapperState {
   perfectHits: number;
   goodHits: number;
   misses: number;
+  particles: NeonParticle[];
 }
 
 interface DailyChallengeState {
@@ -517,6 +518,7 @@ export default function MimoPlayground() {
     perfectHits: 0,
     goodHits: 0,
     misses: 0,
+    particles: [],
   });
 
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallengeState>({
@@ -645,7 +647,7 @@ export default function MimoPlayground() {
     const hash = dateStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
     // Cycle through games
-    const games: ('infinity' | '2048' | 'neon')[] = ['infinity', '2048', 'neon'];
+    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm'];
     const game = games[hash % games.length];
 
     // Generate target based on game type
@@ -668,6 +670,16 @@ export default function MimoPlayground() {
         target = 300 + (hash % 300); // 300-600 points
         description = `Score ${target}+ in Neon Dash`;
         reward = 60;
+        break;
+      case 'cosmic':
+        target = 200 + (hash % 200); // 200-400 points
+        description = `Score ${target}+ in Cosmic Catch`;
+        reward = 60;
+        break;
+      case 'rhythm':
+        target = 300 + (hash % 300); // 300-600 points
+        description = `Score ${target}+ in Rhythm Tapper`;
+        reward = 70;
         break;
     }
 
@@ -2810,6 +2822,422 @@ export default function MimoPlayground() {
     };
   }, [cosmicState.isPlaying, cosmicState.isGameOver, cosmicGameLoop]);
 
+  // ==================== RHYTHM TAPPER FUNCTIONS ====================
+
+  // Color to hex mapping
+  const getZoneColor = (color: RhythmColor): string => {
+    switch (color) {
+      case 'red': return '#ef4444';
+      case 'blue': return '#3b82f6';
+      case 'green': return '#22c55e';
+      case 'yellow': return '#eab308';
+    }
+  };
+
+  // Start Rhythm Tapper game
+  const startRhythmGame = useCallback(() => {
+    setRhythmState({
+      isPlaying: true,
+      isGameOver: false,
+      score: 0,
+      highScore: rhythmState.highScore,
+      combo: 0,
+      bestCombo: 0,
+      lives: 3,
+      notes: [],
+      zones: [],
+      spawnTimer: 0,
+      spawnInterval: 90,
+      speed: 3,
+      perfectHits: 0,
+      goodHits: 0,
+      misses: 0,
+      particles: [],
+    });
+
+    // Initialize zones
+    const containerWidth = containerRef.current?.clientWidth || 300;
+    const zoneColors: RhythmColor[] = ['red', 'blue', 'green', 'yellow'];
+    const zoneWidth = containerWidth / 4;
+    const zones: RhythmZone[] = zoneColors.map((color, index) => ({
+      color,
+      x: index * zoneWidth + zoneWidth / 2,
+      width: zoneWidth,
+      isActive: false,
+    }));
+
+    setRhythmState((prev) => ({ ...prev, zones }));
+
+    // First play achievement
+    if (!gameStats.rhythmFirstPlay) {
+      setGameStats((prev) => ({ ...prev, rhythmFirstPlay: true }));
+    }
+
+    storeGameEvent('rhythm', { type: 'start' });
+    vibrate(30);
+  }, [gameStats.rhythmFirstPlay, rhythmState.highScore]);
+
+  // Handle rhythm tap
+  const handleRhythmTap = useCallback((zoneColor: RhythmColor) => {
+    if (!rhythmState.isPlaying || rhythmState.isGameOver) return;
+
+    const containerHeight = containerRef.current?.clientHeight || 400;
+    const hitZoneY = containerHeight - 80; // Hit line position
+    const hitThreshold = 30; // Tolerance in pixels
+
+    // Find notes in the hit zone
+    const notesInZone = rhythmState.notes.filter(
+      (note) =>
+        note.color === zoneColor &&
+        !note.hit &&
+        !note.missed &&
+        Math.abs(note.y - hitZoneY) < hitThreshold
+    );
+
+    if (notesInZone.length > 0) {
+      // Hit the closest note
+      const closestNote = notesInZone.reduce((prev, curr) =>
+        Math.abs(curr.y - hitZoneY) < Math.abs(prev.y - hitZoneY) ? curr : prev
+      );
+
+      const distance = Math.abs(closestNote.y - hitZoneY);
+      let points = 0;
+      let isPerfect = false;
+
+      if (distance < 10) {
+        // Perfect hit
+        points = 100;
+        isPerfect = true;
+        rhythmState.perfectHits++;
+      } else {
+        // Good hit
+        points = 50;
+        rhythmState.goodHits++;
+      }
+
+      // Apply combo multiplier
+      const multiplier = 1 + Math.floor(rhythmState.combo / 10) * 0.5;
+      points = Math.floor(points * multiplier);
+
+      // Update state
+      setRhythmState((prev) => {
+        const newNotes = prev.notes.map((n) =>
+          n.id === closestNote.id ? { ...n, hit: true } : n
+        );
+
+        const newCombo = prev.combo + 1;
+        const newScore = prev.score + points;
+        const newBestCombo = Math.max(prev.bestCombo, newCombo);
+
+        // Achievement checks
+        if (newScore >= 100 && !gameStats.rhythm100Score) {
+          setGameStats((prev) => ({ ...prev, rhythm100Score: true }));
+        }
+        if (newScore >= 500 && !gameStats.rhythm500Score) {
+          setGameStats((prev) => ({ ...prev, rhythm500Score: true }));
+        }
+        if (newBestCombo >= 10 && !gameStats.rhythmBestCombo10) {
+          setGameStats((prev) => ({ ...prev, rhythmBestCombo10: true }));
+        }
+
+        updateScoreAchievements('rhythm', newScore);
+
+        return {
+          ...prev,
+          notes: newNotes,
+          score: newScore,
+          combo: newCombo,
+          bestCombo: newBestCombo,
+        };
+      });
+
+      // Visual and haptic feedback
+      vibrate(isPerfect ? 30 : 15);
+      playSound(isPerfect ? 'perfect' : 'good');
+      createRhythmParticles(closestNote.x, closestNote.y, getZoneColor(zoneColor));
+    } else {
+      // Miss tap - just visual feedback
+      setRhythmState((prev) => ({ ...prev }));
+      vibrate(5);
+    }
+
+    // Activate zone visual
+    setRhythmState((prev) => {
+      const newZones = prev.zones.map((z) =>
+        z.color === zoneColor ? { ...z, isActive: true } : z
+      );
+      // Deactivate after short delay
+      setTimeout(() => {
+        setRhythmState((p) => ({
+          ...p,
+          zones: p.zones.map((z) => ({ ...z, isActive: false })),
+        }));
+      }, 100);
+      return { ...prev, zones: newZones };
+    });
+  }, [rhythmState, gameStats, updateScoreAchievements]);
+
+  // Create Rhythm particles
+  const createRhythmParticles = useCallback((x: number, y: number, color: string) => {
+    setRhythmState((prev) => {
+      const newParticles: NeonParticle[] = [];
+      const particleCount = 8;
+
+      for (let i = 0; i < particleCount; i++) {
+        const angle = (Math.PI * 2 * i) / particleCount;
+        const speed = 2 + Math.random() * 2;
+        newParticles.push({
+          id: Date.now() + Math.random(),
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 20 + Math.random() * 10,
+          color,
+        });
+      }
+
+      return {
+        ...prev,
+        particles: [...(prev.particles || []), ...newParticles],
+      };
+    });
+  }, []);
+
+  // Game over for Rhythm
+  const gameOverRhythm = useCallback(() => {
+    setRhythmState((prev) => {
+      const newHighScore = Math.max(prev.highScore, prev.score);
+
+      if (prev.score > prev.highScore) {
+        localStorage.setItem('rhythmTapper_highScore', prev.score.toString());
+      }
+
+      return {
+        ...prev,
+        isPlaying: false,
+        isGameOver: true,
+        highScore: newHighScore,
+      };
+    });
+
+    vibrate(100);
+    storeGameEvent('rhythm', { type: 'gameOver', score: rhythmState.score });
+  }, [rhythmState.score]);
+
+  // Rhythm drawing
+  const drawRhythm = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Background gradient (pink to purple)
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, '#1e1b4b');
+    gradient.addColorStop(1, '#3730a3');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw zones
+    const zoneWidth = width / 4;
+    const zoneY = height - 80;
+    const zoneHeight = 60;
+
+    rhythmState.zones.forEach((zone) => {
+      const x = zone.x - zoneWidth / 2;
+
+      // Zone background
+      ctx.fillStyle = zone.isActive ? zone.color : `${zone.color}40`;
+      ctx.fillRect(x, zoneY, zoneWidth - 4, zoneHeight);
+
+      // Zone border
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = zone.isActive ? 3 : 1;
+      ctx.strokeRect(x, zoneY, zoneWidth - 4, zoneHeight);
+
+      // Zone label
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 16px Arial';
+      ctx.textAlign = 'center';
+      const label = zone.color === 'red' ? 'D' : zone.color === 'blue' ? 'F' : zone.color === 'green' ? 'J' : 'K';
+      ctx.fillText(label, zone.x, zoneY + 35);
+    });
+
+    // Hit line
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(0, zoneY);
+    ctx.lineTo(width, zoneY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw notes
+    rhythmState.notes.forEach((note) => {
+      if (note.hit) return; // Don't draw hit notes
+
+      const size = 16;
+      ctx.fillStyle = note.color;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+
+      // Glow effect
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = note.color;
+
+      ctx.beginPath();
+      ctx.arc(note.x, note.y, size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+    });
+
+    // Draw particles
+    if (rhythmState.particles) {
+      rhythmState.particles.forEach((p: NeonParticle) => {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life / 30;
+        ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+        ctx.globalAlpha = 1;
+      });
+    }
+
+    // HUD
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 18px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${rhythmState.score}`, 10, 25);
+    ctx.fillText(`Combo: x${rhythmState.combo}`, 10, 50);
+    ctx.fillText(`Lives: ${'❤️'.repeat(rhythmState.lives)}`, 10, 75);
+
+    // High score
+    if (rhythmState.highScore > 0) {
+      ctx.fillStyle = '#f472b6';
+      ctx.font = '14px Arial';
+      ctx.textAlign = 'right';
+      ctx.fillText(`Best: ${rhythmState.highScore}`, width - 10, 25);
+    }
+
+    // Difficulty indicator
+    ctx.fillStyle = '#22c55e';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'right';
+    const difficulty = rhythmState.score > 500 ? 'EXPERT' : rhythmState.score > 300 ? 'HARD' : rhythmState.score > 100 ? 'MEDIUM' : 'EASY';
+    ctx.fillText(difficulty, width - 10, 50);
+  }, [rhythmState]);
+
+  // Rhythm game loop
+  const rhythmGameLoop = useCallback(() => {
+    setRhythmState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver) return prev;
+
+      const containerHeight = containerRef.current?.clientHeight || 400;
+      const containerWidth = containerRef.current?.clientWidth || 300;
+      const hitZoneY = containerHeight - 80;
+
+      // Create mutable copy for state updates
+      // eslint-disable-next-line prefer-const
+      let newState = { ...prev };
+
+      // Spawn notes
+      newState.spawnTimer += 1;
+      if (newState.spawnTimer >= newState.spawnInterval) {
+        const zoneColors: RhythmColor[] = ['red', 'blue', 'green', 'yellow'];
+        const randomColor = zoneColors[Math.floor(Math.random() * zoneColors.length)];
+        const zoneWidth = containerWidth / 4;
+        const zoneIndex = zoneColors.indexOf(randomColor);
+        const noteX = zoneIndex * zoneWidth + zoneWidth / 2;
+
+        const newNote: RhythmNote = {
+          id: Date.now() + Math.random(),
+          color: randomColor,
+          x: noteX,
+          y: -20,
+          hit: false,
+          missed: false,
+          velocity: newState.speed,
+        };
+
+        newState.notes = [...newState.notes, newNote];
+        newState.spawnTimer = 0;
+
+        // Increase difficulty as score increases
+        if (newState.score > 100) {
+          newState.spawnInterval = Math.max(40, 90 - Math.floor(newState.score / 50));
+          newState.speed = Math.min(6, 3 + newState.score / 300);
+        }
+      }
+
+      // Move notes
+      newState.notes = newState.notes
+        .map((note) => ({
+          ...note,
+          y: note.y + note.velocity,
+        }))
+        .filter((note) => {
+          // Check if note missed (passed hit zone)
+          if (!note.hit && !note.missed && note.y > hitZoneY + 40) {
+            // Note was missed
+            note.missed = true;
+            newState.misses++;
+            newState.combo = 0;
+            newState.lives--;
+            vibrate(50);
+            playSound('miss');
+
+            // Game over check
+            if (newState.lives <= 0) {
+              gameOverRhythm();
+              return false;
+            }
+          }
+          // Remove notes that are off screen or hit
+          return note.y < containerHeight + 50 && !note.hit;
+        });
+
+      // Move particles
+      if (newState.particles) {
+        newState.particles = newState.particles
+          .map((p) => ({
+            ...p,
+            x: p.x + p.vx,
+            y: p.y + p.vy,
+            life: p.life - 1,
+          }))
+          .filter((p) => p.life > 0);
+      }
+
+      return newState;
+    });
+
+    drawRhythm();
+    requestRef.current = requestAnimationFrame(rhythmGameLoop);
+  }, [gameOverRhythm, drawRhythm]);
+
+  // Rhythm game loop useEffect
+  useEffect(() => {
+    if (rhythmState.isPlaying && !rhythmState.isGameOver) {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+      requestRef.current = requestAnimationFrame(rhythmGameLoop);
+    }
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, [rhythmState.isPlaying, rhythmState.isGameOver, rhythmGameLoop]);
+
+  // ==================== END RHYTHM TAPPER ====================
+
   // キーコントロール（PC用）
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -2881,6 +3309,32 @@ export default function MimoPlayground() {
                 isBoosting: true,
               },
             }));
+          }
+        }
+      }
+      // Rhythm Tapper
+      else if (currentGame === 'rhythm') {
+        if (!rhythmState.isPlaying && !rhythmState.isGameOver) {
+          if (e.code === 'Space' || e.code === 'Enter') {
+            e.preventDefault();
+            startRhythmGame();
+          }
+        } else if (rhythmState.isGameOver) {
+          if (e.code === 'Space' || e.code === 'Enter') {
+            e.preventDefault();
+            startRhythmGame();
+          }
+        } else if (rhythmState.isPlaying && !rhythmState.isGameOver) {
+          // D = Red, F = Blue, J = Green, K = Yellow
+          const keyMap: Record<string, RhythmColor> = {
+            KeyD: 'red',
+            KeyF: 'blue',
+            KeyJ: 'green',
+            KeyK: 'yellow',
+          };
+          if (keyMap[e.code]) {
+            e.preventDefault();
+            handleRhythmTap(keyMap[e.code]);
           }
         }
       }
@@ -3431,6 +3885,34 @@ export default function MimoPlayground() {
                   {tc('highScore')}: {formatScore(cosmicState.highScore)}
                 </div>
               </button>
+
+              {/* Rhythm Tapper カード */}
+              <button
+                onClick={() => {
+                  setCurrentGame('rhythm');
+                  trackClick();
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
+                }}
+                aria-label={`${t('rhythmTapper.title')}. ${t('rhythmTapper.description')}`}
+                className="bg-gradient-to-br from-pink-600 to-red-800 p-6 rounded-xl border-2 border-pink-500 hover:border-pink-400 active:scale-95 active:bg-pink-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                style={{
+                  minHeight: '140px',
+                  touchAction: 'manipulation',
+                }}
+              >
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-pink-200 group-active:text-pink-100">{t('rhythmTapper.title')}</div>
+                  <div className="text-pink-200 text-sm mb-3">{t('rhythmTapper.subtitle')}</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    {t('rhythmTapper.description')}
+                  </p>
+                </div>
+                <div className="text-xs text-slate-400">
+                  {tc('highScore')}: {formatScore(rhythmState.highScore)}
+                </div>
+              </button>
             </div>
 
             {/* Action Buttons */}
@@ -3872,8 +4354,135 @@ export default function MimoPlayground() {
           </>
         )}
 
+        {/* ==================== RHYTHM TAPPER ==================== */}
+        {currentGame === 'rhythm' && (
+          <>
+            {/* Daily Challenge Status for Rhythm Tapper */}
+            {dailyChallenge.currentChallenge && dailyChallenge.currentChallenge.game === 'rhythm' && (
+              <div className="mb-4 w-full max-w-md p-3 rounded-lg border border-amber-500/50 bg-amber-900/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <div className="text-sm">
+                      <span className="text-amber-400 font-bold">{t('dailyChallenge.short')}:</span>{' '}
+                      <span className="text-slate-300">{dailyChallenge.currentChallenge.target}+</span>
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-bold ${
+                    dailyChallenge.currentChallenge.completed
+                      ? 'bg-green-600 text-white'
+                      : 'bg-amber-600/50 text-amber-200'
+                  }`}>
+                    {dailyChallenge.currentChallenge.completed
+                      ? t('dailyChallenge.completed')
+                      : `${dailyChallenge.currentChallenge.reward} 💰`}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div
+              ref={containerRef}
+              className="w-full max-w-md bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden shadow-2xl shadow-pink-900/10 relative"
+            >
+              <div className="relative">
+                <canvas
+                  ref={canvasRef}
+                  className="w-full block cursor-pointer touch-none"
+                  style={{
+                    touchAction: 'manipulation',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                  onClick={() => {
+                    if (!rhythmState.isPlaying && !rhythmState.isGameOver) {
+                      startRhythmGame();
+                    } else if (rhythmState.isGameOver) {
+                      startRhythmGame();
+                    }
+                  }}
+                />
+
+                {/* Game HUD */}
+                {rhythmState.isPlaying && !rhythmState.isGameOver && (
+                  <div className="absolute top-3 left-3 right-3 flex justify-between gap-2">
+                    <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
+                      <span className="text-slate-400">{tc('score')}</span>{' '}
+                      <span className="text-pink-400 font-bold">{formatScore(rhythmState.score)}</span>
+                    </div>
+                    <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
+                      <span className="text-slate-400">{t('rhythmTapper.combo')}</span>{' '}
+                      <span className="text-cyan-400 font-bold">x{rhythmState.combo}</span>
+                    </div>
+                    <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
+                      <span className="text-slate-400">{t('rhythmTapper.lives')}</span>{' '}
+                      <span className="text-red-400 font-bold">{'❤️'.repeat(rhythmState.lives)}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Game Over / Start Screen */}
+                {!rhythmState.isPlaying && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+                    <div className="text-center p-6">
+                      {rhythmState.isGameOver ? (
+                        <>
+                          <div className="text-4xl mb-2">🎵</div>
+                          <div className="text-2xl font-bold text-white mb-2">{t('playground.common.gameOver')}</div>
+                          <div className="text-pink-400 text-xl mb-1">{tc('score')}: {formatScore(rhythmState.score)}</div>
+                          <div className="text-cyan-400 text-sm mb-4">{t('rhythmTapper.bestCombo')}: {rhythmState.bestCombo}</div>
+                          <div className="text-xs text-slate-400 mb-4">
+                            {t('rhythmTapper.perfect')}: {rhythmState.perfectHits} |
+                            {t('rhythmTapper.good')}: {rhythmState.goodHits} |
+                            {t('rhythmTapper.miss')}: {rhythmState.misses}
+                          </div>
+                          <button
+                            onClick={() => startRhythmGame()}
+                            className="px-6 py-3 bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-500 hover:to-red-500 rounded-lg font-bold text-white border border-pink-400"
+                          >
+                            {tc('playAgain')}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-4xl mb-2">🎵</div>
+                          <div className="text-2xl font-bold text-white mb-2">{t('rhythmTapper.title')}</div>
+                          <div className="text-pink-200 text-sm mb-4">{t('rhythmTapper.description')}</div>
+                          <div className="text-xs text-slate-400 mb-4">
+                            <p className="mb-1">👆 {t('rhythmTapper.controls')}</p>
+                            <p>{tc('tapToStart')}</p>
+                          </div>
+                          <button
+                            onClick={() => startRhythmGame()}
+                            className="px-6 py-3 bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-500 hover:to-red-500 rounded-lg font-bold text-white border border-pink-400"
+                          >
+                            {tc('tapToStart')}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 text-center text-slate-400 text-sm">
+              <p className="mb-2">🎵 {t('rhythmTapper.tapToStart')}</p>
+              <p className="text-xs">🎮 {t('rhythmTapper.controls')}</p>
+            </div>
+
+            <button
+              onClick={() => setCurrentGame('menu')}
+              className="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+            >
+              ← {t('rhythmTapper.backToMenu')}
+            </button>
+          </>
+        )}
+
         {/* 広告スペース（ゲームプレイ画面のみ） */}
-        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic') && (
+        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
               {t('adArea')}
@@ -3898,6 +4507,8 @@ export default function MimoPlayground() {
           <span>{t('infinityDrop.title')}: {formatScore(gameState.highScore)}</span>
           <span>{t('slide2048.title')}: {formatScore(game2048State.highScore)}</span>
           <span>{t('neonDash.title')}: {formatScore(neonState.highScore)}</span>
+          <span>{t('cosmicCatch.title')}: {formatScore(cosmicState.highScore)}</span>
+          <span>{t('rhythmTapper.title')}: {formatScore(rhythmState.highScore)}</span>
         </div>
       </footer>
 
@@ -4067,6 +4678,79 @@ export default function MimoPlayground() {
                 isBoosting: false,
               },
             }));
+          }}
+          className="fixed inset-0 z-50"
+          style={{
+            touchAction: 'none',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        />
+      )}
+
+      {/* Rhythm Tapper 入力イベント用（画面全体） */}
+      {currentGame === 'rhythm' && (
+        <div
+          onTouchStart={(e) => {
+            e.preventDefault();
+
+            // ゲーム開始/リスタート処理
+            if (!rhythmState.isPlaying || rhythmState.isGameOver) {
+              if (rhythmState.isGameOver || !rhythmState.isPlaying) {
+                startRhythmGame();
+              }
+              return;
+            }
+
+            // プレイ中はタップ処理
+            const touches = Array.from(e.touches);
+            const containerRect = containerRef.current?.getBoundingClientRect();
+            if (!containerRect) return;
+
+            touches.forEach((touch) => {
+              const relativeX = touch.clientX - containerRect.left;
+              const relativeY = touch.clientY - containerRect.top;
+              const zoneWidth = containerRect.width / 4;
+
+              // Check if touch is in the zone area (bottom 100px)
+              if (relativeY > containerRect.height - 150) {
+                const zoneIndex = Math.floor(relativeX / zoneWidth);
+                const colors: RhythmColor[] = ['red', 'blue', 'green', 'yellow'];
+                const color = colors[zoneIndex];
+                if (color) {
+                  handleRhythmTap(color);
+                }
+              }
+            });
+          }}
+          onTouchMove={(e) => {
+            e.preventDefault();
+
+            if (!rhythmState.isPlaying || rhythmState.isGameOver) return;
+
+            const touches = Array.from(e.touches);
+            const containerRect = containerRef.current?.getBoundingClientRect();
+            if (!containerRect) return;
+
+            touches.forEach((touch) => {
+              const relativeX = touch.clientX - containerRect.left;
+              const relativeY = touch.clientY - containerRect.top;
+              const zoneWidth = containerRect.width / 4;
+
+              // Check if touch is in the zone area (bottom 100px)
+              if (relativeY > containerRect.height - 150) {
+                const zoneIndex = Math.floor(relativeX / zoneWidth);
+                const colors: RhythmColor[] = ['red', 'blue', 'green', 'yellow'];
+                const color = colors[zoneIndex];
+                if (color) {
+                  handleRhythmTap(color);
+                }
+              }
+            });
+          }}
+          onTouchEnd={(e) => {
+            // No action needed on end
           }}
           className="fixed inset-0 z-50"
           style={{

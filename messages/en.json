@@ -244,6 +244,8 @@
         "good": "Good!",
         "miss": "Miss...",
         "lives": "Lives",
+        "combo": "Combo",
+        "bestCombo": "Best Combo",
         "zoneRed": "Red",
         "zoneBlue": "Blue",
         "zoneGreen": "Green",

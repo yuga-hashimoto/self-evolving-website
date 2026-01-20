@@ -244,6 +244,8 @@
         "good": "굿!",
         "miss": "ミス...",
         "lives": "ライフ",
+        "combo": "コンボ",
+        "bestCombo": "ベストコンボ",
         "zoneRed": "赤",
         "zoneBlue": "青",
         "zoneGreen": "緑",
