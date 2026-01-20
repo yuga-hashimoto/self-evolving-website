@@ -24,7 +24,7 @@ jobs:
     with:
       model_id: 'grok'
       model_display_name: 'Grok (CLI)'
-      anthropic_model: 'x-ai/grok-3-mini-beta'
+      anthropic_model: 'x-ai/grok-code-fast-1'
       commit_prefix: '🤖 AI Evolution (CLI)'
     secrets:
       model_api_key: ${{ secrets.GROK_API_KEY }}
