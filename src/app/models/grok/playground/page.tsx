@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import EndlessJumperGame from './components/EndlessJumperGame';
 import Game from './components/Game';
@@ -8,22 +8,11 @@ import Two048Game from './components/Two048Game';
 import SnakeGame from './components/SnakeGame';
 // EndlessRunnerGame is available but not currently used in the UI
 import TetrisGame from './components/TetrisGame';
+import BreakoutGame from './components/BreakoutGame';
 
 export default function GrokPlayground() {
-  // Initialized game loop for Doodle Leap
-  console.log('Starting enhanced game loop for better engagement');
 
-function GameLoop() {
-  const [score, setScore] = useState(0);
-  useEffect(() => {
-    const handleGameTick = () => setScore(prev => prev + 1);
-    const interval = setInterval(handleGameTick, 1000);
-    return () => clearInterval(interval);
-  }, []);
-  return <div>Current Score: {score}</div>;
-}
-
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -67,6 +56,12 @@ function GameLoop() {
             >
               {t('grok.tetrisTitle') || 'Tetris'}
             </button>
+            <button
+              onClick={() => setSelectedGame('breakout')}
+              className={`px-4 py-2 rounded ${selectedGame === 'breakout' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.breakout') || 'Breakout'}
+            </button>
           </div>
 
           {/* Game container */}
@@ -74,7 +69,8 @@ function GameLoop() {
           {selectedGame === 'endlessJumper' && <EndlessJumperGame />}
           {selectedGame === '2048' && <Two048Game />}
           {selectedGame === 'snake' && <SnakeGame />}
-                    {selectedGame === 'tetris' && <TetrisGame />}
+          {selectedGame === 'tetris' && <TetrisGame />}
+          {selectedGame === 'breakout' && <BreakoutGame />}
         </div>
       </div>
 
