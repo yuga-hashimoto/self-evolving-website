@@ -170,11 +170,49 @@ interface CosmicCatchState {
 interface DailyChallenge {
   id: string; // YYYY-MM-DD
   date: string;
-  game: 'infinity' | '2048' | 'neon' | 'cosmic';
+  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm';
   target: number; // Target score to beat
   description: string;
   completed: boolean;
   reward: number; // Coins to reward
+}
+
+// Rhythm Tapper Interfaces
+type RhythmColor = 'red' | 'blue' | 'green' | 'yellow';
+
+interface RhythmNote {
+  id: number;
+  color: RhythmColor;
+  x: number; // Target x position (zone center)
+  y: number; // Current falling position
+  hit: boolean;
+  missed: boolean;
+  velocity: number; // Falling speed
+}
+
+interface RhythmZone {
+  color: RhythmColor;
+  x: number;
+  width: number;
+  isActive: boolean;
+}
+
+interface RhythmTapperState {
+  isPlaying: boolean;
+  isGameOver: boolean;
+  score: number;
+  highScore: number;
+  combo: number;
+  bestCombo: number;
+  lives: number;
+  notes: RhythmNote[];
+  zones: RhythmZone[];
+  spawnTimer: number;
+  spawnInterval: number;
+  speed: number;
+  perfectHits: number;
+  goodHits: number;
+  misses: number;
 }
 
 interface DailyChallengeState {
@@ -207,6 +245,10 @@ interface GameStats {
   cosmicFirstPlay: boolean;
   cosmic100Score: boolean;
   cosmicBestCombo3: boolean;
+  rhythmFirstPlay: boolean;
+  rhythm100Score: boolean;
+  rhythm500Score: boolean;
+  rhythmBestCombo10: boolean;
   dailyStreak3: boolean;
   dailyStreak7: boolean;
   allGamesPlayed: boolean;
@@ -321,6 +363,33 @@ const ACHIEVEMENTS: Achievement[] = [
     condition: (stats) => stats.cosmicBestCombo3,
   },
   {
+    id: 'rhythm_100',
+    name: 'Rhythm Starter',
+    description: 'Score 100+ in Rhythm Tapper',
+    unlocked: false,
+    icon: '🎵',
+    reward: 20,
+    condition: (stats) => stats.rhythm100Score,
+  },
+  {
+    id: 'rhythm_500',
+    name: 'Rhythm Master',
+    description: 'Score 500+ in Rhythm Tapper',
+    unlocked: false,
+    icon: '🎶',
+    reward: 50,
+    condition: (stats) => stats.rhythm500Score,
+  },
+  {
+    id: 'rhythm_combo',
+    name: 'Beat Boxer',
+    description: 'Get 10x combo in Rhythm Tapper',
+    unlocked: false,
+    icon: '🥁',
+    reward: 40,
+    condition: (stats) => stats.rhythmBestCombo10,
+  },
+  {
     id: 'daily_streak_3',
     name: 'Habit Builder',
     description: '3-day daily challenge streak',
@@ -341,7 +410,7 @@ const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'all_games',
     name: 'Game Explorer',
-    description: 'Play all 4 games',
+    description: 'Play all 5 games',
     unlocked: false,
     icon: '🎮',
     reward: 30,
@@ -352,7 +421,7 @@ const ACHIEVEMENTS: Achievement[] = [
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm'>('menu');
   const [shopOpen, setShopOpen] = useState(false);
 
   const [gameState, setGameState] = useState<InfinityDropState>({
@@ -432,6 +501,24 @@ export default function MimoPlayground() {
     starSpawnTimer: 0,
   });
 
+  const [rhythmState, setRhythmState] = useState<RhythmTapperState>({
+    isPlaying: false,
+    isGameOver: false,
+    score: 0,
+    highScore: 0,
+    combo: 0,
+    bestCombo: 0,
+    lives: 3,
+    notes: [],
+    zones: [],
+    spawnTimer: 0,
+    spawnInterval: 120,
+    speed: 3,
+    perfectHits: 0,
+    goodHits: 0,
+    misses: 0,
+  });
+
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallengeState>({
     currentChallenge: null,
     streak: 0,
@@ -459,6 +546,10 @@ export default function MimoPlayground() {
     cosmicFirstPlay: false,
     cosmic100Score: false,
     cosmicBestCombo3: false,
+    rhythmFirstPlay: false,
+    rhythm100Score: false,
+    rhythm500Score: false,
+    rhythmBestCombo10: false,
     dailyStreak3: false,
     dailyStreak7: false,
     allGamesPlayed: false,
@@ -472,9 +563,16 @@ export default function MimoPlayground() {
   const infinityRequestRef = useRef<number | null>(null);
   const neonRequestRef = useRef<number | null>(null);
   const cosmicRequestRef = useRef<number | null>(null);
+  const rhythmRequestRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const checkAchievementsRef = useRef<() => void>(() => {});
-  const updateScoreAchievementsRef = useRef<(gameType: 'infinity' | 'neon' | 'cosmic', score: number) => void>(() => {});
+  const updateScoreAchievementsRef = useRef<(gameType: 'infinity' | 'neon' | 'cosmic' | 'rhythm', score: number) => void>(() => {});
+
+  // Ref-based touch storage to prevent memory leaks
+  const touchStartRef2048 = useRef<{ x: number; y: number } | null>(null);
+  const touchStartRefNeon = useRef<{ x: number; y: number; time: number } | null>(null);
+  const touchStartRefCosmic = useRef<{ x: number; y: number; time: number } | null>(null);
+
   const { trackClick } = useAnalytics();
 
   // Canvas用翻訳テキストをrefで保持
@@ -1469,7 +1567,7 @@ export default function MimoPlayground() {
   }, [dailyChallenge, getTodayDate, playSound, vibrate, gameStats]);
 
   // Update score-based achievements
-  const updateScoreAchievements = useCallback((gameType: 'infinity' | 'neon' | 'cosmic', score: number) => {
+  const updateScoreAchievements = useCallback((gameType: 'infinity' | 'neon' | 'cosmic' | 'rhythm', score: number) => {
     let updated = false;
     const newStats = { ...gameStats };
 
@@ -1500,10 +1598,19 @@ export default function MimoPlayground() {
         newStats.cosmic100Score = true;
         updated = true;
       }
+    } else if (gameType === 'rhythm') {
+      if (score >= 100 && !newStats.rhythm100Score) {
+        newStats.rhythm100Score = true;
+        updated = true;
+      }
+      if (score >= 500 && !newStats.rhythm500Score) {
+        newStats.rhythm500Score = true;
+        updated = true;
+      }
     }
 
     // Check all games played
-    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && !newStats.allGamesPlayed) {
+    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && newStats.rhythmFirstPlay && !newStats.allGamesPlayed) {
       newStats.allGamesPlayed = true;
       updated = true;
     }
@@ -3801,17 +3908,20 @@ export default function MimoPlayground() {
             if (!game2048State.grid.length) return;
             const touchStartX = e.touches[0].clientX;
             const touchStartY = e.touches[0].clientY;
-            (e.target as any)._touchStart = { x: touchStartX, y: touchStartY };
+            touchStartRef2048.current = { x: touchStartX, y: touchStartY };
           }}
           onTouchEnd={(e) => {
             if (!game2048State.grid.length || game2048State.isGameOver) return;
-            const touchStart = (e.target as any)._touchStart;
+            const touchStart = touchStartRef2048.current;
             if (!touchStart) return;
 
             const touchEndX = e.changedTouches[0].clientX;
             const touchEndY = e.changedTouches[0].clientY;
             const dx = touchEndX - touchStart.x;
             const dy = touchEndY - touchStart.y;
+
+            // Clear touch data
+            touchStartRef2048.current = null;
 
             // デッドゾーン - スクリーンサイズに基づいて動的に計算
             const rect = containerRef.current?.getBoundingClientRect();
@@ -3842,7 +3952,7 @@ export default function MimoPlayground() {
         <div
           onTouchStart={(e) => {
             const touch = e.touches[0];
-            (e.target as any)._touchStart = {
+            touchStartRefNeon.current = {
               x: touch.clientX,
               y: touch.clientY,
               time: Date.now(),
@@ -3859,8 +3969,11 @@ export default function MimoPlayground() {
           onTouchEnd={(e) => {
             if (!neonState.isPlaying || neonState.isGameOver) return;
 
-            const touchStart = (e.target as any)._touchStart;
+            const touchStart = touchStartRefNeon.current;
             if (!touchStart) return;
+
+            // Clear touch data
+            touchStartRefNeon.current = null;
 
             const touchEnd = e.changedTouches[0];
             const dx = touchEnd.clientX - touchStart.x;
@@ -3906,7 +4019,7 @@ export default function MimoPlayground() {
         <div
           onTouchStart={(e) => {
             const touch = e.touches[0];
-            (e.target as any)._touchStart = {
+            touchStartRefCosmic.current = {
               x: touch.clientX,
               y: touch.clientY,
               time: Date.now(),
@@ -3930,6 +4043,9 @@ export default function MimoPlayground() {
             }));
           }}
           onTouchEnd={(e) => {
+            // Clear touch data
+            touchStartRefCosmic.current = null;
+
             // ブースト解除
             setCosmicState((prev) => ({
               ...prev,
@@ -3940,6 +4056,9 @@ export default function MimoPlayground() {
             }));
           }}
           onTouchCancel={(e) => {
+            // Clear touch data
+            touchStartRefCosmic.current = null;
+
             // ブースト解除
             setCosmicState((prev) => ({
               ...prev,
