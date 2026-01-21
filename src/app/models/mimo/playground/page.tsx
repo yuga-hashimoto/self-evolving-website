@@ -4,6 +4,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAnalytics } from '@/lib/analytics';
+import RhythmTapper from './components/RhythmTapper';
+import type { RhythmTapperState, RhythmColor, RhythmZone, RhythmNote, RhythmParticle } from './components/RhythmTapper';
 
 // Infinity Drop Interfaces
 interface Block {
@@ -181,44 +183,7 @@ interface DailyChallenge {
   reward: number; // Coins to reward
 }
 
-// Rhythm Tapper Interfaces
-type RhythmColor = 'red' | 'blue' | 'green' | 'yellow';
-
-interface RhythmNote {
-  id: number;
-  color: RhythmColor;
-  x: number; // Target x position (zone center)
-  y: number; // Current falling position
-  hit: boolean;
-  missed: boolean;
-  velocity: number; // Falling speed
-}
-
-interface RhythmZone {
-  color: RhythmColor;
-  x: number;
-  width: number;
-  isActive: boolean;
-}
-
-interface RhythmTapperState {
-  isPlaying: boolean;
-  isGameOver: boolean;
-  score: number;
-  highScore: number;
-  combo: number;
-  bestCombo: number;
-  lives: number;
-  notes: RhythmNote[];
-  zones: RhythmZone[];
-  spawnTimer: number;
-  spawnInterval: number;
-  speed: number;
-  perfectHits: number;
-  goodHits: number;
-  misses: number;
-  particles: NeonParticle[];
-}
+// Rhythm Tapper Interfaces - now imported from component
 
 interface DailyChallengeState {
   currentChallenge: DailyChallenge | null;
@@ -512,6 +477,7 @@ export default function MimoPlayground() {
     starSpawnTimer: 0,
   });
 
+  // Rhythm Tapper state - managed by RhythmTapper component
   const [rhythmState, setRhythmState] = useState<RhythmTapperState>({
     isPlaying: false,
     isGameOver: false,
@@ -3030,7 +2996,7 @@ export default function MimoPlayground() {
       // Visual and haptic feedback
       vibrate(isPerfect ? 30 : 15);
       playSound(isPerfect ? 'perfect' : 'good');
-      createRhythmParticles(closestNote.x, closestNote.y, getZoneColor(zoneColor));
+      createRhythmParticles(closestNote.x, closestNote.y, getZoneColor(zoneColor), isPerfect);
     } else {
       // Miss tap - just visual feedback
       setRhythmState((prev) => ({ ...prev }));
@@ -3053,32 +3019,55 @@ export default function MimoPlayground() {
     });
   }, [rhythmState, gameStats, updateScoreAchievements]);
 
-  // Create Rhythm particles
-  const createRhythmParticles = useCallback((x: number, y: number, color: string) => {
+  // Create Rhythm particles with enhanced effects
+  const createRhythmParticles = useCallback((x: number, y: number, color: string, isPerfect: boolean = false) => {
     setRhythmState((prev) => {
       const newParticles: NeonParticle[] = [];
-      const particleCount = 8;
+      // More particles for perfect hits
+      const particleCount = isPerfect ? 16 : 8;
 
       for (let i = 0; i < particleCount; i++) {
         const angle = (Math.PI * 2 * i) / particleCount;
-        const speed = 2 + Math.random() * 2;
+        const speed = isPerfect ? 3 + Math.random() * 3 : 2 + Math.random() * 2;
         newParticles.push({
           id: Date.now() + Math.random(),
           x,
           y,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
-          life: 20 + Math.random() * 10,
+          life: (isPerfect ? 30 : 20) + Math.random() * 10,
           color,
         });
       }
 
+      // Add spiral particles for perfect hits
+      if (isPerfect) {
+        for (let i = 0; i < 8; i++) {
+          const angle = (Math.PI * 2 * i) / 8 + Date.now() / 200;
+          const speed = 1 + Math.random() * 2;
+          newParticles.push({
+            id: Date.now() + Math.random() + i,
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 25,
+            color: '#fff',
+          });
+        }
+      }
+
+      // Limit particles for mobile
+      const maxParticles = isMobile ? 50 : 100;
+      const allParticles = [...(prev.particles || []), ...newParticles];
+      const limitedParticles = allParticles.slice(-maxParticles);
+
       return {
         ...prev,
-        particles: [...(prev.particles || []), ...newParticles],
+        particles: limitedParticles,
       };
     });
-  }, []);
+  }, [isMobile]);
 
   // Game over for Rhythm
   const gameOverRhythm = useCallback(() => {
@@ -3112,102 +3101,159 @@ export default function MimoPlayground() {
     const width = canvas.width;
     const height = canvas.height;
 
-    // Background gradient (pink to purple)
+    // Background gradient (purple to pink)
     const gradient = ctx.createLinearGradient(0, 0, 0, height);
     gradient.addColorStop(0, '#1e1b4b');
-    gradient.addColorStop(1, '#3730a3');
+    gradient.addColorStop(0.5, '#3730a3');
+    gradient.addColorStop(1, '#4c1d95');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
+
+    // Animated background pulse when playing
+    if (rhythmState.isPlaying && !rhythmState.isGameOver) {
+      const pulseIntensity = (Math.sin(Date.now() / 500) + 1) / 2 * 0.1;
+      ctx.fillStyle = `rgba(236, 72, 153, ${pulseIntensity})`;
+      ctx.fillRect(0, 0, width, height);
+    }
 
     // Draw zones
     const zoneWidth = width / 4;
     const zoneY = height - 80;
     const zoneHeight = 60;
 
-    rhythmState.zones.forEach((zone) => {
+    rhythmState.zones.forEach((zone, index) => {
       const x = zone.x - zoneWidth / 2;
+      const color = getZoneColor(zone.color);
 
-      // Zone background
-      ctx.fillStyle = zone.isActive ? zone.color : `${zone.color}40`;
+      // Zone background with glow when active
+      if (zone.isActive) {
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = color;
+      }
+
+      ctx.fillStyle = zone.isActive ? color : `${color}40`;
       ctx.fillRect(x, zoneY, zoneWidth - 4, zoneHeight);
+      ctx.shadowBlur = 0;
 
       // Zone border
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = zone.isActive ? 3 : 1;
+      ctx.strokeStyle = zone.isActive ? '#fff' : 'rgba(255,255,255,0.5)';
+      ctx.lineWidth = zone.isActive ? 4 : 2;
       ctx.strokeRect(x, zoneY, zoneWidth - 4, zoneHeight);
 
-      // Zone label
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 16px Arial';
+      // Zone label (keyboard key)
+      ctx.fillStyle = zone.isActive ? '#000' : '#fff';
+      ctx.font = `bold ${zone.isActive ? '20px' : '16px'} Arial`;
       ctx.textAlign = 'center';
-      const label = zone.color === 'red' ? 'D' : zone.color === 'blue' ? 'F' : zone.color === 'green' ? 'J' : 'K';
-      ctx.fillText(label, zone.x, zoneY + 35);
+      const labels = { red: 'D', blue: 'F', green: 'J', yellow: 'K' };
+      ctx.fillText(labels[zone.color], zone.x, zoneY + 35);
     });
 
-    // Hit line
+    // Hit line with glow
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#fff';
     ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.setLineDash([5, 5]);
     ctx.beginPath();
     ctx.moveTo(0, zoneY);
     ctx.lineTo(width, zoneY);
     ctx.stroke();
     ctx.setLineDash([]);
+    ctx.shadowBlur = 0;
 
-    // Draw notes
+    // Draw notes with enhanced visual effects
     rhythmState.notes.forEach((note) => {
       if (note.hit) return; // Don't draw hit notes
 
-      const size = 16;
-      ctx.fillStyle = note.color;
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
+      const color = getZoneColor(note.color);
+      const size = 18;
 
-      // Glow effect
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = note.color;
-
+      // Note glow
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = color;
+      ctx.fillStyle = color;
       ctx.beginPath();
       ctx.arc(note.x, note.y, size, 0, Math.PI * 2);
       ctx.fill();
-      ctx.stroke();
 
+      // Inner highlight
       ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.beginPath();
+      ctx.arc(note.x - 4, note.y - 4, size * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Outer ring
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(note.x, note.y, size + 3, 0, Math.PI * 2);
+      ctx.stroke();
     });
 
-    // Draw particles
+    // Draw particles with round shapes
     if (rhythmState.particles) {
       rhythmState.particles.forEach((p: NeonParticle) => {
+        const alpha = Math.min(p.life / 20, 1);
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.life / 30;
-        ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.fill();
         ctx.globalAlpha = 1;
       });
     }
 
-    // HUD
+    // HUD with better styling
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(5, 5, 140, 85);
+
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold 18px Arial';
+    ctx.font = 'bold 16px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText(`Score: ${rhythmState.score}`, 10, 25);
-    ctx.fillText(`Combo: x${rhythmState.combo}`, 10, 50);
-    ctx.fillText(`Lives: ${'❤️'.repeat(rhythmState.lives)}`, 10, 75);
+    ctx.fillText(`${tc('score')}: ${rhythmState.score}`, 15, 25);
+
+    // Combo display with color based on combo
+    if (rhythmState.combo > 0) {
+      const comboColor = rhythmState.combo >= 10 ? '#fbbf24' : rhythmState.combo >= 5 ? '#22c55e' : '#fff';
+      ctx.fillStyle = comboColor;
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText(`${t('rhythmTapper.combo')}: x${rhythmState.combo}`, 15, 45);
+
+      // Show combo multiplier
+      const multiplier = 1 + Math.floor(rhythmState.combo / 10) * 0.5;
+      if (multiplier > 1) {
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText(`x${multiplier} BONUS`, 15, 65);
+      }
+    }
+
+    // Lives display
+    ctx.fillStyle = '#ef4444';
+    ctx.font = '16px Arial';
+    ctx.fillText('❤️'.repeat(rhythmState.lives), 15, 85);
 
     // High score
     if (rhythmState.highScore > 0) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(width - 115, 5, 110, 25);
       ctx.fillStyle = '#f472b6';
-      ctx.font = '14px Arial';
+      ctx.font = 'bold 14px Arial';
       ctx.textAlign = 'right';
-      ctx.fillText(`Best: ${rhythmState.highScore}`, width - 10, 25);
+      ctx.fillText(`${tc('highScore')}: ${rhythmState.highScore}`, width - 15, 22);
     }
 
-    // Difficulty indicator
-    ctx.fillStyle = '#22c55e';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'right';
+    // Difficulty indicator with better visibility
     const difficulty = rhythmState.score > 500 ? 'EXPERT' : rhythmState.score > 300 ? 'HARD' : rhythmState.score > 100 ? 'MEDIUM' : 'EASY';
-    ctx.fillText(difficulty, width - 10, 50);
-  }, [rhythmState]);
+    const difficultyColor = difficulty === 'EXPERT' ? '#ef4444' : difficulty === 'HARD' ? '#f97316' : difficulty === 'MEDIUM' ? '#eab308' : '#22c55e';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(width - 85, 35, 80, 20);
+    ctx.fillStyle = difficultyColor;
+    ctx.font = 'bold 12px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(difficulty, width - 15, 50);
+  }, [rhythmState, getZoneColor, tc, t]);
 
   // Rhythm game loop
   const rhythmGameLoop = useCallback(() => {
