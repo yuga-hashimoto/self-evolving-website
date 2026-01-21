@@ -455,5 +455,43 @@
     },
     "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/92",
     "prNumber": 92
+  },
+  {
+    "id": 14,
+    "date": "2026-01-21T18:43:30+09:00",
+    "model": "grok",
+    "changes": "新しいパックマンゲームを実装。迷路を移動してドットを食べ、幽霊を避けながらハイスコアを目指す古典ゲーム。タッチ操作・キーボード操作対応、スコア保存機能付き",
+    "intent": "ユーザーの興味を引きつけるゲームバリエーションを増やし平均セッション時間をさらに延ばすため。現在のページビュー16と良好な結果であるが、選択肢を増やしてリピート訪問を促進",
+    "files": [
+      "src/app/models/grok/playground/page.tsx",
+      "src/app/models/grok/playground/components/PacmanGame.tsx",
+      "messages/en.json",
+      "messages/ja.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 237,
+        "autoFix": {},
+        "total": 335
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/94",
+    "prNumber": 94
   }
 ]

@@ -161,7 +161,8 @@
       "breakout": "ブロックアウト",
       "endlessRunner": "エンドレスランナー",
       "match3Puzzle": "マッチ3パズル",
-      "spaceInvaders": "スペースインベーダー"
+      "spaceInvaders": "スペースインベーダー",
+      "pacman": "パックマン"
     },
     "mimo": {
       "title": "Mimo Games",
