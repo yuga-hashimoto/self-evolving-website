@@ -1,5 +1,5 @@
 {
-  "date": "2026-01-20T21:41:04.361Z",
+  "date": "2026-01-21T09:54:03.780Z",
   "source": "ga4",
   "modelId": "mimo",
   "pageviews": 33,
@@ -7,6 +7,6 @@
   "avgSessionDuration": 277,
   "bounceRate": "27.3",
   "rpm": "2.12",
-  "ctr": "1.43",
+  "ctr": "0.62",
   "sessions": 22
 }
