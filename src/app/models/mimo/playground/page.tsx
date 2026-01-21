@@ -33,15 +33,19 @@ interface SkillState {
   boostActive: boolean;
   slowActive: boolean;
   wideActive: boolean;
+  shieldActive: boolean;
+  freezeActive: boolean;
   boostEndTime: number;
   slowEndTime: number;
+  freezeEndTime: number;
+  shieldCount: number; // Shield is consumable
 }
 
 interface ShopItem {
   id: string;
   cost: number;
   owned: boolean;
-  key: 'boost' | 'slow' | 'wide';
+  key: 'boost' | 'slow' | 'wide' | 'shield' | 'freeze';
 }
 
 interface InfinityParticle {
@@ -442,14 +446,20 @@ export default function MimoPlayground() {
     boostActive: false,
     slowActive: false,
     wideActive: false,
+    shieldActive: false,
+    freezeActive: false,
     boostEndTime: 0,
     slowEndTime: 0,
+    freezeEndTime: 0,
+    shieldCount: 0,
   });
 
   const [shopItems, setShopItems] = useState<ShopItem[]>([
     { id: 'skill_boost', cost: 50, owned: false, key: 'boost' },
     { id: 'skill_slow', cost: 75, owned: false, key: 'slow' },
     { id: 'skill_wide', cost: 100, owned: false, key: 'wide' },
+    { id: 'skill_shield', cost: 100, owned: false, key: 'shield' },
+    { id: 'skill_freeze', cost: 150, owned: false, key: 'freeze' },
   ]);
 
   const [game2048State, setGame2048State] = useState<Game2048State>({
@@ -593,6 +603,8 @@ export default function MimoPlayground() {
     shop: 'SHOP',
     boostSkill: 'Boost',
     slowSkill: 'Slow',
+    shieldSkill: 'Shield',
+    freezeSkill: 'Freeze',
     shopTitle: 'SKILL SHOP',
     buy: 'BUY',
     owned: 'OWNED',
@@ -600,6 +612,8 @@ export default function MimoPlayground() {
     boostDesc: '+20% Block Width',
     slowDesc: '-30% Block Speed',
     wideDesc: 'Start with 30% wider',
+    shieldDesc: 'Blocks 1 failure',
+    freezeDesc: 'Pause blocks 5s',
   });
 
   // Infinity Drop particles state
@@ -622,6 +636,8 @@ export default function MimoPlayground() {
       shop: t('infinityDrop.shop'),
       boostSkill: t('infinityDrop.boostSkill'),
       slowSkill: t('infinityDrop.slowSkill'),
+      shieldSkill: t('infinityDrop.shieldSkill'),
+      freezeSkill: t('infinityDrop.freezeSkill'),
       shopTitle: t('infinityDrop.shopTitle'),
       buy: t('infinityDrop.buy'),
       owned: t('infinityDrop.owned'),
@@ -629,6 +645,8 @@ export default function MimoPlayground() {
       boostDesc: t('infinityDrop.boostDesc'),
       slowDesc: t('infinityDrop.slowDesc'),
       wideDesc: t('infinityDrop.wideDesc'),
+      shieldDesc: t('infinityDrop.shieldDesc'),
+      freezeDesc: t('infinityDrop.freezeDesc'),
     };
   }, [t, tc]);
 
@@ -991,6 +1009,21 @@ export default function MimoPlayground() {
         ctx.fillText(`🐌 ${canvasTextsRef.current.slowSkill}: ${remaining}s`, 15, skillOffset);
         skillOffset += 18;
       }
+
+      if (skillState.freezeActive && now < skillState.freezeEndTime) {
+        ctx.fillStyle = '#88aaff';
+        ctx.font = '12px Arial';
+        const remaining = Math.ceil((skillState.freezeEndTime - now) / 1000);
+        ctx.fillText(`❄️ ${canvasTextsRef.current.freezeSkill}: ${remaining}s`, 15, skillOffset);
+        skillOffset += 18;
+      }
+
+      if (skillState.shieldActive && skillState.shieldCount > 0) {
+        ctx.fillStyle = '#ffdd44';
+        ctx.font = '12px Arial';
+        ctx.fillText(`🛡️ ${canvasTextsRef.current.shieldSkill}: ${skillState.shieldCount}`, 15, skillOffset);
+        skillOffset += 18;
+      }
     }
 
     // ゲームオーバー時のオーバーレイ
@@ -1058,11 +1091,19 @@ export default function MimoPlayground() {
     if (skillState.slowActive && now >= skillState.slowEndTime) {
       setSkillState((prev) => ({ ...prev, slowActive: false }));
     }
+    if (skillState.freezeActive && now >= skillState.freezeEndTime) {
+      setSkillState((prev) => ({ ...prev, freezeActive: false }));
+    }
 
     setGameState((prev) => {
       if (!prev.isPlaying || prev.isGameOver) return prev;
 
       const updatedBlocks = prev.blocks.map((block) => {
+        // Skip block movement if freeze is active
+        if (skillState.freezeActive) {
+          return block;
+        }
+
         if (block.velocityX !== 0) {
           let newX = block.x + block.velocityX;
 
@@ -1250,7 +1291,28 @@ export default function MimoPlayground() {
     }
 
     if (accuracy <= 0) {
-      // 完全に外れた - ゲームオーバー
+      // 完全に外れた - ゲームオーバーまたはシールド使用
+      if (skillState.shieldActive && skillState.shieldCount > 0) {
+        // シールドを使用してゲームを続行
+        vibrate(50);
+        setSkillState((prev) => ({
+          ...prev,
+          shieldCount: prev.shieldCount - 1,
+          shieldActive: prev.shieldCount - 1 > 0,
+        }));
+        createParticles(lastBlock.x + lastBlock.width / 2, 500, '#ffdd44', 10);
+        // Reset the last block to center
+        const containerWidth = containerRef.current?.clientWidth || 360;
+        setGameState((prev) => ({
+          ...prev,
+          blocks: [
+            ...prev.blocks.slice(0, prev.blocks.length - 1),
+            { ...prev.blocks[prev.blocks.length - 1], x: containerWidth / 2 - lastBlock.width / 2 },
+          ],
+        }));
+        return;
+      }
+
       vibrate(200);
 
       // ゲームオーバー追跡
@@ -1360,7 +1422,7 @@ export default function MimoPlayground() {
     if (newHighScore > gameState.highScore) {
       localStorage.setItem('infinityDrop_highScore', newHighScore.toString());
     }
-  }, [gameState, trackClick]);
+  }, [gameState, trackClick, skillState.shieldActive, skillState.shieldCount]);
 
   // 重なり計算
   const calculateOverlap = (block1: Block, block2: Block | { x: number; width: number }): number => {
@@ -1689,14 +1751,28 @@ export default function MimoPlayground() {
   checkAchievementsRef.current = checkAchievements;
   updateScoreAchievementsRef.current = updateScoreAchievements;
 
-  const activateSkill = useCallback((skillKey: 'boost' | 'slow' | 'wide') => {
+  const activateSkill = useCallback((skillKey: 'boost' | 'slow' | 'wide' | 'shield' | 'freeze') => {
     if (skillKey === 'wide') {
       // Wide skill is passive (applied on game start)
       playSound('success');
       return;
     }
 
-    const duration = skillKey === 'boost' ? 15000 : 20000; // 15秒 or 20秒
+    // Shield is consumable and applied on game start
+    if (skillKey === 'shield') {
+      setSkillState((prev) => ({
+        ...prev,
+        shieldActive: true,
+        shieldCount: (prev.shieldCount || 0) + 1,
+      }));
+      playSound('success');
+      vibrate(30);
+      trackClick();
+      storeGameEvent('skill_activated', { skill: skillKey });
+      return;
+    }
+
+    const duration = skillKey === 'boost' ? 15000 : skillKey === 'freeze' ? 5000 : 20000; // boost:15s, freeze:5s, slow:20s
     const endTime = Date.now() + duration;
 
     setSkillState((prev) => ({
@@ -4517,11 +4593,13 @@ export default function MimoPlayground() {
         <div
           onTouchStart={(e) => {
             if (!game2048State.grid.length) return;
+            e.preventDefault();
             const touchStartX = e.touches[0].clientX;
             const touchStartY = e.touches[0].clientY;
             touchStartRef2048.current = { x: touchStartX, y: touchStartY };
           }}
           onTouchEnd={(e) => {
+            e.preventDefault();
             if (!game2048State.grid.length || game2048State.isGameOver) return;
             const touchStart = touchStartRef2048.current;
             if (!touchStart) return;
@@ -4562,6 +4640,7 @@ export default function MimoPlayground() {
       {currentGame === 'neon' && (
         <div
           onTouchStart={(e) => {
+            e.preventDefault();
             const touch = e.touches[0];
             touchStartRefNeon.current = {
               x: touch.clientX,
@@ -4578,6 +4657,7 @@ export default function MimoPlayground() {
             }
           }}
           onTouchEnd={(e) => {
+            e.preventDefault();
             if (!neonState.isPlaying || neonState.isGameOver) return;
 
             const touchStart = touchStartRefNeon.current;
@@ -4629,6 +4709,7 @@ export default function MimoPlayground() {
       {currentGame === 'cosmic' && (
         <div
           onTouchStart={(e) => {
+            e.preventDefault();
             const touch = e.touches[0];
             touchStartRefCosmic.current = {
               x: touch.clientX,
@@ -4654,6 +4735,7 @@ export default function MimoPlayground() {
             }));
           }}
           onTouchEnd={(e) => {
+            e.preventDefault();
             // Clear touch data
             touchStartRefCosmic.current = null;
 
@@ -4667,6 +4749,7 @@ export default function MimoPlayground() {
             }));
           }}
           onTouchCancel={(e) => {
+            e.preventDefault();
             // Clear touch data
             touchStartRefCosmic.current = null;
 
@@ -4796,6 +4879,8 @@ export default function MimoPlayground() {
                         {item.key === 'boost' && '⚡'}
                         {item.key === 'slow' && '🐌'}
                         {item.key === 'wide' && '📏'}
+                        {item.key === 'shield' && '🛡️'}
+                        {item.key === 'freeze' && '❄️'}
                         {t(`infinityDrop.${item.key}Skill`)}
                       </div>
                       <div className="text-xs text-slate-400 mt-1">
@@ -4823,14 +4908,19 @@ export default function MimoPlayground() {
                       )}
                     </div>
                   </div>
-                  {item.owned && item.key !== 'wide' && (
-                    <div className="mt-2 text-xs text-slate-300">
-                      <span className="text-green-400">✓ {t('infinityDrop.activate')} - {item.key === 'boost' ? '15s' : '20s'}</span>
-                    </div>
-                  )}
                   {item.owned && item.key === 'wide' && (
                     <div className="mt-2 text-xs text-slate-300">
                       <span className="text-green-400">✓ {t('infinityDrop.owned')} - {t('infinityDrop.activate')} on Start</span>
+                    </div>
+                  )}
+                  {item.owned && item.key === 'shield' && (
+                    <div className="mt-2 text-xs text-slate-300">
+                      <span className="text-green-400">✓ {t('infinityDrop.owned')} - {t('infinityDrop.activate')} on Start (1 use)</span>
+                    </div>
+                  )}
+                  {item.owned && (item.key === 'boost' || item.key === 'slow' || item.key === 'freeze') && (
+                    <div className="mt-2 text-xs text-slate-300">
+                      <span className="text-green-400">✓ {t('infinityDrop.activate')} - {item.key === 'boost' ? '15s' : item.key === 'freeze' ? '5s' : '20s'}</span>
                     </div>
                   )}
                 </div>

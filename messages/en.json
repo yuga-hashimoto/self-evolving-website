@@ -198,7 +198,11 @@
         "activate": "Activate",
         "boostDesc": "Increase block speed",
         "slowDesc": "Decrease block speed",
-        "wideDesc": "Widen block size"
+        "wideDesc": "Widen block size",
+        "shieldSkill": "Shield",
+        "shieldDesc": "Block 1 failure",
+        "freezeSkill": "Freeze",
+        "freezeDesc": "Pause blocks 5s"
       },
       "slide2048": {
         "title": "Slide 2048",

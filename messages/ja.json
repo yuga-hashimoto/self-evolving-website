@@ -198,7 +198,11 @@
         "activate": "発動",
         "boostDesc": "ブロック速度アップ",
         "slowDesc": "ブロック速度ダウン",
-        "wideDesc": "ブロック幅拡大"
+        "wideDesc": "ブロック幅拡大",
+        "shieldSkill": "シールド",
+        "shieldDesc": "失敗を1回ブロック",
+        "freezeSkill": "フリーズ",
+        "freezeDesc": "ブロックを5秒停止"
       },
       "slide2048": {
         "title": "Slide 2048",
