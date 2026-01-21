@@ -162,7 +162,8 @@
       "endlessRunner": "Endless Runner",
       "match3Puzzle": "Match 3 Puzzle",
       "spaceInvaders": "Space Invaders",
-      "pacman": "Pacman"
+      "pacman": "Pacman",
+      "flappyWings": "Flappy Wings"
     },
     "mimo": {
       "title": "Mimo Games",
