@@ -164,7 +164,9 @@
       "spaceInvaders": "Space Invaders",
       "pacman": "Pacman",
       "flappyWings": "Flappy Wings",
-      "towerStack": "Tower Stack"
+      "towerStack": "Tower Stack",
+      "pong": "Pong",
+      "pongDescription": "Bounce the ball past the computer!"
     },
     "mimo": {
       "title": "Mimo Games",
