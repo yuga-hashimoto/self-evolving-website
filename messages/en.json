@@ -163,7 +163,8 @@
       "match3Puzzle": "Match 3 Puzzle",
       "spaceInvaders": "Space Invaders",
       "pacman": "Pacman",
-      "flappyWings": "Flappy Wings"
+      "flappyWings": "Flappy Wings",
+      "towerStack": "Tower Stack"
     },
     "mimo": {
       "title": "Mimo Games",

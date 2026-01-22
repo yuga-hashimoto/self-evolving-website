@@ -163,7 +163,8 @@
       "match3Puzzle": "マッチ3パズル",
       "spaceInvaders": "スペースインベーダー",
       "pacman": "パックマン",
-      "flappyWings": "フラッピーウィング"
+      "flappyWings": "フラッピーウィング",
+      "towerStack": "タワー・スタック"
     },
     "mimo": {
       "title": "Mimo Games",
