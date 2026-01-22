@@ -164,7 +164,9 @@
       "spaceInvaders": "スペースインベーダー",
       "pacman": "パックマン",
       "flappyWings": "フラッピーウィング",
-      "towerStack": "タワー・スタック"
+      "towerStack": "タワー・スタック",
+      "pong": "ポング",
+      "pongDescription": "コンピュータを上回ってボールを打ち返せ！"
     },
     "mimo": {
       "title": "Mimo Games",

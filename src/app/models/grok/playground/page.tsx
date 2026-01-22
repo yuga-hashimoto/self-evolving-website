@@ -13,10 +13,11 @@ import SpaceInvadersGame from './components/SpaceInvadersGame';
 import PacmanGame from './components/PacmanGame';
 import FlappyBirdGame from './components/FlappyBirdGame';
 import TowerStackGame from './components/TowerStackGame';
+import PongGame from './components/PongGame';
 
 export default function GrokPlayground() {
 
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -96,6 +97,12 @@ export default function GrokPlayground() {
             >
               {t('grok.towerStack') || 'Tower Stack'}
             </button>
+            <button
+              onClick={() => setSelectedGame('pong')}
+              className={`px-4 py-2 rounded ${selectedGame === 'pong' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.pong') || 'Pong'}
+            </button>
           </div>
 
           {/* Game container */}
@@ -110,6 +117,7 @@ export default function GrokPlayground() {
           {selectedGame === 'pacman' && <PacmanGame />}
           {selectedGame === 'flappy' && <FlappyBirdGame />}
           {selectedGame === 'towerStack' && <TowerStackGame />}
+          {selectedGame === 'pong' && <PongGame />}
         </div>
       </div>
 
