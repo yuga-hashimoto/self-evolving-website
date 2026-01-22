@@ -278,11 +278,11 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
 
   // Start game - defined first so other handlers can reference it
   const startGame = useCallback(() => {
-    setState({
+    setState((prev) => ({
       isPlaying: true,
       isGameOver: false,
       score: 0,
-      highScore: state.highScore,
+      highScore: prev.highScore, // Use callback to get current state
       combo: 0,
       bestCombo: 0,
       lives: 3,
@@ -295,7 +295,7 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
       goodHits: 0,
       misses: 0,
       particles: [],
-    });
+    }));
 
     // Initialize zones
     const container = containerRef.current;
@@ -315,7 +315,7 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
 
     onStart?.();
     vibrate(30);
-  }, [state.highScore, containerRef, onStart, vibrate]);
+  }, [containerRef, onStart, vibrate]);
 
   // Game over
   const handleGameOver = useCallback(() => {
