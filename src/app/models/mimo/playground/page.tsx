@@ -4,7 +4,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAnalytics } from '@/lib/analytics';
-import RhythmTapper from './components/RhythmTapper';
 import type { RhythmTapperState, RhythmColor, RhythmZone, RhythmNote, RhythmParticle } from './components/RhythmTapper';
 
 // Infinity Drop Interfaces
@@ -317,8 +316,9 @@ const TILE_COLORS: Record<number, string> = {
   512: '#edc850',
   1024: '#edc53f',
   2048: '#edc22e',
-  4096: '#3c3a32',
-  8192: '#1e1d18',
+  4096: '#ff6b6b', // Bright red for 4096
+  8192: '#9b59b6', // Purple for 8192
+  16384: '#2ecc71', // Green for 16384
 };
 
 // Neon Snake Constants
@@ -663,6 +663,7 @@ export default function MimoPlayground() {
   });
 
   const [showTutorial, setShowTutorial] = useState(false);
+  const [gameError, setGameError] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number | null>(null);
@@ -996,7 +997,12 @@ export default function MimoPlayground() {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      if (!gameError) {
+        setGameError('Unable to get canvas context. Please refresh the page.');
+      }
+      return;
+    }
 
     const width = canvas.width;
     const height = canvas.height;
@@ -1243,25 +1249,33 @@ export default function MimoPlayground() {
     requestRef.current = requestAnimationFrame(gameLoop);
   }, [draw, skillState.boostActive, skillState.boostEndTime, skillState.slowActive, skillState.slowEndTime]);
 
-  // リサイズ時のキャンバス設定
+  // リサイズ時のキャンバス設定（debounced for performance）
+  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const handleResize = useCallback(() => {
-    if (containerRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const maxWidth = Math.min(window.innerWidth - 32, 400);
-      const maxHeight = Math.min(window.innerHeight - 200, 600);
-
-      // Support for high-DPI displays (Retina)
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = maxWidth * dpr;
-      canvas.height = maxHeight * dpr;
-      canvas.style.width = `${maxWidth}px`;
-      canvas.style.height = `${maxHeight}px`;
-      ctx.scale(dpr, dpr);
+    // Debounce resize events to prevent excessive calls
+    if (resizeTimeoutRef.current) {
+      clearTimeout(resizeTimeoutRef.current);
     }
-    draw();
+
+    resizeTimeoutRef.current = setTimeout(() => {
+      if (containerRef.current && canvasRef.current) {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const maxWidth = Math.min(window.innerWidth - 32, 400);
+        const maxHeight = Math.min(window.innerHeight - 200, 600);
+
+        // Support for high-DPI displays (Retina)
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = maxWidth * dpr;
+        canvas.height = maxHeight * dpr;
+        canvas.style.width = `${maxWidth}px`;
+        canvas.style.height = `${maxHeight}px`;
+        ctx.scale(dpr, dpr);
+      }
+      draw();
+    }, 100); // 100ms debounce delay
   }, [draw]);
 
   useEffect(() => {
@@ -1271,6 +1285,9 @@ export default function MimoPlayground() {
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
     };
   }, [handleResize]);
 
@@ -1392,8 +1409,8 @@ export default function MimoPlayground() {
       gameStatsRef.current.perfectBlocks += 1;
     }
 
-    if (accuracy <= 0) {
-      // 完全に外れた - ゲームオーバーまたはシールド使用
+    if (accuracy < 0.1) {
+      // Block is mostly missed (less than 10% overlap) - use shield or game over
       if (skillState.shieldActive && skillState.shieldCount > 0) {
         // シールドを使用してゲームを続行
         vibrate(50);
@@ -1573,6 +1590,9 @@ export default function MimoPlayground() {
       } else if (type === 'hit') {
         oscillator.frequency.value = 110; // A2
         oscillator.type = 'sawtooth';
+      } else if (type === 'miss') {
+        oscillator.frequency.value = 146.83; // D3
+        oscillator.type = 'square';
       } else {
         oscillator.frequency.value = 220;
         oscillator.type = 'square';
@@ -2518,8 +2538,6 @@ export default function MimoPlayground() {
       checkAchievementsRef.current();
     }, 0);
 
-    vibrate(200);
-    playSound('hit');
   }, [checkDailyChallengeCompletion, gameStats, cosmicState.combo, cosmicState.bestCombo, cosmicState.score]);
 
   // Cosmic Catch: パーティクル生成
