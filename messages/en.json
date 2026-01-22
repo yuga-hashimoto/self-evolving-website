@@ -258,6 +258,14 @@
         "zoneGreen": "Green",
         "zoneYellow": "Yellow"
       },
+      "neonSnake": {
+        "title": "Neon Snake",
+        "subtitle": "Neon Arcade",
+        "description": "Control a neon snake to collect food and power-ups! Watch out for obstacles!",
+        "tapToStart": "Swipe to change direction!",
+        "controls": "4-direction swipe (up/down/left/right) to control snake",
+        "backToMenu": "Back to Menu"
+      },
       "achievements": {
         "title": "Achievements",
         "description": "Play games to unlock achievements!",
@@ -270,7 +278,7 @@
         "title": "Tutorial",
         "welcome": "Welcome to Mimo Games!",
         "step1Title": "1️⃣ Game Selection",
-        "step1Desc": "Choose from 5 different games. Each has unique features - you'll find your favorite!",
+        "step1Desc": "Choose from 6 different games. Each has unique features - you'll find your favorite!",
         "step2Title": "2️⃣ Daily Challenges",
         "step2Desc": "New challenges every day! Clear them to earn coins, and maintain your streak for bonuses!",
         "step3Title": "3️⃣ Achievements",

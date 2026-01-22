@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/immutability, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -176,11 +176,70 @@ interface CosmicCatchState {
 interface DailyChallenge {
   id: string; // YYYY-MM-DD
   date: string;
-  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm';
+  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake';
   target: number; // Target score to beat
   description: string;
   completed: boolean;
   reward: number; // Coins to reward
+}
+
+// Neon Snake Interfaces
+interface SnakeSegment {
+  x: number;
+  y: number;
+}
+
+interface Food {
+  x: number;
+  y: number;
+  glowPhase: number;
+}
+
+interface PowerUp {
+  x: number;
+  y: number;
+  type: 'speed' | 'slow' | 'shield' | 'bonus';
+  phase: number;
+}
+
+interface ObstacleObj {
+  id: number;
+  x: number;
+  y: number;
+  glowPhase: number;
+}
+
+interface NeonSnakeParticle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  color: string;
+}
+
+interface NeonSnakeState {
+  isPlaying: boolean;
+  isGameOver: boolean;
+  score: number;
+  highScore: number;
+  combo: number;
+  bestCombo: number;
+  snake: SnakeSegment[];
+  direction: 'up' | 'down' | 'left' | 'right';
+  nextDirection: 'up' | 'down' | 'left' | 'right';
+  food: Food | null;
+  powerUps: PowerUp[];
+  obstacles: ObstacleObj[];
+  particles: NeonSnakeParticle[];
+  speed: number;
+  baseSpeed: number;
+  moveTimer: number;
+  activePowerUp: { type: 'speed' | 'slow' | 'shield' | 'bonus'; endTime: number } | null;
+  scoreMultiplier: number;
+  foodsEaten: number;
+  nearMisses: number;
 }
 
 // Rhythm Tapper Interfaces - now imported from component
@@ -219,6 +278,10 @@ interface GameStats {
   rhythm100Score: boolean;
   rhythm500Score: boolean;
   rhythmBestCombo10: boolean;
+  snakeFirstPlay: boolean;
+  snake100Score: boolean;
+  snake500Score: boolean;
+  snakeNoMiss100: boolean;
   dailyStreak3: boolean;
   dailyStreak7: boolean;
   allGamesPlayed: boolean;
@@ -257,6 +320,17 @@ const TILE_COLORS: Record<number, string> = {
   4096: '#3c3a32',
   8192: '#1e1d18',
 };
+
+// Neon Snake Constants
+const SNAKE_GRID_SIZE = 20; // 20x20 grid
+const SNAKE_INITIAL_SPEED = 8; // Frames between moves (lower = faster)
+const SNAKE_SPEED_INCREMENT = 0.5; // Speed increase per score milestone
+const SNAKE_MIN_SPEED = 3; // Minimum speed
+const POWER_UP_DURATION = 5000; // 5 seconds in ms
+const SHIELD_DURATION = 8000; // 8 seconds in ms
+const BONUS_FOOD_COUNT = 3; // Number of foods with 2x multiplier
+const OBSTACLE_SPAWN_INTERVAL = 100; // Points between obstacle spawns
+const POWER_UP_SPAWN_INTERVAL = 60; // Points between power-up spawns
 
 // Achievement Definitions
 const ACHIEVEMENTS: Achievement[] = [
@@ -378,9 +452,36 @@ const ACHIEVEMENTS: Achievement[] = [
     condition: (stats) => stats.dailyStreak7,
   },
   {
+    id: 'snake_100',
+    name: 'Neon Starter',
+    description: 'Score 100+ in Neon Snake',
+    unlocked: false,
+    icon: '🐍',
+    reward: 20,
+    condition: (stats) => stats.snake100Score,
+  },
+  {
+    id: 'snake_500',
+    name: 'Neon Conqueror',
+    description: 'Score 500+ in Neon Snake',
+    unlocked: false,
+    icon: '👑',
+    reward: 50,
+    condition: (stats) => stats.snake500Score,
+  },
+  {
+    id: 'snake_no_miss',
+    name: 'Serpent Master',
+    description: 'Get 100+ points without dying',
+    unlocked: false,
+    icon: '💎',
+    reward: 100,
+    condition: (stats) => stats.snakeNoMiss100,
+  },
+  {
     id: 'all_games',
     name: 'Game Explorer',
-    description: 'Play all 5 games',
+    description: 'Play all 6 games',
     unlocked: false,
     icon: '🎮',
     reward: 30,
@@ -391,7 +492,7 @@ const ACHIEVEMENTS: Achievement[] = [
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake'>('menu');
   const [shopOpen, setShopOpen] = useState(false);
 
   const [gameState, setGameState] = useState<InfinityDropState>({
@@ -497,6 +598,30 @@ export default function MimoPlayground() {
     particles: [],
   });
 
+  // Neon Snake state
+  const [snakeState, setSnakeState] = useState<NeonSnakeState>({
+    isPlaying: false,
+    isGameOver: false,
+    score: 0,
+    highScore: 0,
+    combo: 0,
+    bestCombo: 0,
+    snake: [],
+    direction: 'right',
+    nextDirection: 'right',
+    food: null,
+    powerUps: [],
+    obstacles: [],
+    particles: [],
+    speed: SNAKE_INITIAL_SPEED,
+    baseSpeed: SNAKE_INITIAL_SPEED,
+    moveTimer: 0,
+    activePowerUp: null,
+    scoreMultiplier: 1,
+    foodsEaten: 0,
+    nearMisses: 0,
+  });
+
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallengeState>({
     currentChallenge: null,
     streak: 0,
@@ -528,6 +653,10 @@ export default function MimoPlayground() {
     rhythm100Score: false,
     rhythm500Score: false,
     rhythmBestCombo10: false,
+    snakeFirstPlay: false,
+    snake100Score: false,
+    snake500Score: false,
+    snakeNoMiss100: false,
     dailyStreak3: false,
     dailyStreak7: false,
     allGamesPlayed: false,
@@ -542,14 +671,16 @@ export default function MimoPlayground() {
   const neonRequestRef = useRef<number | null>(null);
   const cosmicRequestRef = useRef<number | null>(null);
   const rhythmRequestRef = useRef<number | null>(null);
+  const snakeRequestRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const checkAchievementsRef = useRef<() => void>(() => {});
-  const updateScoreAchievementsRef = useRef<(gameType: 'infinity' | 'neon' | 'cosmic' | 'rhythm', score: number) => void>(() => {});
+  const updateScoreAchievementsRef = useRef<(gameType: 'infinity' | 'neon' | 'cosmic' | 'rhythm' | 'snake', score: number) => void>(() => {});
 
   // Ref-based touch storage to prevent memory leaks
   const touchStartRef2048 = useRef<{ x: number; y: number } | null>(null);
   const touchStartRefNeon = useRef<{ x: number; y: number; time: number } | null>(null);
   const touchStartRefCosmic = useRef<{ x: number; y: number; time: number } | null>(null);
+  const touchStartRefSnake = useRef<{ x: number; y: number; time: number } | null>(null);
 
   const { trackClick } = useAnalytics();
 
@@ -631,7 +762,7 @@ export default function MimoPlayground() {
     const hash = dateStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
     // Cycle through games
-    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm'];
+    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake'];
     const game = games[hash % games.length];
 
     // Generate target based on game type
@@ -664,6 +795,11 @@ export default function MimoPlayground() {
         target = 300 + (hash % 300); // 300-600 points
         description = `Score ${target}+ in Rhythm Tapper`;
         reward = 70;
+        break;
+      case 'snake':
+        target = 200 + (hash % 200); // 200-400 points
+        description = `Score ${target}+ in Neon Snake`;
+        reward = 65;
         break;
     }
 
@@ -1607,7 +1743,7 @@ export default function MimoPlayground() {
   }, [dailyChallenge, getTodayDate, playSound, vibrate, gameStats]);
 
   // Update score-based achievements
-  const updateScoreAchievements = useCallback((gameType: 'infinity' | 'neon' | 'cosmic' | 'rhythm', score: number) => {
+  const updateScoreAchievements = useCallback((gameType: 'infinity' | 'neon' | 'cosmic' | 'rhythm' | 'snake', score: number) => {
     let updated = false;
     const newStats = { ...gameStats };
 
@@ -1647,10 +1783,19 @@ export default function MimoPlayground() {
         newStats.rhythm500Score = true;
         updated = true;
       }
+    } else if (gameType === 'snake') {
+      if (score >= 100 && !newStats.snake100Score) {
+        newStats.snake100Score = true;
+        updated = true;
+      }
+      if (score >= 500 && !newStats.snake500Score) {
+        newStats.snake500Score = true;
+        updated = true;
+      }
     }
 
     // Check all games played
-    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && newStats.rhythmFirstPlay && !newStats.allGamesPlayed) {
+    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && newStats.rhythmFirstPlay && newStats.snakeFirstPlay && !newStats.allGamesPlayed) {
       newStats.allGamesPlayed = true;
       updated = true;
     }
@@ -3360,6 +3505,690 @@ export default function MimoPlayground() {
 
   // ==================== END RHYTHM TAPPER ====================
 
+  // ==================== NEON SNAKE ====================
+
+  // Start Neon Snake game
+  const startNeonSnakeGame = useCallback(() => {
+    // Initialize snake with 3 segments in middle
+    const gridWidth = SNAKE_GRID_SIZE;
+    const gridHeight = SNAKE_GRID_SIZE;
+    const startX = Math.floor(gridWidth / 2);
+    const startY = Math.floor(gridHeight / 2);
+
+    const initialSnake: SnakeSegment[] = [
+      { x: startX, y: startY },
+      { x: startX - 1, y: startY },
+      { x: startX - 2, y: startY },
+    ];
+
+    const newFood = spawnSnakeFood(initialSnake, [], gridWidth, gridHeight);
+
+    setSnakeState({
+      isPlaying: true,
+      isGameOver: false,
+      score: 0,
+      highScore: snakeState.highScore,
+      combo: 0,
+      bestCombo: 0,
+      snake: initialSnake,
+      direction: 'right',
+      nextDirection: 'right',
+      food: newFood,
+      powerUps: [],
+      obstacles: [],
+      particles: [],
+      speed: SNAKE_INITIAL_SPEED,
+      baseSpeed: SNAKE_INITIAL_SPEED,
+      moveTimer: 0,
+      activePowerUp: null,
+      scoreMultiplier: 1,
+      foodsEaten: 0,
+      nearMisses: 0,
+    });
+
+    // First play achievement
+    if (!gameStats.snakeFirstPlay) {
+      setGameStats((prev) => ({ ...prev, snakeFirstPlay: true }));
+    }
+
+    storeGameEvent('snake', { type: 'start' });
+    vibrate(30);
+  }, [gameStats.snakeFirstPlay, snakeState.highScore]);
+
+  // Spawn snake food
+  const spawnSnakeFood = useCallback((snake: SnakeSegment[], obstacles: ObstacleObj[], gridWidth: number, gridHeight: number): Food => {
+    let x: number, y: number;
+    let attempts = 0;
+    const maxAttempts = 100;
+
+    do {
+      x = Math.floor(Math.random() * gridWidth);
+      y = Math.floor(Math.random() * gridHeight);
+      attempts++;
+    } while (
+      attempts < maxAttempts &&
+      (snake.some(seg => seg.x === x && seg.y === y) ||
+       obstacles.some(obs => obs.x === x && obs.y === y))
+    );
+
+    return { x, y, glowPhase: 0 };
+  }, []);
+
+  // Spawn power-up
+  const spawnSnakePowerUp = useCallback((snake: SnakeSegment[], food: Food | null, obstacles: ObstacleObj[], gridWidth: number, gridHeight: number): PowerUp | null => {
+    const types: ('speed' | 'slow' | 'shield' | 'bonus')[] = ['speed', 'slow', 'shield', 'bonus'];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    let x: number, y: number;
+    let attempts = 0;
+    const maxAttempts = 50;
+
+    do {
+      x = Math.floor(Math.random() * gridWidth);
+      y = Math.floor(Math.random() * gridHeight);
+      attempts++;
+    } while (
+      attempts < maxAttempts &&
+      (snake.some(seg => seg.x === x && seg.y === y) ||
+       (food && food.x === x && food.y === y) ||
+       obstacles.some(obs => obs.x === x && obs.y === y))
+    );
+
+    if (attempts >= maxAttempts) return null;
+
+    return { x, y, type, phase: 0 };
+  }, []);
+
+  // Spawn obstacle
+  const spawnSnakeObstacle = useCallback((snake: SnakeSegment[], food: Food | null, powerUps: PowerUp[], gridWidth: number, gridHeight: number): ObstacleObj | null => {
+    let x: number, y: number;
+    let attempts = 0;
+    const maxAttempts = 50;
+
+    do {
+      x = Math.floor(Math.random() * gridWidth);
+      y = Math.floor(Math.random() * gridHeight);
+      attempts++;
+    } while (
+      attempts < maxAttempts &&
+      (snake.some(seg => seg.x === x && seg.y === y) ||
+       (food && food.x === x && food.y === y) ||
+       powerUps.some(pu => pu.x === x && pu.y === y))
+    );
+
+    if (attempts >= maxAttempts) return null;
+
+    return { id: Date.now() + Math.random(), x, y, glowPhase: 0 };
+  }, []);
+
+  // Create snake particles
+  const createSnakeParticles = useCallback((x: number, y: number, color: string, count: number = 8) => {
+    setSnakeState((prev) => {
+      const newParticles: NeonSnakeParticle[] = [];
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count;
+        const speed = 2 + Math.random() * 2;
+        newParticles.push({
+          id: Date.now() + Math.random(),
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 20 + Math.random() * 10,
+          color,
+        });
+      }
+      const maxParticles = isMobile ? MOBILE_PARTICLE_LIMIT : 60;
+      const allParticles = [...prev.particles, ...newParticles];
+      return {
+        ...prev,
+        particles: allParticles.slice(-maxParticles),
+      };
+    });
+  }, []);
+
+  // Handle snake game over
+  const gameOverSnake = useCallback(() => {
+    setSnakeState((prev) => {
+      const newHighScore = Math.max(prev.highScore, prev.score);
+
+      if (prev.score > prev.highScore) {
+        localStorage.setItem('neonSnake_highScore', prev.score.toString());
+      }
+
+      // Achievement checks
+      if (prev.score >= 100 && !gameStats.snake100Score) {
+        setGameStats((s) => ({ ...s, snake100Score: true }));
+      }
+      if (prev.score >= 500 && !gameStats.snake500Score) {
+        setGameStats((s) => ({ ...s, snake500Score: true }));
+      }
+      if (prev.score >= 100 && prev.nearMisses === 0 && !gameStats.snakeNoMiss100) {
+        setGameStats((s) => ({ ...s, snakeNoMiss100: true }));
+      }
+
+      updateScoreAchievements('snake', prev.score);
+
+      return {
+        ...prev,
+        isPlaying: false,
+        isGameOver: true,
+        highScore: newHighScore,
+      };
+    });
+
+    vibrate(100);
+    storeGameEvent('snake', { type: 'gameOver', score: snakeState.score });
+  }, [snakeState.score, gameStats, updateScoreAchievements]);
+
+  // Neon Snake game loop
+  const neonSnakeGameLoop = useCallback(() => {
+    setSnakeState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver) return prev;
+
+      const gridWidth = SNAKE_GRID_SIZE;
+      const gridHeight = SNAKE_GRID_SIZE;
+
+      // Update animation phase for visual effects
+      const newFood = prev.food ? { ...prev.food, glowPhase: prev.food.glowPhase + 0.1 } : null;
+      const newPowerUps = prev.powerUps.map(pu => ({ ...pu, phase: pu.phase + 0.1 }));
+      const newObstacles = prev.obstacles.map(obs => ({ ...obs, glowPhase: obs.glowPhase + 0.1 }));
+
+      // Move timer
+      let moveTimer = prev.moveTimer + 1;
+      let currentSpeed = prev.speed;
+      if (prev.activePowerUp) {
+        if (prev.activePowerUp.type === 'speed') {
+          currentSpeed = prev.baseSpeed * 0.5; // Faster (lower is faster for moveTimer)
+        } else if (prev.activePowerUp.type === 'slow') {
+          currentSpeed = prev.baseSpeed * 2; // Slower
+        }
+      }
+
+      if (moveTimer < currentSpeed) {
+        // Still waiting to move - update visual effects only
+        return {
+          ...prev,
+          moveTimer,
+          food: newFood,
+          powerUps: newPowerUps,
+          obstacles: newObstacles,
+        };
+      }
+
+      // Time to move
+      moveTimer = 0;
+
+      // Apply next direction (prevent 180-degree turns)
+      let newDirection = prev.nextDirection;
+      if (
+        (prev.direction === 'up' && newDirection === 'down') ||
+        (prev.direction === 'down' && newDirection === 'up') ||
+        (prev.direction === 'left' && newDirection === 'right') ||
+        (prev.direction === 'right' && newDirection === 'left')
+      ) {
+        newDirection = prev.direction;
+      }
+
+      // Calculate new head position
+      const head = prev.snake[0];
+      let newHeadX = head.x;
+      let newHeadY = head.y;
+
+      switch (newDirection) {
+        case 'up': newHeadY--; break;
+        case 'down': newHeadY++; break;
+        case 'left': newHeadX--; break;
+        case 'right': newHeadX++; break;
+      }
+
+      // Check wall collision
+      if (newHeadX < 0 || newHeadX >= gridWidth || newHeadY < 0 || newHeadY >= gridHeight) {
+        gameOverSnake();
+        return prev;
+      }
+
+      // Check self collision (excluding tail since it will move)
+      const bodyWithoutTail = prev.snake.slice(0, -1);
+      if (bodyWithoutTail.some(seg => seg.x === newHeadX && seg.y === newHeadY)) {
+        gameOverSnake();
+        return prev;
+      }
+
+      // Check obstacle collision
+      if (prev.obstacles.some(obs => obs.x === newHeadX && obs.y === newHeadY)) {
+        if (prev.activePowerUp?.type !== 'shield') {
+          gameOverSnake();
+          return prev;
+        }
+      }
+
+      // Move snake
+      const newSnake: SnakeSegment[] = [{ x: newHeadX, y: newHeadY }, ...prev.snake];
+
+      let newScore = prev.score;
+      let newCombo = prev.combo;
+      let newFoodsEaten = prev.foodsEaten;
+      let newNearMisses = prev.nearMisses;
+      let newMultiplier = prev.scoreMultiplier;
+      let newActivePowerUp = prev.activePowerUp;
+      let newBaseSpeed = prev.baseSpeed;
+      const newPowerUpsList = [...prev.powerUps];
+      const newObstaclesList = [...prev.obstacles];
+
+      // Check food collision
+      let ateFood = false;
+      if (prev.food && newHeadX === prev.food.x && newHeadY === prev.food.y) {
+        ateFood = true;
+        newFoodsEaten++;
+
+        // Don't remove tail (snake grows)
+        // Score with multiplier
+        const foodPoints = 10 * prev.scoreMultiplier;
+        newScore += foodPoints;
+        newCombo++;
+
+        // Update best combo
+        if (newCombo > prev.bestCombo) {
+          newCombo = newCombo; // Keep local variable for scoring
+        }
+
+        // Spawn new food
+        const newFoodObj = spawnSnakeFood(newSnake, prev.obstacles, gridWidth, gridHeight);
+
+        // Chance to spawn power-up
+        if (newFoodsEaten % 3 === 0) {
+          const newPowerUp = spawnSnakePowerUp(newSnake, newFoodObj, prev.obstacles, gridWidth, gridHeight);
+          if (newPowerUp) {
+            newPowerUpsList.push(newPowerUp);
+          }
+        }
+
+        // Chance to spawn obstacle
+        if (newScore >= OBSTACLE_SPAWN_INTERVAL && newScore % OBSTACLE_SPAWN_INTERVAL < 10) {
+          const newObstacle = spawnSnakeObstacle(newSnake, newFoodObj, newPowerUpsList, gridWidth, gridHeight);
+          if (newObstacle) {
+            newObstaclesList.push(newObstacle);
+          }
+        }
+
+        // Speed up based on score
+        if (newScore > 0 && newScore % 100 === 0) {
+          newBaseSpeed = Math.max(SNAKE_MIN_SPEED, newBaseSpeed - SNAKE_SPEED_INCREMENT);
+        }
+
+        // Visual feedback
+        createSnakeParticles(newHeadX * (300 / gridWidth), newHeadY * (300 / gridHeight), '#00ffff', 12);
+        vibrate(10);
+      } else {
+        // Didn't eat food - remove tail
+        newSnake.pop();
+      }
+
+      // Check power-up collision
+      const collectedPowerUpIndex = prev.powerUps.findIndex(pu => pu.x === newHeadX && pu.y === newHeadY);
+      if (collectedPowerUpIndex >= 0) {
+        const collectedPowerUp = prev.powerUps[collectedPowerUpIndex];
+        newPowerUpsList.splice(collectedPowerUpIndex, 1);
+
+        if (collectedPowerUp.type === 'shield') {
+          newActivePowerUp = { type: 'shield', endTime: Date.now() + SHIELD_DURATION };
+        } else if (collectedPowerUp.type === 'bonus') {
+          newMultiplier = 2;
+          newActivePowerUp = { type: 'bonus', endTime: Date.now() + POWER_UP_DURATION };
+        } else if (collectedPowerUp.type === 'speed' || collectedPowerUp.type === 'slow') {
+          newActivePowerUp = { type: collectedPowerUp.type, endTime: Date.now() + POWER_UP_DURATION };
+        }
+
+        createSnakeParticles(newHeadX * (300 / gridWidth), newHeadY * (300 / gridHeight), '#ffff00', 8);
+        vibrate(20);
+      }
+
+      // Check power-up expiration
+      if (newActivePowerUp && Date.now() >= newActivePowerUp.endTime) {
+        newActivePowerUp = null;
+        newMultiplier = 1;
+      }
+
+      // Check for near miss (optional - snake passes close to obstacle)
+      // This is a simple implementation - could be expanded
+      if (prev.obstacles.some(obs => {
+        const dist = Math.abs(obs.x - newHeadX) + Math.abs(obs.y - newHeadY);
+        return dist === 1 && !ateFood;
+      })) {
+        newNearMisses++;
+      }
+
+      // Update particles (move and fade)
+      const newParticles = prev.particles
+        .map((p) => ({
+          ...p,
+          x: p.x + p.vx,
+          y: p.y + p.vy,
+          life: p.life - 1,
+        }))
+        .filter((p) => p.life > 0)
+        .slice(0, isMobile ? MOBILE_PARTICLE_LIMIT : 60);
+
+      return {
+        ...prev,
+        snake: newSnake,
+        direction: newDirection,
+        nextDirection: newDirection,
+        food: newFood,
+        powerUps: newPowerUpsList,
+        obstacles: newObstaclesList,
+        particles: newParticles,
+        moveTimer,
+        score: newScore,
+        combo: newCombo,
+        bestCombo: Math.max(prev.bestCombo, newCombo),
+        foodsEaten: newFoodsEaten,
+        nearMisses: newNearMisses,
+        speed: newBaseSpeed,
+        baseSpeed: newBaseSpeed,
+        activePowerUp: newActivePowerUp,
+        scoreMultiplier: newMultiplier,
+      };
+    });
+
+    drawNeonSnake();
+    snakeRequestRef.current = requestAnimationFrame(neonSnakeGameLoop);
+  }, [spawnSnakeFood, spawnSnakePowerUp, spawnSnakeObstacle, createSnakeParticles, gameOverSnake]);
+
+  // Draw Neon Snake
+  const drawNeonSnake = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Background gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, '#0a0a1a');
+    gradient.addColorStop(1, '#1a0a2a');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Grid (subtle)
+    const gridWidth = SNAKE_GRID_SIZE;
+    const gridHeight = SNAKE_GRID_SIZE;
+    const cellWidth = width / gridWidth;
+    const cellHeight = height / gridHeight;
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= gridWidth; x++) {
+      ctx.beginPath();
+      ctx.moveTo(x * cellWidth, 0);
+      ctx.lineTo(x * cellWidth, height);
+      ctx.stroke();
+    }
+    for (let y = 0; y <= gridHeight; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * cellHeight);
+      ctx.lineTo(width, y * cellHeight);
+      ctx.stroke();
+    }
+
+    // Draw obstacles
+    snakeState.obstacles.forEach((obs) => {
+      const x = obs.x * cellWidth;
+      const y = obs.y * cellHeight;
+      const size = Math.min(cellWidth, cellHeight) * 0.8;
+      const padding = (Math.min(cellWidth, cellHeight) - size) / 2;
+
+      // Glow effect
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#ff0066';
+
+      ctx.fillStyle = '#ff0066';
+      ctx.fillRect(x + padding, y + padding, size, size);
+
+      ctx.shadowBlur = 0;
+
+      // Border
+      ctx.strokeStyle = '#ff6699';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + padding, y + padding, size, size);
+    });
+
+    // Draw power-ups
+    snakeState.powerUps.forEach((pu) => {
+      const x = pu.x * cellWidth;
+      const y = pu.y * cellHeight;
+      const size = Math.min(cellWidth, cellHeight) * 0.7;
+      const padding = (Math.min(cellWidth, cellHeight) - size) / 2;
+      const pulse = Math.sin(pu.phase) * 0.3 + 0.7;
+
+      let color = '#ffffff';
+      let emoji = '?';
+      switch (pu.type) {
+        case 'speed': color = '#ffff00'; emoji = '⚡'; break;
+        case 'slow': color = '#00ffff'; emoji = '🐌'; break;
+        case 'shield': color = '#00ff00'; emoji = '🛡️'; break;
+        case 'bonus': color = '#ff00ff'; emoji = '🌟'; break;
+      }
+
+      // Glow
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = color;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = pulse;
+      ctx.beginPath();
+      ctx.arc(x + cellWidth / 2, y + cellHeight / 2, size / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+
+      // Emoji
+      ctx.font = `${size * 0.6}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(emoji, x + cellWidth / 2, y + cellHeight / 2);
+    });
+
+    // Draw food
+    if (snakeState.food) {
+      const x = snakeState.food.x * cellWidth;
+      const y = snakeState.food.y * cellHeight;
+      const size = Math.min(cellWidth, cellHeight) * 0.6;
+      const padding = (Math.min(cellWidth, cellHeight) - size) / 2;
+      const pulse = Math.sin(snakeState.food.glowPhase) * 0.3 + 0.7;
+
+      // Glow
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#00ffff';
+      ctx.fillStyle = '#00ffff';
+      ctx.globalAlpha = pulse;
+      ctx.beginPath();
+      ctx.arc(x + cellWidth / 2, y + cellHeight / 2, size / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+
+      // Inner highlight
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(x + cellWidth / 2 - size * 0.1, y + cellHeight / 2 - size * 0.1, size * 0.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Draw snake
+    snakeState.snake.forEach((segment, index) => {
+      const x = segment.x * cellWidth;
+      const y = segment.y * cellHeight;
+      const size = Math.min(cellWidth, cellHeight) * 0.8;
+      const padding = (Math.min(cellWidth, cellHeight) - size) / 2;
+
+      // Head is cyan, body fades to magenta
+      const isHead = index === 0;
+      const hue = isHead ? 180 : 300 - Math.min(index * 3, 100);
+      const lightness = isHead ? 60 : 50 - Math.min(index * 2, 30);
+      const color = `hsl(${hue}, 100%, ${lightness}%)`;
+
+      // Glow for head
+      if (isHead) {
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = color;
+      }
+
+      ctx.fillStyle = color;
+      ctx.fillRect(x + padding, y + padding, size, size);
+
+      if (isHead) {
+        ctx.shadowBlur = 0;
+      }
+
+      // Border for segment
+      ctx.strokeStyle = `hsl(${hue}, 100%, ${lightness + 20}%)`;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + padding, y + padding, size, size);
+
+      // Eyes for head
+      if (isHead) {
+        ctx.fillStyle = '#000000';
+        const eyeSize = size * 0.15;
+        const eyeOffset = size * 0.25;
+
+        // Position eyes based on direction
+        let eye1X = x + cellWidth / 2 - eyeOffset;
+        let eye1Y = y + cellHeight / 2 - eyeOffset;
+        let eye2X = x + cellWidth / 2 + eyeOffset;
+        let eye2Y = y + cellHeight / 2 - eyeOffset;
+
+        if (snakeState.direction === 'down') {
+          eye1Y = y + cellHeight / 2 + eyeOffset;
+          eye2Y = y + cellHeight / 2 + eyeOffset;
+        } else if (snakeState.direction === 'left') {
+          eye1X = x + cellWidth / 2 - eyeOffset;
+          eye1Y = y + cellHeight / 2 - eyeOffset;
+          eye2X = x + cellWidth / 2 - eyeOffset;
+          eye2Y = y + cellHeight / 2 + eyeOffset;
+        } else if (snakeState.direction === 'right') {
+          eye1X = x + cellWidth / 2 + eyeOffset;
+          eye1Y = y + cellHeight / 2 - eyeOffset;
+          eye2X = x + cellWidth / 2 + eyeOffset;
+          eye2Y = y + cellHeight / 2 + eyeOffset;
+        }
+
+        ctx.beginPath();
+        ctx.arc(eye1X, eye1Y, eyeSize, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(eye2X, eye2Y, eyeSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+
+    // Draw particles
+    if (snakeState.particles) {
+      snakeState.particles.forEach((p) => {
+        const alpha = Math.min(p.life / 20, 1);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+    }
+
+    // HUD
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(5, 5, 160, 100);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${snakeState.score}`, 15, 25);
+
+    // Combo display
+    if (snakeState.combo > 0) {
+      const comboColor = snakeState.combo >= 10 ? '#fbbf24' : snakeState.combo >= 5 ? '#22c55e' : '#fff';
+      ctx.fillStyle = comboColor;
+      ctx.fillText(`Combo: x${snakeState.combo}`, 15, 45);
+    }
+
+    // Multiplier
+    if (snakeState.scoreMultiplier > 1) {
+      ctx.fillStyle = '#ff00ff';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText(`x${snakeState.scoreMultiplier} BONUS`, 15, 65);
+    }
+
+    // Active power-up indicator
+    if (snakeState.activePowerUp) {
+      const timeLeft = Math.max(0, Math.ceil((snakeState.activePowerUp.endTime - Date.now()) / 1000));
+      let label = '';
+      let color = '#fff';
+
+      switch (snakeState.activePowerUp.type) {
+        case 'shield': label = `🛡️ Shield: ${timeLeft}s`; color = '#00ff00'; break;
+        case 'bonus': label = `🌟 Bonus: ${timeLeft}s`; color = '#ff00ff'; break;
+        case 'speed': label = `⚡ Speed: ${timeLeft}s`; color = '#ffff00'; break;
+        case 'slow': label = `🐌 Slow: ${timeLeft}s`; color = '#00ffff'; break;
+      }
+
+      ctx.fillStyle = color;
+      ctx.font = 'bold 12px Arial';
+      ctx.fillText(label, 15, 85);
+    }
+
+    // High score
+    if (snakeState.highScore > 0) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(width - 115, 5, 110, 25);
+      ctx.fillStyle = '#00ffff';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'right';
+      ctx.fillText(`High: ${snakeState.highScore}`, width - 15, 22);
+    }
+  }, [snakeState]);
+
+  // Snake controls
+  const handleSnakeDirection = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
+    setSnakeState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver) return prev;
+
+      // Prevent 180-degree turns
+      if (
+        (prev.direction === 'up' && direction === 'down') ||
+        (prev.direction === 'down' && direction === 'up') ||
+        (prev.direction === 'left' && direction === 'right') ||
+        (prev.direction === 'right' && direction === 'left')
+      ) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        nextDirection: direction,
+      };
+    });
+  }, []);
+
+  // Neon Snake game loop useEffect
+  useEffect(() => {
+    if (snakeState.isPlaying && !snakeState.isGameOver) {
+      if (snakeRequestRef.current) {
+        cancelAnimationFrame(snakeRequestRef.current);
+      }
+      snakeRequestRef.current = requestAnimationFrame(neonSnakeGameLoop);
+    }
+    return () => {
+      if (snakeRequestRef.current) {
+        cancelAnimationFrame(snakeRequestRef.current);
+      }
+    };
+  }, [snakeState.isPlaying, snakeState.isGameOver, neonSnakeGameLoop]);
+
+  // ==================== END NEON SNAKE ====================
+
   // キーコントロール（PC用）
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -3460,6 +4289,35 @@ export default function MimoPlayground() {
           }
         }
       }
+      // Neon Snake
+      else if (currentGame === 'snake') {
+        if (!snakeState.isPlaying && !snakeState.isGameOver) {
+          if (e.code === 'Space' || e.code === 'Enter') {
+            e.preventDefault();
+            startNeonSnakeGame();
+          }
+        } else if (snakeState.isGameOver) {
+          if (e.code === 'Space' || e.code === 'Enter') {
+            e.preventDefault();
+            startNeonSnakeGame();
+          }
+        } else if (snakeState.isPlaying && !snakeState.isGameOver) {
+          const dirMap: Record<string, 'up' | 'down' | 'left' | 'right'> = {
+            ArrowUp: 'up',
+            ArrowDown: 'down',
+            ArrowLeft: 'left',
+            ArrowRight: 'right',
+            KeyW: 'up',
+            KeyS: 'down',
+            KeyA: 'left',
+            KeyD: 'right',
+          };
+          if (dirMap[e.code]) {
+            e.preventDefault();
+            handleSnakeDirection(dirMap[e.code]);
+          }
+        }
+      }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -3484,7 +4342,7 @@ export default function MimoPlayground() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, neonState.isPlaying, neonState.isGameOver, startNeonDashGame, jump, slide, cosmicState.isPlaying, cosmicState.isGameOver, startCosmicGame]);
+  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, neonState.isPlaying, neonState.isGameOver, startNeonDashGame, jump, slide, cosmicState.isPlaying, cosmicState.isGameOver, startCosmicGame, rhythmState.isPlaying, rhythmState.isGameOver, startRhythmGame, handleRhythmTap, snakeState.isPlaying, snakeState.isGameOver, startNeonSnakeGame, handleSnakeDirection]);
 
   // スコア表示用フォーマット
   const formatScore = (score: number): string => {
@@ -4033,6 +4891,34 @@ export default function MimoPlayground() {
                 </div>
                 <div className="text-xs text-slate-400">
                   {tc('highScore')}: {formatScore(rhythmState.highScore)}
+                </div>
+              </button>
+
+              {/* Neon Snake カード */}
+              <button
+                onClick={() => {
+                  setCurrentGame('snake');
+                  trackClick();
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
+                }}
+                aria-label={`${t('neonSnake.title')}. ${t('neonSnake.description')}`}
+                className="bg-gradient-to-br from-cyan-600 to-blue-800 p-6 rounded-xl border-2 border-cyan-500 hover:border-cyan-400 active:scale-95 active:bg-cyan-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                style={{
+                  minHeight: '140px',
+                  touchAction: 'manipulation',
+                }}
+              >
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-cyan-200 group-active:text-cyan-100">{t('neonSnake.title')}</div>
+                  <div className="text-cyan-200 text-sm mb-3">{t('neonSnake.subtitle')}</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    {t('neonSnake.description')}
+                  </p>
+                </div>
+                <div className="text-xs text-slate-400">
+                  {tc('highScore')}: {formatScore(snakeState.highScore)}
                 </div>
               </button>
             </div>
@@ -4603,8 +5489,120 @@ export default function MimoPlayground() {
           </>
         )}
 
+        {/* ==================== NEON SNAKE ==================== */}
+        {currentGame === 'snake' && (
+          <>
+            {/* Daily Challenge Status for Neon Snake */}
+            {dailyChallenge.currentChallenge && dailyChallenge.currentChallenge.game === 'snake' && (
+              <div className="mb-4 w-full max-w-md p-3 rounded-lg border border-amber-500/50 bg-amber-900/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <div className="text-sm">
+                      <span className="text-amber-400 font-bold">{t('dailyChallenge.short')}:</span>{' '}
+                      <span className="text-slate-300">{dailyChallenge.currentChallenge.target}+</span>
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-bold ${
+                    dailyChallenge.currentChallenge.completed
+                      ? 'bg-green-600 text-white'
+                      : 'bg-amber-600/50 text-amber-200'
+                  }`}>
+                    {dailyChallenge.currentChallenge.completed
+                      ? t('dailyChallenge.completed')
+                      : `${dailyChallenge.currentChallenge.reward} 💰`}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div
+              ref={containerRef}
+              className="w-full max-w-md bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden shadow-2xl shadow-cyan-900/10 relative"
+            >
+              <div className="relative">
+                <canvas
+                  ref={canvasRef}
+                  className="w-full block cursor-pointer touch-none"
+                  style={{
+                    touchAction: 'manipulation',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                  onClick={() => {
+                    if (!snakeState.isPlaying && !snakeState.isGameOver) {
+                      startNeonSnakeGame();
+                    } else if (snakeState.isGameOver) {
+                      startNeonSnakeGame();
+                    }
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    if (!snakeState.isPlaying && !snakeState.isGameOver) {
+                      startNeonSnakeGame();
+                    } else if (snakeState.isGameOver) {
+                      startNeonSnakeGame();
+                    }
+                  }}
+                />
+
+                {/* Game Over / Start Overlay */}
+                {!snakeState.isPlaying && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm rounded-lg z-10">
+                    <div className="text-center p-6">
+                      {snakeState.isGameOver ? (
+                        <>
+                          <div className="text-4xl mb-2">🐍</div>
+                          <div className="text-2xl font-bold text-white mb-2">GAME OVER</div>
+                          <div className="text-cyan-400 text-xl mb-1">Score: {snakeState.score}</div>
+                          <div className="text-pink-400 text-sm mb-2">Best Combo: {snakeState.bestCombo}</div>
+                          <div className="text-xs text-slate-400 mb-4">
+                            Foods: {snakeState.foodsEaten} | Near Misses: {snakeState.nearMisses}
+                          </div>
+                          <button className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded font-bold text-white">
+                            TAP TO START
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-4xl mb-2">🐍</div>
+                          <div className="text-2xl font-bold text-white mb-2">Neon Snake</div>
+                          <div className="text-cyan-200 text-sm mb-4">
+                            Eat food, avoid obstacles, collect power-ups!
+                          </div>
+                          <div className="text-xs text-slate-400 mb-4">
+                            <p className="mb-1">👆 Swipe to change direction</p>
+                            <p>⌨️ Arrow keys / WASD</p>
+                            <p className="mt-2">TAP TO START</p>
+                          </div>
+                          <button className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded font-bold text-white">
+                            TAP TO START
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 text-center text-slate-400 text-sm">
+              <p className="mb-2">🐍 {t('neonSnake.tapToStart')}</p>
+              <p className="text-xs">🎮 {t('neonSnake.controls')}</p>
+            </div>
+
+            <button
+              onClick={() => setCurrentGame('menu')}
+              className="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+            >
+              ← {t('neonSnake.backToMenu')}
+            </button>
+          </>
+        )}
+
         {/* 広告スペース（ゲームプレイ画面のみ） */}
-        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm') && (
+        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
               {t('adArea')}
@@ -4631,6 +5629,7 @@ export default function MimoPlayground() {
           <span>{t('neonDash.title')}: {formatScore(neonState.highScore)}</span>
           <span>{t('cosmicCatch.title')}: {formatScore(cosmicState.highScore)}</span>
           <span>{t('rhythmTapper.title')}: {formatScore(rhythmState.highScore)}</span>
+        <span>{t('neonSnake.title')}: {formatScore(snakeState.highScore)}</span>
         </div>
       </footer>
 
@@ -4880,6 +5879,78 @@ export default function MimoPlayground() {
           }}
           onTouchEnd={(e) => {
             // No action needed on end
+          }}
+          className="fixed inset-0 z-50"
+          style={{
+            touchAction: 'none',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        />
+      )}
+
+      {/* Neon Snake swipe input handler */}
+      {currentGame === 'snake' && (
+        <div
+          onTouchStart={(e) => {
+            e.preventDefault();
+
+            if (!snakeState.isPlaying || snakeState.isGameOver) {
+              if (snakeState.isGameOver || !snakeState.isPlaying) {
+                startNeonSnakeGame();
+              }
+              return;
+            }
+
+            const touch = e.touches[0];
+            touchStartRefSnake.current = {
+              x: touch.clientX,
+              y: touch.clientY,
+              time: Date.now(),
+            };
+          }}
+          onTouchMove={(e) => {
+            e.preventDefault();
+            if (!snakeState.isPlaying || snakeState.isGameOver) return;
+            if (!touchStartRefSnake.current) return;
+
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - touchStartRefSnake.current.x;
+            const deltaY = touch.clientY - touchStartRefSnake.current.y;
+
+            // Only trigger if swipe is significant enough
+            if (Math.abs(deltaX) < SWIPE_THRESHOLD && Math.abs(deltaY) < SWIPE_THRESHOLD) {
+              return;
+            }
+
+            // Determine direction based on which axis has greater movement
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+              // Horizontal swipe
+              if (deltaX > 0) {
+                handleSnakeDirection('right');
+              } else {
+                handleSnakeDirection('left');
+              }
+            } else {
+              // Vertical swipe
+              if (deltaY > 0) {
+                handleSnakeDirection('down');
+              } else {
+                handleSnakeDirection('up');
+              }
+            }
+
+            // Clear touch start to prevent multiple triggers
+            touchStartRefSnake.current = null;
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            touchStartRefSnake.current = null;
+          }}
+          onTouchCancel={(e) => {
+            e.preventDefault();
+            touchStartRefSnake.current = null;
           }}
           className="fixed inset-0 z-50"
           style={{
