@@ -167,7 +167,8 @@
       "towerStack": "Tower Stack",
       "pong": "Pong",
       "pongDescription": "Bounce the ball past the computer!",
-      "asteroids": "Asteroids"
+      "asteroids": "Asteroids",
+      "bubblePop": "Bubble Pop"
     },
     "mimo": {
       "title": "Mimo Games",

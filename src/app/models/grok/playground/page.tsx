@@ -15,10 +15,11 @@ import FlappyBirdGame from './components/FlappyBirdGame';
 import TowerStackGame from './components/TowerStackGame';
 import PongGame from './components/PongGame';
 import AsteroidsGame from './components/AsteroidsGame';
+import BubbleGame from './components/BubbleGame';
 
 export default function GrokPlayground() {
 
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -110,6 +111,12 @@ export default function GrokPlayground() {
             >
               {t('grok.asteroids') || 'Asteroids'}
             </button>
+            <button
+              onClick={() => setSelectedGame('bubble')}
+              className={`px-4 py-2 rounded ${selectedGame === 'bubble' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.bubblePop') || 'Bubble Pop'}
+            </button>
           </div>
 
           {/* Game container */}
@@ -126,6 +133,7 @@ export default function GrokPlayground() {
           {selectedGame === 'towerStack' && <TowerStackGame />}
           {selectedGame === 'pong' && <PongGame />}
           {selectedGame === 'asteroids' && <AsteroidsGame />}
+          {selectedGame === 'bubble' && <BubbleGame />}
         </div>
       </div>
 
