@@ -363,6 +363,12 @@ export default function TetrisGame() {
         width={canvasSize.width}
         height={canvasSize.height}
         className="border border-gray-300 bg-black mx-auto block"
+        style={{
+          touchAction: 'manipulation',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          WebkitTapHighlightColor: 'transparent',
+        }}
       />
       {gameOver && (
         <div className="mt-4">

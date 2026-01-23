@@ -167,7 +167,8 @@
       "towerStack": "タワー・スタック",
       "pong": "ポング",
       "pongDescription": "コンピュータを上回ってボールを打ち返せ！",
-      "asteroids": "アステロイド"
+      "asteroids": "アステロイド",
+      "bubblePop": "バブルポップ"
     },
     "mimo": {
       "title": "Mimo Games",

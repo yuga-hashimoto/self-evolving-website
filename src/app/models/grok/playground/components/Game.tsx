@@ -239,6 +239,12 @@ export default function Game() {
         height={canvasSize.height}
         className="border border-gray-300 bg-white"
         onClick={startGame}
+        style={{
+          touchAction: 'manipulation',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          WebkitTapHighlightColor: 'transparent',
+        }}
       />
       {gameOver && (
         <div className="mt-4">

@@ -293,6 +293,12 @@ export default function Two048Game() {
         width={canvasSize.width}
         height={canvasSize.height}
         className="border border-gray-300 bg-white mx-auto block"
+        style={{
+          touchAction: 'manipulation',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          WebkitTapHighlightColor: 'transparent',
+        }}
       />
       {gameOver && (
         <div className="mt-4">
