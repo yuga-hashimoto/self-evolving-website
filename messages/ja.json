@@ -166,7 +166,8 @@
       "flappyWings": "フラッピーウィング",
       "towerStack": "タワー・スタック",
       "pong": "ポング",
-      "pongDescription": "コンピュータを上回ってボールを打ち返せ！"
+      "pongDescription": "コンピュータを上回ってボールを打ち返せ！",
+      "asteroids": "アステロイド"
     },
     "mimo": {
       "title": "Mimo Games",
