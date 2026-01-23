@@ -1,12 +1,12 @@
 {
-  "date": "2026-01-23T09:51:45.352Z",
+  "date": "2026-01-23T21:40:47.603Z",
   "source": "ga4",
   "modelId": "mimo",
-  "pageviews": 24,
-  "revenue": "0.05",
-  "avgSessionDuration": 232,
-  "bounceRate": "20.0",
-  "rpm": "2.08",
-  "ctr": "0.83",
-  "sessions": 15
+  "pageviews": 21,
+  "revenue": "0.04",
+  "avgSessionDuration": 253,
+  "bounceRate": "18.2",
+  "rpm": "1.90",
+  "ctr": "1.49",
+  "sessions": 11
 }
