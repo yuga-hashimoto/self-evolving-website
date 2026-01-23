@@ -5151,6 +5151,44 @@ export default function MimoPlayground() {
               <p className="text-slate-400">{t('selectGameDesc')}</p>
             </div>
 
+            {/* Random Game Button - Prominent CTA */}
+            <div className="mb-6">
+              <button
+                onClick={() => {
+                  // Select random game from available games
+                  const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap')[] =
+                    ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap'];
+                  const randomGame = games[Math.floor(Math.random() * games.length)];
+
+                  setCurrentGame(randomGame);
+                  trackClick();
+
+                  // Haptic feedback
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate([30, 20, 30]);
+                  }
+
+                  // Auto-start 2048 if needed
+                  if (randomGame === '2048' && !game2048State.grid.length) {
+                    start2048Game(game2048State.difficulty);
+                  }
+                }}
+                className="w-full p-6 rounded-xl border-4 border-amber-500 bg-gradient-to-r from-amber-600 via-orange-500 to-red-500 hover:from-amber-500 hover:via-orange-400 hover:to-red-400 active:scale-[0.98] transition-all shadow-lg hover:shadow-amber-500/30 group touch-manipulation"
+                aria-label="Random game selector - play a surprise game!"
+                style={{
+                  touchAction: 'manipulation',
+                }}
+              >
+                <div className="flex items-center justify-center gap-3">
+                  <span className="text-4xl group-hover:animate-bounce">🎲</span>
+                  <div className="text-left">
+                    <div className="text-xl font-bold text-white">{t('randomGame')}</div>
+                    <div className="text-amber-100 text-sm">{t('randomGameDesc')}</div>
+                  </div>
+                </div>
+              </button>
+            </div>
+
             {/* Daily Challenge Banner */}
             {dailyChallenge.currentChallenge && (
               <div className={`mb-6 p-4 rounded-xl border-2 border-amber-500 bg-gradient-to-r from-amber-900/30 to-orange-900/30 relative overflow-hidden ${
@@ -5208,14 +5246,26 @@ export default function MimoPlayground() {
                   }
                 }}
                 aria-label={`${t('infinityDrop.title')}. ${t('infinityDrop.description')}`}
-                className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl border-2 border-blue-500 hover:border-blue-400 active:scale-95 active:bg-blue-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                className={`relative bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl border-2 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between ${
+                  dailyChallenge.currentChallenge?.game === 'infinity'
+                    ? 'border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/50'
+                    : 'border-blue-500 hover:border-blue-400'
+                } active:scale-95 active:bg-blue-700`}
                 style={{
                   minHeight: '140px',
                   touchAction: 'manipulation',
                 }}
               >
+                {dailyChallenge.currentChallenge?.game === 'infinity' && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                    🎯 Daily
+                  </div>
+                )}
                 <div>
-                  <div className="text-2xl font-bold mb-2 group-hover:text-blue-200 group-active:text-blue-100">{t('infinityDrop.title')}</div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-blue-200 group-active:text-blue-100 flex items-center gap-2">
+                    {t('infinityDrop.title')}
+                    {gameStats.infinityFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                  </div>
                   <div className="text-blue-200 text-sm mb-3">{t('infinityDrop.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
                     {t('infinityDrop.description')}
@@ -5239,14 +5289,26 @@ export default function MimoPlayground() {
                   }
                 }}
                 aria-label={`${t('slide2048.title')}. ${t('slide2048.description')}`}
-                className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl border-2 border-purple-500 hover:border-purple-400 active:scale-95 active:bg-purple-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                className={`relative bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl border-2 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between ${
+                  dailyChallenge.currentChallenge?.game === '2048'
+                    ? 'border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/50'
+                    : 'border-purple-500 hover:border-purple-400'
+                } active:scale-95 active:bg-purple-700`}
                 style={{
                   minHeight: '140px',
                   touchAction: 'manipulation',
                 }}
               >
+                {dailyChallenge.currentChallenge?.game === '2048' && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                    🎯 Daily
+                  </div>
+                )}
                 <div>
-                  <div className="text-2xl font-bold mb-2 group-hover:text-purple-200 group-active:text-purple-100">{t('slide2048.title')}</div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-purple-200 group-active:text-purple-100 flex items-center gap-2">
+                    {t('slide2048.title')}
+                    {game2048State.highScore > 0 && <span className="text-xs opacity-70">✓</span>}
+                  </div>
                   <div className="text-purple-200 text-sm mb-3">{t('slide2048.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
                     {t('slide2048.description')}
@@ -5267,14 +5329,26 @@ export default function MimoPlayground() {
                   }
                 }}
                 aria-label={`${t('neonDash.title')}. ${t('neonDash.description')}`}
-                className="bg-gradient-to-br from-cyan-600 to-teal-800 p-6 rounded-xl border-2 border-cyan-500 hover:border-cyan-400 active:scale-95 active:bg-cyan-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                className={`relative bg-gradient-to-br from-cyan-600 to-teal-800 p-6 rounded-xl border-2 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between ${
+                  dailyChallenge.currentChallenge?.game === 'neon'
+                    ? 'border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/50'
+                    : 'border-cyan-500 hover:border-cyan-400'
+                } active:scale-95 active:bg-cyan-700`}
                 style={{
                   minHeight: '140px',
                   touchAction: 'manipulation',
                 }}
               >
+                {dailyChallenge.currentChallenge?.game === 'neon' && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                    🎯 Daily
+                  </div>
+                )}
                 <div>
-                  <div className="text-2xl font-bold mb-2 group-hover:text-cyan-200 group-active:text-cyan-100">{t('neonDash.title')}</div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-cyan-200 group-active:text-cyan-100 flex items-center gap-2">
+                    {t('neonDash.title')}
+                    {gameStats.neonFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                  </div>
                   <div className="text-cyan-200 text-sm mb-3">{t('neonDash.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
                     {t('neonDash.description')}
@@ -5295,14 +5369,26 @@ export default function MimoPlayground() {
                   }
                 }}
                 aria-label={`${t('cosmicCatch.title')}. ${t('cosmicCatch.description')}`}
-                className="bg-gradient-to-br from-indigo-600 to-purple-800 p-6 rounded-xl border-2 border-indigo-500 hover:border-indigo-400 active:scale-95 active:bg-indigo-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                className={`relative bg-gradient-to-br from-indigo-600 to-purple-800 p-6 rounded-xl border-2 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between ${
+                  dailyChallenge.currentChallenge?.game === 'cosmic'
+                    ? 'border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/50'
+                    : 'border-indigo-500 hover:border-indigo-400'
+                } active:scale-95 active:bg-indigo-700`}
                 style={{
                   minHeight: '140px',
                   touchAction: 'manipulation',
                 }}
               >
+                {dailyChallenge.currentChallenge?.game === 'cosmic' && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                    🎯 Daily
+                  </div>
+                )}
                 <div>
-                  <div className="text-2xl font-bold mb-2 group-hover:text-indigo-200 group-active:text-indigo-100">{t('cosmicCatch.title')}</div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-indigo-200 group-active:text-indigo-100 flex items-center gap-2">
+                    {t('cosmicCatch.title')}
+                    {gameStats.cosmicFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                  </div>
                   <div className="text-indigo-200 text-sm mb-3">{t('cosmicCatch.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
                     {t('cosmicCatch.description')}
@@ -5323,14 +5409,26 @@ export default function MimoPlayground() {
                   }
                 }}
                 aria-label={`${t('rhythmTapper.title')}. ${t('rhythmTapper.description')}`}
-                className="bg-gradient-to-br from-pink-600 to-red-800 p-6 rounded-xl border-2 border-pink-500 hover:border-pink-400 active:scale-95 active:bg-pink-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                className={`relative bg-gradient-to-br from-pink-600 to-red-800 p-6 rounded-xl border-2 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between ${
+                  dailyChallenge.currentChallenge?.game === 'rhythm'
+                    ? 'border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/50'
+                    : 'border-pink-500 hover:border-pink-400'
+                } active:scale-95 active:bg-pink-700`}
                 style={{
                   minHeight: '140px',
                   touchAction: 'manipulation',
                 }}
               >
+                {dailyChallenge.currentChallenge?.game === 'rhythm' && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                    🎯 Daily
+                  </div>
+                )}
                 <div>
-                  <div className="text-2xl font-bold mb-2 group-hover:text-pink-200 group-active:text-pink-100">{t('rhythmTapper.title')}</div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-pink-200 group-active:text-pink-100 flex items-center gap-2">
+                    {t('rhythmTapper.title')}
+                    {gameStats.rhythmFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                  </div>
                   <div className="text-pink-200 text-sm mb-3">{t('rhythmTapper.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
                     {t('rhythmTapper.description')}
@@ -5351,14 +5449,26 @@ export default function MimoPlayground() {
                   }
                 }}
                 aria-label={`${t('neonSnake.title')}. ${t('neonSnake.description')}`}
-                className="bg-gradient-to-br from-cyan-600 to-blue-800 p-6 rounded-xl border-2 border-cyan-500 hover:border-cyan-400 active:scale-95 active:bg-cyan-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                className={`relative bg-gradient-to-br from-cyan-600 to-blue-800 p-6 rounded-xl border-2 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between ${
+                  dailyChallenge.currentChallenge?.game === 'snake'
+                    ? 'border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/50'
+                    : 'border-cyan-500 hover:border-cyan-400'
+                } active:scale-95 active:bg-cyan-700`}
                 style={{
                   minHeight: '140px',
                   touchAction: 'manipulation',
                 }}
               >
+                {dailyChallenge.currentChallenge?.game === 'snake' && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                    🎯 Daily
+                  </div>
+                )}
                 <div>
-                  <div className="text-2xl font-bold mb-2 group-hover:text-cyan-200 group-active:text-cyan-100">{t('neonSnake.title')}</div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-cyan-200 group-active:text-cyan-100 flex items-center gap-2">
+                    {t('neonSnake.title')}
+                    {gameStats.snakeFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                  </div>
                   <div className="text-cyan-200 text-sm mb-3">{t('neonSnake.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
                     {t('neonSnake.description')}
@@ -5379,14 +5489,26 @@ export default function MimoPlayground() {
                   }
                 }}
                 aria-label={`${t('neonFlap.title')}. ${t('neonFlap.description')}`}
-                className="bg-gradient-to-br from-teal-600 to-cyan-800 p-6 rounded-xl border-2 border-teal-500 hover:border-teal-400 active:scale-95 active:bg-teal-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                className={`relative bg-gradient-to-br from-teal-600 to-cyan-800 p-6 rounded-xl border-2 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between ${
+                  dailyChallenge.currentChallenge?.game === 'flap'
+                    ? 'border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/50'
+                    : 'border-teal-500 hover:border-teal-400'
+                } active:scale-95 active:bg-teal-700`}
                 style={{
                   minHeight: '140px',
                   touchAction: 'manipulation',
                 }}
               >
+                {dailyChallenge.currentChallenge?.game === 'flap' && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                    🎯 Daily
+                  </div>
+                )}
                 <div>
-                  <div className="text-2xl font-bold mb-2 group-hover:text-teal-200 group-active:text-teal-100">{t('neonFlap.title')}</div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-teal-200 group-active:text-teal-100 flex items-center gap-2">
+                    {t('neonFlap.title')}
+                    {gameStats.flap50Score && <span className="text-xs opacity-70">✓</span>}
+                  </div>
                   <div className="text-teal-200 text-sm mb-3">{t('neonFlap.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
                     {t('neonFlap.description')}
