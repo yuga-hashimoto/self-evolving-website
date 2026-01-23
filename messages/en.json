@@ -269,6 +269,14 @@
         "controls": "4-direction swipe (up/down/left/right) to control snake",
         "backToMenu": "Back to Menu"
       },
+      "neonFlap": {
+        "title": "Neon Flap",
+        "subtitle": "Neon Flight",
+        "description": "Tap to flap through gaps in pipes! Simple controls, highly addictive!",
+        "tapToStart": "Tap to flap",
+        "controls": "Tap/Click/Space to flap",
+        "backToMenu": "Back to Menu"
+      },
       "achievements": {
         "title": "Achievements",
         "description": "Play games to unlock achievements!",
@@ -281,7 +289,7 @@
         "title": "Tutorial",
         "welcome": "Welcome to Mimo Games!",
         "step1Title": "1️⃣ Game Selection",
-        "step1Desc": "Choose from 6 different games. Each has unique features - you'll find your favorite!",
+        "step1Desc": "Choose from 7 different games. Each has unique features - you'll find your favorite!",
         "step2Title": "2️⃣ Daily Challenges",
         "step2Desc": "New challenges every day! Clear them to earn coins, and maintain your streak for bonuses!",
         "step3Title": "3️⃣ Achievements",

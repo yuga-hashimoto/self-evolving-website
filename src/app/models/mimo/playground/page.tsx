@@ -175,7 +175,7 @@ interface CosmicCatchState {
 interface DailyChallenge {
   id: string; // YYYY-MM-DD
   date: string;
-  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake';
+  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap';
   target: number; // Target score to beat
   description: string;
   completed: boolean;
@@ -198,7 +198,41 @@ interface PowerUp {
   x: number;
   y: number;
   type: 'speed' | 'slow' | 'shield' | 'bonus';
-  phase: number;
+  phase?: number;
+}
+
+// Neon Flap Interfaces
+interface FlapObstacle {
+  id: number;
+  x: number;
+  gapY: number;
+  gapHeight: number;
+  width: number;
+  passed: boolean;
+}
+
+interface FlapParticle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  color: string;
+  size: number;
+}
+
+interface NeonFlapState {
+  isPlaying: boolean;
+  isGameOver: boolean;
+  score: number;
+  highScore: number;
+  playerY: number;
+  playerVelocityY: number;
+  obstacles: FlapObstacle[];
+  particles: FlapParticle[];
+  speed: number;
+  spawnTimer: number;
 }
 
 interface ObstacleObj {
@@ -281,6 +315,8 @@ interface GameStats {
   snake100Score: boolean;
   snake500Score: boolean;
   snakeNoMiss100: boolean;
+  flap50Score: boolean;
+  flap200Score: boolean;
   dailyStreak3: boolean;
   dailyStreak7: boolean;
   allGamesPlayed: boolean;
@@ -481,18 +517,36 @@ const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'all_games',
     name: 'Game Explorer',
-    description: 'Play all 6 games',
+    description: 'Play all 7 games',
     unlocked: false,
     icon: '🎮',
     reward: 30,
     condition: (stats) => stats.allGamesPlayed,
+  },
+  {
+    id: 'flap_50',
+    name: 'Flap Beginner',
+    description: 'Score 50+ in Neon Flap',
+    unlocked: false,
+    icon: '🪶',
+    reward: 20,
+    condition: (stats) => stats.flap50Score,
+  },
+  {
+    id: 'flap_200',
+    name: 'High Flier',
+    description: 'Score 200+ in Neon Flap',
+    unlocked: false,
+    icon: '🦅',
+    reward: 50,
+    condition: (stats) => stats.flap200Score,
   },
 ];
 
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap'>('menu');
   const [shopOpen, setShopOpen] = useState(false);
 
   const [gameState, setGameState] = useState<InfinityDropState>({
@@ -622,6 +676,20 @@ export default function MimoPlayground() {
     nearMisses: 0,
   });
 
+  // Neon Flap state
+  const [flapState, setFlapState] = useState<NeonFlapState>({
+    isPlaying: false,
+    isGameOver: false,
+    score: 0,
+    highScore: 0,
+    playerY: 0,
+    playerVelocityY: 0,
+    obstacles: [],
+    particles: [],
+    speed: 5,
+    spawnTimer: 0,
+  });
+
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallengeState>({
     currentChallenge: null,
     streak: 0,
@@ -657,6 +725,8 @@ export default function MimoPlayground() {
     snake100Score: false,
     snake500Score: false,
     snakeNoMiss100: false,
+    flap50Score: false,
+    flap200Score: false,
     dailyStreak3: false,
     dailyStreak7: false,
     allGamesPlayed: false,
@@ -3429,7 +3499,7 @@ export default function MimoPlayground() {
 
       // Create mutable copy for state updates
       // eslint-disable-next-line prefer-const
-      let newState = { ...prev };
+      const newState = { ...prev };
 
       // Spawn notes
       newState.spawnTimer += 1;
@@ -3709,7 +3779,7 @@ export default function MimoPlayground() {
 
       // Update animation phase for visual effects
       const newFood = prev.food ? { ...prev.food, glowPhase: prev.food.glowPhase + 0.1 } : null;
-      const newPowerUps = prev.powerUps.map(pu => ({ ...pu, phase: pu.phase + 0.1 }));
+      const newPowerUps = prev.powerUps.map(pu => ({ ...pu, phase: (pu.phase || 0) + 0.1 }));
       const newObstacles = prev.obstacles.map(obs => ({ ...obs, glowPhase: obs.glowPhase + 0.1 }));
 
       // Move timer
@@ -3981,7 +4051,7 @@ export default function MimoPlayground() {
       const y = pu.y * cellHeight;
       const size = Math.min(cellWidth, cellHeight) * 0.7;
       const padding = (Math.min(cellWidth, cellHeight) - size) / 2;
-      const pulse = Math.sin(pu.phase) * 0.3 + 0.7;
+      const pulse = Math.sin(pu.phase || 0) * 0.3 + 0.7;
 
       let color = '#ffffff';
       let emoji = '?';
@@ -4205,7 +4275,353 @@ export default function MimoPlayground() {
     };
   }, [snakeState.isPlaying, snakeState.isGameOver, neonSnakeGameLoop]);
 
-  // ==================== END NEON SNAKE ====================
+  // ==================== NEON FLAP ====================
+
+  // Start Neon Flap game
+  const startNeonFlapGame = useCallback(() => {
+    setFlapState({
+      isPlaying: true,
+      isGameOver: false,
+      score: 0,
+      highScore: flapState.highScore,
+      playerY: 0,
+      playerVelocityY: 0,
+      obstacles: [],
+      particles: [],
+      speed: 5,
+      spawnTimer: 0,
+    });
+    storeGameEvent('game_start', { game: 'flap' });
+  }, [flapState.highScore]);
+
+  // Flap action
+  const flap = useCallback(() => {
+    setFlapState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver) return prev;
+
+      // Vibration feedback
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+
+      return {
+        ...prev,
+        playerVelocityY: -8, // Jump upward
+        particles: [
+          ...prev.particles,
+          ...Array.from({ length: 3 }, (_, i) => ({
+            id: Date.now() + i,
+            x: 30,
+            y: prev.playerY,
+            vx: -2 - Math.random(),
+            vy: (Math.random() - 0.5) * 4,
+            life: 1,
+            color: `hsl(${180 + Math.random() * 40}, 100%, 60%)`,
+            size: 2 + Math.random() * 3,
+          })),
+        ],
+      };
+    });
+  }, []);
+
+  // Neon Flap game loop
+  const neonFlapGameLoop = useCallback(() => {
+    // Draw first
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        // Setup canvas
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const displayWidth = rect.width;
+        const displayHeight = rect.height;
+
+        if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+          canvas.width = displayWidth * dpr;
+          canvas.height = displayHeight * dpr;
+          ctx.scale(dpr, dpr);
+        }
+
+        const width = displayWidth;
+        const height = displayHeight;
+
+        // Background gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, '#0a0a1a');
+        gradient.addColorStop(1, '#1a0a2a');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+
+        // Grid lines
+        ctx.strokeStyle = 'rgba(100, 100, 255, 0.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < width; i += 40) {
+          ctx.beginPath();
+          ctx.moveTo(i, 0);
+          ctx.lineTo(i, height);
+          ctx.stroke();
+        }
+
+        const PLAYER_X = 30;
+
+        // Draw obstacles
+        flapState.obstacles.forEach((obs) => {
+          const obsLeft = (obs.x / 400) * width;
+          const obsWidth = (obs.width / 400) * width;
+          const gapY = (obs.gapY / 200) * height;
+          const gapHeight = (obs.gapHeight / 200) * height;
+
+          // Glow effect
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = '#ff00ff';
+
+          // Top pipe
+          ctx.fillStyle = '#ff00ff';
+          ctx.fillRect(obsLeft, 0, obsWidth, gapY);
+
+          // Bottom pipe
+          ctx.fillRect(obsLeft, gapY + gapHeight, obsWidth, height - (gapY + gapHeight));
+
+          ctx.shadowBlur = 0;
+        });
+
+        // Draw player
+        const playerY = (flapState.playerY / 200) * height;
+        ctx.shadowBlur = 25;
+        ctx.shadowColor = '#00ffff';
+        ctx.fillStyle = '#00ffff';
+        ctx.beginPath();
+        ctx.arc(PLAYER_X, playerY, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Player trail
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+        ctx.beginPath();
+        ctx.arc(PLAYER_X - 5, playerY + flapState.playerVelocityY * 2, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        // Draw particles
+        flapState.particles.forEach((p) => {
+          const px = p.x / 400 * width;
+          const py = p.y / 200 * height;
+          const alpha = p.life;
+
+          ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('hsl', 'hsla');
+          ctx.beginPath();
+          ctx.arc(px, py, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Ground line
+        const groundY = (180 / 200) * height;
+        ctx.strokeStyle = '#ff0088';
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#ff0088';
+        ctx.beginPath();
+        ctx.moveTo(0, groundY);
+        ctx.lineTo(width, groundY);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Score
+        if (flapState.score > 0 || flapState.isPlaying || flapState.isGameOver) {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+          ctx.fillRect(width / 2 - 50, 10, 100, 40);
+          ctx.fillStyle = '#00ff88';
+          ctx.font = 'bold 28px Arial';
+          ctx.textAlign = 'center';
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#00ff88';
+          ctx.fillText(flapState.score.toString(), width / 2, 40);
+          ctx.shadowBlur = 0;
+        }
+
+        // High score
+        if (flapState.highScore > 0) {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+          ctx.fillRect(width - 95, 10, 90, 25);
+          ctx.fillStyle = '#ffaa00';
+          ctx.font = 'bold 12px Arial';
+          ctx.textAlign = 'right';
+          ctx.fillText(`High: ${flapState.highScore}`, width - 10, 28);
+        }
+
+        // Game over text
+        if (flapState.isGameOver) {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+          ctx.fillRect(0, 0, width, height);
+          ctx.fillStyle = '#ff0066';
+          ctx.font = 'bold 36px Arial';
+          ctx.textAlign = 'center';
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = '#ff0066';
+          ctx.fillText('GAME OVER', width / 2, height / 2 - 20);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 18px Arial';
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#ffffff';
+          ctx.fillText('Tap to restart', width / 2, height / 2 + 20);
+          ctx.shadowBlur = 0;
+        } else if (!flapState.isPlaying) {
+          // Start screen
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+          ctx.fillRect(0, 0, width, height);
+          ctx.fillStyle = '#00ffff';
+          ctx.font = 'bold 24px Arial';
+          ctx.textAlign = 'center';
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = '#00ffff';
+          ctx.fillText('TAP TO FLAP', width / 2, height / 2);
+          ctx.shadowBlur = 0;
+        }
+      }
+    }
+
+    // Update state
+    setFlapState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver) return prev;
+
+      const GRAVITY = 0.4;
+      const GROUND_Y = 180; // Ground position
+      const PLAYER_X = 30;
+
+      const newState = { ...prev };
+
+      // Apply gravity
+      newState.playerVelocityY += GRAVITY;
+      newState.playerY += newState.playerVelocityY;
+
+      // Check ground collision
+      if (newState.playerY >= GROUND_Y) {
+        newState.playerY = GROUND_Y;
+        newState.playerVelocityY = 0;
+        newState.isGameOver = true;
+        newState.isPlaying = false;
+
+        // Update high score
+        if (newState.score > newState.highScore) {
+          newState.highScore = newState.score;
+          localStorage.setItem('mimo_flap_highscore', newState.score.toString());
+        }
+
+        storeGameEvent('game_over', { game: 'flap', score: newState.score });
+        return newState;
+      }
+
+      // Check ceiling collision
+      if (newState.playerY <= 0) {
+        newState.playerY = 0;
+        newState.playerVelocityY = 0;
+      }
+
+      // Update spawn timer
+      newState.spawnTimer += 1;
+
+      // Spawn obstacles
+      const spawnInterval = Math.max(60, 100 - newState.speed * 5);
+      if (newState.spawnTimer >= spawnInterval) {
+        newState.spawnTimer = 0;
+        const gapHeight = 100 - (newState.score * 2); // Gap gets smaller as score increases
+        const gapY = 50 + Math.random() * (GROUND_Y - gapHeight - 50);
+
+        newState.obstacles.push({
+          id: Date.now(),
+          x: 400,
+          gapY,
+          gapHeight,
+          width: 50,
+          passed: false,
+        });
+
+        // Speed increases with score
+        if (newState.score % 5 === 0) {
+          newState.speed = Math.min(12, newState.speed + 0.2);
+        }
+      }
+
+      // Move obstacles
+      newState.obstacles = newState.obstacles
+        .map((obs) => ({
+          ...obs,
+          x: obs.x - newState.speed,
+        }))
+        .filter((obs) => obs.x > -100);
+
+      // Check collisions
+      const playerTop = newState.playerY - 20;
+      const playerBottom = newState.playerY + 20;
+      const playerLeft = PLAYER_X - 15;
+      const playerRight = PLAYER_X + 15;
+
+      for (const obs of newState.obstacles) {
+        const obsLeft = obs.x;
+        const obsRight = obs.x + obs.width;
+
+        // Check if player is in the gap zone
+        const inGapY = playerTop > obs.gapY && playerBottom < obs.gapY + obs.gapHeight;
+        const inGapX = playerRight > obsLeft && playerLeft < obsRight;
+
+        // Collision if not in gap
+        if (inGapX && !inGapY) {
+          newState.isGameOver = true;
+          newState.isPlaying = false;
+
+          if (newState.score > newState.highScore) {
+            newState.highScore = newState.score;
+            localStorage.setItem('mimo_flap_highscore', newState.score.toString());
+          }
+
+          storeGameEvent('game_over', { game: 'flap', score: newState.score });
+          break;
+        }
+
+        // Score point when passing obstacle
+        if (!obs.passed && obsRight < playerLeft) {
+          obs.passed = true;
+          newState.score += 1;
+
+          // Particle effect on score
+          newState.particles.push({
+            id: Date.now(),
+            x: PLAYER_X,
+            y: newState.playerY,
+            vx: 2,
+            vy: -2,
+            life: 1,
+            color: '#00ff88',
+            size: 4,
+          });
+        }
+      }
+
+      // Update particles
+      newState.particles = newState.particles
+        .map((p) => ({
+          ...p,
+          x: p.x + p.vx,
+          y: p.y + p.vy,
+          life: p.life - 0.02,
+          vy: p.vy + 0.1, // Gravity on particles
+        }))
+        .filter((p) => p.life > 0);
+
+      return newState;
+    });
+  }, []);
+
+  // Neon Flap game loop useEffect
+  useEffect(() => {
+    if (flapState.isPlaying && !flapState.isGameOver) {
+      const flapRequestRef = requestAnimationFrame(neonFlapGameLoop);
+      return () => cancelAnimationFrame(flapRequestRef);
+    }
+  }, [flapState.isPlaying, flapState.isGameOver, neonFlapGameLoop]);
+
+  // ==================== END NEON FLAP ====================
 
   // キーコントロール（PC用）
   useEffect(() => {
@@ -4336,6 +4752,19 @@ export default function MimoPlayground() {
           }
         }
       }
+      // Neon Flap
+      else if (currentGame === 'flap') {
+        if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+          e.preventDefault();
+          if (!flapState.isPlaying && !flapState.isGameOver) {
+            startNeonFlapGame();
+          } else if (flapState.isGameOver) {
+            startNeonFlapGame();
+          } else {
+            flap();
+          }
+        }
+      }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -4360,7 +4789,7 @@ export default function MimoPlayground() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, neonState.isPlaying, neonState.isGameOver, startNeonDashGame, jump, slide, cosmicState.isPlaying, cosmicState.isGameOver, startCosmicGame, rhythmState.isPlaying, rhythmState.isGameOver, startRhythmGame, handleRhythmTap, snakeState.isPlaying, snakeState.isGameOver, startNeonSnakeGame, handleSnakeDirection]);
+  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, neonState.isPlaying, neonState.isGameOver, startNeonDashGame, jump, slide, cosmicState.isPlaying, cosmicState.isGameOver, startCosmicGame, rhythmState.isPlaying, rhythmState.isGameOver, startRhythmGame, handleRhythmTap, snakeState.isPlaying, snakeState.isGameOver, startNeonSnakeGame, handleSnakeDirection, flapState.isPlaying, flapState.isGameOver, startNeonFlapGame, flap]);
 
   // スコア表示用フォーマット
   const formatScore = (score: number): string => {
@@ -4937,6 +5366,34 @@ export default function MimoPlayground() {
                 </div>
                 <div className="text-xs text-slate-400">
                   {tc('highScore')}: {formatScore(snakeState.highScore)}
+                </div>
+              </button>
+
+              {/* Neon Flap カード */}
+              <button
+                onClick={() => {
+                  setCurrentGame('flap');
+                  trackClick();
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
+                }}
+                aria-label={`${t('neonFlap.title')}. ${t('neonFlap.description')}`}
+                className="bg-gradient-to-br from-teal-600 to-cyan-800 p-6 rounded-xl border-2 border-teal-500 hover:border-teal-400 active:scale-95 active:bg-teal-700 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between"
+                style={{
+                  minHeight: '140px',
+                  touchAction: 'manipulation',
+                }}
+              >
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-teal-200 group-active:text-teal-100">{t('neonFlap.title')}</div>
+                  <div className="text-teal-200 text-sm mb-3">{t('neonFlap.subtitle')}</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    {t('neonFlap.description')}
+                  </p>
+                </div>
+                <div className="text-xs text-slate-400">
+                  {tc('highScore')}: {formatScore(flapState.highScore)}
                 </div>
               </button>
             </div>
@@ -5619,8 +6076,97 @@ export default function MimoPlayground() {
           </>
         )}
 
+        {/* ==================== NEON FLAP ==================== */}
+        {currentGame === 'flap' && (
+          <>
+            <div
+              ref={containerRef}
+              className="w-full max-w-md bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden shadow-2xl shadow-teal-900/10 relative"
+            >
+              <div className="relative">
+                <canvas
+                  ref={canvasRef}
+                  className="w-full block cursor-pointer touch-none"
+                  style={{
+                    touchAction: 'manipulation',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                  onClick={() => {
+                    if (!flapState.isPlaying && !flapState.isGameOver) {
+                      startNeonFlapGame();
+                    } else if (flapState.isGameOver) {
+                      startNeonFlapGame();
+                    } else {
+                      flap();
+                    }
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    if (!flapState.isPlaying && !flapState.isGameOver) {
+                      startNeonFlapGame();
+                    } else if (flapState.isGameOver) {
+                      startNeonFlapGame();
+                    } else {
+                      flap();
+                    }
+                  }}
+                />
+
+                {/* Game Over / Start Overlay */}
+                {!flapState.isPlaying && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm rounded-lg z-10">
+                    <div className="text-center p-6">
+                      {flapState.isGameOver ? (
+                        <>
+                          <div className="text-4xl mb-2">🪶</div>
+                          <div className="text-2xl font-bold text-white mb-2">GAME OVER</div>
+                          <div className="text-teal-400 text-xl mb-1">Score: {flapState.score}</div>
+                          <div className="text-amber-400 text-sm mb-2">Best: {flapState.highScore}</div>
+                          <button className="px-4 py-2 bg-teal-600 hover:bg-teal-500 rounded font-bold text-white">
+                            TAP TO START
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-4xl mb-2">🪶</div>
+                          <div className="text-2xl font-bold text-white mb-2">Neon Flap</div>
+                          <div className="text-teal-200 text-sm mb-4">
+                            Tap to flap, avoid pipes, go far!
+                          </div>
+                          <div className="text-xs text-slate-400 mb-4">
+                            <p className="mb-1">👆 Tap to flap upward</p>
+                            <p>⌨️ Space / Click</p>
+                            <p className="mt-2">TAP TO START</p>
+                          </div>
+                          <button className="px-4 py-2 bg-teal-600 hover:bg-teal-500 rounded font-bold text-white">
+                            TAP TO START
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 text-center text-slate-400 text-sm">
+              <p className="mb-2">🪶 Tap to flap upward</p>
+              <p className="text-xs">🎮 Avoid the gaps!</p>
+            </div>
+
+            <button
+              onClick={() => setCurrentGame('menu')}
+              className="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+            >
+              ← {t('backToMenu')}
+            </button>
+          </>
+        )}
+
         {/* 広告スペース（ゲームプレイ画面のみ） */}
-        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake') && (
+        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake' || currentGame === 'flap') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
               {t('adArea')}
