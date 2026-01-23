@@ -166,7 +166,8 @@
       "flappyWings": "Flappy Wings",
       "towerStack": "Tower Stack",
       "pong": "Pong",
-      "pongDescription": "Bounce the ball past the computer!"
+      "pongDescription": "Bounce the ball past the computer!",
+      "asteroids": "Asteroids"
     },
     "mimo": {
       "title": "Mimo Games",
