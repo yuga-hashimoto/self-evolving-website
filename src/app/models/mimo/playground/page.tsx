@@ -753,6 +753,9 @@ export default function MimoPlayground() {
   const touchStartRefCosmic = useRef<{ x: number; y: number; time: number } | null>(null);
   const touchStartRefSnake = useRef<{ x: number; y: number; time: number } | null>(null);
 
+  // Ref for current flap state to avoid stale closure in game loop
+  const flapStateRef = useRef<NeonFlapState>({} as NeonFlapState);
+
   const { trackClick } = useAnalytics();
 
   // Canvas用翻訳テキストをrefで保持
@@ -4324,8 +4327,11 @@ export default function MimoPlayground() {
     });
   }, []);
 
-  // Neon Flap game loop
+  // Neon Flap game loop - now using a ref to access current state without stale closure issues
   const neonFlapGameLoop = useCallback(() => {
+    // Get current state from ref to avoid stale closure
+    const currentFlapState = flapStateRef.current;
+
     // Draw first
     const canvas = canvasRef.current;
     if (canvas) {
@@ -4366,7 +4372,7 @@ export default function MimoPlayground() {
         const PLAYER_X = 30;
 
         // Draw obstacles
-        flapState.obstacles.forEach((obs) => {
+        currentFlapState.obstacles.forEach((obs) => {
           const obsLeft = (obs.x / 400) * width;
           const obsWidth = (obs.width / 400) * width;
           const gapY = (obs.gapY / 200) * height;
@@ -4387,7 +4393,7 @@ export default function MimoPlayground() {
         });
 
         // Draw player
-        const playerY = (flapState.playerY / 200) * height;
+        const playerY = (currentFlapState.playerY / 200) * height;
         ctx.shadowBlur = 25;
         ctx.shadowColor = '#00ffff';
         ctx.fillStyle = '#00ffff';
@@ -4398,13 +4404,13 @@ export default function MimoPlayground() {
         // Player trail
         ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
         ctx.beginPath();
-        ctx.arc(PLAYER_X - 5, playerY + flapState.playerVelocityY * 2, 6, 0, Math.PI * 2);
+        ctx.arc(PLAYER_X - 5, playerY + currentFlapState.playerVelocityY * 2, 6, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.shadowBlur = 0;
 
         // Draw particles
-        flapState.particles.forEach((p) => {
+        currentFlapState.particles.forEach((p) => {
           const px = p.x / 400 * width;
           const py = p.y / 200 * height;
           const alpha = p.life;
@@ -4428,7 +4434,7 @@ export default function MimoPlayground() {
         ctx.shadowBlur = 0;
 
         // Score
-        if (flapState.score > 0 || flapState.isPlaying || flapState.isGameOver) {
+        if (currentFlapState.score > 0 || currentFlapState.isPlaying || currentFlapState.isGameOver) {
           ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
           ctx.fillRect(width / 2 - 50, 10, 100, 40);
           ctx.fillStyle = '#00ff88';
@@ -4436,22 +4442,22 @@ export default function MimoPlayground() {
           ctx.textAlign = 'center';
           ctx.shadowBlur = 10;
           ctx.shadowColor = '#00ff88';
-          ctx.fillText(flapState.score.toString(), width / 2, 40);
+          ctx.fillText(currentFlapState.score.toString(), width / 2, 40);
           ctx.shadowBlur = 0;
         }
 
-        // High score
-        if (flapState.highScore > 0) {
+        // High score - now displays in-game at top right
+        if (currentFlapState.highScore > 0) {
           ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
           ctx.fillRect(width - 95, 10, 90, 25);
           ctx.fillStyle = '#ffaa00';
           ctx.font = 'bold 12px Arial';
           ctx.textAlign = 'right';
-          ctx.fillText(`High: ${flapState.highScore}`, width - 10, 28);
+          ctx.fillText(`High: ${currentFlapState.highScore}`, width - 10, 28);
         }
 
         // Game over text
-        if (flapState.isGameOver) {
+        if (currentFlapState.isGameOver) {
           ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
           ctx.fillRect(0, 0, width, height);
           ctx.fillStyle = '#ff0066';
@@ -4466,7 +4472,7 @@ export default function MimoPlayground() {
           ctx.shadowColor = '#ffffff';
           ctx.fillText('Tap to restart', width / 2, height / 2 + 20);
           ctx.shadowBlur = 0;
-        } else if (!flapState.isPlaying) {
+        } else if (!currentFlapState.isPlaying) {
           // Start screen
           ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
           ctx.fillRect(0, 0, width, height);
@@ -4612,6 +4618,11 @@ export default function MimoPlayground() {
       return newState;
     });
   }, []);
+
+  // Update flapStateRef whenever flapState changes (avoids stale closure in game loop)
+  useEffect(() => {
+    flapStateRef.current = flapState;
+  }, [flapState]);
 
   // Neon Flap game loop useEffect
   useEffect(() => {
