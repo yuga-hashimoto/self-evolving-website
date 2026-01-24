@@ -168,7 +168,8 @@
       "pong": "ポング",
       "pongDescription": "コンピュータを上回ってボールを打ち返せ！",
       "asteroids": "アステロイド",
-      "bubblePop": "バブルポップ"
+      "bubblePop": "バブルポップ",
+      "colorSwitch": "カラースイッチ"
     },
     "mimo": {
       "title": "Mimo Games",

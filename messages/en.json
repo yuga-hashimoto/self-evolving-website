@@ -168,7 +168,8 @@
       "pong": "Pong",
       "pongDescription": "Bounce the ball past the computer!",
       "asteroids": "Asteroids",
-      "bubblePop": "Bubble Pop"
+      "bubblePop": "Bubble Pop",
+      "colorSwitch": "Color Switch"
     },
     "mimo": {
       "title": "Mimo Games",
