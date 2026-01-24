@@ -169,7 +169,8 @@
       "pongDescription": "Bounce the ball past the computer!",
       "asteroids": "Asteroids",
       "bubblePop": "Bubble Pop",
-      "colorSwitch": "Color Switch"
+      "colorSwitch": "Color Switch",
+      "speedColorTap": "Speed Color Tap"
     },
     "mimo": {
       "title": "Mimo Games",
