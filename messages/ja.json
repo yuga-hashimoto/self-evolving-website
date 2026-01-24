@@ -169,7 +169,8 @@
       "pongDescription": "コンピュータを上回ってボールを打ち返せ！",
       "asteroids": "アステロイド",
       "bubblePop": "バブルポップ",
-      "colorSwitch": "カラースイッチ"
+      "colorSwitch": "カラースイッチ",
+      "speedColorTap": "スピードカラータップ"
     },
     "mimo": {
       "title": "Mimo Games",
