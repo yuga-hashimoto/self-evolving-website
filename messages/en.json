@@ -282,6 +282,14 @@
         "controls": "Tap/Click/Space to flap",
         "backToMenu": "Back to Menu"
       },
+      "neonBrick": {
+        "title": "Neon Brick",
+        "subtitle": "Neon Breakout",
+        "description": "Break neon blocks with your paddle! Bounce the ball to score high!",
+        "tapToStart": "Tap/Click to start",
+        "controls": "Swipe/Mouse to move paddle",
+        "backToMenu": "Back to Menu"
+      },
       "achievements": {
         "title": "Achievements",
         "description": "Play games to unlock achievements!",

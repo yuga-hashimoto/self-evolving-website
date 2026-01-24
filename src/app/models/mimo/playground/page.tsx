@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAnalytics } from '@/lib/analytics';
-import type { RhythmTapperState, RhythmColor, RhythmZone, RhythmNote, RhythmParticle } from './components/RhythmTapper';
+import type { RhythmTapperState, RhythmColor, RhythmZone, RhythmNote } from './components/RhythmTapper';
 
 // Infinity Drop Interfaces
 interface Block {
@@ -175,7 +175,7 @@ interface CosmicCatchState {
 interface DailyChallenge {
   id: string; // YYYY-MM-DD
   date: string;
-  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap';
+  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick';
   target: number; // Target score to beat
   description: string;
   completed: boolean;
@@ -233,6 +233,59 @@ interface NeonFlapState {
   particles: FlapParticle[];
   speed: number;
   spawnTimer: number;
+}
+
+// Neon Brick Breaker Interfaces
+interface Brick {
+  id: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  hits: number; // Hits required to destroy
+  maxHits: number;
+  color: string;
+}
+
+interface Ball {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+}
+
+interface Paddle {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  speed: number;
+}
+
+interface BrickParticle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  color: string;
+}
+
+interface NeonBrickState {
+  isPlaying: boolean;
+  isGameOver: boolean;
+  isPaused: boolean;
+  score: number;
+  highScore: number;
+  level: number;
+  paddle: Paddle;
+  ball: Ball | null;
+  bricks: Brick[];
+  particles: BrickParticle[];
+  ballSpeed: number;
+  powerUps: { type: 'multi' | 'wide' | 'slow'; x: number; y: number }[];
 }
 
 interface ObstacleObj {
@@ -317,6 +370,9 @@ interface GameStats {
   snakeNoMiss100: boolean;
   flap50Score: boolean;
   flap200Score: boolean;
+  brickFirstPlay: boolean;
+  brick100Score: boolean;
+  brick500Score: boolean;
   dailyStreak3: boolean;
   dailyStreak7: boolean;
   allGamesPlayed: boolean;
@@ -331,12 +387,10 @@ interface AchievementState {
 const INITIAL_BLOCK_WIDTH = 200;
 const BLOCK_HEIGHT = 30;
 const BASE_SPEED = 2;
-const GRAVITY = 0.5;
 
 // Mobile detection and optimization
 const isMobile = typeof window !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 const MOBILE_PARTICLE_LIMIT = isMobile ? 30 : 60;
-const TOUCH_TARGET_MIN_SIZE = 60; // Increased from 44px for better mobile UX
 const SWIPE_THRESHOLD = 50; // Minimum swipe distance in pixels
 
 // 2048 Constants
@@ -364,9 +418,7 @@ const SNAKE_SPEED_INCREMENT = 0.5; // Speed increase per score milestone
 const SNAKE_MIN_SPEED = 3; // Minimum speed
 const POWER_UP_DURATION = 5000; // 5 seconds in ms
 const SHIELD_DURATION = 8000; // 8 seconds in ms
-const BONUS_FOOD_COUNT = 3; // Number of foods with 2x multiplier
 const OBSTACLE_SPAWN_INTERVAL = 100; // Points between obstacle spawns
-const POWER_UP_SPAWN_INTERVAL = 60; // Points between power-up spawns
 
 // Achievement Definitions
 const ACHIEVEMENTS: Achievement[] = [
@@ -546,7 +598,7 @@ const ACHIEVEMENTS: Achievement[] = [
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick'>('menu');
   const [shopOpen, setShopOpen] = useState(false);
 
   const [gameState, setGameState] = useState<InfinityDropState>({
@@ -690,6 +742,28 @@ export default function MimoPlayground() {
     spawnTimer: 0,
   });
 
+  // Neon Brick Breaker state
+  const [brickState, setBrickState] = useState<NeonBrickState>({
+    isPlaying: false,
+    isGameOver: false,
+    isPaused: false,
+    score: 0,
+    highScore: 0,
+    level: 1,
+    paddle: {
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 15,
+      speed: 8,
+    },
+    ball: null,
+    bricks: [],
+    particles: [],
+    ballSpeed: 5,
+    powerUps: [],
+  });
+
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallengeState>({
     currentChallenge: null,
     streak: 0,
@@ -727,6 +801,9 @@ export default function MimoPlayground() {
     snakeNoMiss100: false,
     flap50Score: false,
     flap200Score: false,
+    brickFirstPlay: false,
+    brick100Score: false,
+    brick500Score: false,
     dailyStreak3: false,
     dailyStreak7: false,
     allGamesPlayed: false,
@@ -741,7 +818,6 @@ export default function MimoPlayground() {
   const infinityRequestRef = useRef<number | null>(null);
   const neonRequestRef = useRef<number | null>(null);
   const cosmicRequestRef = useRef<number | null>(null);
-  const rhythmRequestRef = useRef<number | null>(null);
   const snakeRequestRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const checkAchievementsRef = useRef<() => void>(() => {});
@@ -836,7 +912,7 @@ export default function MimoPlayground() {
     const hash = dateStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
     // Cycle through games
-    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake'];
+    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'brick')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'brick'];
     const game = games[hash % games.length];
 
     // Generate target based on game type
@@ -874,6 +950,11 @@ export default function MimoPlayground() {
         target = 200 + (hash % 200); // 200-400 points
         description = `Score ${target}+ in Neon Snake`;
         reward = 65;
+        break;
+      case 'brick':
+        target = 300 + (hash % 300); // 300-600 points
+        description = `Score ${target}+ in Neon Brick`;
+        reward = 70;
         break;
     }
 
@@ -933,9 +1014,9 @@ export default function MimoPlayground() {
             return;
           }
         }
-      } catch (e) {
+      } catch (_) {
         // Parse error - create new
-        console.error('Failed to parse daily challenge data', e);
+        console.error('Failed to parse daily challenge data', _);
       }
     }
 
@@ -1000,7 +1081,7 @@ export default function MimoPlayground() {
       try {
         const parsedItems = JSON.parse(shopItemsSaved);
         setShopItems(parsedItems);
-      } catch (e) {
+      } catch (_) { // eslint-disable-line @typescript-eslint/no-unused-vars -- Error is intentionally ignored
         // parse error - keep defaults
       }
     }
@@ -1008,7 +1089,6 @@ export default function MimoPlayground() {
     // 2048ハイスコア読み込み
     const load2048Scores = () => {
       const normalSaved = localStorage.getItem('game2048_highScore_normal');
-      const hardSaved = localStorage.getItem('game2048_highScore_hard');
       const bestTileSaved = localStorage.getItem('game2048_bestTile');
 
       setGame2048State((prev) => ({
@@ -1037,7 +1117,7 @@ export default function MimoPlayground() {
       try {
         const parsed: string[] = JSON.parse(achievementSaved);
         setAchievementState((prev) => ({ ...prev, unlocked: parsed }));
-      } catch (e) {
+      } catch (_) { // eslint-disable-line @typescript-eslint/no-unused-vars -- Error is intentionally ignored
         // parse error - keep defaults
       }
     }
@@ -1052,7 +1132,7 @@ export default function MimoPlayground() {
         if (parsed.cosmicBestCombo3) {
           setCosmicState((prev) => ({ ...prev, bestCombo: Math.max(prev.bestCombo, 3) }));
         }
-      } catch (e) {
+      } catch (_) { // eslint-disable-line @typescript-eslint/no-unused-vars -- Error is intentionally ignored
         // parse error - keep defaults
       }
     }
@@ -1538,10 +1618,6 @@ export default function MimoPlayground() {
       return;
     }
 
-    // 正確な配置
-    const matchedX = baseBlock.x;
-    const newX = Math.min(matchedX, Math.max(matchedX, lastBlock.x));
-
     // 正確さによるボーナス
     const accuracyBonus = Math.floor(accuracy * 100);
     const comboBonus = gameState.combo * 5;
@@ -1676,14 +1752,13 @@ export default function MimoPlayground() {
 
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.1);
-    } catch (e) {
+    } catch (_) { // eslint-disable-line @typescript-eslint/no-unused-vars -- Error is intentionally ignored
       // オーディオコンテキストのエラーは無視
     }
   };
 
   // パーティクル生成 (Infinity Drop用)
   const createParticles = useCallback((x: number, y: number, color: string, count: number = 8) => {
-    const containerWidth = containerRef.current?.clientWidth || 300;
     const newParticles: InfinityParticle[] = [];
 
     for (let i = 0; i < count; i++) {
@@ -1721,7 +1796,7 @@ export default function MimoPlayground() {
       }
 
       localStorage.setItem(key, JSON.stringify(events));
-    } catch (e) {
+    } catch (_) { // eslint-disable-line @typescript-eslint/no-unused-vars -- Error is intentionally ignored
       // エラーは無視
     }
   };
@@ -1888,7 +1963,7 @@ export default function MimoPlayground() {
     }
 
     // Check all games played
-    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && newStats.rhythmFirstPlay && newStats.snakeFirstPlay && !newStats.allGamesPlayed) {
+    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && newStats.rhythmFirstPlay && newStats.snakeFirstPlay && newStats.brickFirstPlay && !newStats.allGamesPlayed) {
       newStats.allGamesPlayed = true;
       updated = true;
     }
@@ -2213,9 +2288,6 @@ export default function MimoPlayground() {
 
   // Neon Dash: 確認当たったか (Fixed collision detection)
   const checkCollision = useCallback((playerY: number, playerState: 'running' | 'jumping' | 'sliding'): boolean => {
-    const containerHeight = containerRef.current?.clientHeight || 400;
-    const groundY = containerHeight - 100;
-
     // Player dimensions based on state
     const playerHeight = playerState === 'sliding' ? 20 : 40;
     const playerWidth = 30;
@@ -2760,7 +2832,6 @@ export default function MimoPlayground() {
       if (!prev.isPlaying || prev.isGameOver) return prev;
 
       const containerHeight = containerRef.current?.clientHeight || 400;
-      const containerWidth = containerRef.current?.clientWidth || 300;
       const groundY = containerHeight - 100;
 
       const newState = { ...prev };
@@ -2887,203 +2958,6 @@ export default function MimoPlayground() {
 
     requestRef.current = requestAnimationFrame(cosmicGameLoop);
   }, [checkCosmicCollision, createCosmicParticles, generateCosmicObstacle, generateCosmicStar, gameOverCosmic]);
-
-  // Cosmic Catch: 描画
-  const drawCosmic = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const width = canvas.width;
-    const height = canvas.height;
-    const groundY = height - 100;
-
-    // Space background (gradient)
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, '#0a0015');
-    gradient.addColorStop(0.5, '#150520');
-    gradient.addColorStop(1, '#0a0510');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-
-    // Stars in background
-    ctx.fillStyle = '#ffffff';
-    for (let i = 0; i < 50; i++) {
-      const x = (i * 73) % width;
-      const y = (i * 47) % height;
-      const size = (i % 3) + 1;
-      ctx.fillRect(x, y, size, size);
-    }
-
-    // Ground
-    ctx.fillStyle = '#1a1a2e';
-    ctx.fillRect(0, groundY, width, height - groundY);
-
-    // Ground glow line
-    ctx.strokeStyle = '#00ffff';
-    ctx.lineWidth = 2;
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = '#00ffff';
-    ctx.beginPath();
-    ctx.moveTo(0, groundY);
-    ctx.lineTo(width, groundY);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    // Obstacles (rocks/asteroids)
-    cosmicState.obstacles.forEach((obs) => {
-      ctx.fillStyle = '#ff3366';
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = '#ff3366';
-      ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-
-      ctx.strokeStyle = '#ff88aa';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
-      ctx.shadowBlur = 0;
-    });
-
-    // Stars (collectibles)
-    cosmicState.stars.forEach((star) => {
-      if (!star.collected) {
-        ctx.fillStyle = '#ffff00';
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = '#ffff00';
-
-        // Draw star shape
-        const size = 8;
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, size, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#fff';
-        ctx.shadowBlur = 5;
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, 4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-    });
-
-    // Particles
-    cosmicState.particles.forEach((p) => {
-      const alpha = p.life / 30;
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = alpha;
-      ctx.fillRect(p.x, p.y, 4, 4);
-      ctx.globalAlpha = 1;
-    });
-
-    // Ship
-    const ship = cosmicState.ship;
-    const shipWidth = 25;
-    const shipHeight = ship.isBoosting ? 35 : 25;
-
-    // Ship glow
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = ship.isBoosting ? '#00ffff' : '#8888ff';
-
-    // Ship body
-    ctx.fillStyle = ship.isBoosting ? '#00ffff' : '#8888ff';
-    ctx.fillRect(ship.x - shipWidth / 2, ship.y - shipHeight, shipWidth, shipHeight);
-
-    // Ship cockpit
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(ship.x - 8, ship.y - shipHeight + 5, 16, 10);
-
-    // Ship wings
-    ctx.fillStyle = ship.isBoosting ? '#0088aa' : '#6666cc';
-    ctx.fillRect(ship.x - 15, ship.y - 8, 8, 6);
-    ctx.fillRect(ship.x + 7, ship.y - 8, 8, 6);
-
-    ctx.shadowBlur = 0;
-
-    // UI: Score
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 24px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(`${cosmicState.score}`, 15, 35);
-
-    ctx.fillStyle = '#666';
-    ctx.font = '14px Arial';
-    ctx.fillText('SCORE', 15, 55);
-
-    // UI: High Score
-    ctx.fillStyle = '#ffff00';
-    ctx.font = 'bold 18px Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText(`HI: ${cosmicState.highScore}`, width - 15, 30);
-
-    // UI: Speed
-    ctx.fillStyle = '#00ffff';
-    ctx.font = '14px Arial';
-    ctx.fillText(`SPD: ${cosmicState.speed.toFixed(1)}`, width - 15, 55);
-
-    // UI: Combo
-    if (cosmicState.combo > 0) {
-      ctx.fillStyle = '#ffaa00';
-      ctx.font = 'bold 20px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(`COMBO x${cosmicState.combo}`, width / 2, 35);
-    }
-
-    // Game Over Screen
-    if (cosmicState.isGameOver) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.fillStyle = '#ff3366';
-      ctx.font = 'bold 48px Arial';
-      ctx.textAlign = 'center';
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = '#ff3366';
-      ctx.fillText('GAME OVER', width / 2, height / 2 - 50);
-
-      ctx.fillStyle = '#fff';
-      ctx.font = '24px Arial';
-      ctx.shadowBlur = 0;
-      ctx.fillText(`Score: ${cosmicState.score}`, width / 2, height / 2);
-      ctx.fillText(`High: ${cosmicState.highScore}`, width / 2, height / 2 + 35);
-
-      if (cosmicState.combo > 1) {
-        ctx.fillStyle = '#ffaa00';
-        ctx.font = '20px Arial';
-        ctx.fillText(`Best Combo: ${cosmicState.bestCombo}`, width / 2, height / 2 + 70);
-      }
-    }
-
-    // Start Screen
-    if (!cosmicState.isPlaying && !cosmicState.isGameOver) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.fillStyle = '#00ffff';
-      ctx.font = 'bold 48px Arial';
-      ctx.textAlign = 'center';
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = '#00ffff';
-      ctx.fillText('COSMIC CATCH', width / 2, height / 2 - 60);
-
-      ctx.font = 'bold 36px Arial';
-      ctx.fillText('TAP TO START', width / 2, height / 2 - 10);
-
-      ctx.fillStyle = '#aaa';
-      ctx.font = '14px Arial';
-      ctx.shadowBlur = 0;
-      ctx.fillText('Hold to boost upward', width / 2, height / 2 + 30);
-      ctx.fillText('Avoid asteroids • Collect stars', width / 2, height / 2 + 50);
-      ctx.fillText('Space / Click to control', width / 2, height / 2 + 70);
-
-      // Show high score if exists
-      if (cosmicState.highScore > 0) {
-        ctx.fillStyle = '#ffff00';
-        ctx.font = '18px Arial';
-        ctx.fillText(`High Score: ${cosmicState.highScore}`, width / 2, height / 2 + 100);
-      }
-    }
-  }, [cosmicState]);
 
   // Cosmic Catchゲームループ
   useEffect(() => {
@@ -3357,7 +3231,7 @@ export default function MimoPlayground() {
     const zoneY = height - 80;
     const zoneHeight = 60;
 
-    rhythmState.zones.forEach((zone, index) => {
+    rhythmState.zones.forEach((zone) => {
       const x = zone.x - zoneWidth / 2;
       const color = getZoneColor(zone.color);
 
@@ -3501,7 +3375,6 @@ export default function MimoPlayground() {
       const hitZoneY = containerHeight - 80;
 
       // Create mutable copy for state updates
-      // eslint-disable-next-line prefer-const
       const newState = { ...prev };
 
       // Spawn notes
@@ -4053,7 +3926,6 @@ export default function MimoPlayground() {
       const x = pu.x * cellWidth;
       const y = pu.y * cellHeight;
       const size = Math.min(cellWidth, cellHeight) * 0.7;
-      const padding = (Math.min(cellWidth, cellHeight) - size) / 2;
       const pulse = Math.sin(pu.phase || 0) * 0.3 + 0.7;
 
       let color = '#ffffff';
@@ -4088,7 +3960,6 @@ export default function MimoPlayground() {
       const x = snakeState.food.x * cellWidth;
       const y = snakeState.food.y * cellHeight;
       const size = Math.min(cellWidth, cellHeight) * 0.6;
-      const padding = (Math.min(cellWidth, cellHeight) - size) / 2;
       const pulse = Math.sin(snakeState.food.glowPhase) * 0.3 + 0.7;
 
       // Glow
@@ -4634,6 +4505,306 @@ export default function MimoPlayground() {
 
   // ==================== END NEON FLAP ====================
 
+// ==================== NEON BRICK BREAKER ====================
+// Start Brick Breaker game
+const startBrickGame = useCallback(() => {
+  const containerWidth = containerRef.current?.clientWidth || 360;
+  const containerHeight = containerRef.current?.clientHeight || 480;
+  
+  setBrickState({
+    isPlaying: true,
+    isGameOver: false,
+    isPaused: false,
+    score: 0,
+    highScore: brickState.highScore,
+    level: 1,
+    paddle: {
+      x: containerWidth / 2 - 50,
+      y: containerHeight - 40,
+      width: 100,
+      height: 15,
+      speed: 8,
+    },
+    ball: {
+      x: containerWidth / 2,
+      y: containerHeight - 60,
+      vx: 4,
+      vy: -4,
+      radius: 6,
+    },
+    bricks: generateBricks(containerWidth, containerHeight, 1),
+    particles: [],
+    ballSpeed: 5,
+    powerUps: [],
+  });
+
+  // First play achievement
+  if (!gameStats.brickFirstPlay) {
+    setGameStats((prev) => ({ ...prev, brickFirstPlay: true }));
+  }
+
+  storeGameEvent('brick', { type: 'start' });
+  vibrate(30);
+}, [brickState.highScore, gameStats.brickFirstPlay]);
+
+// Generate bricks for a level
+const generateBricks = (containerWidth: number, containerHeight: number, level: number): Brick[] => {
+  const bricks: Brick[] = [];
+  const rows = Math.min(3 + level, 8);
+  const cols = 8;
+  const brickWidth = (containerWidth - 40) / cols;
+  const brickHeight = 20;
+  const padding = 2;
+  const offsetX = 20;
+  const offsetY = 50;
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const hits = Math.min(1 + Math.floor(level / 2), 3);
+      const colors = ['#22c55e', '#eab308', '#ef4444'];
+      bricks.push({
+        id: row * cols + col,
+        x: offsetX + col * (brickWidth + padding),
+        y: offsetY + row * (brickHeight + padding),
+        width: brickWidth,
+        height: brickHeight,
+        hits: hits,
+        maxHits: hits,
+        color: colors[hits - 1] || '#22c55e',
+      });
+    }
+  }
+  return bricks;
+};
+
+// Move paddle from touch
+const movePaddleFromTouch = useCallback((clientX: number) => {
+  if (!brickState.isPlaying || brickState.isGameOver) return;
+  if (!containerRef.current) return;
+  
+  const rect = containerRef.current.getBoundingClientRect();
+  const x = clientX - rect.left;
+  
+  setBrickState((prev) => {
+    if (!prev.paddle) return prev;
+    const paddleWidth = prev.paddle.width;
+    let newX = x - paddleWidth / 2;
+    newX = Math.max(0, Math.min((containerRef.current?.clientWidth || 360) - paddleWidth, newX));
+    
+    return {
+      ...prev,
+      paddle: { ...prev.paddle, x: newX },
+    };
+  });
+}, [brickState.isPlaying, brickState.isGameOver]);
+
+// Move paddle from mouse
+const movePaddleFromMouse = useCallback((clientX: number) => {
+  if (!brickState.isPlaying || brickState.isGameOver) return;
+  if (!containerRef.current) return;
+  
+  const rect = containerRef.current.getBoundingClientRect();
+  const x = clientX - rect.left;
+  
+  setBrickState((prev) => {
+    if (!prev.paddle) return prev;
+    const paddleWidth = prev.paddle.width;
+    let newX = x - paddleWidth / 2;
+    newX = Math.max(0, Math.min((containerRef.current?.clientWidth || 360) - paddleWidth, newX));
+    
+    return {
+      ...prev,
+      paddle: { ...prev.paddle, x: newX },
+    };
+  });
+}, [brickState.isPlaying, brickState.isGameOver]);
+
+// Brick game loop
+const brickGameLoop = useCallback(() => {
+  // Using a ref to get current state to avoid stale closures
+  const currentBrickState = brickRef.current;
+  
+  if (!currentBrickState.isPlaying || currentBrickState.isGameOver) return;
+  
+  setBrickState((prev) => {
+    if (!prev.isPlaying || prev.isGameOver || !prev.ball || !prev.paddle) return prev;
+    
+    const containerWidth = containerRef.current?.clientWidth || 360;
+    const containerHeight = containerRef.current?.clientHeight || 480;
+    
+    // Move ball
+    const ball = { ...prev.ball };
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    
+    // Wall collision
+    if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= containerWidth) {
+      ball.vx *= -1;
+      ball.x = Math.max(ball.radius, Math.min(containerWidth - ball.radius, ball.x));
+      vibrate(5);
+    }
+    if (ball.y - ball.radius <= 0) {
+      ball.vy *= -1;
+      ball.y = ball.radius;
+      vibrate(5);
+    }
+    
+    // Paddle collision
+    const paddle = prev.paddle;
+    if (ball.y + ball.radius >= paddle.y && 
+        ball.y - ball.radius <= paddle.y + paddle.height &&
+        ball.x >= paddle.x && 
+        ball.x <= paddle.x + paddle.width &&
+        ball.vy > 0) {
+      
+      // Calculate hit position for angle (-1 to 1)
+      const hitPos = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
+      const angle = hitPos * 0.8; // Max 0.8 radian angle
+      
+      const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+      ball.vx = speed * Math.sin(angle);
+      ball.vy = -speed * Math.cos(angle);
+      ball.y = paddle.y - ball.radius;
+      
+      vibrate(10);
+    }
+    
+    // Ball fell off
+    if (ball.y > containerHeight + 20) {
+      // Game over
+      const newHighScore = Math.max(prev.highScore, prev.score);
+      if (prev.score > newHighScore) {
+        localStorage.setItem('brickHighScore', prev.score.toString());
+      }
+      
+      return {
+        ...prev,
+        isPlaying: false,
+        isGameOver: true,
+        highScore: newHighScore,
+      };
+    }
+    
+    // Brick collision
+    const bricks = [...prev.bricks];
+    let score = prev.score;
+    const particles = [...prev.particles];
+    
+    for (let i = bricks.length - 1; i >= 0; i--) {
+      const brick = bricks[i];
+      if (
+        ball.x + ball.radius > brick.x &&
+        ball.x - ball.radius < brick.x + brick.width &&
+        ball.y + ball.radius > brick.y &&
+        ball.y - ball.radius < brick.y + brick.height
+      ) {
+        // Collision detected
+        brick.hits--;
+        
+        // Determine bounce direction
+        const overlapX = Math.min(
+          ball.x + ball.radius - brick.x,
+          brick.x + brick.width - (ball.x - ball.radius)
+        );
+        const overlapY = Math.min(
+          ball.y + ball.radius - brick.y,
+          brick.y + brick.height - (ball.y - ball.radius)
+        );
+        
+        if (overlapX < overlapY) {
+          ball.vx *= -1;
+        } else {
+          ball.vy *= -1;
+        }
+        
+        // Add particles
+        for (let j = 0; j < 8; j++) {
+          particles.push({
+            id: Date.now() + Math.random(),
+            x: brick.x + brick.width / 2,
+            y: brick.y + brick.height / 2,
+            vx: (Math.random() - 0.5) * 6,
+            vy: (Math.random() - 0.5) * 6,
+            life: 20,
+            color: brick.color,
+          });
+        }
+        
+        // Hit score
+        score += 10;
+        vibrate(15);
+        
+        // Brick destroyed
+        if (brick.hits <= 0) {
+          bricks.splice(i, 1);
+          score += 20; // Bonus for destroying
+        }
+        
+        break; // Only one brick per frame
+      }
+    }
+    
+    // Update particles
+    const updatedParticles = particles
+      .map((p) => ({
+        ...p,
+        x: p.x + p.vx,
+        y: p.y + p.vy,
+        life: p.life - 1,
+      }))
+      .filter((p) => p.life > 0);
+    
+    // Level complete
+    if (bricks.length === 0) {
+      const nextLevel = prev.level + 1;
+      return {
+        ...prev,
+        score,
+        level: nextLevel,
+        ball: { ...ball, vx: ball.vx * 1.1, vy: ball.vy * 1.1 },
+        bricks: generateBricks(containerWidth, containerHeight, nextLevel),
+        particles: updatedParticles,
+      };
+    }
+
+    return {
+      ...prev,
+      score,
+      ball,
+      bricks,
+      particles: updatedParticles,
+    };
+  });
+}, []);
+
+// Brick game loop useEffect
+useEffect(() => {
+  const brickRequestRef = requestAnimationFrame(() => {
+    brickGameLoop();
+  });
+  
+  return () => {
+    cancelAnimationFrame(brickRequestRef);
+  };
+}, [brickState.isPlaying, brickState.isGameOver, brickGameLoop]);
+
+// Load high score on mount
+useEffect(() => {
+  const saved = localStorage.getItem('brickHighScore');
+  if (saved) {
+    setBrickState((prev) => ({ ...prev, highScore: parseInt(saved) }));
+  }
+}, []);
+
+// Brick ref for game loop
+const brickRef = useRef<NeonBrickState>({} as NeonBrickState);
+useEffect(() => {
+  brickRef.current = brickState;
+}, [brickState]);
+
+
+
+
   // キーコントロール（PC用）
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -4773,6 +4944,39 @@ export default function MimoPlayground() {
             startNeonFlapGame();
           } else {
             flap();
+          }
+        }
+      }
+      // Neon Brick
+      else if (currentGame === 'brick') {
+        if (e.code === 'Space' || e.code === 'Enter') {
+          e.preventDefault();
+          if (!brickState.isPlaying && !brickState.isGameOver) {
+            startBrickGame();
+          } else if (brickState.isGameOver) {
+            startBrickGame();
+          }
+        } else if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+          e.preventDefault();
+          if (brickState.isPlaying && !brickState.isGameOver && brickState.paddle) {
+            setBrickState((prev) => ({
+              ...prev,
+              paddle: { ...prev.paddle, x: Math.max(0, prev.paddle.x - prev.paddle.speed) },
+            }));
+          }
+        } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+          e.preventDefault();
+          if (brickState.isPlaying && !brickState.isGameOver && brickState.paddle) {
+            setBrickState((prev) => ({
+              ...prev,
+              paddle: {
+                ...prev.paddle,
+                x: Math.min(
+                  (containerRef.current?.clientWidth || 360) - prev.paddle.width,
+                  prev.paddle.x + prev.paddle.speed
+                )
+              },
+            }));
           }
         }
       }
@@ -5085,7 +5289,7 @@ export default function MimoPlayground() {
   }, [start2048Game]);
 
   // 2048: タイル描画用（HTML表示）
-  const render2048Tile = (tile: Tile2048 | null, index: number) => {
+  const render2048Tile = (tile: Tile2048 | null) => {
     if (!tile) return null;
     const color = TILE_COLORS[tile.value] || '#3c3a32';
     const textColor = tile.value >= 8 ? '#f9f6f2' : '#776e65';
@@ -5527,6 +5731,46 @@ export default function MimoPlayground() {
                 </div>
                 <div className="text-xs text-slate-400">
                   {tc('highScore')}: {formatScore(flapState.highScore)}
+                </div>
+              </button>
+
+              {/* Neon Brick カード */}
+              <button
+                onClick={() => {
+                  setCurrentGame('brick');
+                  trackClick();
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
+                }}
+                aria-label={`${t('neonBrick.title')}. ${t('neonBrick.description')}`}
+                className={`relative bg-gradient-to-br from-pink-600 to-purple-800 p-6 rounded-xl border-2 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between ${
+                  dailyChallenge.currentChallenge?.game === 'brick'
+                    ? 'border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/50'
+                    : 'border-pink-500 hover:border-pink-400'
+                } active:scale-95 active:bg-pink-700`}
+                style={{
+                  minHeight: '140px',
+                  touchAction: 'manipulation',
+                }}
+              >
+                {dailyChallenge.currentChallenge?.game === 'brick' && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                    🎯 Daily
+                  </div>
+                )}
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-pink-200 group-active:text-pink-100 flex items-center gap-2">
+                    {t('neonBrick.title')}
+                    {gameStats.brickFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                  </div>
+                  <div className="text-pink-200 text-sm mb-3">{t('neonBrick.subtitle')}</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    {t('neonBrick.description')}
+                  </p>
+                </div>
+                <div className="text-xs text-slate-400">
+                  {tc('highScore')}: {formatScore(brickState.highScore)}
                 </div>
               </button>
             </div>
@@ -6298,8 +6542,120 @@ export default function MimoPlayground() {
           </>
         )}
 
+        {/* ==================== NEON BRICK BREAKER ==================== */}
+        {currentGame === 'brick' && (
+          <>
+            <div
+              ref={containerRef}
+              className="w-full max-w-md bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden shadow-2xl shadow-pink-900/10 relative"
+            >
+              <div className="relative">
+                <canvas
+                  ref={canvasRef}
+                  className="w-full block cursor-pointer touch-none"
+                  style={{
+                    touchAction: 'manipulation',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                  onClick={() => {
+                    if (!brickState.isPlaying && !brickState.isGameOver) {
+                      startBrickGame();
+                    } else if (brickState.isGameOver) {
+                      startBrickGame();
+                    }
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    if (!brickState.isPlaying && !brickState.isGameOver) {
+                      startBrickGame();
+                    } else if (brickState.isGameOver) {
+                      startBrickGame();
+                    } else {
+                      movePaddleFromTouch(e.touches[0].clientX);
+                    }
+                  }}
+                  onTouchMove={(e) => {
+                    e.preventDefault();
+                    if (brickState.isPlaying && !brickState.isGameOver) {
+                      movePaddleFromTouch(e.touches[0].clientX);
+                    }
+                  }}
+                  onMouseMove={(e) => {
+                    if (brickState.isPlaying && !brickState.isGameOver) {
+                      movePaddleFromMouse(e.clientX);
+                    }
+                  }}
+                />
+
+                {/* Game Over / Start Overlay */}
+                {!brickState.isPlaying && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm rounded-lg z-10">
+                    <div className="text-center p-6">
+                      {brickState.isGameOver ? (
+                        <>
+                          <div className="text-4xl mb-2">🧱</div>
+                          <div className="text-2xl font-bold text-white mb-2">GAME OVER</div>
+                          <div className="text-pink-400 text-xl mb-1">Score: {brickState.score}</div>
+                          <div className="text-amber-400 text-sm mb-2">Best: {brickState.highScore}</div>
+                          <button className="px-4 py-2 bg-pink-600 hover:bg-pink-500 rounded font-bold text-white">
+                            TAP TO START
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-4xl mb-2">🧱</div>
+                          <div className="text-2xl font-bold text-white mb-2">Neon Brick</div>
+                          <div className="text-pink-200 text-sm mb-4">
+                            Break all bricks to win!
+                          </div>
+                          <div className="text-xs text-slate-400 mb-4">
+                            <p className="mb-1">👆 Swipe/Mouse to move paddle</p>
+                            <p>⌨️ Arrow Keys / A-D</p>
+                            <p className="mt-2">TAP TO START</p>
+                          </div>
+                          <button className="px-4 py-2 bg-pink-600 hover:bg-pink-500 rounded font-bold text-white">
+                            TAP TO START
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Level indicator */}
+                {brickState.isPlaying && !brickState.isGameOver && (
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
+                      <span className="text-slate-400">LEVEL</span>{' '}
+                      <span className="text-pink-400 font-bold">{brickState.level}</span>
+                    </div>
+                    <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
+                      <span className="text-slate-400">BALLS</span>{' '}
+                      <span className="text-cyan-400 font-bold">1</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 text-center text-slate-400 text-sm">
+              <p className="mb-2">🧱 Break all neon bricks!</p>
+              <p className="text-xs">🎮 Move paddle to bounce ball</p>
+            </div>
+
+            <button
+              onClick={() => setCurrentGame('menu')}
+              className="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+            >
+              ← {t('neonBrick.backToMenu')}
+            </button>
+          </>
+        )}
+
         {/* 広告スペース（ゲームプレイ画面のみ） */}
-        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake' || currentGame === 'flap') && (
+        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake' || currentGame === 'flap' || currentGame === 'brick') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
               {t('adArea')}
@@ -6326,7 +6682,8 @@ export default function MimoPlayground() {
           <span>{t('neonDash.title')}: {formatScore(neonState.highScore)}</span>
           <span>{t('cosmicCatch.title')}: {formatScore(cosmicState.highScore)}</span>
           <span>{t('rhythmTapper.title')}: {formatScore(rhythmState.highScore)}</span>
-        <span>{t('neonSnake.title')}: {formatScore(snakeState.highScore)}</span>
+          <span>{t('neonSnake.title')}: {formatScore(snakeState.highScore)}</span>
+          <span>{t('neonBrick.title')}: {formatScore(brickState.highScore)}</span>
         </div>
       </footer>
 
@@ -6574,7 +6931,7 @@ export default function MimoPlayground() {
               }
             });
           }}
-          onTouchEnd={(e) => {
+          onTouchEnd={() => {
             // No action needed on end
           }}
           className="fixed inset-0 z-50"

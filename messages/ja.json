@@ -282,6 +282,14 @@
         "controls": "タップ/クリック/スペースで羽ばたき",
         "backToMenu": "メニューへ"
       },
+      "neonBrick": {
+        "title": "Neon Brick",
+        "subtitle": "ネオンブロック崩し",
+        "description": "ネオンバーでブロックを壊せ！ボールを跳ね返してスコアを伸ばせ！",
+        "tapToStart": "タップ/クリックで開始",
+        "controls": "スワイプ/マウスでバーを動かす",
+        "backToMenu": "メニューへ"
+      },
       "achievements": {
         "title": "アチーブメント",
         "description": "ゲームをプレイしてアチーブメントを解除しよう！",
