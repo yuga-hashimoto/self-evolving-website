@@ -171,6 +171,16 @@ interface CosmicCatchState {
   starSpawnTimer: number;
 }
 
+// Achievement Interfaces
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  unlockedAt?: number;
+}
+
 // Daily Challenge Interfaces
 interface DailyChallenge {
   id: string; // YYYY-MM-DD
@@ -368,11 +378,14 @@ interface GameStats {
   snake100Score: boolean;
   snake500Score: boolean;
   snakeNoMiss100: boolean;
+  flapFirstPlay: boolean;
   flap50Score: boolean;
   flap200Score: boolean;
   brickFirstPlay: boolean;
   brick100Score: boolean;
   brick500Score: boolean;
+  game2048_firstPlay: boolean;
+  game2048_2048Reached: boolean;
   dailyStreak3: boolean;
   dailyStreak7: boolean;
   allGamesPlayed: boolean;
@@ -569,11 +582,20 @@ const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'all_games',
     name: 'Game Explorer',
-    description: 'Play all 7 games',
+    description: 'Play all 8 games',
     unlocked: false,
     icon: '🎮',
-    reward: 30,
+    reward: 50,
     condition: (stats) => stats.allGamesPlayed,
+  },
+  {
+    id: 'flap_first',
+    name: 'First Flap',
+    description: 'Play your first Neon Flap game',
+    unlocked: false,
+    icon: '🪶',
+    reward: 15,
+    condition: (stats) => stats.flapFirstPlay,
   },
   {
     id: 'flap_50',
@@ -592,6 +614,51 @@ const ACHIEVEMENTS: Achievement[] = [
     icon: '🦅',
     reward: 50,
     condition: (stats) => stats.flap200Score,
+  },
+  {
+    id: 'brick_first',
+    name: 'Brick Breaker',
+    description: 'Play your first Brick game',
+    unlocked: false,
+    icon: '🧱',
+    reward: 15,
+    condition: (stats) => stats.brickFirstPlay,
+  },
+  {
+    id: 'brick_100',
+    name: 'Wall Cracker',
+    description: 'Score 100+ in Neon Brick',
+    unlocked: false,
+    icon: '💥',
+    reward: 25,
+    condition: (stats) => stats.brick100Score,
+  },
+  {
+    id: 'brick_500',
+    name: 'Demolition Expert',
+    description: 'Score 500+ in Neon Brick',
+    unlocked: false,
+    icon: '🏗️',
+    reward: 60,
+    condition: (stats) => stats.brick500Score,
+  },
+  {
+    id: '2048_reached',
+    name: '2048 Champion',
+    description: 'Reach the 2048 tile',
+    unlocked: false,
+    icon: '🔢',
+    reward: 100,
+    condition: (stats) => stats.game2048_2048Reached,
+  },
+  {
+    id: '2048_first',
+    name: 'Puzzle Starter',
+    description: 'Play your first 2048 game',
+    unlocked: false,
+    icon: '🧩',
+    reward: 15,
+    condition: (stats) => stats.game2048_firstPlay,
   },
 ];
 
@@ -799,11 +866,14 @@ export default function MimoPlayground() {
     snake100Score: false,
     snake500Score: false,
     snakeNoMiss100: false,
+    flapFirstPlay: false,
     flap50Score: false,
     flap200Score: false,
     brickFirstPlay: false,
     brick100Score: false,
     brick500Score: false,
+    game2048_firstPlay: false,
+    game2048_2048Reached: false,
     dailyStreak3: false,
     dailyStreak7: false,
     allGamesPlayed: false,
@@ -821,7 +891,7 @@ export default function MimoPlayground() {
   const snakeRequestRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const checkAchievementsRef = useRef<() => void>(() => {});
-  const updateScoreAchievementsRef = useRef<(gameType: 'infinity' | 'neon' | 'cosmic' | 'rhythm' | 'snake', score: number) => void>(() => {});
+  const updateScoreAchievementsRef = useRef<(gameType: 'infinity' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick', score: number) => void>(() => {});
 
   // Ref-based touch storage to prevent memory leaks
   const touchStartRef2048 = useRef<{ x: number; y: number } | null>(null);
@@ -1911,7 +1981,7 @@ export default function MimoPlayground() {
   }, [dailyChallenge, getTodayDate, playSound, vibrate, gameStats]);
 
   // Update score-based achievements
-  const updateScoreAchievements = useCallback((gameType: 'infinity' | 'neon' | 'cosmic' | 'rhythm' | 'snake', score: number) => {
+  const updateScoreAchievements = useCallback((gameType: 'infinity' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick', score: number) => {
     let updated = false;
     const newStats = { ...gameStats };
 
@@ -1960,10 +2030,28 @@ export default function MimoPlayground() {
         newStats.snake500Score = true;
         updated = true;
       }
+    } else if (gameType === 'flap') {
+      if (score >= 50 && !newStats.flap50Score) {
+        newStats.flap50Score = true;
+        updated = true;
+      }
+      if (score >= 200 && !newStats.flap200Score) {
+        newStats.flap200Score = true;
+        updated = true;
+      }
+    } else if (gameType === 'brick') {
+      if (score >= 100 && !newStats.brick100Score) {
+        newStats.brick100Score = true;
+        updated = true;
+      }
+      if (score >= 500 && !newStats.brick500Score) {
+        newStats.brick500Score = true;
+        updated = true;
+      }
     }
 
-    // Check all games played
-    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && newStats.rhythmFirstPlay && newStats.snakeFirstPlay && newStats.brickFirstPlay && !newStats.allGamesPlayed) {
+    // Check all games played (including 2048)
+    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && newStats.rhythmFirstPlay && newStats.snakeFirstPlay && newStats.flapFirstPlay && newStats.brickFirstPlay && newStats.game2048_firstPlay && !newStats.allGamesPlayed) {
       newStats.allGamesPlayed = true;
       updated = true;
     }
@@ -4166,7 +4254,15 @@ export default function MimoPlayground() {
       spawnTimer: 0,
     });
     storeGameEvent('game_start', { game: 'flap' });
-  }, [flapState.highScore]);
+
+    // Check first play achievement
+    if (!gameStats.flapFirstPlay) {
+      const newStats = { ...gameStats, flapFirstPlay: true };
+      setGameStats(newStats);
+      localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+      setTimeout(() => checkAchievementsRef.current(), 100);
+    }
+  }, [flapState.highScore, gameStats]);
 
   // Flap action
   const flap = useCallback(() => {
@@ -4386,6 +4482,12 @@ export default function MimoPlayground() {
         }
 
         storeGameEvent('game_over', { game: 'flap', score: newState.score });
+
+        // Trigger achievement check for flap score
+        setTimeout(() => {
+          updateScoreAchievementsRef.current('flap', newState.score);
+        }, 0);
+
         return newState;
       }
 
@@ -4540,12 +4642,15 @@ const startBrickGame = useCallback(() => {
 
   // First play achievement
   if (!gameStats.brickFirstPlay) {
-    setGameStats((prev) => ({ ...prev, brickFirstPlay: true }));
+    const newStats = { ...gameStats, brickFirstPlay: true };
+    setGameStats(newStats);
+    localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+    setTimeout(() => checkAchievementsRef.current(), 100);
   }
 
   storeGameEvent('brick', { type: 'start' });
   vibrate(30);
-}, [brickState.highScore, gameStats.brickFirstPlay]);
+}, [brickState.highScore, gameStats]);
 
 // Generate bricks for a level
 const generateBricks = (containerWidth: number, containerHeight: number, level: number): Brick[] => {
@@ -4676,7 +4781,12 @@ const brickGameLoop = useCallback(() => {
       if (prev.score > newHighScore) {
         localStorage.setItem('brickHighScore', prev.score.toString());
       }
-      
+
+      // Trigger achievement check for brick score
+      setTimeout(() => {
+        updateScoreAchievementsRef.current('brick', prev.score);
+      }, 0);
+
       return {
         ...prev,
         isPlaying: false,
@@ -5047,7 +5157,15 @@ useEffect(() => {
 
     trackClick();
     storeGameEvent('game2048_start', { difficulty: diff });
-  }, [game2048State.difficulty, game2048State.highScore, game2048State.bestTile, trackClick]);
+
+    // Check first play achievement
+    if (!gameStats.game2048_firstPlay) {
+      const newStats = { ...gameStats, game2048_firstPlay: true };
+      setGameStats(newStats);
+      localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+      setTimeout(() => checkAchievementsRef.current(), 100);
+    }
+  }, [game2048State.difficulty, game2048State.highScore, game2048State.bestTile, trackClick, gameStats]);
 
   // 2048: ランダムなタイルを追加
   const addRandomTile = useCallback((grid: (Tile2048 | null)[][]): (Tile2048 | null)[][] => {
@@ -5242,6 +5360,16 @@ useEffect(() => {
     }
   }, [game2048State.invalidMoveFlash]);
 
+  // 2048 achievement check when 2048 tile is reached
+  useEffect(() => {
+    if (game2048State.isWon && !gameStats.game2048_2048Reached) {
+      const newStats = { ...gameStats, game2048_2048Reached: true };
+      setGameStats(newStats);
+      localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+      setTimeout(() => checkAchievementsRef.current(), 100);
+    }
+  }, [game2048State.isWon, gameStats]);
+
   // 2048: 移動可能判定
   const canMove = useCallback((grid: (Tile2048 | null)[][]): boolean => {
     const size = grid.length;
@@ -5328,7 +5456,15 @@ useEffect(() => {
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              {currentGame === 'menu' ? t('title') : currentGame === 'infinity' ? t('infinityDrop.title') : currentGame === '2048' ? t('slide2048.title') : currentGame === 'neon' ? t('neonDash.title') : t('cosmicCatch.title')}
+              {currentGame === 'menu' ? t('title') :
+               currentGame === 'infinity' ? t('infinityDrop.title') :
+               currentGame === '2048' ? t('slide2048.title') :
+               currentGame === 'neon' ? t('neonDash.title') :
+               currentGame === 'cosmic' ? t('cosmicCatch.title') :
+               currentGame === 'rhythm' ? t('rhythmTapper.title') :
+               currentGame === 'snake' ? t('neonSnake.title') :
+               currentGame === 'flap' ? t('neonFlap.title') :
+               currentGame === 'brick' ? t('neonBrick.title') : ''}
             </h1>
           </div>
 
@@ -5371,8 +5507,8 @@ useEffect(() => {
               <button
                 onClick={() => {
                   // Select random game from available games
-                  const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap')[] =
-                    ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap'];
+                  const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick')[] =
+                    ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick'];
                   const randomGame = games[Math.floor(Math.random() * games.length)];
 
                   setCurrentGame(randomGame);
