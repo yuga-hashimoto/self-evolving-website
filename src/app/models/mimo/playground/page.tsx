@@ -348,6 +348,17 @@ interface DailyChallengeState {
   celebrationActive: boolean;
 }
 
+// Progression System Interfaces
+interface PlayerProgress {
+  level: number;
+  xp: number;
+  xpToNext: number;
+  totalPlayTime: number; // in seconds
+  gamesPlayed: Set<string>; // Track which games have been played
+  masteryStars: Record<string, number>; // game -> stars (0-3)
+}
+
+
 // Achievement Interfaces
 interface Achievement {
   id: string;
@@ -662,6 +673,91 @@ const ACHIEVEMENTS: Achievement[] = [
   },
 ];
 
+// ==================== PROGRESSION SYSTEM HELPERS ====================
+
+const PROGRESSION_CONFIG = {
+  XP_PER_LEVEL: (level: number) => 100 + (level - 1) * 50, // XP needed increases with level
+  MASTERY_THRESHOLDS: {
+    1: 100,   // Bronze star - 100 points
+    2: 300,   // Silver star - 300 points
+    3: 500,   // Gold star - 500 points
+  },
+  XP_PER_POINT: 1, // 1 XP per point scored
+  XP_FOR_TIME: 0.1, // 0.1 XP per second played
+  XP_FOR_STREAK: 10, // Bonus XP per daily streak day
+};
+
+// Calculate XP gained from a game session
+function calculateGameXP(
+  score: number,
+  duration: number,
+  isVictory: boolean = false,
+  difficultyBonus: number = 1
+): number {
+  let xp = 0;
+
+  // XP from score
+  xp += score * PROGRESSION_CONFIG.XP_PER_POINT;
+
+  // XP from duration (capped at 60 seconds for balance)
+  xp += Math.min(duration, 60) * PROGRESSION_CONFIG.XP_FOR_TIME;
+
+  // Victory bonus
+  if (isVictory) {
+    xp += 50;
+  }
+
+  // Difficulty multiplier
+  xp *= difficultyBonus;
+
+  return Math.round(xp);
+}
+
+// Calculate mastery stars based on score
+function calculateMasteryStars(game: string, score: number): number {
+  const thresholds = PROGRESSION_CONFIG.MASTERY_THRESHOLDS;
+
+  if (score >= thresholds[3]) return 3;
+  if (score >= thresholds[2]) return 2;
+  if (score >= thresholds[1]) return 1;
+  return 0;
+}
+
+// Calculate XP needed for next level
+function getXpForLevel(level: number): number {
+  return PROGRESSION_CONFIG.XP_PER_LEVEL(level);
+}
+
+// Render mastery stars
+function renderMasteryStars(stars: number): string {
+  if (stars === 0) return '☆☆☆';
+  if (stars === 1) return '⭐☆☆';
+  if (stars === 2) return '⭐⭐☆';
+  return '⭐⭐⭐';
+}
+
+// Generate level-up rewards
+function generateLevelRewards(level: number): string[] {
+  const rewards: string[] = [];
+
+  // Every 5 levels: unlock visual badge
+  if (level % 5 === 0) {
+    rewards.push(`⭐ Level ${level} Badge`);
+  }
+
+  // Every 10 levels: unlock bonus feature
+  if (level % 10 === 0) {
+    rewards.push('🎉 Bonus Game Mode');
+  }
+
+  // Random rewards
+  if (level % 3 === 0) {
+    rewards.push('💰 50 Bonus Coins');
+  }
+
+  return rewards;
+}
+
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
@@ -878,6 +974,31 @@ export default function MimoPlayground() {
     dailyStreak7: false,
     allGamesPlayed: false,
   });
+
+  // Player Progression State
+  const [playerProgress, setPlayerProgress] = useState<PlayerProgress>({
+    level: 1,
+    xp: 0,
+    xpToNext: 100,
+    totalPlayTime: 0,
+    gamesPlayed: new Set(),
+    masteryStars: {
+      infinity: 0,
+      '2048': 0,
+      neon: 0,
+      cosmic: 0,
+      rhythm: 0,
+      snake: 0,
+      flap: 0,
+      brick: 0,
+    },
+  });
+
+  const [levelUpModal, setLevelUpModal] = useState<{
+    show: boolean;
+    newLevel: number;
+    rewards: string[];
+  }>({ show: false, newLevel: 1, rewards: [] });
 
   const [showTutorial, setShowTutorial] = useState(false);
   const [gameError, setGameError] = useState<string | null>(null);
@@ -1133,6 +1254,36 @@ export default function MimoPlayground() {
     slides: 0,
   });
 
+  // Cosmic Catch用統計
+  const cosmicStatsRef = useRef({
+    sessionStartTime: 0,
+    playCount: 0,
+  });
+
+  // Rhythm Tapper用統計
+  const rhythmStatsRef = useRef({
+    sessionStartTime: 0,
+    playCount: 0,
+  });
+
+  // Neon Snake用統計
+  const snakeStatsRef = useRef({
+    sessionStartTime: 0,
+    playCount: 0,
+  });
+
+  // Neon Flap用統計
+  const flapStatsRef = useRef({
+    sessionStartTime: 0,
+    playCount: 0,
+  });
+
+  // Neon Brick用統計
+  const brickStatsRef = useRef({
+    sessionStartTime: 0,
+    playCount: 0,
+  });
+
   // ハイスコアの読み込みと保存
   useEffect(() => {
     const infinitySaved = localStorage.getItem('infinityDrop_highScore');
@@ -1207,11 +1358,111 @@ export default function MimoPlayground() {
       }
     }
 
+    // Player Progression loading
+    const progressSaved = localStorage.getItem('mimo_playerProgress');
+    if (progressSaved) {
+      try {
+        const parsed = JSON.parse(progressSaved);
+        setPlayerProgress({
+          level: parsed.level || 1,
+          xp: parsed.xp || 0,
+          xpToNext: parsed.xpToNext || getXpForLevel(1),
+          totalPlayTime: parsed.totalPlayTime || 0,
+          gamesPlayed: new Set(parsed.gamesPlayed || []),
+          masteryStars: parsed.masteryStars || {
+            infinity: 0,
+            '2048': 0,
+            neon: 0,
+            cosmic: 0,
+            rhythm: 0,
+            snake: 0,
+            flap: 0,
+            brick: 0,
+          },
+        });
+      } catch {
+        // parse error - keep defaults
+      }
+    }
+
     // Show tutorial on first visit
     const tutorialShown = localStorage.getItem('mimo_tutorialShown');
     if (!tutorialShown) {
       setShowTutorial(true);
     }
+  }, []);
+
+  // Save player progress whenever it changes
+  useEffect(() => {
+    const progressToSave = {
+      level: playerProgress.level,
+      xp: playerProgress.xp,
+      xpToNext: playerProgress.xpToNext,
+      totalPlayTime: playerProgress.totalPlayTime,
+      gamesPlayed: Array.from(playerProgress.gamesPlayed),
+      masteryStars: playerProgress.masteryStars,
+    };
+    localStorage.setItem('mimo_playerProgress', JSON.stringify(progressToSave));
+  }, [playerProgress]);
+
+  // Function to update player progress after a game session
+  const updatePlayerProgress = useCallback((
+    game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick',
+    score: number,
+    duration: number,
+    isVictory: boolean = false,
+    difficulty: 'easy' | 'normal' | 'hard' = 'normal'
+  ) => {
+    // Calculate difficulty multiplier
+    const difficultyMultiplier = difficulty === 'easy' ? 0.8 : difficulty === 'hard' ? 1.5 : 1.0;
+
+    // Calculate XP
+    const xpGained = calculateGameXP(score, duration, isVictory, difficultyMultiplier);
+
+    setPlayerProgress((prev) => {
+      let newLevel = prev.level;
+      let newXp = prev.xp + xpGained;
+      let newXpToNext = prev.xpToNext;
+      const newRewards: string[] = [];
+
+      // Check for level up
+      while (newXp >= newXpToNext) {
+        newXp -= newXpToNext;
+        newLevel += 1;
+        newXpToNext = getXpForLevel(newLevel);
+        newRewards.push(...generateLevelRewards(newLevel));
+      }
+
+      // Update games played set
+      const newGamesPlayed = new Set(prev.gamesPlayed);
+      newGamesPlayed.add(game);
+
+      // Update mastery stars
+      const currentStars = calculateMasteryStars(game, score);
+      const newMasteryStars = { ...prev.masteryStars };
+      if (currentStars > newMasteryStars[game]) {
+        newMasteryStars[game] = currentStars;
+      }
+
+      // Show level up modal if leveled up
+      if (newLevel > prev.level) {
+        setLevelUpModal({
+          show: true,
+          newLevel: newLevel,
+          rewards: newRewards,
+        });
+        setTimeout(() => setLevelUpModal((m) => ({ ...m, show: false })), 4000);
+      }
+
+      return {
+        level: newLevel,
+        xp: newXp,
+        xpToNext: newXpToNext,
+        totalPlayTime: prev.totalPlayTime + duration,
+        gamesPlayed: newGamesPlayed,
+        masteryStars: newMasteryStars,
+      };
+    });
   }, []);
 
   // キャンバスの描画
@@ -1676,6 +1927,9 @@ export default function MimoPlayground() {
         isPlaying: false,
         isGameOver: true,
       }));
+
+      // Update player progression
+      updatePlayerProgress('infinity', gameState.score, sessionDuration, false);
 
       // Check daily challenge completion
       checkDailyChallengeCompletion('infinity', gameState.score);
@@ -2242,6 +2496,9 @@ export default function MimoPlayground() {
       highScore: newHighScore,
     }));
 
+    // Update player progression
+    updatePlayerProgress('neon', neonState.score, sessionDuration, false);
+
     trackClick();
     storeGameEvent('neonDash_over', {
       score: neonState.score,
@@ -2706,6 +2963,10 @@ export default function MimoPlayground() {
       starSpawnTimer: 0,
     });
 
+    // Track session start time for progression
+    cosmicStatsRef.current.sessionStartTime = Date.now();
+    cosmicStatsRef.current.playCount += 1;
+
     // Track game start
     trackClick();
     storeGameEvent('cosmic_game_start', {});
@@ -2743,6 +3004,12 @@ export default function MimoPlayground() {
         bestCombo: newBestCombo,
       };
     });
+
+    // Calculate session duration and update player progression
+    const sessionDuration = cosmicStatsRef.current.sessionStartTime > 0
+      ? Math.floor((Date.now() - cosmicStatsRef.current.sessionStartTime) / 1000)
+      : 0;
+    updatePlayerProgress('cosmic', cosmicState.score, sessionDuration, false);
 
     // Set first play achievement
     if (!gameStats.cosmicFirstPlay) {
@@ -3108,6 +3375,10 @@ export default function MimoPlayground() {
 
     setRhythmState((prev) => ({ ...prev, zones }));
 
+    // Track session start time for progression
+    rhythmStatsRef.current.sessionStartTime = Date.now();
+    rhythmStatsRef.current.playCount += 1;
+
     // First play achievement
     if (!gameStats.rhythmFirstPlay) {
       setGameStats((prev) => ({ ...prev, rhythmFirstPlay: true }));
@@ -3284,9 +3555,15 @@ export default function MimoPlayground() {
       };
     });
 
+    // Calculate session duration and update player progression
+    const sessionDuration = rhythmStatsRef.current.sessionStartTime > 0
+      ? Math.floor((Date.now() - rhythmStatsRef.current.sessionStartTime) / 1000)
+      : 0;
+    updatePlayerProgress('rhythm', rhythmState.score, sessionDuration, false);
+
     vibrate(100);
     storeGameEvent('rhythm', { type: 'gameOver', score: rhythmState.score });
-  }, [rhythmState.score]);
+  }, [rhythmState.score, updatePlayerProgress]);
 
   // Rhythm drawing
   const drawRhythm = useCallback(() => {
@@ -3598,6 +3875,10 @@ export default function MimoPlayground() {
       nearMisses: 0,
     });
 
+    // Track session start time for progression
+    snakeStatsRef.current.sessionStartTime = Date.now();
+    snakeStatsRef.current.playCount += 1;
+
     // First play achievement
     if (!gameStats.snakeFirstPlay) {
       setGameStats((prev) => ({ ...prev, snakeFirstPlay: true }));
@@ -3729,9 +4010,15 @@ export default function MimoPlayground() {
       };
     });
 
+    // Calculate session duration and update player progression
+    const sessionDuration = snakeStatsRef.current.sessionStartTime > 0
+      ? Math.floor((Date.now() - snakeStatsRef.current.sessionStartTime) / 1000)
+      : 0;
+    updatePlayerProgress('snake', snakeState.score, sessionDuration, false);
+
     vibrate(100);
     storeGameEvent('snake', { type: 'gameOver', score: snakeState.score });
-  }, [snakeState.score, gameStats, updateScoreAchievements]);
+  }, [snakeState.score, gameStats, updateScoreAchievements, updatePlayerProgress]);
 
   // Neon Snake game loop
   const neonSnakeGameLoop = useCallback(() => {
@@ -4255,6 +4542,10 @@ export default function MimoPlayground() {
     });
     storeGameEvent('game_start', { game: 'flap' });
 
+    // Track session start time for progression
+    flapStatsRef.current.sessionStartTime = Date.now();
+    flapStatsRef.current.playCount += 1;
+
     // Check first play achievement
     if (!gameStats.flapFirstPlay) {
       const newStats = { ...gameStats, flapFirstPlay: true };
@@ -4554,6 +4845,15 @@ export default function MimoPlayground() {
             localStorage.setItem('mimo_flap_highscore', newState.score.toString());
           }
 
+          // Calculate session duration and update player progression
+          const sessionDuration = flapStatsRef.current.sessionStartTime > 0
+            ? Math.floor((Date.now() - flapStatsRef.current.sessionStartTime) / 1000)
+            : 0;
+          // Use setTimeout to avoid state update during render
+          setTimeout(() => {
+            updatePlayerProgress('flap', newState.score, sessionDuration, false);
+          }, 0);
+
           storeGameEvent('game_over', { game: 'flap', score: newState.score });
           break;
         }
@@ -4590,7 +4890,7 @@ export default function MimoPlayground() {
 
       return newState;
     });
-  }, []);
+  }, [updatePlayerProgress]);
 
   // Update flapStateRef whenever flapState changes (avoids stale closure in game loop)
   useEffect(() => {
@@ -4639,6 +4939,10 @@ const startBrickGame = useCallback(() => {
     ballSpeed: 5,
     powerUps: [],
   });
+
+  // Track session start time for progression
+  brickStatsRef.current.sessionStartTime = Date.now();
+  brickStatsRef.current.playCount += 1;
 
   // First play achievement
   if (!gameStats.brickFirstPlay) {
@@ -4782,9 +5086,15 @@ const brickGameLoop = useCallback(() => {
         localStorage.setItem('brickHighScore', prev.score.toString());
       }
 
-      // Trigger achievement check for brick score
+      // Calculate session duration and update player progression
+      const sessionDuration = brickStatsRef.current.sessionStartTime > 0
+        ? Math.floor((Date.now() - brickStatsRef.current.sessionStartTime) / 1000)
+        : 0;
+
+      // Trigger achievement check for brick score and progress update
       setTimeout(() => {
         updateScoreAchievementsRef.current('brick', prev.score);
+        updatePlayerProgress('brick', prev.score, sessionDuration, false);
       }, 0);
 
       return {
@@ -5333,6 +5643,9 @@ useEffect(() => {
           difficulty: prev.difficulty,
         });
 
+        // Update player progression
+        updatePlayerProgress('2048', score, sessionDuration, hasWon, prev.difficulty);
+
         // Check daily challenge completion (score-based, not tile-based)
         setTimeout(() => checkDailyChallengeCompletion('2048', score), 0);
       }
@@ -5348,7 +5661,7 @@ useEffect(() => {
         invalidMoveFlash: false, // Clear flash on valid move
       };
     });
-  }, [game2048State, currentGame, addRandomTile, trackClick]);
+  }, [game2048State, currentGame, addRandomTile, trackClick, updatePlayerProgress]);
 
   // Clear invalid move flash after animation
   useEffect(() => {
@@ -5586,6 +5899,40 @@ useEffect(() => {
               </div>
             )}
 
+            {/* Player Progression Section */}
+            <div className="mb-6 p-4 rounded-xl border-2 border-cyan-500/50 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                    {t('progression.level')} {playerProgress.level}
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs text-slate-400">{t('progression.xpProgress')}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-32 h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500"
+                          style={{ width: `${(playerProgress.xp / playerProgress.xpToNext) * 100}%` }}
+                        />
+                      </div>
+                      <div className="text-xs text-cyan-300">
+                        {playerProgress.xp}/{playerProgress.xpToNext} XP
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-slate-400">{t('progression.mastery')}</div>
+                  <div className="text-sm text-amber-300">
+                    ⭐ {Object.values(playerProgress.masteryStars).reduce((a, b) => a + b, 0)} total
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">
+                    🎮 {playerProgress.gamesPlayed.size}/8 {t('progression.gamesPlayed')}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Infinity Drop カード */}
               <button
@@ -5615,7 +5962,11 @@ useEffect(() => {
                 <div>
                   <div className="text-2xl font-bold mb-2 group-hover:text-blue-200 group-active:text-blue-100 flex items-center gap-2">
                     {t('infinityDrop.title')}
-                    {gameStats.infinityFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                    {playerProgress.masteryStars.infinity > 0 && (
+                      <span className="text-amber-300 text-xs">
+                        {renderMasteryStars(playerProgress.masteryStars.infinity)}
+                      </span>
+                    )}
                   </div>
                   <div className="text-blue-200 text-sm mb-3">{t('infinityDrop.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
@@ -5658,7 +6009,11 @@ useEffect(() => {
                 <div>
                   <div className="text-2xl font-bold mb-2 group-hover:text-purple-200 group-active:text-purple-100 flex items-center gap-2">
                     {t('slide2048.title')}
-                    {game2048State.highScore > 0 && <span className="text-xs opacity-70">✓</span>}
+                    {playerProgress.masteryStars['2048'] > 0 && (
+                      <span className="text-amber-300 text-xs">
+                        {renderMasteryStars(playerProgress.masteryStars['2048'])}
+                      </span>
+                    )}
                   </div>
                   <div className="text-purple-200 text-sm mb-3">{t('slide2048.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
@@ -5698,7 +6053,11 @@ useEffect(() => {
                 <div>
                   <div className="text-2xl font-bold mb-2 group-hover:text-cyan-200 group-active:text-cyan-100 flex items-center gap-2">
                     {t('neonDash.title')}
-                    {gameStats.neonFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                    {playerProgress.masteryStars.neon > 0 && (
+                      <span className="text-amber-300 text-xs">
+                        {renderMasteryStars(playerProgress.masteryStars.neon)}
+                      </span>
+                    )}
                   </div>
                   <div className="text-cyan-200 text-sm mb-3">{t('neonDash.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
@@ -5738,7 +6097,11 @@ useEffect(() => {
                 <div>
                   <div className="text-2xl font-bold mb-2 group-hover:text-indigo-200 group-active:text-indigo-100 flex items-center gap-2">
                     {t('cosmicCatch.title')}
-                    {gameStats.cosmicFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                    {playerProgress.masteryStars.cosmic > 0 && (
+                      <span className="text-amber-300 text-xs">
+                        {renderMasteryStars(playerProgress.masteryStars.cosmic)}
+                      </span>
+                    )}
                   </div>
                   <div className="text-indigo-200 text-sm mb-3">{t('cosmicCatch.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
@@ -5778,7 +6141,11 @@ useEffect(() => {
                 <div>
                   <div className="text-2xl font-bold mb-2 group-hover:text-pink-200 group-active:text-pink-100 flex items-center gap-2">
                     {t('rhythmTapper.title')}
-                    {gameStats.rhythmFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                    {playerProgress.masteryStars.rhythm > 0 && (
+                      <span className="text-amber-300 text-xs">
+                        {renderMasteryStars(playerProgress.masteryStars.rhythm)}
+                      </span>
+                    )}
                   </div>
                   <div className="text-pink-200 text-sm mb-3">{t('rhythmTapper.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
@@ -5818,7 +6185,11 @@ useEffect(() => {
                 <div>
                   <div className="text-2xl font-bold mb-2 group-hover:text-cyan-200 group-active:text-cyan-100 flex items-center gap-2">
                     {t('neonSnake.title')}
-                    {gameStats.snakeFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                    {playerProgress.masteryStars.snake > 0 && (
+                      <span className="text-amber-300 text-xs">
+                        {renderMasteryStars(playerProgress.masteryStars.snake)}
+                      </span>
+                    )}
                   </div>
                   <div className="text-cyan-200 text-sm mb-3">{t('neonSnake.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
@@ -5858,7 +6229,11 @@ useEffect(() => {
                 <div>
                   <div className="text-2xl font-bold mb-2 group-hover:text-teal-200 group-active:text-teal-100 flex items-center gap-2">
                     {t('neonFlap.title')}
-                    {gameStats.flap50Score && <span className="text-xs opacity-70">✓</span>}
+                    {playerProgress.masteryStars.flap > 0 && (
+                      <span className="text-amber-300 text-xs">
+                        {renderMasteryStars(playerProgress.masteryStars.flap)}
+                      </span>
+                    )}
                   </div>
                   <div className="text-teal-200 text-sm mb-3">{t('neonFlap.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
@@ -5898,7 +6273,11 @@ useEffect(() => {
                 <div>
                   <div className="text-2xl font-bold mb-2 group-hover:text-pink-200 group-active:text-pink-100 flex items-center gap-2">
                     {t('neonBrick.title')}
-                    {gameStats.brickFirstPlay && <span className="text-xs opacity-70">✓</span>}
+                    {playerProgress.masteryStars.brick > 0 && (
+                      <span className="text-amber-300 text-xs">
+                        {renderMasteryStars(playerProgress.masteryStars.brick)}
+                      </span>
+                    )}
                   </div>
                   <div className="text-pink-200 text-sm mb-3">{t('neonBrick.subtitle')}</div>
                   <p className="text-slate-300 text-xs mb-3">
@@ -7368,6 +7747,40 @@ useEffect(() => {
                 className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded border border-cyan-400 font-bold text-white"
               >
                 {t('tutorial.startButton')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Level Up Modal */}
+      {levelUpModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setLevelUpModal((m) => ({ ...m, show: false }))}></div>
+          <div className="relative bg-gradient-to-br from-purple-900 via-blue-900 to-cyan-900 rounded-2xl border-2 border-purple-400 shadow-2xl p-6 max-w-sm w-full animate-bounce">
+            <div className="text-center">
+              <div className="text-5xl mb-2">🎉</div>
+              <div className="text-2xl font-bold bg-gradient-to-r from-purple-300 to-cyan-300 bg-clip-text text-transparent mb-2">
+                {t('progression.levelUp')}
+              </div>
+              <div className="text-xl font-bold text-white mb-4">
+                {t('progression.level')} {levelUpModal.newLevel}
+              </div>
+              {levelUpModal.rewards.length > 0 && (
+                <div className="bg-black/30 rounded-lg p-3 mb-4">
+                  <div className="text-xs text-slate-400 mb-2">{t('progression.rewards')}:</div>
+                  <ul className="text-sm text-amber-300 space-y-1">
+                    {levelUpModal.rewards.map((reward, idx) => (
+                      <li key={idx}>✨ {reward}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <button
+                onClick={() => setLevelUpModal((m) => ({ ...m, show: false }))}
+                className="w-full py-2 bg-purple-600 hover:bg-purple-500 rounded-lg font-bold text-white border border-purple-400"
+              >
+                {t('progression.awesome')}
               </button>
             </div>
           </div>
