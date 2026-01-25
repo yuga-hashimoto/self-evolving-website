@@ -187,6 +187,15 @@
         "completed": "達成",
         "pending": "未達成"
       },
+      "progression": {
+        "level": "レベル",
+        "xpProgress": "XP進行",
+        "mastery": "熟練度",
+        "gamesPlayed": "プレイ済みゲーム",
+        "levelUp": "レベルアップ！",
+        "rewards": "報酬 unlocked",
+        "awesome": "すごい！"
+      },
       "infinityDrop": {
         "title": "Infinity Drop",
         "subtitle": "積み上げパズル",

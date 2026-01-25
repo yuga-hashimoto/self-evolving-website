@@ -187,6 +187,15 @@
         "completed": "Completed",
         "pending": "Pending"
       },
+      "progression": {
+        "level": "Level",
+        "xpProgress": "XP Progress",
+        "mastery": "Mastery",
+        "gamesPlayed": "Games Played",
+        "levelUp": "Level Up!",
+        "rewards": "Rewards Unlocked",
+        "awesome": "Awesome!"
+      },
       "infinityDrop": {
         "title": "Infinity Drop",
         "subtitle": "Stack Puzzle",
