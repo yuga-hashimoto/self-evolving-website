@@ -18,10 +18,11 @@ import AsteroidsGame from './components/AsteroidsGame';
 import BubbleGame from './components/BubbleGame';
 import ColorSwitchGame from './components/ColorSwitchGame';
 import SpeedColorTapGame from './components/SpeedColorTapGame';
+import GemBlitzGame from './components/GemBlitzGame';
 
 export default function GrokPlayground() {
 
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -131,6 +132,12 @@ export default function GrokPlayground() {
             >
               {t('grok.speedColorTap') || 'Speed Color Tap'}
             </button>
+            <button
+              onClick={() => setSelectedGame('gemBlitz')}
+              className={`px-4 py-2 rounded ${selectedGame === 'gemBlitz' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.gemBlitz') || 'Gem Blitz'}
+            </button>
           </div>
 
           {/* Game container */}
@@ -150,6 +157,7 @@ export default function GrokPlayground() {
           {selectedGame === 'bubble' && <BubbleGame />}
           {selectedGame === 'colorSwitch' && <ColorSwitchGame />}
           {selectedGame === 'speedColorTap' && <SpeedColorTapGame />}
+          {selectedGame === 'gemBlitz' && <GemBlitzGame />}
         </div>
       </div>
 
