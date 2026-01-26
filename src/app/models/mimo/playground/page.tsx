@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAnalytics } from '@/lib/analytics';
 import type { RhythmTapperState, RhythmColor, RhythmZone, RhythmNote } from './components/RhythmTapper';
+import type { NeonTetrisState } from './components/NeonTetris';
 
 // Infinity Drop Interfaces
 interface Block {
@@ -185,7 +186,7 @@ interface Achievement {
 interface DailyChallenge {
   id: string; // YYYY-MM-DD
   date: string;
-  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick';
+  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris';
   target: number; // Target score to beat
   description: string;
   completed: boolean;
@@ -338,6 +339,25 @@ interface NeonSnakeState {
   nearMisses: number;
 }
 
+// Neon Tetris Interfaces (needed for local game logic)
+type TetrominoShape = 'I' | 'O' | 'T' | 'S' | 'Z' | 'J' | 'L';
+
+interface Tetromino {
+  shape: TetrominoShape;
+  x: number;
+  y: number;
+  rotation: number;
+  color: string;
+}
+
+interface TetrisCell {
+  x: number;
+  y: number;
+  color: string;
+  isCleared?: boolean;
+  clearAnimation?: number;
+}
+
 // Rhythm Tapper Interfaces - now imported from component
 
 interface DailyChallengeState {
@@ -397,6 +417,10 @@ interface GameStats {
   brick500Score: boolean;
   game2048_firstPlay: boolean;
   game2048_2048Reached: boolean;
+  tetrisFirstPlay: boolean;
+  tetris100Score: boolean;
+  tetris500Score: boolean;
+  tetrisLevel10: boolean;
   dailyStreak3: boolean;
   dailyStreak7: boolean;
   allGamesPlayed: boolean;
@@ -443,6 +467,63 @@ const SNAKE_MIN_SPEED = 3; // Minimum speed
 const POWER_UP_DURATION = 5000; // 5 seconds in ms
 const SHIELD_DURATION = 8000; // 8 seconds in ms
 const OBSTACLE_SPAWN_INTERVAL = 100; // Points between obstacle spawns
+
+// Neon Tetris Constants
+const TETRIS_GRID_WIDTH = 10;
+const TETRIS_GRID_HEIGHT = 20;
+const TETRIS_COLORS: Record<TetrominoShape, string> = {
+  I: '#00f5ff', // Cyan
+  O: '#fbbf24', // Yellow
+  T: '#a855f7', // Purple
+  S: '#22c55e', // Green
+  Z: '#ef4444', // Red
+  J: '#3b82f6', // Blue
+  L: '#f97316', // Orange
+};
+const TETROMINO_SHAPES: Record<TetrominoShape, number[][][]> = {
+  I: [
+    [[0,0,0,0], [1,1,1,1], [0,0,0,0], [0,0,0,0]],
+    [[0,0,1,0], [0,0,1,0], [0,0,1,0], [0,0,1,0]],
+    [[0,0,0,0], [0,0,0,0], [1,1,1,1], [0,0,0,0]],
+    [[0,1,0,0], [0,1,0,0], [0,1,0,0], [0,1,0,0]],
+  ],
+  O: [
+    [[0,1,1,0], [0,1,1,0], [0,0,0,0], [0,0,0,0]],
+    [[0,1,1,0], [0,1,1,0], [0,0,0,0], [0,0,0,0]],
+    [[0,1,1,0], [0,1,1,0], [0,0,0,0], [0,0,0,0]],
+    [[0,1,1,0], [0,1,1,0], [0,0,0,0], [0,0,0,0]],
+  ],
+  T: [
+    [[0,1,0,0], [1,1,1,0], [0,0,0,0], [0,0,0,0]],
+    [[0,1,0,0], [0,1,1,0], [0,1,0,0], [0,0,0,0]],
+    [[0,0,0,0], [1,1,1,0], [0,1,0,0], [0,0,0,0]],
+    [[0,1,0,0], [1,1,0,0], [0,1,0,0], [0,0,0,0]],
+  ],
+  S: [
+    [[0,1,1,0], [1,1,0,0], [0,0,0,0], [0,0,0,0]],
+    [[0,1,0,0], [0,1,1,0], [0,0,1,0], [0,0,0,0]],
+    [[0,0,0,0], [0,1,1,0], [1,1,0,0], [0,0,0,0]],
+    [[1,0,0,0], [1,1,0,0], [0,1,0,0], [0,0,0,0]],
+  ],
+  Z: [
+    [[1,1,0,0], [0,1,1,0], [0,0,0,0], [0,0,0,0]],
+    [[0,0,1,0], [0,1,1,0], [0,1,0,0], [0,0,0,0]],
+    [[0,0,0,0], [1,1,0,0], [0,1,1,0], [0,0,0,0]],
+    [[0,1,0,0], [1,1,0,0], [1,0,0,0], [0,0,0,0]],
+  ],
+  J: [
+    [[1,0,0,0], [1,1,1,0], [0,0,0,0], [0,0,0,0]],
+    [[0,1,1,0], [0,1,0,0], [0,1,0,0], [0,0,0,0]],
+    [[0,0,0,0], [1,1,1,0], [0,0,1,0], [0,0,0,0]],
+    [[0,1,0,0], [0,1,0,0], [1,1,0,0], [0,0,0,0]],
+  ],
+  L: [
+    [[0,0,1,0], [1,1,1,0], [0,0,0,0], [0,0,0,0]],
+    [[0,1,0,0], [0,1,0,0], [0,1,1,0], [0,0,0,0]],
+    [[0,0,0,0], [1,1,1,0], [1,0,0,0], [0,0,0,0]],
+    [[1,1,0,0], [0,1,0,0], [0,1,0,0], [0,0,0,0]],
+  ],
+};
 
 // Achievement Definitions
 const ACHIEVEMENTS: Achievement[] = [
@@ -671,6 +752,42 @@ const ACHIEVEMENTS: Achievement[] = [
     reward: 15,
     condition: (stats) => stats.game2048_firstPlay,
   },
+  {
+    id: 'tetris_first',
+    name: 'Tetris Newbie',
+    description: 'Play your first Neon Tetris',
+    unlocked: false,
+    icon: '🟦',
+    reward: 15,
+    condition: (stats) => stats.tetrisFirstPlay,
+  },
+  {
+    id: 'tetris_100',
+    name: 'Block Stacker',
+    description: 'Score 100+ in Neon Tetris',
+    unlocked: false,
+    icon: '🟩',
+    reward: 25,
+    condition: (stats) => stats.tetris100Score,
+  },
+  {
+    id: 'tetris_500',
+    name: 'Line Master',
+    description: 'Score 500+ in Neon Tetris',
+    unlocked: false,
+    icon: '🟪',
+    reward: 50,
+    condition: (stats) => stats.tetris500Score,
+  },
+  {
+    id: 'tetris_level10',
+    name: 'Tetris Expert',
+    description: 'Reach Level 10 in Neon Tetris',
+    unlocked: false,
+    icon: '🏆',
+    reward: 100,
+    condition: (stats) => stats.tetrisLevel10,
+  },
 ];
 
 // ==================== PROGRESSION SYSTEM HELPERS ====================
@@ -761,7 +878,7 @@ function generateLevelRewards(level: number): string[] {
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris'>('menu');
   const [shopOpen, setShopOpen] = useState(false);
 
   const [gameState, setGameState] = useState<InfinityDropState>({
@@ -927,6 +1044,28 @@ export default function MimoPlayground() {
     powerUps: [],
   });
 
+  // Neon Tetris state
+  const [tetrisState, setTetrisState] = useState<NeonTetrisState>({
+    isPlaying: false,
+    isGameOver: false,
+    score: 0,
+    highScore: 0,
+    level: 1,
+    linesCleared: 0,
+    board: Array.from({ length: TETRIS_GRID_HEIGHT }, () => Array(TETRIS_GRID_WIDTH).fill(null)),
+    currentPiece: null,
+    nextPiece: null,
+    holdPiece: null,
+    canHold: true,
+    dropTimer: 0,
+    dropInterval: 60,
+    particles: [],
+    lastMoveWasRotate: false,
+  });
+
+  // Track tetris session start time for duration calculation
+  const tetrisSessionStartRef = useRef<number>(0);
+
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallengeState>({
     currentChallenge: null,
     streak: 0,
@@ -970,6 +1109,10 @@ export default function MimoPlayground() {
     brick500Score: false,
     game2048_firstPlay: false,
     game2048_2048Reached: false,
+    tetrisFirstPlay: false,
+    tetris100Score: false,
+    tetris500Score: false,
+    tetrisLevel10: false,
     dailyStreak3: false,
     dailyStreak7: false,
     allGamesPlayed: false,
@@ -991,6 +1134,7 @@ export default function MimoPlayground() {
       snake: 0,
       flap: 0,
       brick: 0,
+      tetris: 0,
     },
   });
 
@@ -1019,6 +1163,7 @@ export default function MimoPlayground() {
   const touchStartRefNeon = useRef<{ x: number; y: number; time: number } | null>(null);
   const touchStartRefCosmic = useRef<{ x: number; y: number; time: number } | null>(null);
   const touchStartRefSnake = useRef<{ x: number; y: number; time: number } | null>(null);
+  const touchStartRefTetris = useRef<{ x: number; y: number } | null>(null);
 
   // Ref for current flap state to avoid stale closure in game loop
   const flapStateRef = useRef<NeonFlapState>({} as NeonFlapState);
@@ -1103,7 +1248,7 @@ export default function MimoPlayground() {
     const hash = dateStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
     // Cycle through games
-    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'brick')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'brick'];
+    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'brick' | 'tetris')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'brick', 'tetris'];
     const game = games[hash % games.length];
 
     // Generate target based on game type
@@ -1146,6 +1291,11 @@ export default function MimoPlayground() {
         target = 300 + (hash % 300); // 300-600 points
         description = `Score ${target}+ in Neon Brick`;
         reward = 70;
+        break;
+      case 'tetris':
+        target = 200 + (hash % 200); // 200-400 points
+        description = `Score ${target}+ in Neon Tetris`;
+        reward = 65;
         break;
     }
 
@@ -1407,7 +1557,7 @@ export default function MimoPlayground() {
 
   // Function to update player progress after a game session
   const updatePlayerProgress = useCallback((
-    game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick',
+    game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris',
     score: number,
     duration: number,
     isVictory: boolean = false,
@@ -2126,7 +2276,7 @@ export default function MimoPlayground() {
   };
 
   // Check and complete daily challenge if criteria met
-  const checkDailyChallengeCompletion = useCallback((gameType: 'infinity' | '2048' | 'neon' | 'cosmic', score: number) => {
+  const checkDailyChallengeCompletion = useCallback((gameType: 'infinity' | '2048' | 'neon' | 'cosmic' | 'tetris', score: number) => {
     if (!dailyChallenge.currentChallenge || dailyChallenge.currentChallenge.completed) return;
     if (dailyChallenge.currentChallenge.game !== gameType) return;
 
@@ -2143,6 +2293,8 @@ export default function MimoPlayground() {
     } else if (gameType === 'neon' && score >= targetScore) {
       completed = true;
     } else if (gameType === 'cosmic' && score >= targetScore) {
+      completed = true;
+    } else if (gameType === 'tetris' && score >= targetScore) {
       completed = true;
     }
 
@@ -2304,8 +2456,8 @@ export default function MimoPlayground() {
       }
     }
 
-    // Check all games played (including 2048)
-    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && newStats.rhythmFirstPlay && newStats.snakeFirstPlay && newStats.flapFirstPlay && newStats.brickFirstPlay && newStats.game2048_firstPlay && !newStats.allGamesPlayed) {
+    // Check all games played (including 2048 and tetris)
+    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && newStats.rhythmFirstPlay && newStats.snakeFirstPlay && newStats.flapFirstPlay && newStats.brickFirstPlay && newStats.game2048_firstPlay && newStats.tetrisFirstPlay && !newStats.allGamesPlayed) {
       newStats.allGamesPlayed = true;
       updated = true;
     }
@@ -2439,8 +2591,12 @@ export default function MimoPlayground() {
       // 追跡
       trackClick();
       storeGameEvent('shop_purchase', { itemId: item.id, cost: item.cost });
+    } else {
+      // Not enough coins - provide feedback
+      playSound('miss');
+      vibrate(20);
     }
-  }, [gameState.coins, shopItems, trackClick, activateSkill]);
+  }, [gameState.coins, shopItems, trackClick, activateSkill, playSound, vibrate]);
 
   // ==================== NEON DASH GAME LOGIC ====================
 
@@ -4907,6 +5063,612 @@ export default function MimoPlayground() {
 
   // ==================== END NEON FLAP ====================
 
+  // ==================== NEON TETRIS ====================
+  // Start Tetris game
+  const startTetrisGame = useCallback(() => {
+    const shapes: TetrominoShape[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+    const getRandomShape = () => shapes[Math.floor(Math.random() * shapes.length)];
+    const nextPiece = getRandomShape();
+
+    // Set session start time
+    tetrisSessionStartRef.current = Date.now();
+
+    setTetrisState({
+      isPlaying: true,
+      isGameOver: false,
+      score: 0,
+      highScore: tetrisState.highScore,
+      level: 1,
+      linesCleared: 0,
+      board: Array.from({ length: TETRIS_GRID_HEIGHT }, () => Array(TETRIS_GRID_WIDTH).fill(null)),
+      currentPiece: {
+        shape: getRandomShape(),
+        x: 3,
+        y: 0,
+        rotation: 0,
+        color: TETRIS_COLORS[getRandomShape()],
+      },
+      nextPiece,
+      holdPiece: null,
+      canHold: true,
+      dropTimer: 0,
+      dropInterval: 60,
+      particles: [],
+      lastMoveWasRotate: false,
+    });
+
+    // Track first play
+    if (!gameStats.tetrisFirstPlay) {
+      setGameStats((prev) => ({ ...prev, tetrisFirstPlay: true }));
+    }
+
+    storeGameEvent('game_start', { game: 'tetris' });
+    trackClick();
+    vibrate(30);
+  }, [tetrisState.highScore, gameStats.tetrisFirstPlay, trackClick, vibrate]);
+
+  // Move piece horizontally
+  const moveTetris = useCallback((direction: 'left' | 'right') => {
+    setTetrisState((prev) => {
+      if (!prev.isPlaying || !prev.currentPiece) return prev;
+
+      const dx = direction === 'left' ? -1 : 1;
+      const newPiece = { ...prev.currentPiece, x: prev.currentPiece.x + dx };
+
+      // Check collision
+      const matrix = TETROMINO_SHAPES[newPiece.shape][newPiece.rotation];
+      for (let y = 0; y < 4; y++) {
+        for (let x = 0; x < 4; x++) {
+          if (matrix[y][x]) {
+            const newX = newPiece.x + x;
+            const newY = newPiece.y + y;
+            if (
+              newX < 0 ||
+              newX >= TETRIS_GRID_WIDTH ||
+              (newY >= 0 && prev.board[newY][newX])
+            ) {
+              return prev;
+            }
+          }
+        }
+      }
+
+      vibrate(5);
+      return { ...prev, currentPiece: newPiece, lastMoveWasRotate: false };
+    });
+  }, [vibrate]);
+
+  // Rotate piece
+  const rotateTetris = useCallback(() => {
+    setTetrisState((prev) => {
+      if (!prev.isPlaying || !prev.currentPiece) return prev;
+
+      const piece = prev.currentPiece;
+      const newRotation = (piece.rotation + 1) % 4;
+      const matrix = TETROMINO_SHAPES[piece.shape][newRotation];
+
+      // Try wall kicks
+      const kicks = [0, -1, 1, -2, 2];
+      for (const kick of kicks) {
+        let valid = true;
+        for (let y = 0; y < 4; y++) {
+          for (let x = 0; x < 4; x++) {
+            if (matrix[y][x]) {
+              const newX = piece.x + x + kick;
+              const newY = piece.y + y;
+              if (
+                newX < 0 ||
+                newX >= TETRIS_GRID_WIDTH ||
+                newY >= TETRIS_GRID_HEIGHT ||
+                (newY >= 0 && prev.board[newY][newX])
+              ) {
+                valid = false;
+                break;
+              }
+            }
+          }
+          if (!valid) break;
+        }
+
+        if (valid) {
+          vibrate(10);
+          return {
+            ...prev,
+            currentPiece: { ...piece, rotation: newRotation, x: piece.x + kick },
+            lastMoveWasRotate: true,
+          };
+        }
+      }
+
+      return prev;
+    });
+  }, [vibrate]);
+
+  // Soft drop
+  const softDropTetris = useCallback(() => {
+    setTetrisState((prev) => {
+      if (!prev.isPlaying || !prev.currentPiece) return prev;
+
+      const newPiece = { ...prev.currentPiece, y: prev.currentPiece.y + 1 };
+
+      // Check collision
+      const matrix = TETROMINO_SHAPES[newPiece.shape][newPiece.rotation];
+      for (let y = 0; y < 4; y++) {
+        for (let x = 0; x < 4; x++) {
+          if (matrix[y][x]) {
+            const newX = newPiece.x + x;
+            const newY = newPiece.y + y;
+            if (
+              newY >= TETRIS_GRID_HEIGHT ||
+              (newY >= 0 && prev.board[newY][newX])
+            ) {
+              return prev;
+            }
+          }
+        }
+      }
+
+      return { ...prev, currentPiece: newPiece, score: prev.score + 1 };
+    });
+  }, []);
+
+  // Hard drop
+  const hardDropTetris = useCallback(() => {
+    setTetrisState((prev) => {
+      if (!prev.isPlaying || !prev.currentPiece) return prev;
+
+      let piece = { ...prev.currentPiece };
+      const matrix = TETROMINO_SHAPES[piece.shape][piece.rotation];
+
+      // Drop until collision
+      while (true) {
+        const nextPiece = { ...piece, y: piece.y + 1 };
+        let valid = true;
+
+        for (let y = 0; y < 4; y++) {
+          for (let x = 0; x < 4; x++) {
+            if (matrix[y][x]) {
+              const newX = nextPiece.x + x;
+              const newY = nextPiece.y + y;
+              if (
+                newY >= TETRIS_GRID_HEIGHT ||
+                (newY >= 0 && prev.board[newY][newX])
+              ) {
+                valid = false;
+                break;
+              }
+            }
+          }
+          if (!valid) break;
+        }
+
+        if (!valid) break;
+        piece = nextPiece;
+      }
+
+      // Lock piece
+      const newBoard = prev.board.map((row) => row.map((cell) => (cell ? { ...cell } : null)));
+      const lockedMatrix = TETROMINO_SHAPES[piece.shape][piece.rotation];
+      for (let y = 0; y < 4; y++) {
+        for (let x = 0; x < 4; x++) {
+          if (lockedMatrix[y][x]) {
+            const newX = piece.x + x;
+            const newY = piece.y + y;
+            if (newY >= 0) {
+              newBoard[newY][newX] = {
+                x: newX,
+                y: newY,
+                color: piece.color,
+              };
+            }
+          }
+        }
+      }
+
+      // Clear lines
+      let linesCleared = 0;
+      // eslint-disable-next-line prefer-const
+      let clearedBoard = newBoard;
+      for (let y = TETRIS_GRID_HEIGHT - 1; y >= 0; y--) {
+        if (clearedBoard[y].every((cell) => cell !== null)) {
+          linesCleared++;
+          for (let dy = y; dy > 0; dy--) {
+            clearedBoard[dy] = clearedBoard[dy - 1].map((cell) =>
+              cell ? { ...cell, y: dy } : null
+            );
+          }
+          clearedBoard[0] = Array(TETRIS_GRID_WIDTH).fill(null);
+          y++;
+        }
+      }
+
+      // Calculate score
+      const points = [0, 100, 300, 500, 800][linesCleared] * prev.level;
+      const newScore = prev.score + points;
+      const newLines = prev.linesCleared + linesCleared;
+      const newLevel = Math.floor(newLines / 10) + 1;
+      const newInterval = Math.max(15, 60 - (newLevel - 1) * 5);
+
+      // Spawn next piece
+      const nextShape = prev.nextPiece || (['I', 'O', 'T', 'S', 'Z', 'J', 'L'] as TetrominoShape[])[Math.floor(Math.random() * 7)];
+      const shapes: TetrominoShape[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+      const getRandomShape = () => shapes[Math.floor(Math.random() * shapes.length)];
+      const newNextPiece = getRandomShape();
+
+      const newPiece: Tetromino = {
+        shape: nextShape,
+        x: 3,
+        y: 0,
+        rotation: 0,
+        color: TETRIS_COLORS[nextShape],
+      };
+
+      // Check game over
+      const newMatrix = TETROMINO_SHAPES[newPiece.shape][newPiece.rotation];
+      for (let y = 0; y < 4; y++) {
+        for (let x = 0; x < 4; x++) {
+          if (newMatrix[y][x]) {
+            const newX = newPiece.x + x;
+            const newY = newPiece.y + y;
+            if (newY >= 0 && newY < TETRIS_GRID_HEIGHT && clearedBoard[newY][newX]) {
+              const newHighScore = Math.max(prev.highScore, newScore);
+              if (newScore > prev.highScore) {
+                localStorage.setItem('neonTetris_highScore', newScore.toString());
+              }
+
+              // Track achievements
+              const newStats = { ...gameStats };
+              let statsUpdated = false;
+              if (!newStats.tetris100Score && newScore >= 100) {
+                newStats.tetris100Score = true;
+                statsUpdated = true;
+              }
+              if (!newStats.tetris500Score && newScore >= 500) {
+                newStats.tetris500Score = true;
+                statsUpdated = true;
+              }
+              if (!newStats.tetrisLevel10 && newLevel >= 10) {
+                newStats.tetrisLevel10 = true;
+                statsUpdated = true;
+              }
+              if (statsUpdated) {
+                setGameStats(newStats);
+                localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+                checkAchievements();
+              }
+
+              // Check daily challenge
+              checkDailyChallengeCompletion('tetris', newScore);
+
+              storeGameEvent('game_over', { game: 'tetris', score: newScore });
+              const duration = (Date.now() - tetrisSessionStartRef.current) / 1000;
+              updatePlayerProgress('tetris', newScore, duration);
+
+              return {
+                ...prev,
+                isPlaying: false,
+                isGameOver: true,
+                score: newScore,
+                highScore: newHighScore,
+                level: newLevel,
+                linesCleared: newLines,
+                board: clearedBoard,
+                currentPiece: null,
+              };
+            }
+          }
+        }
+      }
+
+      // Track achievements
+      const newStats = { ...gameStats };
+      let statsUpdated = false;
+      if (!newStats.tetris100Score && newScore >= 100) {
+        newStats.tetris100Score = true;
+        statsUpdated = true;
+      }
+      if (!newStats.tetris500Score && newScore >= 500) {
+        newStats.tetris500Score = true;
+        statsUpdated = true;
+      }
+      if (!newStats.tetrisLevel10 && newLevel >= 10) {
+        newStats.tetrisLevel10 = true;
+        statsUpdated = true;
+      }
+      if (statsUpdated) {
+        setGameStats(newStats);
+        localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+        checkAchievements();
+      }
+
+      // Check daily challenge
+      checkDailyChallengeCompletion('tetris', newScore);
+
+      vibrate(10);
+      const duration = (Date.now() - tetrisSessionStartRef.current) / 1000;
+      updatePlayerProgress('tetris', newScore, duration);
+
+      return {
+        ...prev,
+        score: newScore,
+        level: newLevel,
+        linesCleared: newLines,
+        dropInterval: newInterval,
+        board: clearedBoard,
+        currentPiece: newPiece,
+        nextPiece: newNextPiece,
+        canHold: true,
+        lastMoveWasRotate: false,
+        dropTimer: 0,
+      };
+    });
+  }, [gameStats, setGameStats, checkAchievements, checkDailyChallengeCompletion, updatePlayerProgress, vibrate]);
+
+  // Hold piece
+  const holdTetris = useCallback(() => {
+    setTetrisState((prev) => {
+      if (!prev.isPlaying || !prev.currentPiece || !prev.canHold) return prev;
+
+      const currentShape = prev.currentPiece.shape;
+      const heldShape = prev.holdPiece;
+
+      if (heldShape) {
+        // Swap
+        const newPiece: Tetromino = {
+          shape: heldShape,
+          x: 3,
+          y: 0,
+          rotation: 0,
+          color: TETRIS_COLORS[heldShape],
+        };
+
+        // Check collision
+        const matrix = TETROMINO_SHAPES[newPiece.shape][newPiece.rotation];
+        for (let y = 0; y < 4; y++) {
+          for (let x = 0; x < 4; x++) {
+            if (matrix[y][x]) {
+              const newX = newPiece.x + x;
+              const newY = newPiece.y + y;
+              if (newY >= 0 && prev.board[newY][newX]) {
+                return prev;
+              }
+            }
+          }
+        }
+
+        return {
+          ...prev,
+          currentPiece: newPiece,
+          holdPiece: currentShape,
+          canHold: false,
+          lastMoveWasRotate: false,
+        };
+      } else {
+        // Hold first time
+        const shapes: TetrominoShape[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+        const nextShape = prev.nextPiece || shapes[Math.floor(Math.random() * shapes.length)];
+        const newPiece: Tetromino = {
+          shape: nextShape,
+          x: 3,
+          y: 0,
+          rotation: 0,
+          color: TETRIS_COLORS[nextShape],
+        };
+
+        return {
+          ...prev,
+          currentPiece: newPiece,
+          nextPiece: shapes[Math.floor(Math.random() * shapes.length)],
+          holdPiece: currentShape,
+          canHold: false,
+          lastMoveWasRotate: false,
+        };
+      }
+    });
+  }, []);
+
+  // Tetris game loop
+  const tetrisGameLoop = useCallback(() => {
+    setTetrisState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver || !prev.currentPiece) return prev;
+
+      // Gravity drop
+      if (prev.dropTimer >= prev.dropInterval) {
+        const newPiece = { ...prev.currentPiece, y: prev.currentPiece.y + 1 };
+
+        // Check collision
+        const matrix = TETROMINO_SHAPES[newPiece.shape][newPiece.rotation];
+        let collides = false;
+        for (let y = 0; y < 4; y++) {
+          for (let x = 0; x < 4; x++) {
+            if (matrix[y][x]) {
+              const newX = newPiece.x + x;
+              const newY = newPiece.y + y;
+              if (
+                newY >= TETRIS_GRID_HEIGHT ||
+                (newY >= 0 && prev.board[newY][newX])
+              ) {
+                collides = true;
+                break;
+              }
+            }
+          }
+          if (collides) break;
+        }
+
+        if (!collides) {
+          return { ...prev, currentPiece: newPiece, dropTimer: 0 };
+        } else {
+          // Lock piece
+          const newBoard = prev.board.map((row) => row.map((cell) => (cell ? { ...cell } : null)));
+          const lockedMatrix = TETROMINO_SHAPES[prev.currentPiece.shape][prev.currentPiece.rotation];
+          for (let y = 0; y < 4; y++) {
+            for (let x = 0; x < 4; x++) {
+              if (lockedMatrix[y][x]) {
+                const newX = prev.currentPiece.x + x;
+                const newY = prev.currentPiece.y + y;
+                if (newY >= 0) {
+                  newBoard[newY][newX] = {
+                    x: newX,
+                    y: newY,
+                    color: prev.currentPiece.color,
+                  };
+                }
+              }
+            }
+          }
+
+          // Clear lines
+          let linesCleared = 0;
+          // eslint-disable-next-line prefer-const
+          let clearedBoard = newBoard;
+          for (let y = TETRIS_GRID_HEIGHT - 1; y >= 0; y--) {
+            if (clearedBoard[y].every((cell) => cell !== null)) {
+              linesCleared++;
+              for (let dy = y; dy > 0; dy--) {
+                clearedBoard[dy] = clearedBoard[dy - 1].map((cell) =>
+                  cell ? { ...cell, y: dy } : null
+                );
+              }
+              clearedBoard[0] = Array(TETRIS_GRID_WIDTH).fill(null);
+              y++;
+            }
+          }
+
+          // Calculate score
+          const points = [0, 100, 300, 500, 800][linesCleared] * prev.level;
+          const newScore = prev.score + points;
+          const newLines = prev.linesCleared + linesCleared;
+          const newLevel = Math.floor(newLines / 10) + 1;
+          const newInterval = Math.max(15, 60 - (newLevel - 1) * 5);
+
+          // Spawn next piece
+          const nextShape = prev.nextPiece || (['I', 'O', 'T', 'S', 'Z', 'J', 'L'] as TetrominoShape[])[Math.floor(Math.random() * 7)];
+          const shapes: TetrominoShape[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+          const newNextPiece = shapes[Math.floor(Math.random() * shapes.length)];
+
+          const newPiece: Tetromino = {
+            shape: nextShape,
+            x: 3,
+            y: 0,
+            rotation: 0,
+            color: TETRIS_COLORS[nextShape],
+          };
+
+          // Check game over
+          const newMatrix = TETROMINO_SHAPES[newPiece.shape][newPiece.rotation];
+          for (let y = 0; y < 4; y++) {
+            for (let x = 0; x < 4; x++) {
+              if (newMatrix[y][x]) {
+                const newX = newPiece.x + x;
+                const newY = newPiece.y + y;
+                if (newY >= 0 && newY < TETRIS_GRID_HEIGHT && clearedBoard[newY][newX]) {
+                  const newHighScore = Math.max(prev.highScore, newScore);
+                  if (newScore > prev.highScore) {
+                    localStorage.setItem('neonTetris_highScore', newScore.toString());
+                  }
+
+                  // Track achievements
+                  const newStats = { ...gameStats };
+                  let statsUpdated = false;
+                  if (!newStats.tetris100Score && newScore >= 100) {
+                    newStats.tetris100Score = true;
+                    statsUpdated = true;
+                  }
+                  if (!newStats.tetris500Score && newScore >= 500) {
+                    newStats.tetris500Score = true;
+                    statsUpdated = true;
+                  }
+                  if (!newStats.tetrisLevel10 && newLevel >= 10) {
+                    newStats.tetrisLevel10 = true;
+                    statsUpdated = true;
+                  }
+                  if (statsUpdated) {
+                    setGameStats(newStats);
+                    localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+                    checkAchievements();
+                  }
+
+                  // Check daily challenge
+                  checkDailyChallengeCompletion('tetris', newScore);
+
+                  storeGameEvent('game_over', { game: 'tetris', score: newScore });
+                  const duration = (Date.now() - tetrisSessionStartRef.current) / 1000;
+                  updatePlayerProgress('tetris', newScore, duration);
+
+                  return {
+                    ...prev,
+                    isPlaying: false,
+                    isGameOver: true,
+                    score: newScore,
+                    highScore: newHighScore,
+                    level: newLevel,
+                    linesCleared: newLines,
+                    board: clearedBoard,
+                    currentPiece: null,
+                  };
+                }
+              }
+            }
+          }
+
+          // Track achievements
+          const newStats = { ...gameStats };
+          let statsUpdated = false;
+          if (!newStats.tetris100Score && newScore >= 100) {
+            newStats.tetris100Score = true;
+            statsUpdated = true;
+          }
+          if (!newStats.tetris500Score && newScore >= 500) {
+            newStats.tetris500Score = true;
+            statsUpdated = true;
+          }
+          if (!newStats.tetrisLevel10 && newLevel >= 10) {
+            newStats.tetrisLevel10 = true;
+            statsUpdated = true;
+          }
+          if (statsUpdated) {
+            setGameStats(newStats);
+            localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+            checkAchievements();
+          }
+
+          // Check daily challenge
+          checkDailyChallengeCompletion('tetris', newScore);
+
+          const duration = (Date.now() - tetrisSessionStartRef.current) / 1000;
+          updatePlayerProgress('tetris', newScore, duration);
+
+          return {
+            ...prev,
+            score: newScore,
+            level: newLevel,
+            linesCleared: newLines,
+            dropInterval: newInterval,
+            board: clearedBoard,
+            currentPiece: newPiece,
+            nextPiece: newNextPiece,
+            canHold: true,
+            lastMoveWasRotate: false,
+            dropTimer: 0,
+          };
+        }
+      }
+
+      return { ...prev, dropTimer: prev.dropTimer + 1 };
+    });
+  }, [gameStats, setGameStats, checkAchievements, checkDailyChallengeCompletion, updatePlayerProgress]);
+
+  // Tetris game loop useEffect
+  useEffect(() => {
+    if (tetrisState.isPlaying && !tetrisState.isGameOver) {
+      const interval = setInterval(tetrisGameLoop, 1000 / 60); // 60 FPS
+      return () => clearInterval(interval);
+    }
+  }, [tetrisState.isPlaying, tetrisState.isGameOver, tetrisGameLoop]);
+
+  // ==================== END NEON TETRIS ====================
+
 // ==================== NEON BRICK BREAKER ====================
 // Start Brick Breaker game
 const startBrickGame = useCallback(() => {
@@ -5400,6 +6162,40 @@ useEffect(() => {
           }
         }
       }
+      // Neon Tetris
+      else if (currentGame === 'tetris') {
+        if (!tetrisState.isPlaying && !tetrisState.isGameOver) {
+          if (e.code === 'Space' || e.code === 'Enter') {
+            e.preventDefault();
+            startTetrisGame();
+          }
+        } else if (tetrisState.isGameOver) {
+          if (e.code === 'Space' || e.code === 'Enter') {
+            e.preventDefault();
+            startTetrisGame();
+          }
+        } else if (tetrisState.isPlaying && !tetrisState.isGameOver) {
+          if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+            e.preventDefault();
+            moveTetris('left');
+          } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+            e.preventDefault();
+            moveTetris('right');
+          } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+            e.preventDefault();
+            softDropTetris();
+          } else if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+            e.preventDefault();
+            rotateTetris();
+          } else if (e.code === 'Space') {
+            e.preventDefault();
+            hardDropTetris();
+          } else if (e.code === 'KeyC' || e.code === 'ShiftLeft') {
+            e.preventDefault();
+            holdTetris();
+          }
+        }
+      }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -5424,7 +6220,7 @@ useEffect(() => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, neonState.isPlaying, neonState.isGameOver, startNeonDashGame, jump, slide, cosmicState.isPlaying, cosmicState.isGameOver, startCosmicGame, rhythmState.isPlaying, rhythmState.isGameOver, startRhythmGame, handleRhythmTap, snakeState.isPlaying, snakeState.isGameOver, startNeonSnakeGame, handleSnakeDirection, flapState.isPlaying, flapState.isGameOver, startNeonFlapGame, flap]);
+  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, neonState.isPlaying, neonState.isGameOver, startNeonDashGame, jump, slide, cosmicState.isPlaying, cosmicState.isGameOver, startCosmicGame, rhythmState.isPlaying, rhythmState.isGameOver, startRhythmGame, handleRhythmTap, snakeState.isPlaying, snakeState.isGameOver, startNeonSnakeGame, handleSnakeDirection, flapState.isPlaying, flapState.isGameOver, startNeonFlapGame, flap, tetrisState.isPlaying, tetrisState.isGameOver, startTetrisGame, moveTetris, softDropTetris, rotateTetris, hardDropTetris, holdTetris]);
 
   // スコア表示用フォーマット
   const formatScore = (score: number): string => {
@@ -6286,6 +7082,50 @@ useEffect(() => {
                 </div>
                 <div className="text-xs text-slate-400">
                   {tc('highScore')}: {formatScore(brickState.highScore)}
+                </div>
+              </button>
+
+              {/* Neon Tetris カード */}
+              <button
+                onClick={() => {
+                  setCurrentGame('tetris');
+                  trackClick();
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
+                }}
+                aria-label={`${t('neonTetris.title')}. ${t('neonTetris.description')}`}
+                className={`relative bg-gradient-to-br from-orange-600 to-red-800 p-6 rounded-xl border-2 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between ${
+                  dailyChallenge.currentChallenge?.game === 'tetris'
+                    ? 'border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/50'
+                    : 'border-orange-500 hover:border-orange-400'
+                } active:scale-95 active:bg-orange-700`}
+                style={{
+                  minHeight: '140px',
+                  touchAction: 'manipulation',
+                }}
+              >
+                {dailyChallenge.currentChallenge?.game === 'tetris' && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                    🎯 Daily
+                  </div>
+                )}
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-orange-200 group-active:text-orange-100 flex items-center gap-2">
+                    {t('neonTetris.title')}
+                    {playerProgress.masteryStars.tetris > 0 && (
+                      <span className="text-amber-300 text-xs">
+                        {renderMasteryStars(playerProgress.masteryStars.tetris)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-orange-200 text-sm mb-3">{t('neonTetris.subtitle')}</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    {t('neonTetris.description')}
+                  </p>
+                </div>
+                <div className="text-xs text-slate-400">
+                  {tc('highScore')}: {formatScore(tetrisState.highScore)}
                 </div>
               </button>
             </div>
@@ -7169,8 +8009,136 @@ useEffect(() => {
           </>
         )}
 
+        {/* ==================== NEON TETRIS ==================== */}
+        {currentGame === 'tetris' && (
+          <>
+            {/* Daily Challenge Status for Tetris */}
+            {dailyChallenge.currentChallenge && dailyChallenge.currentChallenge.game === 'tetris' && (
+              <div className="mb-4 w-full p-3 rounded-lg border border-amber-500/50 bg-amber-900/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <div className="text-sm">
+                      <span className="text-amber-400 font-bold">{t('dailyChallenge.short')}:</span>{' '}
+                      <span className="text-slate-300">{dailyChallenge.currentChallenge.target}+</span>
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-bold ${
+                    dailyChallenge.currentChallenge.completed
+                      ? 'bg-green-600 text-white'
+                      : 'bg-amber-600/50 text-amber-200'
+                  }`}>
+                    {dailyChallenge.currentChallenge.completed
+                      ? t('dailyChallenge.completed')
+                      : `${dailyChallenge.currentChallenge.reward} 💰`}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="w-full max-w-md">
+              <div className="flex justify-between items-center mb-4 gap-2">
+                <div className="flex-1 bg-slate-800 p-3 rounded-lg text-center border border-slate-700">
+                  <div className="text-xs text-slate-400">{tc('score')}</div>
+                  <div className="text-xl font-bold text-yellow-400">{formatScore(tetrisState.score)}</div>
+                </div>
+                <div className="flex-1 bg-slate-800 p-3 rounded-lg text-center border border-slate-700">
+                  <div className="text-xs text-slate-400">{t('neonTetris.level')}</div>
+                  <div className="text-xl font-bold text-green-400">{tetrisState.level}</div>
+                </div>
+                <div className="flex-1 bg-slate-800 p-3 rounded-lg text-center border border-slate-700">
+                  <div className="text-xs text-slate-400">{t('neonTetris.lines')}</div>
+                  <div className="text-xl font-bold text-cyan-400">{tetrisState.linesCleared}</div>
+                </div>
+              </div>
+
+              <div
+                ref={containerRef}
+                className="w-full bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden shadow-2xl shadow-orange-900/10 relative"
+              >
+                <div className="relative">
+                  <canvas
+                    ref={canvasRef}
+                    className="w-full block cursor-pointer touch-none"
+                    style={{
+                      touchAction: 'manipulation',
+                      userSelect: 'none',
+                      WebkitUserSelect: 'none',
+                      WebkitTapHighlightColor: 'transparent',
+                    }}
+                    onClick={() => {
+                      if (!tetrisState.isPlaying && !tetrisState.isGameOver) {
+                        startTetrisGame();
+                      } else if (tetrisState.isGameOver) {
+                        startTetrisGame();
+                      }
+                    }}
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      if (!tetrisState.isPlaying && !tetrisState.isGameOver) {
+                        startTetrisGame();
+                      } else if (tetrisState.isGameOver) {
+                        startTetrisGame();
+                      }
+                    }}
+                  />
+
+                  {/* Game Over / Start Screen */}
+                  {!tetrisState.isPlaying && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm rounded-lg z-10">
+                      <div className="text-center p-6">
+                        {tetrisState.isGameOver ? (
+                          <>
+                            <div className="text-4xl mb-2">🟦</div>
+                            <div className="text-2xl font-bold text-white mb-2">{t('playground.common.gameOver')}</div>
+                            <div className="text-yellow-400 text-xl mb-1">{tc('score')}: {formatScore(tetrisState.score)}</div>
+                            <div className="text-green-400 text-sm mb-4">{tc('highScore')}: {formatScore(tetrisState.highScore)}</div>
+                            <div className="text-cyan-400 text-sm mb-4">{t('neonTetris.level')}: {tetrisState.level}</div>
+                            <button className="px-4 py-2 bg-orange-600 hover:bg-orange-500 rounded font-bold text-white">
+                              {t('neonTetris.tapToStart')}
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-4xl mb-2">🟦</div>
+                            <div className="text-2xl font-bold text-white mb-2">Neon Tetris</div>
+                            <div className="text-orange-200 text-sm mb-4">
+                              {t('neonTetris.description')}
+                            </div>
+                            <div className="text-xs text-slate-400 mb-4">
+                              <p className="mb-1">👆 {t('neonTetris.controls')}</p>
+                              <p>⌨️ {t('neonTetris.keys')}</p>
+                              <p className="mt-2">{t('neonTetris.tapToStart')}</p>
+                            </div>
+                            <button className="px-4 py-2 bg-orange-600 hover:bg-orange-500 rounded font-bold text-white">
+                              {t('neonTetris.tapToStart')}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4 text-center text-slate-400 text-sm">
+                <p>📌 {t('neonTetris.controls')}</p>
+              </div>
+
+              <div className="flex justify-center gap-2 mt-4">
+                <button
+                  onClick={() => setCurrentGame('menu')}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+                >
+                  ← {t('neonTetris.backToMenu')}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
         {/* 広告スペース（ゲームプレイ画面のみ） */}
-        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake' || currentGame === 'flap' || currentGame === 'brick') && (
+        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake' || currentGame === 'flap' || currentGame === 'brick' || currentGame === 'tetris') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
               {t('adArea')}
@@ -7199,6 +8167,7 @@ useEffect(() => {
           <span>{t('rhythmTapper.title')}: {formatScore(rhythmState.highScore)}</span>
           <span>{t('neonSnake.title')}: {formatScore(snakeState.highScore)}</span>
           <span>{t('neonBrick.title')}: {formatScore(brickState.highScore)}</span>
+          <span>{t('neonTetris.title')}: {formatScore(tetrisState.highScore)}</span>
         </div>
       </footer>
 
@@ -7520,6 +8489,80 @@ useEffect(() => {
           onTouchCancel={(e) => {
             e.preventDefault();
             touchStartRefSnake.current = null;
+          }}
+          className="fixed inset-0 z-50"
+          style={{
+            touchAction: 'none',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        />
+      )}
+
+      {/* Neon Tetris Touch Controls */}
+      {currentGame === 'tetris' && (
+        <div
+          onTouchStart={(e) => {
+            e.preventDefault();
+            if (!tetrisState.isPlaying && !tetrisState.isGameOver) {
+              startTetrisGame();
+              return;
+            }
+            if (tetrisState.isGameOver) {
+              startTetrisGame();
+              return;
+            }
+            const touch = e.touches[0];
+            touchStartRefTetris.current = {
+              x: touch.clientX,
+              y: touch.clientY,
+            };
+          }}
+          onTouchMove={(e) => {
+            e.preventDefault();
+            if (!tetrisState.isPlaying || tetrisState.isGameOver) return;
+            if (!touchStartRefTetris.current) return;
+
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - touchStartRefTetris.current.x;
+            const deltaY = touch.clientY - touchStartRefTetris.current.y;
+            const swipeThreshold = 30;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
+              if (deltaX > 0) {
+                moveTetris('right');
+              } else {
+                moveTetris('left');
+              }
+              touchStartRefTetris.current = null;
+            } else if (deltaY > swipeThreshold) {
+              softDropTetris();
+              touchStartRefTetris.current = null;
+            }
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            if (!tetrisState.isPlaying || tetrisState.isGameOver) return;
+
+            const touchStart = touchStartRefTetris.current;
+            if (!touchStart) return;
+
+            const touchEnd = e.changedTouches[0];
+            const deltaX = touchEnd.clientX - touchStart.x;
+            const deltaY = touchEnd.clientY - touchStart.y;
+            const tapThreshold = 15;
+
+            // If small movement, treat as tap (rotate)
+            if (Math.abs(deltaX) < tapThreshold && Math.abs(deltaY) < tapThreshold) {
+              rotateTetris();
+            }
+
+            touchStartRefTetris.current = null;
+          }}
+          onTouchCancel={(e) => {
+            e.preventDefault();
+            touchStartRefTetris.current = null;
           }}
           className="fixed inset-0 z-50"
           style={{

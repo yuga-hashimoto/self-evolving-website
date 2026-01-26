@@ -302,6 +302,17 @@
         "controls": "Swipe/Mouse to move paddle",
         "backToMenu": "Back to Menu"
       },
+      "neonTetris": {
+        "title": "Neon Tetris",
+        "subtitle": "Neon Block Stack",
+        "description": "Stack blocks and clear lines! Classic Tetris experience!",
+        "tapToStart": "Tap to start",
+        "controls": "← → Move / ↑ Rotate / ↓ Soft Drop / Space Hard Drop",
+        "keys": "C/Shift=Hold",
+        "backToMenu": "Back to Menu",
+        "level": "Level",
+        "lines": "Lines"
+      },
       "achievements": {
         "title": "Achievements",
         "description": "Play games to unlock achievements!",
