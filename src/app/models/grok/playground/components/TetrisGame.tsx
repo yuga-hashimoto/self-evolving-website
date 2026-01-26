@@ -64,10 +64,28 @@ export default function TetrisGame() {
   const startY = useRef<number>(0);
   const t = useTranslations('playground');
 
-  const canvasSize = {
-    width: BOARD_WIDTH * CELL_SIZE,
-    height: BOARD_HEIGHT * CELL_SIZE
-  };
+  // Responsive canvas sizing
+  const [canvasSize, setCanvasSize] = useState({ width: 200, height: 400 });
+  const cellSizeRef = useRef(CELL_SIZE);
+
+  useEffect(() => {
+    const updateSize = () => {
+      const maxWidth = Math.min(window.innerWidth - 32, 360);
+      const maxHeight = Math.min(window.innerHeight - 300, 600);
+      const cellSize = Math.floor(Math.min(maxWidth / BOARD_WIDTH, maxHeight / BOARD_HEIGHT));
+      cellSizeRef.current = Math.max(15, cellSize); // Minimum 15px
+      const width = BOARD_WIDTH * cellSizeRef.current;
+      const height = BOARD_HEIGHT * cellSizeRef.current;
+      setCanvasSize({ width, height });
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    window.addEventListener('orientationchange', updateSize);
+    return () => {
+      window.removeEventListener('resize', updateSize);
+      window.removeEventListener('orientationchange', updateSize);
+    };
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('tetrisHighScore');
@@ -190,9 +208,9 @@ export default function TetrisGame() {
     for (let y = 0; y < BOARD_HEIGHT; y++) {
       for (let x = 0; x < BOARD_WIDTH; x++) {
         ctx.fillStyle = board[y][x];
-        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        ctx.fillRect(x * cellSizeRef.current, y * cellSizeRef.current, cellSizeRef.current, cellSizeRef.current);
         ctx.strokeStyle = '#333';
-        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        ctx.strokeRect(x * cellSizeRef.current, y * cellSizeRef.current, cellSizeRef.current, cellSizeRef.current);
       }
     }
 
@@ -202,8 +220,8 @@ export default function TetrisGame() {
       for (let y = 0; y < currentPiece.shape.length; y++) {
         for (let x = 0; x < currentPiece.shape[y].length; x++) {
           if (currentPiece.shape[y][x]) {
-            ctx.fillRect((currentPiece.x + x) * CELL_SIZE, (currentPiece.y + y) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            ctx.strokeRect((currentPiece.x + x) * CELL_SIZE, (currentPiece.y + y) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            ctx.fillRect((currentPiece.x + x) * cellSizeRef.current, (currentPiece.y + y) * cellSizeRef.current, cellSizeRef.current, cellSizeRef.current);
+            ctx.strokeRect((currentPiece.x + x) * cellSizeRef.current, (currentPiece.y + y) * cellSizeRef.current, cellSizeRef.current, cellSizeRef.current);
           }
         }
       }
