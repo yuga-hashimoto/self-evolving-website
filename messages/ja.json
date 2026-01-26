@@ -302,6 +302,17 @@
         "controls": "スワイプ/マウスでバーを動かす",
         "backToMenu": "メニューへ"
       },
+      "neonTetris": {
+        "title": "Neon Tetris",
+        "subtitle": "ネオンテトリス",
+        "description": "ブロックを積み上げてラインをクリア！Classic Tetris体験！",
+        "tapToStart": "タップでスタート",
+        "controls": "← → 移動 / ↑ 回転 / ↓ ソフトドロップ / Space ハードドロップ",
+        "keys": "C/Shift=ホールド",
+        "backToMenu": "メニューへ",
+        "level": "レベル",
+        "lines": "ライン"
+      },
       "achievements": {
         "title": "アチーブメント",
         "description": "ゲームをプレイしてアチーブメントを解除しよう！",
