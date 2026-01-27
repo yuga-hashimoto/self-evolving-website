@@ -23,10 +23,11 @@ import ReflexTapGame from './components/ReflexTapGame';
 import PianoTileGame from './components/PianoTileGame';
 import MemoryFlipGame from './components/MemoryFlipGame';
 import TapEmpireGame from './components/TapEmpireGame';
+import InfinityLoopGame from './components/InfinityLoopGame';
 
 export default function GrokPlayground() {
 
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire' | 'infinityLoop'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -166,6 +167,12 @@ export default function GrokPlayground() {
             >
               {t('grok.memoryFlip')}
             </button>
+            <button
+              onClick={() => setSelectedGame('infinityLoop')}
+              className={`px-4 py-2 rounded ${selectedGame === 'infinityLoop' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.infinityLoop') || 'Infinity Loop'}
+            </button>
           </div>
 
           {/* Game container */}
@@ -190,6 +197,7 @@ export default function GrokPlayground() {
           {selectedGame === 'pianoTile' && <PianoTileGame />}
           {selectedGame === 'tapEmpire' && <TapEmpireGame />}
           {selectedGame === 'memoryFlip' && <MemoryFlipGame />}
+          {selectedGame === 'infinityLoop' && <InfinityLoopGame />}
         </div>
       </div>
 
