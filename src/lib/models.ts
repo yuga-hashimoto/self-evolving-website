@@ -4,7 +4,7 @@ export const MODELS = {
         id: 'mimo',
         name: 'Mimo',
         description: 'Xiaomi Mimo V2 Flash',
-        openrouterModel: 'xiaomi/mimo-v2-flash:free',
+        openrouterModel: 'xiaomi/mimo-v2-flash',
         color: 'purple',
     },
     grok: {

@@ -24,7 +24,7 @@ jobs:
     with:
       model_id: 'mimo'
       model_display_name: 'MiMo (CLI)'
-      anthropic_model: 'xiaomi/mimo-v2-flash:free'
+      anthropic_model: 'xiaomi/mimo-v2-flash'
       commit_prefix: '🆓 AI Evolution (CLI)'
     secrets:
       model_api_key: ${{ secrets.MIMO_API_KEY }}
