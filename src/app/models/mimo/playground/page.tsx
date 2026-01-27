@@ -867,11 +867,31 @@ function generateLevelRewards(level: number): string[] {
   return rewards;
 }
 
+// Session tracking interface
+interface SessionState {
+  isActive: boolean;
+  startTime: number | null;
+  duration: number; // seconds
+  gamesPlayed: number;
+  totalScore: number;
+  gamesList: string[];
+}
+
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
   const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris'>('menu');
   const [shopOpen, setShopOpen] = useState(false);
+
+  // Session tracking state
+  const [session, setSession] = useState<SessionState>({
+    isActive: false,
+    startTime: null,
+    duration: 0,
+    gamesPlayed: 0,
+    totalScore: 0,
+    gamesList: [],
+  });
 
   const [gameState, setGameState] = useState<InfinityDropState>({
     blocks: [],
@@ -1162,6 +1182,60 @@ export default function MimoPlayground() {
 
   const { trackClick } = useAnalytics();
 
+  // Track game session - called when user enters a game
+  const trackGameSession = useCallback((gameName: string) => {
+    setSession(prev => {
+      const newGamesList = [...prev.gamesList, gameName];
+      const newGamesPlayed = prev.gamesPlayed + 1;
+
+      if (!prev.isActive) {
+        // Start new session
+        return {
+          isActive: true,
+          startTime: Date.now(),
+          duration: 0,
+          gamesPlayed: 1,
+          totalScore: 0,
+          gamesList: [gameName],
+        };
+      }
+
+      return {
+        ...prev,
+        gamesPlayed: newGamesPlayed,
+        gamesList: newGamesList,
+      };
+    });
+  }, []);
+
+  // Reset session (when returning to menu after session complete)
+  const resetSession = useCallback(() => {
+    setSession(() => ({
+      isActive: false,
+      startTime: null,
+      duration: 0,
+      gamesPlayed: 0,
+      totalScore: 0,
+      gamesList: [],
+    }));
+  }, []);
+
+  // Add score to session total (called when game ends)
+  const addToSessionScore = useCallback((score: number) => {
+    setSession(prev => ({
+      ...prev,
+      totalScore: prev.totalScore + score,
+    }));
+  }, []);
+
+  // Helper to return to menu and add current game score to session
+  const returnToMenu = useCallback((currentGameScore: number = 0) => {
+    if (currentGameScore > 0) {
+      addToSessionScore(currentGameScore);
+    }
+    setCurrentGame('menu');
+  }, [addToSessionScore]);
+
   // Canvas用翻訳テキストをrefで保持
   const canvasTextsRef = useRef({
     gameOver: 'GAME OVER',
@@ -1224,6 +1298,18 @@ export default function MimoPlayground() {
       freezeDesc: t('infinityDrop.freezeDesc'),
     };
   }, [t, tc]);
+
+  // Session timer effect
+  useEffect(() => {
+    if (session.isActive && session.startTime) {
+      const interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - session.startTime!) / 1000);
+        setSession(prev => ({ ...prev, duration: elapsed }));
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [session.isActive, session.startTime]);
 
   // Get today's date in YYYY-MM-DD format (local time)
   const getTodayDate = useCallback((): string => {
@@ -6684,12 +6770,13 @@ useEffect(() => {
               <button
                 onClick={() => {
                   // Select random game from available games
-                  const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick')[] =
-                    ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick'];
+                  const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris')[] =
+                    ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris'];
                   const randomGame = games[Math.floor(Math.random() * games.length)];
 
                   setCurrentGame(randomGame);
                   trackClick();
+                  trackGameSession(randomGame);
 
                   // Haptic feedback
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
@@ -6763,6 +6850,70 @@ useEffect(() => {
               </div>
             )}
 
+            {/* Session Stats Section */}
+            {session.isActive && session.gamesPlayed > 0 && (
+              <div className="mb-6 p-4 rounded-xl border-2 border-amber-500/50 bg-gradient-to-r from-amber-900/20 to-orange-900/20 relative overflow-hidden">
+                {session.gamesPlayed >= 3 && session.duration >= 120 && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-400/10 via-transparent to-amber-400/10 animate-pulse"></div>
+                )}
+                <div className="flex items-center justify-between flex-wrap gap-3 relative">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">🔥</span>
+                    <div className="text-left">
+                      <div className="font-bold text-amber-400 flex items-center gap-2">
+                        Session Stats
+                        {session.gamesPlayed >= 3 && session.duration >= 120 && (
+                          <span className="text-sm animate-bounce">🎉</span>
+                        )}
+                      </div>
+                      <div className="text-sm text-slate-300">
+                        {session.duration}s • {session.gamesPlayed} game{session.gamesPlayed > 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-slate-400">Total Score</div>
+                    <div className="text-lg font-bold text-yellow-400">
+                      💯 {formatScore(session.totalScore)}
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {session.gamesList.slice(-3).map((g, i) => (
+                        <span key={i} className="inline-block mr-1">
+                          {g === 'infinity' ? '🧊' :
+                           g === '2048' ? '🔢' :
+                           g === 'neon' ? '🏃' :
+                           g === 'cosmic' ? '🚀' :
+                           g === 'rhythm' ? '🎵' :
+                           g === 'snake' ? '🐍' :
+                           g === 'flap' ? '🪶' :
+                           g === 'brick' ? '🧱' : '🎮'}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                {session.gamesPlayed >= 3 && session.duration >= 120 && (
+                  <div className="mt-3 text-center text-amber-300 text-sm font-bold animate-pulse">
+                    🏆 Amazing session! Keep going! 🏆
+                  </div>
+                )}
+                <div className="mt-3 flex gap-2">
+                  <button
+                    onClick={() => {
+                      resetSession();
+                      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                        navigator.vibrate(50);
+                      }
+                    }}
+                    className="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold transition-colors touch-manipulation"
+                    style={{ touchAction: 'manipulation' }}
+                  >
+                    Reset Session
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Player Progression Section */}
             <div className="mb-6 p-4 rounded-xl border-2 border-cyan-500/50 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
               <div className="flex items-center justify-between flex-wrap gap-3">
@@ -6803,6 +6954,7 @@ useEffect(() => {
                 onClick={() => {
                   setCurrentGame('infinity');
                   trackClick();
+                  trackGameSession('infinity');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -6850,6 +7002,7 @@ useEffect(() => {
                     start2048Game(game2048State.difficulty);
                   }
                   trackClick();
+                  trackGameSession('2048');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -6894,6 +7047,7 @@ useEffect(() => {
                 onClick={() => {
                   setCurrentGame('neon');
                   trackClick();
+                  trackGameSession('neon');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -6938,6 +7092,7 @@ useEffect(() => {
                 onClick={() => {
                   setCurrentGame('cosmic');
                   trackClick();
+                  trackGameSession('cosmic');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -6982,6 +7137,7 @@ useEffect(() => {
                 onClick={() => {
                   setCurrentGame('rhythm');
                   trackClick();
+                  trackGameSession('rhythm');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7026,6 +7182,7 @@ useEffect(() => {
                 onClick={() => {
                   setCurrentGame('snake');
                   trackClick();
+                  trackGameSession('snake');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7070,6 +7227,7 @@ useEffect(() => {
                 onClick={() => {
                   setCurrentGame('flap');
                   trackClick();
+                  trackGameSession('flap');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7114,6 +7272,7 @@ useEffect(() => {
                 onClick={() => {
                   setCurrentGame('brick');
                   trackClick();
+                  trackGameSession('brick');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7158,6 +7317,7 @@ useEffect(() => {
                 onClick={() => {
                   setCurrentGame('tetris');
                   trackClick();
+                  trackGameSession('tetris');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7326,7 +7486,7 @@ useEffect(() => {
                 </button>
               )}
               <button
-                onClick={() => setCurrentGame('menu')}
+                onClick={() => returnToMenu(gameState.isGameOver ? gameState.score : 0)}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
               >
                 ← {t('infinityDrop.backToMenu')}
@@ -7486,7 +7646,7 @@ useEffect(() => {
             {/* リセット/戻るボタン */}
             <div className="flex justify-center gap-2 mt-4">
               <button
-                onClick={() => setCurrentGame('menu')}
+                onClick={() => returnToMenu(game2048State.isGameOver ? game2048State.score : 0)}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
               >
                 ← {t('slide2048.backToMenu')}
