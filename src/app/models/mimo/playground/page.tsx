@@ -1248,7 +1248,7 @@ export default function MimoPlayground() {
     const hash = dateStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
     // Cycle through games
-    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'brick' | 'tetris')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'brick', 'tetris'];
+    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris'];
     const game = games[hash % games.length];
 
     // Generate target based on game type
@@ -1286,6 +1286,11 @@ export default function MimoPlayground() {
         target = 200 + (hash % 200); // 200-400 points
         description = `Score ${target}+ in Neon Snake`;
         reward = 65;
+        break;
+      case 'flap':
+        target = 50 + (hash % 50); // 50-100 points
+        description = `Score ${target}+ in Neon Flap`;
+        reward = 55;
         break;
       case 'brick':
         target = 300 + (hash % 300); // 300-600 points
@@ -6227,6 +6232,76 @@ useEffect(() => {
     return score.toLocaleString();
   };
 
+  // Share score function
+  const shareScore = useCallback((gameName: string, score: number, highScore: number) => {
+    const message = `🎮 MiMo Play\n${gameName}\nScore: ${score}\nBest: ${highScore}\n\nPlay now! 🚀`;
+
+    // Try Web Share API first (mobile)
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: `MiMo - ${gameName}`,
+        text: message,
+      }).catch(() => {
+        // Fallback to clipboard
+        copyToClipboard(message);
+      });
+    } else {
+      // Fallback to clipboard
+      copyToClipboard(message);
+    }
+
+    // Track share event
+    try {
+      const shareEvents = JSON.parse(localStorage.getItem('mimo_share_events') || '[]');
+      shareEvents.push({
+        game: gameName,
+        score,
+        timestamp: Date.now(),
+      });
+      if (shareEvents.length > 50) shareEvents.splice(0, shareEvents.length - 50);
+      localStorage.setItem('mimo_share_events', JSON.stringify(shareEvents));
+    } catch (_) {}
+  }, []);
+
+  // Copy to clipboard helper
+  const copyToClipboard = (text: string) => {
+    if (typeof window !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        // Show toast notification
+        if (typeof document !== 'undefined') {
+          const toast = document.createElement('div');
+          toast.textContent = '✓ Copied to clipboard!';
+          toast.style.cssText = `
+            position: fixed;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #22c55e;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 9999;
+            transition: top 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+          `;
+          document.body.appendChild(toast);
+          // Animate in
+          requestAnimationFrame(() => {
+            toast.style.top = '20px';
+            toast.style.opacity = '1';
+          });
+          setTimeout(() => {
+            // Animate out
+            toast.style.top = '-50px';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+          }, 2000);
+        }
+      });
+    }
+  };
+
   // ==================== 2048 GAME LOGIC ====================
 
   // 2048: 新しいゲーム開始
@@ -7249,6 +7324,14 @@ useEffect(() => {
               >
                 🛒 {t('infinityDrop.shop')}
               </button>
+              {gameState.isGameOver && (
+                <button
+                  onClick={() => shareScore('Infinity Drop', gameState.score, gameState.highScore)}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded border border-purple-500 text-sm font-bold text-white"
+                >
+                  📤 Share
+                </button>
+              )}
               <button
                 onClick={() => setCurrentGame('menu')}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
@@ -7360,12 +7443,20 @@ useEffect(() => {
                     <div className="text-slate-300 mb-4">
                       {tc('score')}: <span className="text-yellow-400 font-bold">{formatScore(game2048State.score)}</span>
                     </div>
-                    <button
-                      onClick={reset2048}
-                      className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded border border-blue-400 font-bold"
-                    >
-                      {tc('playAgain')}
-                    </button>
+                    <div className="flex gap-2 mb-4">
+                      <button
+                        onClick={reset2048}
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded border border-blue-400 font-bold"
+                      >
+                        {tc('playAgain')}
+                      </button>
+                      <button
+                        onClick={() => shareScore('Slide 2048', game2048State.score, game2048State.highScore)}
+                        className="px-6 py-2 bg-purple-600 hover:bg-purple-500 rounded border border-purple-400 font-bold"
+                      >
+                        📤
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -7485,12 +7576,22 @@ useEffect(() => {
               <p className="text-xs">🎮 {t('neonDash.controls')}</p>
             </div>
 
-            <button
-              onClick={() => setCurrentGame('menu')}
-              className="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
-            >
-              ← {t('neonDash.backToMenu')}
-            </button>
+            <div className="flex justify-center gap-2 mt-4">
+              {neonState.isGameOver && (
+                <button
+                  onClick={() => shareScore('Neon Dash', neonState.score, neonState.highScore)}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded border border-purple-500 text-sm font-bold text-white"
+                >
+                  📤 Share
+                </button>
+              )}
+              <button
+                onClick={() => setCurrentGame('menu')}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+              >
+                ← {t('neonDash.backToMenu')}
+              </button>
+            </div>
           </>
         )}
 
@@ -7560,12 +7661,22 @@ useEffect(() => {
               <p className="text-xs">🎮 {t('cosmicCatch.controls')}</p>
             </div>
 
-            <button
-              onClick={() => setCurrentGame('menu')}
-              className="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
-            >
-              ← {t('cosmicCatch.backToMenu')}
-            </button>
+            <div className="flex justify-center gap-2 mt-4">
+              {cosmicState.isGameOver && (
+                <button
+                  onClick={() => shareScore('Cosmic Catch', cosmicState.score, cosmicState.highScore)}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded border border-purple-500 text-sm font-bold text-white"
+                >
+                  📤 Share
+                </button>
+              )}
+              <button
+                onClick={() => setCurrentGame('menu')}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+              >
+                ← {t('cosmicCatch.backToMenu')}
+              </button>
+            </div>
           </>
         )}
 
@@ -7652,12 +7763,20 @@ useEffect(() => {
                             {t('rhythmTapper.good')}: {rhythmState.goodHits} |
                             {t('rhythmTapper.miss')}: {rhythmState.misses}
                           </div>
-                          <button
-                            onClick={() => startRhythmGame()}
-                            className="px-6 py-3 bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-500 hover:to-red-500 rounded-lg font-bold text-white border border-pink-400"
-                          >
-                            {tc('playAgain')}
-                          </button>
+                          <div className="flex gap-2 justify-center mb-4">
+                            <button
+                              onClick={() => shareScore('Rhythm Tapper', rhythmState.score, rhythmState.highScore)}
+                              className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded font-bold text-white"
+                            >
+                              📤 Share
+                            </button>
+                            <button
+                              onClick={() => startRhythmGame()}
+                              className="px-6 py-2 bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-500 hover:to-red-500 rounded-lg font-bold text-white border border-pink-400"
+                            >
+                              {tc('playAgain')}
+                            </button>
+                          </div>
                         </>
                       ) : (
                         <>
@@ -7767,6 +7886,15 @@ useEffect(() => {
                           <div className="text-xs text-slate-400 mb-4">
                             Foods: {snakeState.foodsEaten} | Near Misses: {snakeState.nearMisses}
                           </div>
+                          <div className="flex gap-2 justify-center mb-4">
+                            <button
+                              onClick={() => shareScore('Neon Snake', snakeState.score, snakeState.highScore)}
+                              className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded text-sm font-bold text-white touch-manipulation"
+                              style={{ touchAction: 'manipulation' }}
+                            >
+                              📤 Share
+                            </button>
+                          </div>
                           <button className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded font-bold text-white">
                             TAP TO START
                           </button>
@@ -7856,6 +7984,15 @@ useEffect(() => {
                           <div className="text-2xl font-bold text-white mb-2">GAME OVER</div>
                           <div className="text-teal-400 text-xl mb-1">Score: {flapState.score}</div>
                           <div className="text-amber-400 text-sm mb-2">Best: {flapState.highScore}</div>
+                          <div className="flex gap-2 justify-center mb-4">
+                            <button
+                              onClick={() => shareScore('Neon Flap', flapState.score, flapState.highScore)}
+                              className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded text-sm font-bold text-white touch-manipulation"
+                              style={{ touchAction: 'manipulation' }}
+                            >
+                              📤 Share
+                            </button>
+                          </div>
                           <button className="px-4 py-2 bg-teal-600 hover:bg-teal-500 rounded font-bold text-white">
                             TAP TO START
                           </button>
@@ -7954,6 +8091,15 @@ useEffect(() => {
                           <div className="text-2xl font-bold text-white mb-2">GAME OVER</div>
                           <div className="text-pink-400 text-xl mb-1">Score: {brickState.score}</div>
                           <div className="text-amber-400 text-sm mb-2">Best: {brickState.highScore}</div>
+                          <div className="flex gap-2 justify-center mb-4">
+                            <button
+                              onClick={() => shareScore('Neon Brick', brickState.score, brickState.highScore)}
+                              className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded text-sm font-bold text-white touch-manipulation"
+                              style={{ touchAction: 'manipulation' }}
+                            >
+                              📤 Share
+                            </button>
+                          </div>
                           <button className="px-4 py-2 bg-pink-600 hover:bg-pink-500 rounded font-bold text-white">
                             TAP TO START
                           </button>
@@ -8094,6 +8240,15 @@ useEffect(() => {
                             <div className="text-yellow-400 text-xl mb-1">{tc('score')}: {formatScore(tetrisState.score)}</div>
                             <div className="text-green-400 text-sm mb-4">{tc('highScore')}: {formatScore(tetrisState.highScore)}</div>
                             <div className="text-cyan-400 text-sm mb-4">{t('neonTetris.level')}: {tetrisState.level}</div>
+                            <div className="flex gap-2 justify-center mb-4">
+                              <button
+                                onClick={() => shareScore('Neon Tetris', tetrisState.score, tetrisState.highScore)}
+                                className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded text-sm font-bold text-white touch-manipulation"
+                                style={{ touchAction: 'manipulation' }}
+                              >
+                                📤 Share
+                              </button>
+                            </div>
                             <button className="px-4 py-2 bg-orange-600 hover:bg-orange-500 rounded font-bold text-white">
                               {t('neonTetris.tapToStart')}
                             </button>
