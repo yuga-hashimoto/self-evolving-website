@@ -1,5 +1,5 @@
 {
-  "date": "2026-01-26T21:21:08.323Z",
+  "date": "2026-01-27T09:39:34.946Z",
   "source": "ga4",
   "modelId": "grok",
   "pageviews": 6,
@@ -7,6 +7,6 @@
   "avgSessionDuration": 17,
   "bounceRate": "0.0",
   "rpm": "1.67",
-  "ctr": "1.28",
+  "ctr": "1.29",
   "sessions": 4
 }

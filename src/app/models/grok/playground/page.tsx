@@ -22,10 +22,11 @@ import GemBlitzGame from './components/GemBlitzGame';
 import ReflexTapGame from './components/ReflexTapGame';
 import PianoTileGame from './components/PianoTileGame';
 import MemoryFlipGame from './components/MemoryFlipGame';
+import TapEmpireGame from './components/TapEmpireGame';
 
 export default function GrokPlayground() {
 
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -154,6 +155,12 @@ export default function GrokPlayground() {
               {t('grok.pianoTile') || 'Piano Tiles'}
             </button>
             <button
+              onClick={() => setSelectedGame('tapEmpire')}
+              className={`px-4 py-2 min-w-[60px] min-h-[60px] rounded flex items-center justify-center ${selectedGame === 'tapEmpire' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.tapEmpire') || 'Tap Empire'}
+            </button>
+            <button
               onClick={() => setSelectedGame('memoryFlip')}
               className={`px-4 py-2 min-w-[60px] min-h-[60px] rounded flex items-center justify-center ${selectedGame === 'memoryFlip' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
             >
@@ -181,6 +188,7 @@ export default function GrokPlayground() {
           {selectedGame === 'gemBlitz' && <GemBlitzGame />}
           {selectedGame === 'reflexTap' && <ReflexTapGame />}
           {selectedGame === 'pianoTile' && <PianoTileGame />}
+          {selectedGame === 'tapEmpire' && <TapEmpireGame />}
           {selectedGame === 'memoryFlip' && <MemoryFlipGame />}
         </div>
       </div>
