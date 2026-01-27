@@ -728,7 +728,7 @@ const NeonTetris: React.FC<NeonTetrisProps> = ({
       ctx.fill();
       ctx.globalAlpha = 1;
     });
-  }, [state, canvasRef, languageTexts]);
+  }, [state, canvasRef, languageTexts, checkCollision]);
 
   // Keyboard handler
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -773,45 +773,6 @@ const NeonTetris: React.FC<NeonTetrisProps> = ({
     }
   }, [state.isPlaying, state.isGameOver, startGame, moveHorizontal, softDrop, rotate, hardDrop, hold]);
 
-  // Touch handler
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-
-    if (!state.isPlaying || state.isGameOver) {
-      startGame();
-      return;
-    }
-
-    // Simple touch zones: tap = rotate, swipe = move
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    const width = rect.width;
-    const height = rect.height;
-
-    // Tap bottom area to drop
-    if (y > height * 0.7) {
-      hardDrop();
-      return;
-    }
-
-    // Tap middle area to rotate
-    if (y > height * 0.3 && y < height * 0.7) {
-      rotate();
-      return;
-    }
-
-    // Tap top area to hold
-    if (y < height * 0.3) {
-      hold();
-      return;
-    }
-  }, [state.isPlaying, state.isGameOver, startGame, hardDrop, rotate, hold, canvasRef]);
-
   // Swipe detection
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
@@ -838,7 +799,8 @@ const NeonTetris: React.FC<NeonTetrisProps> = ({
     }
   }, [state.isPlaying, state.isGameOver, moveHorizontal, softDrop]);
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Intentional: touch event is not needed
+  const handleTouchEnd = useCallback((_: React.TouchEvent) => {
     if (!state.isPlaying || state.isGameOver) return;
     touchStartRef.current = null;
   }, [state.isPlaying, state.isGameOver]);

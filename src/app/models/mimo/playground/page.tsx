@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -348,14 +348,6 @@ interface Tetromino {
   y: number;
   rotation: number;
   color: string;
-}
-
-interface TetrisCell {
-  x: number;
-  y: number;
-  color: string;
-  isCleared?: boolean;
-  clearAnimation?: number;
 }
 
 // Rhythm Tapper Interfaces - now imported from component
@@ -1876,7 +1868,7 @@ export default function MimoPlayground() {
 
     draw();
     requestRef.current = requestAnimationFrame(gameLoop);
-  }, [draw, skillState.boostActive, skillState.boostEndTime, skillState.slowActive, skillState.slowEndTime]);
+  }, [draw, skillState.boostActive, skillState.boostEndTime, skillState.slowActive, skillState.slowEndTime, skillState.freezeActive, skillState.freezeEndTime]);
 
   // リサイズ時のキャンバス設定（debounced for performance）
   const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -2185,18 +2177,18 @@ export default function MimoPlayground() {
   };
 
   // バイブレーション
-  const vibrate = (duration: number) => {
+  const vibrate = useCallback((duration: number) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       navigator.vibrate(duration);
     }
-  };
+  }, []);
 
   // サウンド生成
-  const playSound = (type: string) => {
+  const playSound = useCallback((type: string) => {
     if (typeof AudioContext === 'undefined' || typeof window === 'undefined') return;
 
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioContext = new (window.AudioContext || (window as { webkitAudioContext?: AudioContext }).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
@@ -2234,7 +2226,7 @@ export default function MimoPlayground() {
     } catch (_) { // eslint-disable-line @typescript-eslint/no-unused-vars -- Error is intentionally ignored
       // オーディオコンテキストのエラーは無視
     }
-  };
+  }, []);
 
   // パーティクル生成 (Infinity Drop用)
   const createParticles = useCallback((x: number, y: number, color: string, count: number = 8) => {
@@ -2257,7 +2249,7 @@ export default function MimoPlayground() {
   }, []);
 
   // ゲームイベントを保存
-  const storeGameEvent = (eventType: string, data: Record<string, any>) => {
+  const storeGameEvent = (eventType: string, data: Record<string, unknown>) => {
     try {
       const key = 'infinityDrop_events';
       const existing = localStorage.getItem(key);
@@ -2563,7 +2555,7 @@ export default function MimoPlayground() {
     vibrate(30);
     trackClick();
     storeGameEvent('skill_activated', { skill: skillKey, duration });
-  }, [trackClick]);
+  }, [trackClick, playSound, vibrate]);
 
   // スキルショップのアイテムクリック処理
   const handleSkillItemClick = useCallback((item: ShopItem) => {
@@ -2601,7 +2593,7 @@ export default function MimoPlayground() {
       playSound('miss');
       vibrate(20);
     }
-  }, [gameState.coins, shopItems, trackClick, activateSkill, playSound, vibrate]);
+  }, [gameState.coins, shopItems, trackClick, activateSkill, playSound, vibrate, createParticles]);
 
   // ==================== NEON DASH GAME LOGIC ====================
 
@@ -2686,7 +2678,7 @@ export default function MimoPlayground() {
 
     // Check achievements
     checkAchievementsRef.current();
-  }, [neonState.highScore, neonState.score, trackClick, checkDailyChallengeCompletion, gameStats]);
+  }, [neonState.highScore, neonState.score, trackClick, checkDailyChallengeCompletion, gameStats, updatePlayerProgress]);
 
   // Neon Dash: パーティクル生成
   const createNeonParticles = useCallback((y: number, color: string) => {
@@ -2746,7 +2738,7 @@ export default function MimoPlayground() {
       createNeonParticles(neonState.playerY, '#00ddff');
       createNeonParticles(neonState.playerY, '#00aaff');
     }
-  }, [neonState.isPlaying, neonState.isGameOver, neonState.playerState, neonState.playerY, neonState.jumpCount, createNeonParticles]);
+  }, [neonState.isPlaying, neonState.isGameOver, neonState.playerState, neonState.playerY, neonState.jumpCount, createNeonParticles, playSound, vibrate]);
 
   // Neon Dash: スライド
   const slide = useCallback(() => {
@@ -2767,7 +2759,7 @@ export default function MimoPlayground() {
       playSound('slide');
       createNeonParticles(groundY, '#00ddff');
     }
-  }, [neonState.isPlaying, neonState.isGameOver, neonState.playerState, neonState.playerY, createNeonParticles]);
+  }, [neonState.isPlaying, neonState.isGameOver, neonState.playerState, neonState.playerY, createNeonParticles, playSound, vibrate]);
 
   // Neon Dash: 障害物生成
   const generateObstacle = useCallback(() => {
@@ -3078,7 +3070,7 @@ export default function MimoPlayground() {
 
     drawNeon();
     neonRequestRef.current = requestAnimationFrame(neonGameLoop);
-  }, [checkCollision, gameOverNeonDash, generateObstacle, neonState.obstacles]);
+  }, [checkCollision, gameOverNeonDash, generateObstacle, neonState.obstacles, drawNeon, playSound, vibrate]);
 
   // Neon Dashゲームループ
   useEffect(() => {
@@ -3199,7 +3191,7 @@ export default function MimoPlayground() {
       checkAchievementsRef.current();
     }, 0);
 
-  }, [checkDailyChallengeCompletion, gameStats, cosmicState.combo, cosmicState.bestCombo, cosmicState.score]);
+  }, [checkDailyChallengeCompletion, gameStats, cosmicState.combo, cosmicState.bestCombo, cosmicState.score, playSound, vibrate, updatePlayerProgress]);
 
   // Cosmic Catch: パーティクル生成
   const createCosmicParticles = useCallback((x: number, y: number, color: string, count: number = 10) => {
@@ -6260,7 +6252,8 @@ useEffect(() => {
       });
       if (shareEvents.length > 50) shareEvents.splice(0, shareEvents.length - 50);
       localStorage.setItem('mimo_share_events', JSON.stringify(shareEvents));
-    } catch (_) {}
+    } catch (_) { // eslint-disable-line @typescript-eslint/no-unused-vars -- Error is intentionally ignored
+    }
   }, []);
 
   // Copy to clipboard helper
