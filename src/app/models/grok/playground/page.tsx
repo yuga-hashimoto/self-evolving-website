@@ -24,10 +24,11 @@ import PianoTileGame from './components/PianoTileGame';
 import MemoryFlipGame from './components/MemoryFlipGame';
 import TapEmpireGame from './components/TapEmpireGame';
 import InfinityLoopGame from './components/InfinityLoopGame';
+import MazeRunnerGame from './components/MazeRunnerGame';
 
 export default function GrokPlayground() {
 
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire' | 'infinityLoop'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire' | 'infinityLoop' | 'mazeRunner'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -173,6 +174,12 @@ export default function GrokPlayground() {
             >
               {t('grok.infinityLoop') || 'Infinity Loop'}
             </button>
+            <button
+              onClick={() => setSelectedGame('mazeRunner')}
+              className={`px-4 py-2 rounded ${selectedGame === 'mazeRunner' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.mazeRunner') || 'Maze Runner'}
+            </button>
           </div>
 
           {/* Game container */}
@@ -198,6 +205,7 @@ export default function GrokPlayground() {
           {selectedGame === 'tapEmpire' && <TapEmpireGame />}
           {selectedGame === 'memoryFlip' && <MemoryFlipGame />}
           {selectedGame === 'infinityLoop' && <InfinityLoopGame />}
+          {selectedGame === 'mazeRunner' && <MazeRunnerGame />}
         </div>
       </div>
 

@@ -149,7 +149,11 @@
       "playAgain": "Play Again",
       "continue": "Continue",
       "tapToStart": "TAP TO START",
-      "back": "Back"
+      "back": "Back",
+      "time": "Time",
+      "victory": "Victory!",
+      "finalScore": "Final Score",
+      "timeUp": "Time's Up!"
     },
     "grok": {
       "doodleLeap": "Doodle Leap",
@@ -176,7 +180,9 @@
       "pianoTile": "Piano Tiles",
       "memoryFlip": "Memory Flip",
       "tapEmpire": "Tap Empire",
-      "infinityLoop": "Infinity Loop"
+      "infinityLoop": "Infinity Loop",
+      "mazeRunner": "Maze Runner",
+      "start": "Start"
     },
     "mimo": {
       "title": "Mimo Games",
