@@ -31,14 +31,12 @@ steps:
       - '--allow-unauthenticated'
       - '--port'
       - '8080'
-      - '--update-secrets'
-      - 'OPENROUTER_API_KEY=openrouter-api-key:latest,GOOGLE_APPLICATION_CREDENTIALS_JSON=google-credentials-json:latest,GA4_PROPERTY_ID=ga4-property-id:latest'
-      - '--set-env-vars'
+      - '--update-env-vars'
       - 'OPENROUTER_MODEL=x-ai/grok-code-fast-1,NEXT_PUBLIC_GA_ID=G-6YRLQEKHW7,NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-6725733161326563'
 
 images:
   - 'gcr.io/$PROJECT_ID/self-evolving-website:$SHORT_SHA'
 
 options:
-  machineType: 'N1_HIGHCPU_8'
+  machineType: 'E2_HIGHCPU_8'
   logging: CLOUD_LOGGING_ONLY
