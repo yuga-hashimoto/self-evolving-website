@@ -32,6 +32,12 @@ jobs:
       google_application_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
       serper_api_key: ${{ secrets.SERPER_API_KEY }}
 
+  deploy:
+    needs: evolve-mimo-cli
+    if: needs.evolve-mimo-cli.result == 'success'
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+
   handle-retry:
     needs: evolve-mimo-cli
     if: always()
