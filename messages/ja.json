@@ -212,6 +212,16 @@
         "rewards": "報酬 unlocked",
         "awesome": "すごい！"
       },
+      "session": {
+        "title": "セッション統計",
+        "continuePlaying": "続行中のプレイ",
+        "playMore": "ゲームをプレイして earn rewards!",
+        "claimReward": "報酬を受け取る",
+        "resetSession": "セッションをリセット",
+        "rewardAmount": "+100コイン！",
+        "rewardCondition": "3ゲーム以上・120秒以上プレイで獲得！",
+        "amazingSession": "素晴らしいセッション！続行してください！"
+      },
       "infinityDrop": {
         "title": "Infinity Drop",
         "subtitle": "積み上げパズル",

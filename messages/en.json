@@ -212,6 +212,16 @@
         "rewards": "Rewards Unlocked",
         "awesome": "Awesome!"
       },
+      "session": {
+        "title": "Session Stats",
+        "continuePlaying": "Continue Playing",
+        "playMore": "Play games to earn rewards!",
+        "claimReward": "Claim Reward",
+        "resetSession": "Reset Session",
+        "rewardAmount": "+100 Coins!",
+        "rewardCondition": "Play 3+ games & 120s to earn!",
+        "amazingSession": "Amazing session! Keep going!"
+      },
       "infinityDrop": {
         "title": "Infinity Drop",
         "subtitle": "Stack Puzzle",

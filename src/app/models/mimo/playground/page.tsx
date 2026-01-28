@@ -875,7 +875,10 @@ interface SessionState {
   gamesPlayed: number;
   totalScore: number;
   gamesList: string[];
+  rewardClaimed: boolean; // Track if session reward was claimed
 }
+
+type GameType = 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris';
 
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
@@ -891,6 +894,7 @@ export default function MimoPlayground() {
     gamesPlayed: 0,
     totalScore: 0,
     gamesList: [],
+    rewardClaimed: false,
   });
 
   const [gameState, setGameState] = useState<InfinityDropState>({
@@ -1197,6 +1201,7 @@ export default function MimoPlayground() {
           gamesPlayed: 1,
           totalScore: 0,
           gamesList: [gameName],
+          rewardClaimed: false,
         };
       }
 
@@ -1217,7 +1222,32 @@ export default function MimoPlayground() {
       gamesPlayed: 0,
       totalScore: 0,
       gamesList: [],
+      rewardClaimed: false,
     }));
+  }, []);
+
+  // Claim session reward (play 3 games + 120s duration = 100 coins)
+  const claimSessionReward = useCallback(() => {
+    setSession(prev => {
+      if (prev.gamesPlayed >= 3 && prev.duration >= 120 && !prev.rewardClaimed) {
+        const rewardCoins = 100;
+        // Add coins to user's balance
+        setGameState(prevState => ({
+          ...prevState,
+          coins: prevState.coins + rewardCoins,
+        }));
+        // Mark reward as claimed
+        return {
+          ...prev,
+          rewardClaimed: true,
+        };
+      }
+      return prev;
+    });
+    // Haptic feedback
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate([50, 30, 50]);
+    }
   }, []);
 
   // Add score to session total (called when game ends)
@@ -6889,7 +6919,7 @@ useEffect(() => {
                     <span className="text-3xl">🔥</span>
                     <div className="text-left">
                       <div className="font-bold text-amber-400 flex items-center gap-2">
-                        Session Stats
+                        {t('session.title')}
                         {session.gamesPlayed >= 3 && session.duration >= 120 && (
                           <span className="text-sm animate-bounce">🎉</span>
                         )}
@@ -6922,10 +6952,19 @@ useEffect(() => {
                 </div>
                 {session.gamesPlayed >= 3 && session.duration >= 120 && (
                   <div className="mt-3 text-center text-amber-300 text-sm font-bold animate-pulse">
-                    🏆 Amazing session! Keep going! 🏆
+                    🏆 {t('session.amazingSession')}
                   </div>
                 )}
                 <div className="mt-3 flex gap-2">
+                  {session.gamesPlayed >= 3 && session.duration >= 120 && !session.rewardClaimed && (
+                    <button
+                      onClick={claimSessionReward}
+                      className="flex-1 px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 rounded-lg text-xs font-bold text-white transition-all touch-manipulation animate-pulse"
+                      style={{ touchAction: 'manipulation' }}
+                    >
+                      🎁 {t('session.claimReward')}
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       resetSession();
@@ -6936,7 +6975,7 @@ useEffect(() => {
                     className="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold transition-colors touch-manipulation"
                     style={{ touchAction: 'manipulation' }}
                   >
-                    Reset Session
+                    {t('session.resetSession')}
                   </button>
                 </div>
               </div>
@@ -7385,6 +7424,57 @@ useEffect(() => {
                 </div>
               </button>
             </div>
+
+            {/* Continue Playing Suggestions */}
+            {session.isActive && session.gamesPlayed > 0 && (
+              <div className="mt-6 p-4 rounded-xl border-2 border-cyan-500/50 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
+                <div className="text-cyan-400 font-bold mb-3 flex items-center gap-2">
+                  <span className="text-lg">🎮</span>
+                  {t('session.continuePlaying')}
+                </div>
+                <p className="text-slate-300 text-sm mb-3">
+                  {t('session.playMore')}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {(() => {
+                    const allGames: GameType[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris'];
+                    const unplayedGames = allGames.filter(g => !session.gamesList.includes(g));
+                    const suggestions = unplayedGames.length > 0
+                      ? unplayedGames.slice(0, 3)
+                      : (['infinity', '2048', 'neon'] as GameType[]).filter(g => !session.gamesList.slice(-2).includes(g));
+
+                    return suggestions.map(game => (
+                      <button
+                        key={game}
+                        onClick={() => {
+                          setCurrentGame(game);
+                          trackClick();
+                          trackGameSession(game);
+                          if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                            navigator.vibrate(15);
+                          }
+                          // Auto-start 2048 if needed
+                          if (game === '2048' && !game2048State.grid.length) {
+                            start2048Game(game2048State.difficulty);
+                          }
+                        }}
+                        className="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-bold text-cyan-300 hover:text-cyan-200 transition-all"
+                        style={{ touchAction: 'manipulation' }}
+                      >
+                        {game === 'infinity' ? '🧊 Infinity Drop' :
+                         game === '2048' ? '🔢 Slide 2048' :
+                         game === 'neon' ? '🏃 Neon Dash' :
+                         game === 'cosmic' ? '🚀 Cosmic Catch' :
+                         game === 'rhythm' ? '🎵 Rhythm Tapper' :
+                         game === 'snake' ? '🐍 Neon Snake' :
+                         game === 'flap' ? '🪶 Neon Flap' :
+                         game === 'brick' ? '🧱 Neon Brick' : '🎮 Tetris'}
+                      </button>
+                    ));
+                  })()}
+                </div>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="mt-6 flex flex-wrap gap-3 justify-center">
