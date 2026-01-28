@@ -149,7 +149,11 @@
       "playAgain": "もう一度遊ぶ",
       "continue": "続ける",
       "tapToStart": "タップでスタート",
-      "back": "戻る"
+      "back": "戻る",
+      "time": "時間",
+      "victory": "勝利！",
+      "finalScore": "最終スコア",
+      "timeUp": "時間切れ！"
     },
     "grok": {
       "doodleLeap": "Doodle Leap",
@@ -176,7 +180,9 @@
       "pianoTile": "ピアノタイル",
       "memoryFlip": "メモリーフリップ",
       "tapEmpire": "タップエンパイア",
-      "infinityLoop": "インフィニティ・ループ"
+      "infinityLoop": "インフィニティ・ループ",
+      "mazeRunner": "メイズランナー",
+      "start": "スタート"
     },
     "mimo": {
       "title": "Mimo Games",
