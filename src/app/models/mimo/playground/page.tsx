@@ -6804,6 +6804,34 @@ useEffect(() => {
               </button>
             </div>
 
+            {/* Featured Game - shows the highest mastery game or Infinity Drop */}
+            <div className="mb-6">
+              <div className="p-4 rounded-xl border-2 border-cyan-500 bg-gradient-to-r from-cyan-900/30 to-blue-900/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-cyan-400 text-sm font-bold">{t('featuredGame.title')}</div>
+                    <div className="text-cyan-200 text-xs">{t('featuredGame.description')}</div>
+                    <div className="text-white text-lg font-bold mt-1">{t('infinityDrop.title')}</div>
+                    <div className="text-slate-400 text-xs">{t('infinityDrop.description')}</div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setCurrentGame('infinity');
+                      trackClick();
+                      trackGameSession('infinity');
+                      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                        navigator.vibrate(20);
+                      }
+                    }}
+                    className="px-4 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-lg font-bold text-white text-sm active:scale-95 transition-transform"
+                    style={{ touchAction: 'manipulation' }}
+                  >
+                    {t('featuredGame.playNow')}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Daily Challenge Banner */}
             {dailyChallenge.currentChallenge && (
               <div className={`mb-6 p-4 rounded-xl border-2 border-amber-500 bg-gradient-to-r from-amber-900/30 to-orange-900/30 relative overflow-hidden ${
@@ -6942,7 +6970,7 @@ useEffect(() => {
                     ⭐ {Object.values(playerProgress.masteryStars).reduce((a, b) => a + b, 0)} total
                   </div>
                   <div className="text-xs text-slate-500 mt-1">
-                    🎮 {playerProgress.gamesPlayed.size}/8 {t('progression.gamesPlayed')}
+                    🎮 {playerProgress.gamesPlayed.size}/9 {t('progression.gamesPlayed')}
                   </div>
                 </div>
               </div>

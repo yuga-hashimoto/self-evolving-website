@@ -190,6 +190,11 @@
       "selectGameDesc": "Tap on a game to play",
       "randomGame": "Random Game",
       "randomGameDesc": "Play a surprise game!",
+      "featuredGame": {
+        "title": "Featured Game",
+        "description": "Today's most popular!",
+        "playNow": "Play Now"
+      },
       "dailyChallenge": {
         "title": "Today's Challenge",
         "short": "Challenge",
@@ -334,7 +339,7 @@
         "title": "Tutorial",
         "welcome": "Welcome to Mimo Games!",
         "step1Title": "1️⃣ Game Selection",
-        "step1Desc": "Choose from 7 different games. Each has unique features - you'll find your favorite!",
+        "step1Desc": "Choose from 9 different games. Each has unique features - you'll find your favorite!",
         "step2Title": "2️⃣ Daily Challenges",
         "step2Desc": "New challenges every day! Clear them to earn coins, and maintain your streak for bonuses!",
         "step3Title": "3️⃣ Achievements",
