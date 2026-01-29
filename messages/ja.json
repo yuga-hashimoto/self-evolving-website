@@ -362,6 +362,30 @@
         "tip4": "• 毎日のストリークを維持しよう！",
         "startButton": "開始する！"
       },
+      "quickPlay": {
+        "title": "クイックプレイ",
+        "description": "即座にランダムなゲームを開始！",
+        "startNow": "今すぐプレイ！"
+      },
+      "sound": {
+        "on": "サウンド ON",
+        "off": "サウンド OFF",
+        "toggle": "サウンド切替"
+      },
+      "continueSession": {
+        "title": "セッション続行",
+        "description": "進行中のセッションがあります（{duration}秒、{games}ゲーム）",
+        "resume": "続行する",
+        "startNew": "新規セッション"
+      },
+      "tutorial": {
+        "welcome": "Mimo Gamesへようこそ！",
+        "step1": "• ゲームカードをタップしてプレイ",
+        "step2": "• コインを獲得してスキルを解放",
+        "step3": "• 毎日の挑戦をクリアしてボーナス獲得",
+        "step4": "• クイックプレイで即座にアクション！",
+        "close": "了解！"
+      },
       "adArea": "広告エリア (AdSense)",
       "sidebarAd": "サイドバー広告",
       "footer": "無料でいつでも遊べます",
