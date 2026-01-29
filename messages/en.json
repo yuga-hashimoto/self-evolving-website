@@ -223,6 +223,15 @@
         "rewardCondition": "Play 3+ games & 120s to earn!",
         "amazingSession": "Amazing session! Keep going!"
       },
+      "dailyLoginBonus": {
+        "title": "Daily Bonus",
+        "day": "Day",
+        "claim": "Claim",
+        "streak": "Streak",
+        "coins": "Coins",
+        "xp": "XP",
+        "bonus": "Bonus!"
+      },
       "infinityDrop": {
         "title": "Infinity Drop",
         "subtitle": "Stack Puzzle",

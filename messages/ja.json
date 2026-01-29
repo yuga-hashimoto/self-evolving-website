@@ -223,6 +223,15 @@
         "rewardCondition": "3ゲーム以上・120秒以上プレイで獲得！",
         "amazingSession": "素晴らしいセッション！続行してください！"
       },
+      "dailyLoginBonus": {
+        "title": "デイリーボーナス",
+        "day": "日目",
+        "claim": "受け取る",
+        "streak": "ストリーク",
+        "coins": "コイン",
+        "xp": "XP",
+        "bonus": "ボーナス！"
+      },
       "infinityDrop": {
         "title": "Infinity Drop",
         "subtitle": "積み上げパズル",

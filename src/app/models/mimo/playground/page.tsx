@@ -360,6 +360,14 @@ interface DailyChallengeState {
   celebrationActive: boolean;
 }
 
+// Daily Login Bonus State
+interface DailyLoginBonus {
+  lastClaimedDate: string | null;
+  consecutiveDays: number;
+  availableBonus: number | null; // Coins available to claim
+  showBonusModal: boolean;
+}
+
 // Progression System Interfaces
 interface PlayerProgress {
   level: number;
@@ -1103,6 +1111,14 @@ export default function MimoPlayground() {
     celebrationActive: false,
   });
 
+  // Daily Login Bonus State - rewards users for consecutive daily logins
+  const [dailyLoginBonus, setDailyLoginBonus] = useState<DailyLoginBonus>({
+    lastClaimedDate: null,
+    consecutiveDays: 0,
+    availableBonus: null,
+    showBonusModal: false,
+  });
+
   const [achievementState, setAchievementState] = useState<AchievementState>({
     unlocked: [],
     showAchievementPopup: false,
@@ -1549,6 +1565,138 @@ export default function MimoPlayground() {
       localStorage.setItem('dailyChallenge_data', JSON.stringify(dailyChallenge));
     }
   }, [dailyChallenge]);
+
+  // ===== DAILY LOGIN BONUS SYSTEM =====
+  // Calculates daily login bonus and checks for consecutive days
+
+  const calculateLoginBonus = useCallback((consecutiveDays: number): number => {
+    // Progressive bonus system - more coins for longer streaks
+    if (consecutiveDays === 0) return 50; // First day bonus
+    if (consecutiveDays === 1) return 30;
+    if (consecutiveDays === 2) return 50;
+    if (consecutiveDays === 3) return 75;
+    if (consecutiveDays === 4) return 100;
+    if (consecutiveDays === 5) return 150;
+    if (consecutiveDays === 6) return 200;
+    if (consecutiveDays >= 7) return 300; // Weekly bonus cap
+    return 20;
+  }, []);
+
+  // Check and update daily login bonus on mount
+  useEffect(() => {
+    const savedData = localStorage.getItem('mimo_dailyLoginBonus');
+    const today = getTodayDate();
+
+    if (savedData) {
+      try {
+        const parsed: DailyLoginBonus = JSON.parse(savedData);
+        const lastDate = parsed.lastClaimedDate;
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (!lastDate) {
+          // No previous login - first time
+          setDailyLoginBonus({
+            lastClaimedDate: null,
+            consecutiveDays: 0,
+            availableBonus: calculateLoginBonus(0),
+            showBonusModal: true,
+          });
+          return;
+        }
+
+        const lastDateObj = new Date(lastDate);
+        const todayObj = new Date(today);
+
+        // Check if already claimed today
+        if (lastDate === today) {
+          setDailyLoginBonus({
+            ...parsed,
+            showBonusModal: false,
+          });
+          return;
+        }
+
+        // Check if yesterday (streak continues)
+        if (lastDateObj.toDateString() === yesterday.toDateString()) {
+          const newStreak = parsed.consecutiveDays + 1;
+          const bonus = calculateLoginBonus(newStreak);
+          setDailyLoginBonus({
+            lastClaimedDate: null,
+            consecutiveDays: newStreak,
+            availableBonus: bonus,
+            showBonusModal: true,
+          });
+          return;
+        }
+
+        // Streak broken (more than 1 day gap)
+        if (lastDateObj.toDateString() !== todayObj.toDateString()) {
+          setDailyLoginBonus({
+            lastClaimedDate: null,
+            consecutiveDays: 0,
+            availableBonus: calculateLoginBonus(0),
+            showBonusModal: true,
+          });
+          return;
+        }
+      } catch (_) { // eslint-disable-line @typescript-eslint/no-unused-vars -- Error is intentionally ignored
+        // Parse error - reset
+        setDailyLoginBonus({
+          lastClaimedDate: null,
+          consecutiveDays: 0,
+          availableBonus: calculateLoginBonus(0),
+          showBonusModal: true,
+        });
+      }
+    } else {
+      // First time user
+      setDailyLoginBonus({
+        lastClaimedDate: null,
+        consecutiveDays: 0,
+        availableBonus: calculateLoginBonus(0),
+        showBonusModal: true,
+      });
+    }
+  }, [getTodayDate, calculateLoginBonus]);
+
+  // Save daily login bonus state
+  useEffect(() => {
+    localStorage.setItem('mimo_dailyLoginBonus', JSON.stringify(dailyLoginBonus));
+  }, [dailyLoginBonus]);
+
+  // Claim daily login bonus
+  const claimDailyLoginBonus = useCallback(() => {
+    setDailyLoginBonus(prev => {
+      if (prev.availableBonus === null) return prev;
+
+      // Add coins to Infinity Drop balance (shared currency)
+      setGameState(prevState => ({
+        ...prevState,
+        coins: prevState.coins + prev.availableBonus!,
+      }));
+
+      // Haptic feedback
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([50, 30, 50]);
+      }
+
+      return {
+        ...prev,
+        lastClaimedDate: getTodayDate(),
+        availableBonus: null,
+        showBonusModal: false,
+      };
+    });
+  }, [getTodayDate]);
+
+  // Close daily login bonus modal without claiming (user dismisses)
+  const closeDailyLoginBonusModal = useCallback(() => {
+    setDailyLoginBonus(prev => ({
+      ...prev,
+      showBonusModal: false,
+    }));
+  }, []);
 
   // 追跡用のゲーム统计
   const gameStatsRef = useRef({
@@ -9468,6 +9616,48 @@ useEffect(() => {
                   {t('achievements.popupReward', { reward: achievementState.currentPopup.reward })}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Daily Login Bonus Modal */}
+      {dailyLoginBonus.showBonusModal && dailyLoginBonus.availableBonus !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-gradient-to-br from-yellow-900 via-amber-900 to-orange-900 rounded-2xl border-4 border-yellow-400 shadow-2xl p-6 text-center animate-bounce">
+            <div className="text-6xl mb-3">🎁</div>
+            <div className="text-2xl font-bold text-white mb-1">
+              Daily Bonus!
+            </div>
+            <div className="text-amber-200 text-sm mb-4">
+              Day {dailyLoginBonus.consecutiveDays + 1} of your streak
+            </div>
+            <div className="bg-black/30 rounded-xl p-4 mb-4 border-2 border-yellow-400/50">
+              <div className="text-4xl font-bold text-yellow-300 mb-1">
+                💰 {dailyLoginBonus.availableBonus}
+              </div>
+              <div className="text-xs text-amber-200">Coins + XP Bonus!</div>
+            </div>
+            {dailyLoginBonus.consecutiveDays > 0 && (
+              <div className="text-xs text-amber-300 mb-4">
+                🔥 Streak: {dailyLoginBonus.consecutiveDays} day{dailyLoginBonus.consecutiveDays > 1 ? 's' : ''}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={claimDailyLoginBonus}
+                className="flex-1 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 rounded-lg font-bold text-white border-2 border-yellow-300 transition-all touch-manipulation"
+                style={{ touchAction: 'manipulation' }}
+              >
+                Claim!
+              </button>
+              <button
+                onClick={closeDailyLoginBonusModal}
+                className="px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-bold text-white border border-slate-600 transition-all touch-manipulation"
+                style={{ touchAction: 'manipulation' }}
+              >
+                ×
+              </button>
             </div>
           </div>
         </div>
