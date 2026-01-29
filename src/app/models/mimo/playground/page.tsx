@@ -878,6 +878,9 @@ interface SessionState {
   rewardClaimed: boolean; // Track if session reward was claimed
 }
 
+// Sound effect types
+type SoundType = 'click' | 'start' | 'combo' | 'gameover' | 'victory' | 'coin' | 'hit' | 'perfect' | 'good' | 'success' | 'miss';
+
 type GameType = 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris';
 
 export default function MimoPlayground() {
@@ -885,6 +888,16 @@ export default function MimoPlayground() {
   const tc = useTranslations('playground.common');
   const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris'>('menu');
   const [shopOpen, setShopOpen] = useState(false);
+
+  // Audio/Sound state
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Quick play and tutorial state
+  const [showQuickPlay, setShowQuickPlay] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [firstTimeUser, setFirstTimeUser] = useState(false);
+  const [continueSession, setContinueSession] = useState(false);
 
   // Session tracking state
   const [session, setSession] = useState<SessionState>({
@@ -1160,7 +1173,6 @@ export default function MimoPlayground() {
     rewards: string[];
   }>({ show: false, newLevel: 1, rewards: [] });
 
-  const [showTutorial, setShowTutorial] = useState(false);
   const [gameError, setGameError] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1185,6 +1197,27 @@ export default function MimoPlayground() {
   const flapStateRef = useRef<NeonFlapState>({} as NeonFlapState);
 
   const { trackClick } = useAnalytics();
+
+  // Wrapper for trackClick that also plays sound
+  // Note: playSound is defined later, so we call it directly within the callback
+  const handleClick = useCallback(() => {
+    trackClick();
+    if (soundEnabled) {
+      if (typeof window !== 'undefined' && typeof window.AudioContext !== 'undefined') {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.frequency.value = 400;
+        oscillator.type = 'sine' as OscillatorType;
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.05);
+      }
+    }
+  }, [trackClick, soundEnabled]);
 
   // Track game session - called when user enters a game
   const trackGameSession = useCallback((gameName: string) => {
@@ -1265,6 +1298,31 @@ export default function MimoPlayground() {
     }
     setCurrentGame('menu');
   }, [addToSessionScore]);
+
+  // Initialize first-time user
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hasVisited = localStorage.getItem('mimo_hasVisited');
+      if (!hasVisited) {
+        setFirstTimeUser(true);
+        setShowTutorial(true);
+        localStorage.setItem('mimo_hasVisited', 'true');
+      }
+
+      // Check for saved session
+      const savedSession = localStorage.getItem('mimo_session');
+      if (savedSession) {
+        setContinueSession(true);
+      }
+    }
+  }, []);
+
+  // Save session state
+  useEffect(() => {
+    if (typeof window !== 'undefined' && session.isActive) {
+      localStorage.setItem('mimo_session', JSON.stringify(session));
+    }
+  }, [session]);
 
   // Canvas用翻訳テキストをrefで保持
   const canvasTextsRef = useRef({
@@ -2170,6 +2228,7 @@ export default function MimoPlayground() {
       }
 
       vibrate(200);
+      playSound('gameover');
 
       // ゲームオーバー追跡
       trackClick();
@@ -2301,6 +2360,7 @@ export default function MimoPlayground() {
 
   // サウンド生成
   const playSound = useCallback((type: string) => {
+    if (!soundEnabled) return;
     if (typeof AudioContext === 'undefined' || typeof window === 'undefined') return;
 
     try {
@@ -2329,6 +2389,27 @@ export default function MimoPlayground() {
       } else if (type === 'miss') {
         oscillator.frequency.value = 146.83; // D3
         oscillator.type = 'square';
+      } else if (type === 'click') {
+        oscillator.frequency.value = 400;
+        oscillator.type = 'sine';
+      } else if (type === 'start') {
+        oscillator.frequency.value = 600;
+        oscillator.type = 'sine';
+      } else if (type === 'gameover') {
+        oscillator.frequency.value = 200;
+        oscillator.type = 'sawtooth';
+      } else if (type === 'victory') {
+        oscillator.frequency.value = 1000;
+        oscillator.type = 'sine';
+      } else if (type === 'coin') {
+        oscillator.frequency.value = 1200;
+        oscillator.type = 'sine';
+      } else if (type === 'perfect') {
+        oscillator.frequency.value = 1200;
+        oscillator.type = 'sine';
+      } else if (type === 'good') {
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
       } else {
         oscillator.frequency.value = 220;
         oscillator.type = 'square';
@@ -2342,7 +2423,7 @@ export default function MimoPlayground() {
     } catch (_) { // eslint-disable-line @typescript-eslint/no-unused-vars -- Error is intentionally ignored
       // オーディオコンテキストのエラーは無視
     }
-  }, []);
+  }, [soundEnabled]);
 
   // パーティクル生成 (Infinity Drop用)
   const createParticles = useCallback((x: number, y: number, color: string, count: number = 8) => {
@@ -6805,8 +6886,9 @@ useEffect(() => {
                   const randomGame = games[Math.floor(Math.random() * games.length)];
 
                   setCurrentGame(randomGame);
-                  trackClick();
+                  handleClick();
                   trackGameSession(randomGame);
+                  playSound('start');
 
                   // Haptic feedback
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
@@ -6847,8 +6929,9 @@ useEffect(() => {
                   <button
                     onClick={() => {
                       setCurrentGame('infinity');
-                      trackClick();
+                      handleClick();
                       trackGameSession('infinity');
+                      playSound('start');
                       if (typeof navigator !== 'undefined' && navigator.vibrate) {
                         navigator.vibrate(20);
                       }
@@ -7015,13 +7098,116 @@ useEffect(() => {
               </div>
             </div>
 
+            {/* Quick Play Button */}
+            <div className="mb-6">
+              <button
+                onClick={() => {
+                  handleClick();
+                  // Start random game immediately
+                  const games: GameType[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris'];
+                  const randomGame = games[Math.floor(Math.random() * games.length)];
+                  setCurrentGame(randomGame);
+                  trackGameSession(randomGame);
+                  playSound('start');
+
+                  // Auto-start 2048 if needed
+                  if (randomGame === '2048' && !game2048State.grid.length) {
+                    start2048Game(game2048State.difficulty);
+                  }
+
+                  // Haptic feedback
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate([30, 20, 30]);
+                  }
+                }}
+                className="w-full p-6 rounded-xl border-4 border-green-500 bg-gradient-to-r from-green-700 via-emerald-600 to-teal-700 hover:from-green-600 hover:via-emerald-500 hover:to-teal-600 active:scale-[0.98] transition-all shadow-lg hover:shadow-green-500/30 group touch-manipulation"
+                aria-label="Quick Play - Start a random game instantly"
+                style={{
+                  touchAction: 'manipulation',
+                }}
+              >
+                <div className="flex items-center justify-center gap-4">
+                  <span className="text-5xl group-hover:animate-bounce">⚡</span>
+                  <div className="text-left">
+                    <div className="text-xl font-bold text-white">{t('quickPlay.title')}</div>
+                    <div className="text-green-100 text-sm">{t('quickPlay.description')}</div>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            {/* Continue Session Banner */}
+            {continueSession && session.isActive && session.gamesPlayed > 0 && (
+              <div className="mb-6 p-4 rounded-xl border-2 border-cyan-500 bg-gradient-to-r from-cyan-900/50 to-blue-900/50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-cyan-400 font-bold">{t('continueSession.title')}</div>
+                    <div className="text-cyan-200 text-sm">
+                      {t('continueSession.description', { duration: session.duration, games: session.gamesPlayed })}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setContinueSession(false);
+                        handleClick();
+                      }}
+                      className="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-xs font-bold text-white"
+                      style={{ touchAction: 'manipulation' }}
+                    >
+                      {t('continueSession.resume')}
+                    </button>
+                    <button
+                      onClick={() => {
+                        resetSession();
+                        setContinueSession(false);
+                        handleClick();
+                      }}
+                      className="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold text-white"
+                      style={{ touchAction: 'manipulation' }}
+                    >
+                      {t('continueSession.startNew')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Sound Toggle */}
+            <div className="mb-6 flex justify-end">
+              <button
+                onClick={() => {
+                  setSoundEnabled(!soundEnabled);
+                  handleClick();
+                  // Initialize audio context on first toggle
+                  if (!audioContextRef.current && typeof window !== 'undefined') {
+                    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+                    if (AudioContextClass) {
+                      audioContextRef.current = new AudioContextClass();
+                    }
+                  }
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-bold transition-all touch-manipulation ${
+                  soundEnabled
+                    ? 'bg-green-600 border-green-500 text-white hover:bg-green-500'
+                    : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600'
+                }`}
+                style={{ touchAction: 'manipulation' }}
+                aria-label={soundEnabled ? t('sound.off') : t('sound.on')}
+              >
+                <span>{soundEnabled ? '🔊' : '🔇'}</span>
+                <span>{soundEnabled ? t('sound.on') : t('sound.off')}</span>
+              </button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Infinity Drop カード */}
               <button
                 onClick={() => {
                   setCurrentGame('infinity');
-                  trackClick();
+                  handleClick();
                   trackGameSession('infinity');
+                  playSound('start');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7068,8 +7254,9 @@ useEffect(() => {
                   if (!game2048State.grid.length) {
                     start2048Game(game2048State.difficulty);
                   }
-                  trackClick();
+                  handleClick();
                   trackGameSession('2048');
+                  playSound('start');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7113,8 +7300,9 @@ useEffect(() => {
               <button
                 onClick={() => {
                   setCurrentGame('neon');
-                  trackClick();
+                  handleClick();
                   trackGameSession('neon');
+                  playSound('start');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7158,8 +7346,9 @@ useEffect(() => {
               <button
                 onClick={() => {
                   setCurrentGame('cosmic');
-                  trackClick();
+                  handleClick();
                   trackGameSession('cosmic');
+                  playSound('start');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7203,8 +7392,9 @@ useEffect(() => {
               <button
                 onClick={() => {
                   setCurrentGame('rhythm');
-                  trackClick();
+                  handleClick();
                   trackGameSession('rhythm');
+                  playSound('start');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7248,8 +7438,9 @@ useEffect(() => {
               <button
                 onClick={() => {
                   setCurrentGame('snake');
-                  trackClick();
+                  handleClick();
                   trackGameSession('snake');
+                  playSound('start');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7293,8 +7484,9 @@ useEffect(() => {
               <button
                 onClick={() => {
                   setCurrentGame('flap');
-                  trackClick();
+                  handleClick();
                   trackGameSession('flap');
+                  playSound('start');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7338,8 +7530,9 @@ useEffect(() => {
               <button
                 onClick={() => {
                   setCurrentGame('brick');
-                  trackClick();
+                  handleClick();
                   trackGameSession('brick');
+                  playSound('start');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7383,8 +7576,9 @@ useEffect(() => {
               <button
                 onClick={() => {
                   setCurrentGame('tetris');
-                  trackClick();
+                  handleClick();
                   trackGameSession('tetris');
+                  playSound('start');
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(15);
                   }
@@ -7448,8 +7642,9 @@ useEffect(() => {
                         key={game}
                         onClick={() => {
                           setCurrentGame(game);
-                          trackClick();
+                          handleClick();
                           trackGameSession(game);
+                          playSound('start');
                           if (typeof navigator !== 'undefined' && navigator.vibrate) {
                             navigator.vibrate(15);
                           }

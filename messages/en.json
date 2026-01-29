@@ -362,6 +362,30 @@
         "tip4": "• Keep your daily streak going!",
         "startButton": "Start!"
       },
+      "quickPlay": {
+        "title": "Quick Play",
+        "description": "Start instantly with a random game!",
+        "startNow": "Start Now!"
+      },
+      "sound": {
+        "on": "Sound ON",
+        "off": "Sound OFF",
+        "toggle": "Toggle Sound"
+      },
+      "continueSession": {
+        "title": "Continue Session",
+        "description": "You have an ongoing session with {duration}s and {games} games",
+        "resume": "Resume",
+        "startNew": "New Session"
+      },
+      "tutorial": {
+        "welcome": "Welcome to Mimo Games!",
+        "step1": "• Tap any game card to play",
+        "step2": "• Earn coins and unlock skills",
+        "step3": "• Complete daily challenges for bonus rewards",
+        "step4": "• Try Quick Play for instant action!",
+        "close": "Got it!"
+      },
       "adArea": "Ad Area (AdSense)",
       "sidebarAd": "Sidebar Ad",
       "footer": "Free to play anytime",
