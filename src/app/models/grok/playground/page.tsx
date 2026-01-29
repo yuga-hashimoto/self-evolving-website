@@ -26,10 +26,11 @@ import TapEmpireGame from './components/TapEmpireGame';
 import InfinityLoopGame from './components/InfinityLoopGame';
 import MazeRunnerGame from './components/MazeRunnerGame';
 import GravityBallGame from './components/GravityBallGame';
+import EndlessRunnerGame from './components/EndlessRunnerGame';
 
 export default function GrokPlayground() {
 
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire' | 'infinityLoop' | 'mazeRunner' | 'gravityBall'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire' | 'infinityLoop' | 'mazeRunner' | 'gravityBall' | 'endlessRunner'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -187,6 +188,12 @@ export default function GrokPlayground() {
             >
               {t('grok.gravityBall') || 'Gravity Ball'}
             </button>
+            <button
+              onClick={() => setSelectedGame('endlessRunner')}
+              className={`px-4 py-2 min-w-[60px] min-h-[60px] rounded flex items-center justify-center ${selectedGame === 'endlessRunner' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.endlessRunner') || 'Endless Runner'}
+            </button>
           </div>
 
           {/* Game container */}
@@ -214,6 +221,7 @@ export default function GrokPlayground() {
           {selectedGame === 'infinityLoop' && <InfinityLoopGame />}
           {selectedGame === 'mazeRunner' && <MazeRunnerGame />}
           {selectedGame === 'gravityBall' && <GravityBallGame />}
+          {selectedGame === 'endlessRunner' && <EndlessRunnerGame />}
         </div>
       </div>
 
