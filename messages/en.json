@@ -184,6 +184,12 @@
       "mazeRunner": "Maze Runner",
       "gravityBall": "Gravity Ball",
       "hyperTap": "Hyper Tap",
+      "labyrinthGame": "Ball Labyrinth",
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "expert": "Expert",
+      "levelComplete": "Level Complete!",
+      "labyrinthInstructions": "Tilt or drag to move the ball. Collect gems and reach the golden tile!",
       "start": "Start"
     },
     "mimo": {

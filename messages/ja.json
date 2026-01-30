@@ -184,6 +184,12 @@
       "mazeRunner": "メイズランナー",
       "gravityBall": "グラビティーボール",
       "hyperTap": "ハイパータップ",
+      "labyrinthGame": "ボール・ラビリンス",
+      "beginner": "初級",
+      "intermediate": "中級",
+      "expert": "上級",
+      "levelComplete": "レベルクリア！",
+      "labyrinthInstructions": "タッチやドラッグでボールを傾けて動かしてください。宝石を集めてゴールタイルを目指そう！",
       "start": "スタート"
     },
     "mimo": {
