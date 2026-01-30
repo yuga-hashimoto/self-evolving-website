@@ -354,6 +354,16 @@
         "level": "Level",
         "lines": "Lines"
       },
+      "colorRush": {
+        "title": "Color Rush",
+        "subtitle": "Color Match Blitz",
+        "description": "Tap when colors match for points! 10 seconds of color challenge!",
+        "tapToStart": "Tap to start",
+        "tapToRestart": "Tap to restart",
+        "instructions": "Screen tap for color match challenge!",
+        "keys": "Space/Enter=Tap",
+        "backToMenu": "Back to Menu"
+      },
       "achievements": {
         "title": "Achievements",
         "description": "Play games to unlock achievements!",
@@ -366,7 +376,7 @@
         "title": "Tutorial",
         "welcome": "Welcome to Mimo Games!",
         "step1Title": "1️⃣ Game Selection",
-        "step1Desc": "Choose from 9 different games. Each has unique features - you'll find your favorite!",
+        "step1Desc": "Choose from 10 different games. Each has unique features - you'll find your favorite!",
         "step2Title": "2️⃣ Daily Challenges",
         "step2Desc": "New challenges every day! Clear them to earn coins, and maintain your streak for bonuses!",
         "step3Title": "3️⃣ Achievements",

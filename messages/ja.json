@@ -354,6 +354,16 @@
         "level": "レベル",
         "lines": "ライン"
       },
+      "colorRush": {
+        "title": "Color Rush",
+        "subtitle": "カラーラッシュ",
+        "description": "タップして色が一致するタイミングでポイントゲット！10秒間のカラーチャレンジ！",
+        "tapToStart": "タップでスタート",
+        "tapToRestart": "タップでリスタート",
+        "instructions": "スクリーンタップで色一致チャレンジ！",
+        "keys": "Space/Enter=タップ",
+        "backToMenu": "メニューへ"
+      },
       "achievements": {
         "title": "アチーブメント",
         "description": "ゲームをプレイしてアチーブメントを解除しよう！",
@@ -366,7 +376,7 @@
         "title": "教程",
         "welcome": "Mimo Games 初めての方へ",
         "step1Title": "1️⃣ ゲーム選択",
-        "step1Desc": "9つの異なるゲームから選んでください。それぞれ特色があるから、お気に入りが見つかるはず！",
+        "step1Desc": "10つの異なるゲームから選んでください。それぞれ特色があるから、お気に入りが見つかるはず！",
         "step2Title": "2️⃣ 日々の挑戦",
         "step2Desc": "毎日新しい挑戦が登場！クリアするとコインを獲得でき、ストリークを継続すればボーナスがもらえます。",
         "step3Title": "3️⃣ アチーブメント",

@@ -186,7 +186,7 @@ interface Achievement {
 interface DailyChallenge {
   id: string; // YYYY-MM-DD
   date: string;
-  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris';
+  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush';
   target: number; // Target score to beat
   description: string;
   completed: boolean;
@@ -368,6 +368,20 @@ interface DailyLoginBonus {
   showBonusModal: boolean;
 }
 
+// Neon Color Rush Interfaces
+interface ColorRushState {
+  isPlaying: boolean;
+  isGameOver: boolean;
+  score: number;
+  highScore: number;
+  targetColor: string;
+  currentColor: string;
+  timeLeft: number;
+  speed: number; // Color change interval in ms
+  multiplier: number;
+  combo: number;
+}
+
 // Progression System Interfaces
 interface PlayerProgress {
   level: number;
@@ -421,6 +435,10 @@ interface GameStats {
   tetris100Score: boolean;
   tetris500Score: boolean;
   tetrisLevel10: boolean;
+  colorRushFirstPlay: boolean;
+  colorRush100Score: boolean;
+  colorRush500Score: boolean;
+  colorRushBestCombo10: boolean;
   dailyStreak3: boolean;
   dailyStreak7: boolean;
   allGamesPlayed: boolean;
@@ -440,6 +458,13 @@ const BASE_SPEED = 2;
 const isMobile = typeof window !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 const MOBILE_PARTICLE_LIMIT = isMobile ? 30 : 60;
 const SWIPE_THRESHOLD = 50; // Minimum swipe distance in pixels
+
+// Neon Color Rush Constants
+const COLOR_RUSH_COLORS = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF']; // Red, Green, Blue, Yellow, Magenta, Cyan
+const COLOR_RUSH_ROUND_TIME = 10; // seconds
+const COLOR_RUSH_BASE_SPEED = 800; // ms between color changes
+const COLOR_RUSH_SPEED_INCREMENT = 50; // ms to decrease per 5 combo
+const COLOR_RUSH_MIN_SPEED = 300; // minimum speed
 
 // 2048 Constants
 const TILE_COLORS: Record<number, string> = {
@@ -788,6 +813,42 @@ const ACHIEVEMENTS: Achievement[] = [
     reward: 100,
     condition: (stats) => stats.tetrisLevel10,
   },
+  {
+    id: 'colorRush_first',
+    name: 'Color Initiate',
+    description: 'Play your first Neon Color Rush',
+    unlocked: false,
+    icon: '🎨',
+    reward: 15,
+    condition: (stats) => stats.colorRushFirstPlay,
+  },
+  {
+    id: 'colorRush_100',
+    name: 'Color Rookie',
+    description: 'Score 100+ in Neon Color Rush',
+    unlocked: false,
+    icon: '🟣',
+    reward: 25,
+    condition: (stats) => stats.colorRush100Score,
+  },
+  {
+    id: 'colorRush_500',
+    name: 'Color Master',
+    description: 'Score 500+ in Neon Color Rush',
+    unlocked: false,
+    icon: '🟪',
+    reward: 50,
+    condition: (stats) => stats.colorRush500Score,
+  },
+  {
+    id: 'colorRush_combo10',
+    name: 'Color Rusher',
+    description: 'Achieve 10x Combo in Neon Color Rush',
+    unlocked: false,
+    icon: '⚡',
+    reward: 75,
+    condition: (stats) => stats.colorRushBestCombo10,
+  },
 ];
 
 // ==================== PROGRESSION SYSTEM HELPERS ====================
@@ -889,12 +950,12 @@ interface SessionState {
 // Sound effect types
 type SoundType = 'click' | 'start' | 'combo' | 'gameover' | 'victory' | 'coin' | 'hit' | 'perfect' | 'good' | 'success' | 'miss';
 
-type GameType = 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris';
+type GameType = 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush';
 
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush'>('menu');
   const [shopOpen, setShopOpen] = useState(false);
 
   // Audio/Sound state
@@ -1103,6 +1164,25 @@ export default function MimoPlayground() {
   // Track tetris session start time for duration calculation
   const tetrisSessionStartRef = useRef<number>(0);
 
+  // Track color rush timing
+  const colorRushSessionStartRef = useRef<number>(0);
+  const colorRushColorChangeRef = useRef<number>(0);
+  const colorRushTimerRef = useRef<number>(0);
+
+  // Neon Color Rush state
+  const [colorRushState, setColorRushState] = useState<ColorRushState>({
+    isPlaying: false,
+    isGameOver: false,
+    score: 0,
+    highScore: 0,
+    targetColor: COLOR_RUSH_COLORS[0],
+    currentColor: COLOR_RUSH_COLORS[0],
+    timeLeft: COLOR_RUSH_ROUND_TIME,
+    speed: COLOR_RUSH_BASE_SPEED,
+    multiplier: 1,
+    combo: 0,
+  });
+
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallengeState>({
     currentChallenge: null,
     streak: 0,
@@ -1158,6 +1238,10 @@ export default function MimoPlayground() {
     tetris100Score: false,
     tetris500Score: false,
     tetrisLevel10: false,
+    colorRushFirstPlay: false,
+    colorRush100Score: false,
+    colorRush500Score: false,
+    colorRushBestCombo10: false,
     dailyStreak3: false,
     dailyStreak7: false,
     allGamesPlayed: false,
@@ -1180,6 +1264,7 @@ export default function MimoPlayground() {
       flap: 0,
       brick: 0,
       tetris: 0,
+      colorRush: 0,
     },
   });
 
@@ -1430,7 +1515,7 @@ export default function MimoPlayground() {
     const hash = dateStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
     // Cycle through games
-    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris'];
+    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris', 'colorRush'];
     const game = games[hash % games.length];
 
     // Generate target based on game type
@@ -1483,6 +1568,11 @@ export default function MimoPlayground() {
         target = 200 + (hash % 200); // 200-400 points
         description = `Score ${target}+ in Neon Tetris`;
         reward = 65;
+        break;
+      case 'colorRush':
+        target = 100 + (hash % 100); // 100-200 points
+        description = `Score ${target}+ in Neon Color Rush`;
+        reward = 55;
         break;
     }
 
@@ -1876,7 +1966,7 @@ export default function MimoPlayground() {
 
   // Function to update player progress after a game session
   const updatePlayerProgress = useCallback((
-    game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris',
+    game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush',
     score: number,
     duration: number,
     isVictory: boolean = false,
@@ -2618,7 +2708,7 @@ export default function MimoPlayground() {
   };
 
   // Check and complete daily challenge if criteria met
-  const checkDailyChallengeCompletion = useCallback((gameType: 'infinity' | '2048' | 'neon' | 'cosmic' | 'tetris', score: number) => {
+  const checkDailyChallengeCompletion = useCallback((gameType: 'infinity' | '2048' | 'neon' | 'cosmic' | 'tetris' | 'colorRush', score: number) => {
     if (!dailyChallenge.currentChallenge || dailyChallenge.currentChallenge.completed) return;
     if (dailyChallenge.currentChallenge.game !== gameType) return;
 
@@ -2799,7 +2889,7 @@ export default function MimoPlayground() {
     }
 
     // Check all games played (including 2048 and tetris)
-    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && newStats.rhythmFirstPlay && newStats.snakeFirstPlay && newStats.flapFirstPlay && newStats.brickFirstPlay && newStats.game2048_firstPlay && newStats.tetrisFirstPlay && !newStats.allGamesPlayed) {
+    if (newStats.infinityFirstPlay && newStats.neonFirstPlay && newStats.cosmicFirstPlay && newStats.rhythmFirstPlay && newStats.snakeFirstPlay && newStats.flapFirstPlay && newStats.brickFirstPlay && newStats.game2048_firstPlay && newStats.tetrisFirstPlay && newStats.colorRushFirstPlay && !newStats.allGamesPlayed) {
       newStats.allGamesPlayed = true;
       updated = true;
     }
@@ -6011,6 +6101,176 @@ export default function MimoPlayground() {
 
   // ==================== END NEON TETRIS ====================
 
+  // ==================== NEON COLOR RUSH ====================
+  // Start Color Rush game
+  const startColorRushGame = useCallback(() => {
+    const initialColorIndex = Math.floor(Math.random() * COLOR_RUSH_COLORS.length);
+
+    colorRushSessionStartRef.current = Date.now();
+    colorRushColorChangeRef.current = Date.now();
+    colorRushTimerRef.current = COLOR_RUSH_ROUND_TIME;
+
+    setColorRushState({
+      isPlaying: true,
+      isGameOver: false,
+      score: 0,
+      highScore: colorRushState.highScore,
+      targetColor: COLOR_RUSH_COLORS[initialColorIndex],
+      currentColor: COLOR_RUSH_COLORS[initialColorIndex],
+      timeLeft: COLOR_RUSH_ROUND_TIME,
+      speed: COLOR_RUSH_BASE_SPEED,
+      multiplier: 1,
+      combo: 0,
+    });
+
+    // Track first play
+    if (!gameStats.colorRushFirstPlay) {
+      setGameStats((prev) => ({ ...prev, colorRushFirstPlay: true }));
+    }
+
+    storeGameEvent('game_start', { game: 'colorRush' });
+    trackClick();
+    vibrate(30);
+  }, [colorRushState.highScore, gameStats.colorRushFirstPlay, trackClick, vibrate]);
+
+  // Handle tap for Color Rush
+  const handleColorRushTap = useCallback(() => {
+    setColorRushState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver) return prev;
+
+      const isCorrect = prev.targetColor === prev.currentColor;
+
+      if (isCorrect) {
+        // Correct tap - increase score and combo
+        const points = 10 * prev.multiplier;
+        const newScore = prev.score + points;
+        const newCombo = prev.combo + 1;
+
+        // Increase multiplier every 3 combo (1, 2, 3, 5)
+        let newMultiplier = prev.multiplier;
+        if (newCombo % 3 === 0) {
+          newMultiplier = newMultiplier === 3 ? 5 : newMultiplier + 1;
+        }
+
+        // Increase speed every 5 combo
+        let newSpeed = prev.speed;
+        if (newCombo % 5 === 0 && newSpeed > COLOR_RUSH_MIN_SPEED) {
+          newSpeed = Math.max(COLOR_RUSH_MIN_SPEED, prev.speed - COLOR_RUSH_SPEED_INCREMENT);
+        }
+
+        // Vibrate for feedback
+        vibrate(10);
+
+        // Check and update high score
+        const isNewHighScore = newScore > prev.highScore;
+
+        if (isNewHighScore) {
+          storeGameEvent('high_score', { game: 'colorRush', score: newScore });
+        }
+
+        // Pick new target color
+        const newColorIndex = Math.floor(Math.random() * COLOR_RUSH_COLORS.length);
+        const newTargetColor = COLOR_RUSH_COLORS[newColorIndex];
+
+        // Track stats for achievements
+        if (newScore >= 100 && !gameStats.colorRush100Score) {
+          setGameStats((prev) => ({ ...prev, colorRush100Score: true }));
+        }
+        if (newScore >= 500 && !gameStats.colorRush500Score) {
+          setGameStats((prev) => ({ ...prev, colorRush500Score: true }));
+        }
+        if (newCombo >= 10 && !gameStats.colorRushBestCombo10) {
+          setGameStats((prev) => ({ ...prev, colorRushBestCombo10: true }));
+        }
+
+        return {
+          ...prev,
+          score: newScore,
+          highScore: isNewHighScore ? newScore : prev.highScore,
+          combo: newCombo,
+          multiplier: newMultiplier,
+          speed: newSpeed,
+          targetColor: newTargetColor,
+        };
+      } else {
+        // Wrong tap - penalty
+        const newScore = Math.max(0, prev.score - 5);
+
+        // Vibrate error feedback (longer)
+        vibrate(50);
+
+        // Reset combo and multiplier
+        return {
+          ...prev,
+          score: newScore,
+          combo: 0,
+          multiplier: 1,
+        };
+      }
+    });
+  }, [gameStats, setGameStats, vibrate, storeGameEvent]);
+
+  // Color Rush game loop
+  const colorRushGameLoop = useCallback(() => {
+    const now = Date.now();
+
+    setColorRushState((prev) => {
+      if (!prev.isPlaying || prev.isGameOver) return prev;
+
+      // Update time left
+      const timeElapsed = (now - colorRushSessionStartRef.current) / 1000;
+      const newTimeLeft = Math.max(0, COLOR_RUSH_ROUND_TIME - timeElapsed);
+
+      // Check if game over (time ran out)
+      if (newTimeLeft <= 0) {
+        storeGameEvent('game_over', { game: 'colorRush', score: prev.score });
+        const duration = (Date.now() - colorRushSessionStartRef.current) / 1000;
+        updatePlayerProgress('colorRush', prev.score, duration);
+        checkDailyChallengeCompletion('colorRush', prev.score);
+        checkAchievements();
+
+        return {
+          ...prev,
+          isPlaying: false,
+          isGameOver: true,
+          timeLeft: 0,
+        };
+      }
+
+      // Change color if it's time
+      if (now - colorRushColorChangeRef.current >= prev.speed) {
+        colorRushColorChangeRef.current = now;
+
+        // Pick a random color (different from current)
+        let newColorIndex = Math.floor(Math.random() * COLOR_RUSH_COLORS.length);
+        while (COLOR_RUSH_COLORS[newColorIndex] === prev.currentColor) {
+          newColorIndex = Math.floor(Math.random() * COLOR_RUSH_COLORS.length);
+        }
+
+        return {
+          ...prev,
+          currentColor: COLOR_RUSH_COLORS[newColorIndex],
+          timeLeft: newTimeLeft,
+        };
+      }
+
+      return {
+        ...prev,
+        timeLeft: newTimeLeft,
+      };
+    });
+  }, [storeGameEvent, updatePlayerProgress, checkDailyChallengeCompletion, checkAchievements]);
+
+  // Color Rush game loop useEffect
+  useEffect(() => {
+    if (colorRushState.isPlaying && !colorRushState.isGameOver) {
+      const interval = setInterval(colorRushGameLoop, 50); // 20 FPS is fine for this game
+      return () => clearInterval(interval);
+    }
+  }, [colorRushState.isPlaying, colorRushState.isGameOver, colorRushGameLoop]);
+
+  // ==================== END NEON COLOR RUSH ====================
+
 // ==================== NEON BRICK BREAKER ====================
 // Start Brick Breaker game
 const startBrickGame = useCallback(() => {
@@ -6538,6 +6798,19 @@ useEffect(() => {
           }
         }
       }
+      // Neon Color Rush
+      else if (currentGame === 'colorRush') {
+        if (e.code === 'Space' || e.code === 'Enter') {
+          e.preventDefault();
+          if (!colorRushState.isPlaying && !colorRushState.isGameOver) {
+            startColorRushGame();
+          } else if (colorRushState.isGameOver) {
+            startColorRushGame();
+          } else {
+            handleColorRushTap();
+          }
+        }
+      }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -6562,7 +6835,7 @@ useEffect(() => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, neonState.isPlaying, neonState.isGameOver, startNeonDashGame, jump, slide, cosmicState.isPlaying, cosmicState.isGameOver, startCosmicGame, rhythmState.isPlaying, rhythmState.isGameOver, startRhythmGame, handleRhythmTap, snakeState.isPlaying, snakeState.isGameOver, startNeonSnakeGame, handleSnakeDirection, flapState.isPlaying, flapState.isGameOver, startNeonFlapGame, flap, tetrisState.isPlaying, tetrisState.isGameOver, startTetrisGame, moveTetris, softDropTetris, rotateTetris, hardDropTetris, holdTetris]);
+  }, [gameState, startGame, placeBlock, currentGame, game2048State.isGameOver, neonState.isPlaying, neonState.isGameOver, startNeonDashGame, jump, slide, cosmicState.isPlaying, cosmicState.isGameOver, startCosmicGame, rhythmState.isPlaying, rhythmState.isGameOver, startRhythmGame, handleRhythmTap, snakeState.isPlaying, snakeState.isGameOver, startNeonSnakeGame, handleSnakeDirection, flapState.isPlaying, flapState.isGameOver, startNeonFlapGame, flap, tetrisState.isPlaying, tetrisState.isGameOver, startTetrisGame, moveTetris, softDropTetris, rotateTetris, hardDropTetris, holdTetris, colorRushState.isPlaying, colorRushState.isGameOver, startColorRushGame, handleColorRushTap]);
 
   // スコア表示用フォーマット
   const formatScore = (score: number): string => {
@@ -6986,7 +7259,9 @@ useEffect(() => {
                currentGame === 'rhythm' ? t('rhythmTapper.title') :
                currentGame === 'snake' ? t('neonSnake.title') :
                currentGame === 'flap' ? t('neonFlap.title') :
-               currentGame === 'brick' ? t('neonBrick.title') : ''}
+               currentGame === 'brick' ? t('neonBrick.title') :
+               currentGame === 'tetris' ? t('neonTetris.title') :
+               currentGame === 'colorRush' ? t('colorRush.title') : ''}
             </h1>
           </div>
 
@@ -7002,6 +7277,18 @@ useEffect(() => {
                 ? formatScore(neonState.score)
                 : currentGame === 'cosmic'
                 ? formatScore(cosmicState.score)
+                : currentGame === 'rhythm'
+                ? formatScore(rhythmState.score)
+                : currentGame === 'snake'
+                ? formatScore(snakeState.score)
+                : currentGame === 'flap'
+                ? formatScore(flapState.score)
+                : currentGame === 'brick'
+                ? formatScore(brickState.score)
+                : currentGame === 'tetris'
+                ? formatScore(tetrisState.score)
+                : currentGame === 'colorRush'
+                ? formatScore(colorRushState.score)
                 : '-'}
             </div>
             {currentGame === 'infinity' && gameState.coins > 0 && (
@@ -7175,7 +7462,8 @@ useEffect(() => {
                            g === 'rhythm' ? '🎵' :
                            g === 'snake' ? '🐍' :
                            g === 'flap' ? '🪶' :
-                           g === 'brick' ? '🧱' : '🎮'}
+                           g === 'brick' ? '🧱' :
+                           g === 'tetris' ? '🎮' : '🎨'}
                         </span>
                       ))}
                     </div>
@@ -7252,7 +7540,7 @@ useEffect(() => {
                 onClick={() => {
                   handleClick();
                   // Start random game immediately
-                  const games: GameType[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris'];
+                  const games: GameType[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris', 'colorRush'];
                   const randomGame = games[Math.floor(Math.random() * games.length)];
                   setCurrentGame(randomGame);
                   trackGameSession(randomGame);
@@ -7767,6 +8055,51 @@ useEffect(() => {
               </button>
             </div>
 
+            {/* Neon Color Rush Card */}
+            <div className="p-2">
+              <button
+                onClick={() => {
+                  setCurrentGame('colorRush');
+                  handleClick();
+                  trackGameSession('colorRush');
+                  playSound('start');
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
+                }}
+                aria-label={`${t('colorRush.title')}. ${t('colorRush.description')}`}
+                className={`relative bg-gradient-to-br from-fuchsia-600 to-purple-800 p-6 rounded-xl border-2 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between ${
+                  dailyChallenge.currentChallenge?.game === 'colorRush'
+                    ? 'border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/50'
+                    : 'border-fuchsia-500 hover:border-fuchsia-400'
+                } active:scale-95 active:bg-fuchsia-700`}
+                style={{ touchAction: 'manipulation' }}
+              >
+                {dailyChallenge.currentChallenge?.game === 'colorRush' && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                    🎯 Daily
+                  </div>
+                )}
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-fuchsia-200 group-active:text-fuchsia-100 flex items-center gap-2">
+                    {t('colorRush.title')}
+                    {playerProgress.masteryStars.colorRush > 0 && (
+                      <span className="text-amber-300 text-xs">
+                        {renderMasteryStars(playerProgress.masteryStars.colorRush)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-fuchsia-200 text-sm mb-3">{t('colorRush.subtitle')}</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    {t('colorRush.description')}
+                  </p>
+                </div>
+                <div className="text-xs text-slate-400">
+                  {tc('highScore')}: {formatScore(colorRushState.highScore)}
+                </div>
+              </button>
+            </div>
+
             {/* Continue Playing Suggestions */}
             {session.isActive && session.gamesPlayed > 0 && (
               <div className="mt-6 p-4 rounded-xl border-2 border-cyan-500/50 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
@@ -7779,7 +8112,7 @@ useEffect(() => {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {(() => {
-                    const allGames: GameType[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris'];
+                    const allGames: GameType[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris', 'colorRush'];
                     const unplayedGames = allGames.filter(g => !session.gamesList.includes(g));
                     const suggestions = unplayedGames.length > 0
                       ? unplayedGames.slice(0, 3)
@@ -7811,7 +8144,8 @@ useEffect(() => {
                          game === 'rhythm' ? '🎵 Rhythm Tapper' :
                          game === 'snake' ? '🐍 Neon Snake' :
                          game === 'flap' ? '🪶 Neon Flap' :
-                         game === 'brick' ? '🧱 Neon Brick' : '🎮 Tetris'}
+                         game === 'brick' ? '🧱 Neon Brick' :
+                         game === 'tetris' ? '🎮 Tetris' : '🎨 Color Rush'}
                       </button>
                     ));
                   })()}
@@ -8906,8 +9240,155 @@ useEffect(() => {
           </>
         )}
 
+        {/* ==================== NEON COLOR RUSH ==================== */}
+        {currentGame === 'colorRush' && (
+          <>
+            {/* Daily Challenge Status for Color Rush */}
+            {dailyChallenge.currentChallenge && dailyChallenge.currentChallenge.game === 'colorRush' && (
+              <div className="mb-4 w-full max-w-md p-3 rounded-lg border border-amber-500/50 bg-amber-900/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <div className="text-sm">
+                      <span className="text-amber-400 font-bold">{t('dailyChallenge.short')}:</span>{' '}
+                      <span className="text-slate-300">{dailyChallenge.currentChallenge.target}+</span>
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-bold ${
+                    dailyChallenge.currentChallenge.completed
+                      ? 'bg-green-600 text-white'
+                      : 'bg-amber-600/50 text-amber-200'
+                  }`}>
+                    {dailyChallenge.currentChallenge.completed
+                      ? t('dailyChallenge.completed')
+                      : `${dailyChallenge.currentChallenge.reward} 💰`}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div
+              ref={containerRef}
+              className="w-full max-w-md bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden shadow-2xl shadow-fuchsia-900/10 relative"
+            >
+              <div className="relative">
+                <div
+                  className="w-full block cursor-pointer touch-none"
+                  style={{
+                    touchAction: 'manipulation',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                    height: '300px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    transition: 'background-color 0.1s ease',
+                    backgroundColor: colorRushState.currentColor,
+                  }}
+                  onClick={() => {
+                    if (!colorRushState.isPlaying && !colorRushState.isGameOver) {
+                      startColorRushGame();
+                    } else if (colorRushState.isGameOver) {
+                      startColorRushGame();
+                    } else {
+                      handleColorRushTap();
+                    }
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    if (!colorRushState.isPlaying && !colorRushState.isGameOver) {
+                      startColorRushGame();
+                    } else if (colorRushState.isGameOver) {
+                      startColorRushGame();
+                    } else {
+                      handleColorRushTap();
+                    }
+                  }}
+                >
+                  {/* Game UI */}
+                  <div className="text-center p-6 w-full">
+                    {/* Timer and Stats */}
+                    {colorRushState.isPlaying && !colorRushState.isGameOver && (
+                      <div className="mb-4">
+                        <div className="text-5xl font-bold text-white mb-2">
+                          {Math.ceil(colorRushState.timeLeft)}s
+                        </div>
+                        <div className="text-lg text-fuchsia-200 font-bold">
+                          Target: {colorRushState.targetColor}
+                        </div>
+                        {colorRushState.combo > 0 && (
+                          <div className="mt-2 text-sm text-yellow-300">
+                            Combo: x{colorRushState.combo} (x{colorRushState.multiplier})
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Game Over Screen */}
+                    {colorRushState.isGameOver && (
+                      <div className="bg-black/50 rounded-xl p-4 backdrop-blur-sm">
+                        <div className="text-4xl mb-2">🎨</div>
+                        <div className="text-2xl font-bold text-white mb-2">
+                          {t('common.gameOver')}
+                        </div>
+                        <div className="text-fuchsia-300 text-xl font-bold mb-1">
+                          {t('common.score')}: {formatScore(colorRushState.score)}
+                        </div>
+                        <div className="text-slate-300 text-sm mb-3">
+                          {t('common.highScore')}: {formatScore(colorRushState.highScore)}
+                        </div>
+                        <button className="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 rounded-lg font-bold text-white">
+                          {t('colorRush.tapToRestart')}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Start Screen */}
+                    {!colorRushState.isPlaying && !colorRushState.isGameOver && (
+                      <div>
+                        <div className="text-4xl mb-2">🎨</div>
+                        <div className="text-2xl font-bold text-white mb-2">
+                          {t('colorRush.title')}
+                        </div>
+                        <div className="text-fuchsia-200 text-sm mb-4">
+                          {t('colorRush.description')}
+                        </div>
+                        <div className="text-xs text-slate-300 mb-4">
+                          <p className="mb-1">👆 {t('colorRush.instructions')}</p>
+                          <p>⌨️ {t('colorRush.keys')}</p>
+                          <p className="mt-2">{t('colorRush.tapToStart')}</p>
+                        </div>
+                        <button className="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 rounded-lg font-bold text-white">
+                          {t('colorRush.tapToStart')}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Visual Feedback for Correct/Wrong Taps (could be added with state) */}
+              </div>
+            </div>
+
+            <div className="mt-4 text-center text-slate-400 text-sm">
+              <p>📌 {t('colorRush.instructions')}</p>
+            </div>
+
+            <div className="flex justify-center gap-2 mt-4">
+              <button
+                onClick={() => setCurrentGame('menu')}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+              >
+                ← {t('colorRush.backToMenu')}
+              </button>
+            </div>
+          </>
+        )}
+
         {/* 広告スペース（ゲームプレイ画面のみ） */}
-        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake' || currentGame === 'flap' || currentGame === 'brick' || currentGame === 'tetris') && (
+        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake' || currentGame === 'flap' || currentGame === 'brick' || currentGame === 'tetris' || currentGame === 'colorRush') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
               {t('adArea')}
@@ -8935,8 +9416,10 @@ useEffect(() => {
           <span>{t('cosmicCatch.title')}: {formatScore(cosmicState.highScore)}</span>
           <span>{t('rhythmTapper.title')}: {formatScore(rhythmState.highScore)}</span>
           <span>{t('neonSnake.title')}: {formatScore(snakeState.highScore)}</span>
+          <span>{t('neonFlap.title')}: {formatScore(flapState.highScore)}</span>
           <span>{t('neonBrick.title')}: {formatScore(brickState.highScore)}</span>
           <span>{t('neonTetris.title')}: {formatScore(tetrisState.highScore)}</span>
+          <span>{t('colorRush.title')}: {formatScore(colorRushState.highScore)}</span>
         </div>
       </footer>
 
@@ -9674,6 +10157,7 @@ useEffect(() => {
         {neonState.isGameOver && `Game over. Score: ${neonState.score}`}
         {cosmicState.isGameOver && `Game over. Score: ${cosmicState.score}`}
         {game2048State.isGameOver && `Game over. Score: ${game2048State.score}`}
+        {colorRushState.isGameOver && `Game over. Score: ${colorRushState.score}`}
       </div>
     </div>
   );
