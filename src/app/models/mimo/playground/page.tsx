@@ -1303,6 +1303,10 @@ export default function MimoPlayground() {
   // Note: playSound is defined later, so we call it directly within the callback
   const handleClick = useCallback(() => {
     trackClick();
+    // Haptic feedback for mobile devices
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(10);
+    }
     if (soundEnabled) {
       if (typeof window !== 'undefined' && typeof window.AudioContext !== 'undefined') {
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -2301,6 +2305,8 @@ export default function MimoPlayground() {
 
         // Support for high-DPI displays (Retina)
         const dpr = window.devicePixelRatio || 1;
+        // Reset transform before applying new dimensions to prevent accumulation
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         canvas.width = maxWidth * dpr;
         canvas.height = maxHeight * dpr;
         canvas.style.width = `${maxWidth}px`;
@@ -5190,6 +5196,8 @@ export default function MimoPlayground() {
         const displayHeight = rect.height;
 
         if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+          // Reset transform before changing canvas dimensions
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
           canvas.width = displayWidth * dpr;
           canvas.height = displayHeight * dpr;
           ctx.scale(dpr, dpr);
@@ -8221,6 +8229,9 @@ useEffect(() => {
                     WebkitTapHighlightColor: 'transparent',
                   }}
                   onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(15);
+                    }
                     if (!gameState.isPlaying && !gameState.isGameOver) {
                       startGame();
                     } else if (gameState.isPlaying && !gameState.isGameOver) {
@@ -8231,6 +8242,9 @@ useEffect(() => {
                   }}
                   onTouchStart={(e) => {
                     e.preventDefault();
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(15);
+                    }
                     if (!gameState.isPlaying && !gameState.isGameOver) {
                       startGame();
                     } else if (gameState.isPlaying && !gameState.isGameOver) {
@@ -8266,16 +8280,33 @@ useEffect(() => {
             </div>
 
             <div className="flex justify-center gap-2 mt-4">
-              <button
-                onClick={() => setShopOpen(true)}
-                className="px-4 py-2 bg-amber-600 hover:bg-amber-500 rounded border border-amber-500 text-sm font-bold text-white"
-              >
-                🛒 {t('infinityDrop.shop')}
-              </button>
+              {gameState.isGameOver ? (
+                <button
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(30);
+                    }
+                    startGame();
+                  }}
+                  className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg border border-green-500 text-base font-bold text-white shadow-lg shadow-green-900/20 min-w-[140px]"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
+                >
+                  🔄 {t('tapToStart')}
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShopOpen(true)}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-500 rounded border border-amber-500 text-sm font-bold text-white"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
+                >
+                  🛒 {t('infinityDrop.shop')}
+                </button>
+              )}
               {gameState.isGameOver && (
                 <button
                   onClick={() => shareScore('Infinity Drop', gameState.score, gameState.highScore)}
                   className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded border border-purple-500 text-sm font-bold text-white"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
                 >
                   📤 Share
                 </button>
@@ -8283,6 +8314,7 @@ useEffect(() => {
               <button
                 onClick={() => returnToMenu(gameState.isGameOver ? gameState.score : 0)}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+                style={{ touchAction: 'manipulation', minHeight: '44px' }}
               >
                 ← {t('infinityDrop.backToMenu')}
               </button>
@@ -8393,14 +8425,26 @@ useEffect(() => {
                     </div>
                     <div className="flex gap-2 mb-4">
                       <button
-                        onClick={reset2048}
-                        className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded border border-blue-400 font-bold"
+                        onClick={() => {
+                          if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                            navigator.vibrate(30);
+                          }
+                          reset2048();
+                        }}
+                        className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg border border-blue-400 font-bold shadow-lg shadow-blue-900/20"
+                        style={{ touchAction: 'manipulation', minHeight: '44px' }}
                       >
                         {tc('playAgain')}
                       </button>
                       <button
-                        onClick={() => shareScore('Slide 2048', game2048State.score, game2048State.highScore)}
-                        className="px-6 py-2 bg-purple-600 hover:bg-purple-500 rounded border border-purple-400 font-bold"
+                        onClick={() => {
+                          if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                            navigator.vibrate(15);
+                          }
+                          shareScore('Slide 2048', game2048State.score, game2048State.highScore);
+                        }}
+                        className="px-4 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg border border-purple-400 font-bold"
+                        style={{ touchAction: 'manipulation', minHeight: '44px' }}
                       >
                         📤
                       </button>
@@ -8500,6 +8544,9 @@ useEffect(() => {
                     WebkitTapHighlightColor: 'transparent',
                   }}
                   onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(15);
+                    }
                     if (!neonState.isPlaying && !neonState.isGameOver) {
                       startNeonDashGame();
                     } else if (neonState.isGameOver) {
@@ -8525,20 +8572,51 @@ useEffect(() => {
             </div>
 
             <div className="flex justify-center gap-2 mt-4">
+              {neonState.isGameOver ? (
+                <button
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(30);
+                    }
+                    startNeonDashGame();
+                  }}
+                  className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-lg border border-cyan-500 text-base font-bold text-white shadow-lg shadow-cyan-900/20 min-w-[140px]"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
+                >
+                  🔄 {t('tapToStart')}
+                </button>
+              ) : (
+                <button
+                  onClick={() => setCurrentGame('menu')}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
+                >
+                  ← {t('neonDash.backToMenu')}
+                </button>
+              )}
               {neonState.isGameOver && (
                 <button
-                  onClick={() => shareScore('Neon Dash', neonState.score, neonState.highScore)}
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(15);
+                    }
+                    shareScore('Neon Dash', neonState.score, neonState.highScore);
+                  }}
                   className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded border border-purple-500 text-sm font-bold text-white"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
                 >
                   📤 Share
                 </button>
               )}
-              <button
-                onClick={() => setCurrentGame('menu')}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
-              >
-                ← {t('neonDash.backToMenu')}
-              </button>
+              {!neonState.isGameOver && (
+                <button
+                  onClick={() => setCurrentGame('menu')}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
+                >
+                  ← {t('neonDash.backToMenu')}
+                </button>
+              )}
             </div>
           </>
         )}
@@ -8585,6 +8663,9 @@ useEffect(() => {
                     WebkitTapHighlightColor: 'transparent',
                   }}
                   onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(15);
+                    }
                     if (!cosmicState.isPlaying && !cosmicState.isGameOver) {
                       startCosmicGame();
                     } else if (cosmicState.isGameOver) {
@@ -8610,20 +8691,51 @@ useEffect(() => {
             </div>
 
             <div className="flex justify-center gap-2 mt-4">
+              {cosmicState.isGameOver ? (
+                <button
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(30);
+                    }
+                    startCosmicGame();
+                  }}
+                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-lg border border-indigo-500 text-base font-bold text-white shadow-lg shadow-indigo-900/20 min-w-[140px]"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
+                >
+                  🔄 {t('tapToStart')}
+                </button>
+              ) : (
+                <button
+                  onClick={() => setCurrentGame('menu')}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
+                >
+                  ← {t('cosmicCatch.backToMenu')}
+                </button>
+              )}
               {cosmicState.isGameOver && (
                 <button
-                  onClick={() => shareScore('Cosmic Catch', cosmicState.score, cosmicState.highScore)}
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(15);
+                    }
+                    shareScore('Cosmic Catch', cosmicState.score, cosmicState.highScore);
+                  }}
                   className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded border border-purple-500 text-sm font-bold text-white"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
                 >
                   📤 Share
                 </button>
               )}
-              <button
-                onClick={() => setCurrentGame('menu')}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
-              >
-                ← {t('cosmicCatch.backToMenu')}
-              </button>
+              {!cosmicState.isGameOver && (
+                <button
+                  onClick={() => setCurrentGame('menu')}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
+                >
+                  ← {t('cosmicCatch.backToMenu')}
+                </button>
+              )}
             </div>
           </>
         )}
