@@ -30,10 +30,11 @@ import EndlessRunnerGame from './components/EndlessRunnerGame';
 import HyperTapGame from './components/HyperTapGame';
 import LabyrinthGame from './components/LabyrinthGame';
 import FlipDashGame from './components/FlipDashGame';
+import FruitSliceGame from './components/FruitSliceGame';
 
 export default function GrokPlayground() {
 
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire' | 'infinityLoop' | 'mazeRunner' | 'gravityBall' | 'endlessRunner' | 'hyperTap' | 'labyrinth' | 'flipDash'>('doodle');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire' | 'infinityLoop' | 'mazeRunner' | 'gravityBall' | 'endlessRunner' | 'hyperTap' | 'labyrinth' | 'flipDash' | 'fruitSlice'>('doodle');
   const t = useTranslations('playground');
 
   return (
@@ -215,6 +216,12 @@ export default function GrokPlayground() {
             >
               {t('grok.flipDash') || 'Flip Dash'}
             </button>
+            <button
+              onClick={() => setSelectedGame('fruitSlice')}
+              className={`px-4 py-2 min-w-[60px] min-h-[60px] rounded flex items-center justify-center ${selectedGame === 'fruitSlice' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+            >
+              {t('grok.fruitSlice') || 'Fruit Slice'}
+            </button>
           </div>
 
           {/* Game container */}
@@ -246,6 +253,7 @@ export default function GrokPlayground() {
           {selectedGame === 'hyperTap' && <HyperTapGame />}
           {selectedGame === 'labyrinth' && <LabyrinthGame />}
           {selectedGame === 'flipDash' && <FlipDashGame />}
+          {selectedGame === 'fruitSlice' && <FruitSliceGame />}
         </div>
       </div>
 
