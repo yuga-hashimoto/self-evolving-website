@@ -7489,6 +7489,47 @@ useEffect(() => {
               <p className="text-slate-400">{t('selectGameDesc')}</p>
             </div>
 
+            {/* Quick Start Instant Play Preview - Engages users immediately */}
+            <div className="mb-6">
+              <div className="bg-gradient-to-br from-fuchsia-900/40 to-purple-900/40 border-2 border-fuchsia-500/50 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <div className="text-fuchsia-400 font-bold text-sm">{t('colorRush.title')}</div>
+                    <div className="text-slate-300 text-xs">{t('colorRush.description')}</div>
+                  </div>
+                  <span className="text-2xl">🎨</span>
+                </div>
+
+                {/* Mini Instant Play Button */}
+                <button
+                  onClick={() => {
+                    setCurrentGame('colorRush');
+                    handleClick();
+                    trackGameSession('colorRush');
+                    playSound('start');
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(20);
+                    }
+                    // Auto-start the game immediately
+                    if (!colorRushState.isPlaying && !colorRushState.isGameOver) {
+                      startColorRushGame();
+                    } else if (colorRushState.isGameOver) {
+                      startColorRushGame();
+                    }
+                  }}
+                  className="w-full py-3 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 rounded-lg font-bold text-white text-lg active:scale-[0.98] transition-transform shadow-lg shadow-fuchsia-900/30"
+                  style={{ touchAction: 'manipulation', minHeight: '48px' }}
+                  aria-label={t('colorRush.title') + ' - ' + t('colorRush.description')}
+                >
+                  ▶ {t('colorRush.tapToStart')} - Play Now!
+                </button>
+
+                <div className="mt-2 text-xs text-fuchsia-200/70 text-center">
+                  ⏱️ 15-30 second rounds • Tap matching color • Beat your score!
+                </div>
+              </div>
+            </div>
+
             {/* Random Game Button - Prominent CTA */}
             <div className="mb-6">
               <button
