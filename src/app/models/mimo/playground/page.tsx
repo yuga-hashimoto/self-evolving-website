@@ -851,6 +851,89 @@ const ACHIEVEMENTS: Achievement[] = [
   },
 ];
 
+// ==================== PET COLLECTION & TICKET SYSTEM ====================
+
+interface Pet {
+  id: string;
+  name: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  icon: string;
+  description: string;
+  bonus: string; // e.g., "+10% coins in all games"
+  bonusMultiplier: number; // e.g., 1.10 for 10%
+  unlocked: boolean;
+}
+
+interface PetCollection {
+  collected: string[]; // Array of pet IDs
+  activePet: string | null; // Currently equipped pet
+  eggs: number; // Unhatched eggs
+  showGachaModal: boolean;
+  gachaAnimation: boolean;
+}
+
+interface ArcadeTickets {
+  total: number;
+  lifetime: number; // Total tickets ever earned (for stats)
+  multiplier: number; // Current ticket multiplier based on streak/level
+}
+
+interface PrestigeState {
+  rank: string; // Rookie, Pro, Master, Legend, Mythic
+  prestigePoints: number;
+  visualFlair: string[]; // Unlocked visual effects
+  permanentBonuses: Record<string, number>; // e.g., { coinBonus: 1.15 }
+  showPrestigeModal: boolean;
+}
+
+interface EnhancedPlayerProgress extends PlayerProgress {
+  tickets: ArcadeTickets;
+  prestige: PrestigeState;
+}
+
+// ==================== PET DATABASE ====================
+
+const PET_DATABASE: Pet[] = [
+  // Common (40% chance)
+  { id: 'slime', name: 'Green Slime', rarity: 'common', icon: '🟢', description: 'A friendly green blob', bonus: '+5% coins in all games', bonusMultiplier: 1.05, unlocked: false },
+  { id: 'spark', name: 'Electric Spark', rarity: 'common', icon: '⚡', description: 'Zippy little energy', bonus: '+10% score in action games', bonusMultiplier: 1.10, unlocked: false },
+  { id: 'drop', name: 'Water Drop', rarity: 'common', icon: '💧', description: 'Smooth and steady', bonus: '-5% game speed (easier)', bonusMultiplier: 1.00, unlocked: false },
+
+  // Rare (25% chance)
+  { id: 'cat', name: 'Lucky Cat', rarity: 'rare', icon: '🐱', description: 'Brings good fortune', bonus: '+15% coins, +5% tickets', bonusMultiplier: 1.15, unlocked: false },
+  { id: 'hedgehog', name: 'Speedy Hedgehog', rarity: 'rare', icon: '🦔', description: 'Fast and spiky', bonus: '+15% speed in action games', bonusMultiplier: 1.15, unlocked: false },
+  { id: 'owl', name: 'Wise Owl', rarity: 'rare', icon: '🦉', description: 'Knowledge is power', bonus: '+10% XP gain', bonusMultiplier: 1.10, unlocked: false },
+
+  // Epic (10% chance)
+  { id: 'phoenix', name: 'Phoenix Chick', rarity: 'epic', icon: '🐣', description: 'Rises from ashes', bonus: '+25% coins, revive once per game', bonusMultiplier: 1.25, unlocked: false },
+  { id: 'dragon', name: 'Baby Dragon', rarity: 'epic', icon: '🐉', description: 'Small but mighty', bonus: '+20% score, +10% combo', bonusMultiplier: 1.20, unlocked: false },
+
+  // Legendary (5% chance - with pity system after 30 eggs)
+  { id: 'unicorn', name: 'Unicorn', rarity: 'legendary', icon: '🦄', description: 'Pure magic', bonus: '+30% all stats, rainbow particles', bonusMultiplier: 1.30, unlocked: false },
+  { id: 'phoenix_adult', name: 'Phoenix', rarity: 'legendary', icon: '🔥', description: 'Master of rebirth', bonus: '+40% coins, revive twice', bonusMultiplier: 1.40, unlocked: false },
+  { id: 'dragon_adult', name: 'Elder Dragon', rarity: 'legendary', icon: '🐲', description: 'Legendary power', bonus: '+50% score, explosive combos', bonusMultiplier: 1.50, unlocked: false },
+  { id: 'galaxy', name: 'Galaxy Spirit', rarity: 'legendary', icon: '🌌', description: 'From beyond', bonus: '+100% tickets, cosmic effects', bonusMultiplier: 2.00, unlocked: false },
+];
+
+// ==================== TICKET SYSTEM CONFIG ====================
+
+const TICKET_CONFIG = {
+  BASE_REWARD: 1, // Tickets per 100 score
+  STREAK_MULTIPLIER: (days: number) => 1 + Math.min(days, 10) * 0.05, // Max +50% at day 10
+  LEVEL_MULTIPLIER: (level: number) => 1 + Math.min(level, 50) * 0.02, // Max +100% at level 50
+
+  // Shop prices
+  SHOP: {
+    EGG: 100,
+    SKILL_UPGRADE: 50,
+    PRESTIGE_POINTS: 200,
+    COINS: 25, // 25 tickets = 100 coins
+  },
+
+  // Pet gacha cost
+  GACHA_COST: 50,
+};
+
 // ==================== PROGRESSION SYSTEM HELPERS ====================
 
 const PROGRESSION_CONFIG = {
@@ -904,6 +987,62 @@ function calculateMasteryStars(game: string, score: number): number {
 // Calculate XP needed for next level
 function getXpForLevel(level: number): number {
   return PROGRESSION_CONFIG.XP_PER_LEVEL(level);
+}
+
+// Calculate tickets earned from a game session
+function calculateTickets(
+  score: number,
+  streak: number,
+  level: number,
+  petBonus: number = 1.0
+): number {
+  if (score < 10) return 0; // Minimum score threshold
+
+  // Base tickets from score (1 per 100 points)
+  let tickets = Math.floor(score / 100) * TICKET_CONFIG.BASE_REWARD;
+
+  // Multipliers
+  const streakBonus = TICKET_CONFIG.STREAK_MULTIPLIER(streak);
+  const levelBonus = TICKET_CONFIG.LEVEL_MULTIPLIER(level);
+
+  tickets *= streakBonus * levelBonus * petBonus;
+
+  return Math.round(tickets);
+}
+
+// Get active pet bonus multiplier
+function getActivePetBonus(petId: string | null, allPets: Pet[]): number {
+  if (!petId) return 1.0;
+  const pet = allPets.find(p => p.id === petId);
+  return pet ? pet.bonusMultiplier : 1.0;
+}
+
+// Get rarity color
+function getRarityColor(rarity: string): string {
+  switch (rarity) {
+    case 'common': return 'text-gray-400';
+    case 'rare': return 'text-blue-400';
+    case 'epic': return 'text-purple-400';
+    case 'legendary': return 'text-amber-400';
+    default: return 'text-white';
+  }
+}
+
+// Get gacha weights with pity system
+function getGachaWeights(eggsHatched: number, guaranteedLegendary: boolean = false) {
+  // Pity system: After 30 eggs, guarantee a legendary
+  if (guaranteedLegendary || eggsHatched >= 30) {
+    return { common: 0, rare: 0, epic: 0, legendary: 100 };
+  }
+
+  // Normal rates
+  return {
+    common: 40,
+    rare: 25,
+    epic: 10,
+    legendary: 5,
+    pityProgress: eggsHatched, // Track towards pity
+  };
 }
 
 // Render mastery stars
@@ -1248,7 +1387,7 @@ export default function MimoPlayground() {
   });
 
   // Player Progression State
-  const [playerProgress, setPlayerProgress] = useState<PlayerProgress>({
+  const [playerProgress, setPlayerProgress] = useState<EnhancedPlayerProgress>({
     level: 1,
     xp: 0,
     xpToNext: 100,
@@ -1266,6 +1405,27 @@ export default function MimoPlayground() {
       tetris: 0,
       colorRush: 0,
     },
+    tickets: {
+      total: 0,
+      lifetime: 0,
+      multiplier: 1.0,
+    },
+    prestige: {
+      rank: 'Rookie',
+      prestigePoints: 0,
+      visualFlair: [],
+      permanentBonuses: {},
+      showPrestigeModal: false,
+    },
+  });
+
+  // Pet Collection State
+  const [petCollection, setPetCollection] = useState<PetCollection>({
+    collected: [],
+    activePet: null,
+    eggs: 0,
+    showGachaModal: false,
+    gachaAnimation: false,
   });
 
   const [levelUpModal, setLevelUpModal] = useState<{
@@ -1942,6 +2102,14 @@ export default function MimoPlayground() {
             flap: 0,
             brick: 0,
           },
+          tickets: parsed.tickets || { total: 0, lifetime: 0, multiplier: 1.0 },
+          prestige: parsed.prestige || {
+            rank: 'Rookie',
+            prestigePoints: 0,
+            visualFlair: [],
+            permanentBonuses: {},
+            showPrestigeModal: false,
+          },
         });
       } catch {
         // parse error - keep defaults
@@ -2024,6 +2192,8 @@ export default function MimoPlayground() {
         totalPlayTime: prev.totalPlayTime + duration,
         gamesPlayed: newGamesPlayed,
         masteryStars: newMasteryStars,
+        tickets: prev.tickets,
+        prestige: prev.prestige,
       };
     });
   }, []);
@@ -7536,10 +7706,46 @@ useEffect(() => {
                     ⭐ {Object.values(playerProgress.masteryStars).reduce((a, b) => a + b, 0)} total
                   </div>
                   <div className="text-xs text-slate-500 mt-1">
-                    🎮 {playerProgress.gamesPlayed.size}/9 {t('progression.gamesPlayed')}
+                    🎮 {playerProgress.gamesPlayed.size}/10 {t('progression.gamesPlayed')}
                   </div>
                 </div>
               </div>
+              {/* Arcade Meta-Progression Display */}
+              <div className="mt-3 pt-3 border-t border-cyan-500/30 flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs font-bold">
+                    🎟️ {playerProgress.tickets.total} Tickets
+                  </div>
+                  <div className="px-2 py-1 rounded bg-purple-500/20 text-purple-300 text-xs">
+                    {playerProgress.prestige.rank}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {petCollection.activePet && (
+                    <div className="px-2 py-1 rounded bg-green-500/20 text-green-300 text-xs">
+                      🐾 {getActivePetBonus(petCollection.activePet, PET_DATABASE)}% Bonus
+                    </div>
+                  )}
+                  {petCollection.eggs > 0 && (
+                    <div className="px-2 py-1 rounded bg-pink-500/20 text-pink-300 text-xs font-bold">
+                      🥚 {petCollection.eggs}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Arcade Hub Button */}
+            <div className="mb-6">
+              <button
+                onClick={() => setPetCollection(prev => ({ ...prev, showGachaModal: true }))}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:via-pink-500 hover:to-rose-500 text-white font-bold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300 transform hover:scale-[1.02] active:scale-95"
+              >
+                <span className="text-lg">🎰 Arcade Hub</span>
+                <span className="block text-xs font-normal opacity-80 mt-1">
+                  Collect Pets • Spend Tickets • Prestige Up
+                </span>
+              </button>
             </div>
 
             {/* Quick Play Button */}
