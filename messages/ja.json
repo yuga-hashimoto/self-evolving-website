@@ -212,7 +212,13 @@
         "short": "挑戦",
         "streak": "ストリーク",
         "completed": "達成",
-        "pending": "未達成"
+        "pending": "未達成",
+        "playNow": "今すぐプレイ",
+        "challenge": "チャレンジ",
+        "reward": "報酬",
+        "easy": "簡単",
+        "medium": "普通",
+        "hard": "難しい"
       },
       "progression": {
         "level": "レベル",
