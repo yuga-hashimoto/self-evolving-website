@@ -32,6 +32,8 @@ export default function Game() {
   const [canvasSize, setCanvasSize] = useState({ width: 300, height: 400 });
   const t = useTranslations('playground');
 
+  const audioContextRef = useRef<AudioContext | null>(null);
+
   // Use ref for canvasSize to access latest value in callbacks
   const canvasSizeRef = useRef(canvasSize);
   useEffect(() => {
@@ -41,6 +43,32 @@ export default function Game() {
   const playerRef = useRef<Player>({ x: canvasSize.width / 2 - PLAYER_SIZE / 2, y: canvasSize.height - 100, velocityY: 0 });
   const platformsRef = useRef<Platform[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
+
+  // Initialize audio context
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'AudioContext' in window) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Resume audio context on user interaction if needed
+    }
+  }, []);
+
+  const playSound = (frequency: number, duration: number) => {
+    if (!audioContextRef.current) return;
+    const ctx = audioContextRef.current;
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    oscillator.frequency.value = frequency;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + duration);
+  };
+
+  const playJumpSound = () => playSound(440, 0.1); // A note
+  const playScoreSound = () => playSound(660, 0.2); // Higher note
+  const playGameOverSound = () => playSound(220, 0.5); // Lower note
 
   // Responsive canvas sizing
   useEffect(() => {
@@ -128,6 +156,8 @@ export default function Game() {
         if (!platform.passed) {
           platform.passed = true;
           setScore(prev => prev + 1);
+          playScoreSound();
+          if ('vibrate' in navigator) navigator.vibrate(50);
         }
         break;
       }
@@ -154,6 +184,8 @@ export default function Game() {
     if (player.y > height) {
       setGameOver(true);
       setPlaying(false);
+      playGameOverSound();
+      if ('vibrate' in navigator) navigator.vibrate([100, 100, 100]);
       if (score > highScore) {
         setHighScore(score);
         localStorage.setItem('doodleLeapHighScore', score.toString());
