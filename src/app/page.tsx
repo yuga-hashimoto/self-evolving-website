@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
 import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
@@ -51,8 +50,8 @@ export default async function Home() {
 
       {/* Model Selection Cards */}
       <div className="grid grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
-        {/* Mimo Card */}
-        <Link href="/models/mimo" className="group block active:scale-95 transition-transform" aria-label="Mimoモデルの進化を見る">
+        {/* AI 1 (Mimo) Card */}
+        <Link href="/models/mimo" className="group block active:scale-95 transition-transform" aria-label="AI 1モデルの進化を見る">
           <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 border-purple-500/30 hover:border-purple-500/60 active:bg-white/15">
             <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
               <IconMimo size={80} className="w-14 h-14 sm:w-20 sm:h-20" aria-hidden="true" />
@@ -72,8 +71,8 @@ export default async function Home() {
           </div>
         </Link>
 
-        {/* Grok Card */}
-        <Link href="/models/grok" className="group block active:scale-95 transition-transform" aria-label="Grokモデルの進化を見る">
+        {/* AI 2 (Grok) Card */}
+        <Link href="/models/grok" className="group block active:scale-95 transition-transform" aria-label="AI 2モデルの進化を見る">
           <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 border-blue-500/30 hover:border-blue-500/60 active:bg-white/15">
             <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
               <IconGrok size={80} className="w-14 h-14 sm:w-20 sm:h-20" aria-hidden="true" />
@@ -105,7 +104,7 @@ export default async function Home() {
                   <IconMimo size={48} className="w-8 h-8 sm:w-10 sm:h-10" aria-hidden="true" />
                   <div>
                     <h4 className="text-base sm:text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                      Mimo
+                      AI 1
                     </h4>
                     <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">{MODELS.mimo.openrouterModel}</p>
                   </div>
@@ -113,7 +112,7 @@ export default async function Home() {
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="text-right">
                     <h4 className="text-base sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                      Grok
+                      AI 2
                     </h4>
                     <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">{MODELS.grok.openrouterModel}</p>
                   </div>
