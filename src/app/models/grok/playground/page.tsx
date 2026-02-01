@@ -32,6 +32,7 @@ import LabyrinthGame from './components/LabyrinthGame';
 import FlipDashGame from './components/FlipDashGame';
 import FruitSliceGame from './components/FruitSliceGame';
 import HomeRunDerbyGame from './components/HomeRunDerbyGame';
+import ColorChangeGame from './components/ColorChangeGame';
 
 export default function GrokPlayground() {
 
