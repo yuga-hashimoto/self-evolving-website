@@ -1,8 +1,8 @@
 {
   "header": {
     "home": "Home",
-    "mimo": "Mimo",
-    "grok": "Grok",
+    "mimo": "AI 1",
+    "grok": "AI 2",
     "compareHistory": "History",
     "githubAria": "GitHub Repository"
   },
@@ -53,8 +53,8 @@
     "viewChangelog": "View changelog",
     "viewAnalytics": "View analytics",
     "playGame": "Play game",
-    "mimoSubtitle": "Xiaomi Mimo V2 Flash",
-    "grokSubtitle": "X-AI Grok Code Fast"
+    "mimoSubtitle": "Z-AI GLM 4.5 Air",
+    "grokSubtitle": "DeepSeek R1t2 Chimera"
   },
   "changelog": {
     "title": "{modelName} Changelog",
@@ -120,7 +120,7 @@
   },
   "compare": {
     "title": "Evolution Timeline",
-    "subtitle": "Comparing Mimo and Grok's growth day by day",
+    "subtitle": "Comparing AI 1 and AI 2's growth day by day",
     "backToHome": "← Back to home",
     "noChanges": "No {modelName} changelog entries",
     "updatesCount": "{count} updates",
@@ -131,8 +131,8 @@
     "secondsShort": "sec",
     "timesCount": "times",
     "filterAll": "All",
-    "filterMimo": "Mimo Only",
-    "filterGrok": "Grok Only"
+    "filterMimo": "AI 1 Only",
+    "filterGrok": "AI 2 Only"
   },
   "common": {
     "loading": "Loading...",
