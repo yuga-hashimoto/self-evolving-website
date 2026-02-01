@@ -369,6 +369,17 @@ interface DailyLoginBonus {
 }
 
 // Neon Color Rush Interfaces
+interface ColorRushParticle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  color: string;
+  size: number;
+}
+
 interface ColorRushState {
   isPlaying: boolean;
   isGameOver: boolean;
@@ -380,6 +391,13 @@ interface ColorRushState {
   speed: number; // Color change interval in ms
   multiplier: number;
   combo: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+  flowState: boolean; // For visual feedback when combo > 5
+  particles: ColorRushParticle[];
+  activePowerUp: 'time' | 'slow' | 'hint' | null;
+  powerUpEndTime: number;
+  perfectMatches: number;
+  bestStreak: number;
 }
 
 // Progression System Interfaces
@@ -461,10 +479,19 @@ const SWIPE_THRESHOLD = 50; // Minimum swipe distance in pixels
 
 // Neon Color Rush Constants
 const COLOR_RUSH_COLORS = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF']; // Red, Green, Blue, Yellow, Magenta, Cyan
-const COLOR_RUSH_ROUND_TIME = 10; // seconds
 const COLOR_RUSH_BASE_SPEED = 800; // ms between color changes
 const COLOR_RUSH_SPEED_INCREMENT = 50; // ms to decrease per 5 combo
 const COLOR_RUSH_MIN_SPEED = 300; // minimum speed
+const COLOR_RUSH_FLOW_THRESHOLD = 5; // combo needed for flow state
+const COLOR_RUSH_POWERUP_INTERVAL = 8; // seconds between power-up spawns
+const COLOR_RUSH_PARTICLE_COUNT = 12; // particles per tap
+
+// Difficulty settings
+const COLOR_RUSH_DIFFICULTY = {
+  easy: { speed: 1000, startTime: 15, colors: 4, timeBonus: 1.5 },
+  medium: { speed: 800, startTime: 12, colors: 5, timeBonus: 1.0 },
+  hard: { speed: 600, startTime: 10, colors: 6, timeBonus: 0.5 },
+};
 
 // 2048 Constants
 const TILE_COLORS: Record<number, string> = {
@@ -1307,6 +1334,7 @@ export default function MimoPlayground() {
   const colorRushSessionStartRef = useRef<number>(0);
   const colorRushColorChangeRef = useRef<number>(0);
   const colorRushTimerRef = useRef<number>(0);
+  const colorRushPowerUpRef = useRef<number>(0);
 
   // Neon Color Rush state
   const [colorRushState, setColorRushState] = useState<ColorRushState>({
@@ -1316,10 +1344,17 @@ export default function MimoPlayground() {
     highScore: 0,
     targetColor: COLOR_RUSH_COLORS[0],
     currentColor: COLOR_RUSH_COLORS[0],
-    timeLeft: COLOR_RUSH_ROUND_TIME,
+    timeLeft: COLOR_RUSH_DIFFICULTY.medium.startTime,
     speed: COLOR_RUSH_BASE_SPEED,
     multiplier: 1,
     combo: 0,
+    difficulty: 'medium',
+    flowState: false,
+    particles: [],
+    activePowerUp: null,
+    powerUpEndTime: 0,
+    perfectMatches: 0,
+    bestStreak: 0,
   });
 
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallengeState>({
@@ -6280,25 +6315,74 @@ export default function MimoPlayground() {
   // ==================== END NEON TETRIS ====================
 
   // ==================== NEON COLOR RUSH ====================
+  // Create particle effects for Color Rush
+  const createColorRushParticles = useCallback((x: number, y: number, color: string, count: number = COLOR_RUSH_PARTICLE_COUNT) => {
+    const newParticles: ColorRushParticle[] = [];
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count;
+      const speed = 2 + Math.random() * 2;
+      newParticles.push({
+        id: Date.now() + i,
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1,
+        color,
+        size: 3 + Math.random() * 4,
+      });
+    }
+    return newParticles;
+  }, []);
+
+  // Update particles animation
+  const updateColorRushParticles = useCallback((particles: ColorRushParticle[]): ColorRushParticle[] => {
+    return particles
+      .map((p) => ({
+        ...p,
+        x: p.x + p.vx,
+        y: p.y + p.vy,
+        life: p.life - 0.02,
+        vy: p.vy + 0.1, // gravity
+      }))
+      .filter((p) => p.life > 0);
+  }, []);
+
+  // Handle power-up spawn
+  const spawnColorRushPowerUp = useCallback((): 'time' | 'slow' | 'hint' | null => {
+    const types: ('time' | 'slow' | 'hint')[] = ['time', 'slow', 'hint'];
+    return types[Math.floor(Math.random() * types.length)];
+  }, []);
+
   // Start Color Rush game
-  const startColorRushGame = useCallback(() => {
-    const initialColorIndex = Math.floor(Math.random() * COLOR_RUSH_COLORS.length);
+  const startColorRushGame = useCallback((difficulty: 'easy' | 'medium' | 'hard' = 'medium') => {
+    const config = COLOR_RUSH_DIFFICULTY[difficulty];
+    const availableColors = COLOR_RUSH_COLORS.slice(0, config.colors);
+    const initialColorIndex = Math.floor(Math.random() * availableColors.length);
 
     colorRushSessionStartRef.current = Date.now();
     colorRushColorChangeRef.current = Date.now();
-    colorRushTimerRef.current = COLOR_RUSH_ROUND_TIME;
+    colorRushPowerUpRef.current = Date.now();
+    colorRushTimerRef.current = config.startTime;
 
     setColorRushState({
       isPlaying: true,
       isGameOver: false,
       score: 0,
       highScore: colorRushState.highScore,
-      targetColor: COLOR_RUSH_COLORS[initialColorIndex],
-      currentColor: COLOR_RUSH_COLORS[initialColorIndex],
-      timeLeft: COLOR_RUSH_ROUND_TIME,
-      speed: COLOR_RUSH_BASE_SPEED,
+      targetColor: availableColors[initialColorIndex],
+      currentColor: availableColors[initialColorIndex],
+      timeLeft: config.startTime,
+      speed: config.speed,
       multiplier: 1,
       combo: 0,
+      difficulty,
+      flowState: false,
+      particles: [],
+      activePowerUp: null,
+      powerUpEndTime: 0,
+      perfectMatches: 0,
+      bestStreak: 0,
     });
 
     // Track first play
@@ -6306,23 +6390,33 @@ export default function MimoPlayground() {
       setGameStats((prev) => ({ ...prev, colorRushFirstPlay: true }));
     }
 
-    storeGameEvent('game_start', { game: 'colorRush' });
+    storeGameEvent('game_start', { game: 'colorRush', difficulty });
     trackClick();
     vibrate(30);
-  }, [colorRushState.highScore, gameStats.colorRushFirstPlay, trackClick, vibrate]);
+  }, [colorRushState.highScore, gameStats.colorRushFirstPlay, trackClick, vibrate, storeGameEvent]);
 
   // Handle tap for Color Rush
-  const handleColorRushTap = useCallback(() => {
+  const handleColorRushTap = useCallback((x: number, y: number) => {
     setColorRushState((prev) => {
       if (!prev.isPlaying || prev.isGameOver) return prev;
 
+      const config = COLOR_RUSH_DIFFICULTY[prev.difficulty];
+      const availableColors = COLOR_RUSH_COLORS.slice(0, config.colors);
       const isCorrect = prev.targetColor === prev.currentColor;
 
       if (isCorrect) {
+        // Create particle effect on correct tap
+        const newParticles = createColorRushParticles(x, y, prev.targetColor);
+
         // Correct tap - increase score and combo
         const points = 10 * prev.multiplier;
         const newScore = prev.score + points;
         const newCombo = prev.combo + 1;
+        const newPerfectMatches = prev.perfectMatches + 1;
+
+        // Time extension for perfect matches
+        const timeBonus = config.timeBonus;
+        const extendedTime = prev.timeLeft + timeBonus;
 
         // Increase multiplier every 3 combo (1, 2, 3, 5)
         let newMultiplier = prev.multiplier;
@@ -6336,8 +6430,18 @@ export default function MimoPlayground() {
           newSpeed = Math.max(COLOR_RUSH_MIN_SPEED, prev.speed - COLOR_RUSH_SPEED_INCREMENT);
         }
 
-        // Vibrate for feedback
-        vibrate(10);
+        // Check for flow state (combo >= 5)
+        const isFlowState = newCombo >= COLOR_RUSH_FLOW_THRESHOLD;
+
+        // Update best streak
+        const newBestStreak = Math.max(prev.bestStreak, newCombo);
+
+        // Vibrate more intensely in flow state
+        if (isFlowState) {
+          vibrate(20);
+        } else {
+          vibrate(10);
+        }
 
         // Check and update high score
         const isNewHighScore = newScore > prev.highScore;
@@ -6346,9 +6450,9 @@ export default function MimoPlayground() {
           storeGameEvent('high_score', { game: 'colorRush', score: newScore });
         }
 
-        // Pick new target color
-        const newColorIndex = Math.floor(Math.random() * COLOR_RUSH_COLORS.length);
-        const newTargetColor = COLOR_RUSH_COLORS[newColorIndex];
+        // Pick new target color (limited to current difficulty color count)
+        const newColorIndex = Math.floor(Math.random() * availableColors.length);
+        const newTargetColor = availableColors[newColorIndex];
 
         // Track stats for achievements
         if (newScore >= 100 && !gameStats.colorRush100Score) {
@@ -6361,6 +6465,11 @@ export default function MimoPlayground() {
           setGameStats((prev) => ({ ...prev, colorRushBestCombo10: true }));
         }
 
+        // Update session start time to extend game with time bonus
+        if (timeBonus > 0) {
+          colorRushSessionStartRef.current -= timeBonus * 1000;
+        }
+
         return {
           ...prev,
           score: newScore,
@@ -6369,24 +6478,34 @@ export default function MimoPlayground() {
           multiplier: newMultiplier,
           speed: newSpeed,
           targetColor: newTargetColor,
+          timeLeft: extendedTime,
+          flowState: isFlowState,
+          particles: [...prev.particles, ...newParticles],
+          perfectMatches: newPerfectMatches,
+          bestStreak: newBestStreak,
         };
       } else {
+        // Wrong tap - create red particles
+        const newParticles = createColorRushParticles(x, y, '#FF0000');
+
         // Wrong tap - penalty
         const newScore = Math.max(0, prev.score - 5);
 
         // Vibrate error feedback (longer)
         vibrate(50);
 
-        // Reset combo and multiplier
+        // Reset combo and multiplier, also reset flow state
         return {
           ...prev,
           score: newScore,
           combo: 0,
           multiplier: 1,
+          flowState: false,
+          particles: [...prev.particles, ...newParticles],
         };
       }
     });
-  }, [gameStats, setGameStats, vibrate, storeGameEvent]);
+  }, [gameStats, setGameStats, vibrate, storeGameEvent, createColorRushParticles]);
 
   // Color Rush game loop
   const colorRushGameLoop = useCallback(() => {
@@ -6395,13 +6514,45 @@ export default function MimoPlayground() {
     setColorRushState((prev) => {
       if (!prev.isPlaying || prev.isGameOver) return prev;
 
+      const config = COLOR_RUSH_DIFFICULTY[prev.difficulty];
+      const availableColors = COLOR_RUSH_COLORS.slice(0, config.colors);
+
       // Update time left
       const timeElapsed = (now - colorRushSessionStartRef.current) / 1000;
-      const newTimeLeft = Math.max(0, COLOR_RUSH_ROUND_TIME - timeElapsed);
+      const configTime = config.startTime;
+      const newTimeLeft = Math.max(0, configTime - timeElapsed);
+
+      // Update particles
+      const updatedParticles = updateColorRushParticles(prev.particles);
+
+      // Check power-up spawn
+      let newActivePowerUp = prev.activePowerUp;
+      let newPowerUpEndTime = prev.powerUpEndTime;
+
+      if (!prev.activePowerUp && now - colorRushPowerUpRef.current >= COLOR_RUSH_POWERUP_INTERVAL * 1000) {
+        const powerUp = spawnColorRushPowerUp();
+        if (powerUp) {
+          newActivePowerUp = powerUp;
+          newPowerUpEndTime = now + 5000; // 5 seconds duration
+          colorRushPowerUpRef.current = now;
+        }
+      }
+
+      // Expire power-up
+      if (prev.activePowerUp && now >= prev.powerUpEndTime) {
+        newActivePowerUp = null;
+        newPowerUpEndTime = 0;
+      }
 
       // Check if game over (time ran out)
       if (newTimeLeft <= 0) {
-        storeGameEvent('game_over', { game: 'colorRush', score: prev.score });
+        storeGameEvent('game_over', {
+          game: 'colorRush',
+          score: prev.score,
+          combo: prev.combo,
+          streak: prev.bestStreak,
+          difficulty: prev.difficulty
+        });
         const duration = (Date.now() - colorRushSessionStartRef.current) / 1000;
         updatePlayerProgress('colorRush', prev.score, duration);
         checkDailyChallengeCompletion('colorRush', prev.score);
@@ -6412,32 +6563,44 @@ export default function MimoPlayground() {
           isPlaying: false,
           isGameOver: true,
           timeLeft: 0,
+          flowState: false,
         };
       }
 
-      // Change color if it's time
-      if (now - colorRushColorChangeRef.current >= prev.speed) {
+      // Change color if it's time (with slow power-up modifying speed)
+      let effectiveSpeed = prev.speed;
+      if (prev.activePowerUp === 'slow') {
+        effectiveSpeed = prev.speed * 1.5; // 50% slower
+      }
+
+      if (now - colorRushColorChangeRef.current >= effectiveSpeed) {
         colorRushColorChangeRef.current = now;
 
         // Pick a random color (different from current)
-        let newColorIndex = Math.floor(Math.random() * COLOR_RUSH_COLORS.length);
-        while (COLOR_RUSH_COLORS[newColorIndex] === prev.currentColor) {
-          newColorIndex = Math.floor(Math.random() * COLOR_RUSH_COLORS.length);
+        let newColorIndex = Math.floor(Math.random() * availableColors.length);
+        while (availableColors[newColorIndex] === prev.currentColor) {
+          newColorIndex = Math.floor(Math.random() * availableColors.length);
         }
 
         return {
           ...prev,
-          currentColor: COLOR_RUSH_COLORS[newColorIndex],
+          currentColor: availableColors[newColorIndex],
           timeLeft: newTimeLeft,
+          particles: updatedParticles,
+          activePowerUp: newActivePowerUp,
+          powerUpEndTime: newPowerUpEndTime,
         };
       }
 
       return {
         ...prev,
         timeLeft: newTimeLeft,
+        particles: updatedParticles,
+        activePowerUp: newActivePowerUp,
+        powerUpEndTime: newPowerUpEndTime,
       };
     });
-  }, [storeGameEvent, updatePlayerProgress, checkDailyChallengeCompletion, checkAchievements]);
+  }, [storeGameEvent, updatePlayerProgress, checkDailyChallengeCompletion, checkAchievements, updateColorRushParticles, spawnColorRushPowerUp]);
 
   // Color Rush game loop useEffect
   useEffect(() => {
@@ -6980,12 +7143,17 @@ useEffect(() => {
       else if (currentGame === 'colorRush') {
         if (e.code === 'Space' || e.code === 'Enter') {
           e.preventDefault();
+          const container = containerRef.current;
+          const rect = container?.getBoundingClientRect();
+          const centerX = rect ? rect.width / 2 : 150;
+          const centerY = rect ? rect.height / 2 : 150;
+
           if (!colorRushState.isPlaying && !colorRushState.isGameOver) {
-            startColorRushGame();
+            startColorRushGame(colorRushState.difficulty);
           } else if (colorRushState.isGameOver) {
-            startColorRushGame();
+            startColorRushGame(colorRushState.difficulty);
           } else {
-            handleColorRushTap();
+            handleColorRushTap(centerX, centerY);
           }
         }
       }
@@ -7510,11 +7678,11 @@ useEffect(() => {
                     if (typeof navigator !== 'undefined' && navigator.vibrate) {
                       navigator.vibrate(20);
                     }
-                    // Auto-start the game immediately
+                    // Auto-start the game immediately with medium difficulty for quick access
                     if (!colorRushState.isPlaying && !colorRushState.isGameOver) {
-                      startColorRushGame();
+                      startColorRushGame('medium');
                     } else if (colorRushState.isGameOver) {
-                      startColorRushGame();
+                      startColorRushGame('medium');
                     }
                   }}
                   className="w-full py-3 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 rounded-lg font-bold text-white text-lg active:scale-[0.98] transition-transform shadow-lg shadow-fuchsia-900/30"
@@ -7789,22 +7957,17 @@ useEffect(() => {
               </button>
             </div>
 
-            {/* Quick Play Button */}
+            {/* Quick Play Button - NOW IMMEDIATE COLOR RUSH */}
             <div className="mb-6">
               <button
                 onClick={() => {
                   handleClick();
-                  // Start random game immediately
-                  const games: GameType[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris', 'colorRush'];
-                  const randomGame = games[Math.floor(Math.random() * games.length)];
-                  setCurrentGame(randomGame);
-                  trackGameSession(randomGame);
+                  setCurrentGame('colorRush');
+                  trackGameSession('colorRush');
                   playSound('start');
 
-                  // Auto-start 2048 if needed
-                  if (randomGame === '2048' && !game2048State.grid.length) {
-                    start2048Game(game2048State.difficulty);
-                  }
+                  // Auto-start Color Rush immediately with medium difficulty
+                  startColorRushGame('medium');
 
                   // Haptic feedback
                   if (typeof navigator !== 'undefined' && navigator.vibrate) {
@@ -7812,7 +7975,7 @@ useEffect(() => {
                   }
                 }}
                 className="w-full p-6 rounded-xl border-4 border-green-500 bg-gradient-to-r from-green-700 via-emerald-600 to-teal-700 hover:from-green-600 hover:via-emerald-500 hover:to-teal-600 active:scale-[0.98] transition-all shadow-lg hover:shadow-green-500/30 group touch-manipulation"
-                aria-label="Quick Play - Start a random game instantly"
+                aria-label="Quick Play - Start Color Rush instantly"
                 style={{
                   touchAction: 'manipulation',
                 }}
@@ -7820,8 +7983,8 @@ useEffect(() => {
                 <div className="flex items-center justify-center gap-4">
                   <span className="text-5xl group-hover:animate-bounce">⚡</span>
                   <div className="text-left">
-                    <div className="text-xl font-bold text-white">{t('quickPlay.title')}</div>
-                    <div className="text-green-100 text-sm">{t('quickPlay.description')}</div>
+                    <div className="text-xl font-bold text-white">Start Playing</div>
+                    <div className="text-green-100 text-sm">Instant Color Rush - No waiting!</div>
                   </div>
                 </div>
               </button>
@@ -9643,64 +9806,136 @@ useEffect(() => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexDirection: 'column',
-                    transition: 'background-color 0.1s ease',
+                    transition: 'background-color 0.1s ease, box-shadow 0.3s ease',
                     backgroundColor: colorRushState.currentColor,
+                    boxShadow: colorRushState.flowState
+                      ? '0 0 40px rgba(255, 255, 255, 0.6), 0 0 80px rgba(255, 215, 0, 0.4)'
+                      : colorRushState.activePowerUp
+                        ? '0 0 30px rgba(0, 255, 255, 0.5)'
+                        : 'none',
                   }}
-                  onClick={() => {
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
                     if (!colorRushState.isPlaying && !colorRushState.isGameOver) {
-                      startColorRushGame();
+                      startColorRushGame(colorRushState.difficulty);
                     } else if (colorRushState.isGameOver) {
-                      startColorRushGame();
+                      startColorRushGame(colorRushState.difficulty);
                     } else {
-                      handleColorRushTap();
+                      handleColorRushTap(x, y);
                     }
                   }}
                   onTouchStart={(e) => {
                     e.preventDefault();
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+
                     if (!colorRushState.isPlaying && !colorRushState.isGameOver) {
-                      startColorRushGame();
+                      startColorRushGame(colorRushState.difficulty);
                     } else if (colorRushState.isGameOver) {
-                      startColorRushGame();
+                      startColorRushGame(colorRushState.difficulty);
                     } else {
-                      handleColorRushTap();
+                      handleColorRushTap(x, y);
                     }
                   }}
                 >
+                  {/* Particle Overlay */}
+                  {colorRushState.particles.length > 0 && (
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                    >
+                      {colorRushState.particles.map((particle) => (
+                        <div
+                          key={particle.id}
+                          className="absolute rounded-full"
+                          style={{
+                            left: particle.x,
+                            top: particle.y,
+                            width: particle.size,
+                            height: particle.size,
+                            backgroundColor: particle.color,
+                            opacity: particle.life,
+                            transform: `translate(-50%, -50%)`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+
                   {/* Game UI */}
-                  <div className="text-center p-6 w-full">
+                  <div className="text-center p-6 w-full relative">
+                    {/* Flow State Indicator */}
+                    {colorRushState.flowState && (
+                      <div className="absolute top-0 left-0 right-0 text-center">
+                        <div className="inline-block px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full text-xs font-bold text-black animate-pulse">
+                          🔥 FLOW STATE!
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Power-up Indicator */}
+                    {colorRushState.activePowerUp && (
+                      <div className="absolute top-6 left-0 right-0 text-center">
+                        <div className="inline-block px-2 py-1 bg-cyan-500/80 rounded text-xs font-bold text-white">
+                          ⚡ {colorRushState.activePowerUp.toUpperCase()}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Timer and Stats */}
                     {colorRushState.isPlaying && !colorRushState.isGameOver && (
-                      <div className="mb-4">
-                        <div className="text-5xl font-bold text-white mb-2">
+                      <div className="mb-4 mt-8">
+                        <div className="text-5xl font-bold text-white mb-2 drop-shadow-lg">
                           {Math.ceil(colorRushState.timeLeft)}s
                         </div>
-                        <div className="text-lg text-fuchsia-200 font-bold">
-                          Target: {colorRushState.targetColor}
+                        <div className="text-lg text-white font-bold drop-shadow-md">
+                          Target: <span style={{ color: colorRushState.targetColor }}>{colorRushState.targetColor}</span>
                         </div>
                         {colorRushState.combo > 0 && (
-                          <div className="mt-2 text-sm text-yellow-300">
+                          <div className="mt-2 text-sm text-yellow-300 font-bold drop-shadow">
                             Combo: x{colorRushState.combo} (x{colorRushState.multiplier})
                           </div>
                         )}
+                        <div className="mt-1 text-xs text-slate-200 opacity-80">
+                          Perfect: {colorRushState.perfectMatches} | Best Streak: {colorRushState.bestStreak}
+                        </div>
                       </div>
                     )}
 
                     {/* Game Over Screen */}
                     {colorRushState.isGameOver && (
-                      <div className="bg-black/50 rounded-xl p-4 backdrop-blur-sm">
+                      <div className="bg-black/60 rounded-xl p-4 backdrop-blur-lg border border-fuchsia-500/30">
                         <div className="text-4xl mb-2">🎨</div>
-                        <div className="text-2xl font-bold text-white mb-2">
+                        <div className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
                           {t('common.gameOver')}
                         </div>
-                        <div className="text-fuchsia-300 text-xl font-bold mb-1">
+                        <div className="text-fuchsia-300 text-xl font-bold mb-1 drop-shadow">
                           {t('common.score')}: {formatScore(colorRushState.score)}
                         </div>
-                        <div className="text-slate-300 text-sm mb-3">
+                        <div className="text-slate-300 text-sm mb-1">
                           {t('common.highScore')}: {formatScore(colorRushState.highScore)}
                         </div>
-                        <button className="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 rounded-lg font-bold text-white">
-                          {t('colorRush.tapToRestart')}
-                        </button>
+                        <div className="text-xs text-slate-300 mb-4">
+                          <span className="text-yellow-300">🔥 {colorRushState.bestStreak} Best Streak</span>
+                          <span className="mx-2">|</span>
+                          <span className="text-cyan-300">✓ {colorRushState.perfectMatches} Perfect</span>
+                        </div>
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            className="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 rounded-lg font-bold text-white transition-transform active:scale-95"
+                            onClick={() => startColorRushGame(colorRushState.difficulty)}
+                          >
+                            {t('colorRush.tapToRestart')}
+                          </button>
+                        </div>
+                        <div className="mt-2 text-xs text-slate-400">
+                          Difficulty: <span className="text-cyan-400 uppercase">{colorRushState.difficulty}</span>
+                        </div>
                       </div>
                     )}
 
@@ -9708,19 +9943,50 @@ useEffect(() => {
                     {!colorRushState.isPlaying && !colorRushState.isGameOver && (
                       <div>
                         <div className="text-4xl mb-2">🎨</div>
-                        <div className="text-2xl font-bold text-white mb-2">
+                        <div className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
                           {t('colorRush.title')}
                         </div>
-                        <div className="text-fuchsia-200 text-sm mb-4">
+                        <div className="text-fuchsia-200 text-sm mb-4 drop-shadow">
                           {t('colorRush.description')}
                         </div>
+
+                        {/* Difficulty Selection */}
+                        <div className="mb-4">
+                          <div className="text-xs text-slate-300 mb-2">Select Difficulty:</div>
+                          <div className="flex gap-2 justify-center flex-wrap">
+                            {(['easy', 'medium', 'hard'] as const).map((diff) => (
+                              <button
+                                key={diff}
+                                onClick={() => setColorRushState(prev => ({ ...prev, difficulty: diff }))}
+                                className={`px-3 py-1 rounded text-xs font-bold transition-all ${
+                                  colorRushState.difficulty === diff
+                                    ? 'bg-cyan-500 text-black scale-105'
+                                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                }`}
+                              >
+                                {diff.toUpperCase()}
+                              </button>
+                            ))}
+                          </div>
+                          <div className="text-xs text-slate-400 mt-1">
+                            {colorRushState.difficulty === 'easy' && 'Slow • 15s • 4 colors • +1.5s bonus'}
+                            {colorRushState.difficulty === 'medium' && 'Normal • 12s • 5 colors • +1s bonus'}
+                            {colorRushState.difficulty === 'hard' && 'Fast • 10s • 6 colors • +0.5s bonus'}
+                          </div>
+                        </div>
+
                         <div className="text-xs text-slate-300 mb-4">
                           <p className="mb-1">👆 {t('colorRush.instructions')}</p>
-                          <p>⌨️ {t('colorRush.keys')}</p>
+                          <p className="mb-1">⌨️ {t('colorRush.keys')}</p>
+                          <p className="text-yellow-300">🔥 Keep combos to activate FLOW STATE!</p>
+                          <p className="text-cyan-300">⚡ Power-ups appear during play</p>
                           <p className="mt-2">{t('colorRush.tapToStart')}</p>
                         </div>
-                        <button className="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 rounded-lg font-bold text-white">
-                          {t('colorRush.tapToStart')}
+                        <button
+                          className="px-6 py-3 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 rounded-lg font-bold text-white shadow-lg shadow-fuchsia-900/50 transition-transform active:scale-95"
+                          onClick={() => startColorRushGame(colorRushState.difficulty)}
+                        >
+                          🚀 {t('colorRush.tapToStart')}
                         </button>
                       </div>
                     )}
