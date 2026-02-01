@@ -2,16 +2,16 @@
 export const MODELS = {
     mimo: {
         id: 'mimo',
-        name: 'Mimo',
-        description: 'Xiaomi Mimo V2 Flash',
-        openrouterModel: 'xiaomi/mimo-v2-flash',
+        name: 'AI 1',
+        description: 'Z-AI GLM 4.5 Air',
+        openrouterModel: 'z-ai/glm-4.5-air:free',
         color: 'purple',
     },
     grok: {
         id: 'grok',
-        name: 'Grok',
-        description: 'X-AI Grok Code Fast',
-        openrouterModel: 'x-ai/grok-code-fast-1',
+        name: 'AI 2',
+        description: 'DeepSeek R1t2 Chimera',
+        openrouterModel: 'tngtech/deepseek-r1t2-chimera:free',
         color: 'blue',
     },
 } as const;

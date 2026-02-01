@@ -23,8 +23,8 @@ jobs:
     uses: ./.github/workflows/reusable-evolve-model-skill-cli.yml
     with:
       model_id: 'grok'
-      model_display_name: 'Grok (CLI)'
-      anthropic_model: 'x-ai/grok-code-fast-1'
+      model_display_name: 'AI 2 (CLI)'
+      anthropic_model: 'tngtech/deepseek-r1t2-chimera:free'
       commit_prefix: '🤖 AI Evolution (CLI)'
     secrets:
       model_api_key: ${{ secrets.GROK_API_KEY }}

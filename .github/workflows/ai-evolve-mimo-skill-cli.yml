@@ -23,8 +23,8 @@ jobs:
     uses: ./.github/workflows/reusable-evolve-model-skill-cli.yml
     with:
       model_id: 'mimo'
-      model_display_name: 'MiMo (CLI)'
-      anthropic_model: 'xiaomi/mimo-v2-flash'
+      model_display_name: 'AI 1 (CLI)'
+      anthropic_model: 'z-ai/glm-4.5-air:free'
       commit_prefix: '🆓 AI Evolution (CLI)'
     secrets:
       model_api_key: ${{ secrets.MIMO_API_KEY }}
