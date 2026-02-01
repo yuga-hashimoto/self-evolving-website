@@ -1381,6 +1381,14 @@ export default function MimoPlayground() {
 
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
 
+  // Daily Login Bonus State
+  const [dailyBonus, setDailyBonus] = useState<DailyLoginBonus>({
+    lastClaimedDate: null,
+    consecutiveDays: 0,
+    availableBonus: null,
+    showBonusModal: false,
+  });
+
   const [gameStats, setGameStats] = useState<GameStats>({
     infinityFirstPlay: false,
     infinity100Score: false,
@@ -1786,6 +1794,7 @@ export default function MimoPlayground() {
     };
   }, []);
 
+  
   // Check and update daily challenge
   useEffect(() => {
     const savedData = localStorage.getItem('dailyChallenge_data');
@@ -2703,7 +2712,10 @@ export default function MimoPlayground() {
       updatePlayerProgress('infinity', gameState.score, sessionDuration, false);
 
       // Check daily challenge completion
-      checkDailyChallengeCompletion('infinity', gameState.score);
+      checkDailyChallengeCompletion('infinity', gameState.score, {
+        combo: gameState.combo,
+        accuracy: gameState.accuracy,
+      });
 
       // Update score achievements
       updateScoreAchievementsRef.current('infinity', gameState.score);
@@ -2919,25 +2931,15 @@ export default function MimoPlayground() {
   };
 
   // Check and complete daily challenge if criteria met
-  const checkDailyChallengeCompletion = useCallback((gameType: 'infinity' | '2048' | 'neon' | 'cosmic' | 'tetris' | 'colorRush', score: number) => {
+  const checkDailyChallengeCompletion = useCallback((gameType: 'infinity' | '2048' | 'neon' | 'cosmic' | 'tetris' | 'colorRush', score: number, additionalData?: any) => {
     if (!dailyChallenge.currentChallenge || dailyChallenge.currentChallenge.completed) return;
     if (dailyChallenge.currentChallenge.game !== gameType) return;
 
     const challenge = dailyChallenge.currentChallenge;
-    const targetScore = challenge.target;
-
-    // Check if score meets target
     let completed = false;
 
-    if (gameType === 'infinity' && score >= targetScore) {
-      completed = true;
-    } else if (gameType === '2048' && score >= targetScore) {
-      completed = true;
-    } else if (gameType === 'neon' && score >= targetScore) {
-      completed = true;
-    } else if (gameType === 'cosmic' && score >= targetScore) {
-      completed = true;
-    } else if (gameType === 'tetris' && score >= targetScore) {
+    // Check if score meets the target
+    if (score >= challenge.target) {
       completed = true;
     }
 
@@ -7657,6 +7659,46 @@ useEffect(() => {
               <p className="text-slate-400">{t('selectGameDesc')}</p>
             </div>
 
+            {/* Daily Challenge Card */}
+            {dailyChallenge.currentChallenge && (
+              <div className="mb-6">
+                <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border-2 border-amber-500/50 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="text-2xl">🎯</div>
+                      <div>
+                        <div className="text-amber-400 font-bold text-sm">{t('dailyChallenge.title')}</div>
+                        <div className="text-xs text-amber-300">Streak: {dailyChallenge.streak} days</div>
+                      </div>
+                    </div>
+                    <div className="text-amber-400 text-sm font-bold">
+                      +{dailyChallenge.currentChallenge.reward} coins
+                    </div>
+                  </div>
+                  <div className="text-white mb-2 font-medium">
+                    {dailyChallenge.currentChallenge.game}
+                  </div>
+                  <div className="text-slate-300 text-sm mb-3">
+                    {dailyChallenge.currentChallenge.description}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs text-slate-400">
+                      Easy
+                    </div>
+                    <button
+                      onClick={() => {
+                        setCurrentGame(dailyChallenge.currentChallenge?.game as any);
+                        setDailyChallenge(prev => ({ ...prev, showChallengeModal: false }));
+                      }}
+                      className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-sm font-bold text-white transition-colors"
+                    >
+                      {t('dailyChallenge.playNow')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Quick Start Instant Play Preview - Engages users immediately */}
             <div className="mb-6">
               <div className="bg-gradient-to-br from-fuchsia-900/40 to-purple-900/40 border-2 border-fuchsia-500/50 rounded-xl p-4">
@@ -10686,21 +10728,51 @@ useEffect(() => {
               <div className="text-xl font-bold text-white mb-4">
                 {t('progression.level')} {levelUpModal.newLevel}
               </div>
-              {levelUpModal.rewards.length > 0 && (
-                <div className="bg-black/30 rounded-lg p-3 mb-4">
-                  <div className="text-xs text-slate-400 mb-2">{t('progression.rewards')}:</div>
-                  <ul className="text-sm text-amber-300 space-y-1">
-                    {levelUpModal.rewards.map((reward, idx) => (
-                      <li key={idx}>✨ {reward}</li>
-                    ))}
-                  </ul>
+            </div>
+            <div className="mt-6 space-y-2">
+              {levelUpModal.rewards.map((reward, index) => (
+                <div key={index} className="flex items-center gap-2 text-white">
+                  <span className="text-amber-400">✓</span>
+                  <span>{reward}</span>
                 </div>
-              )}
+              ))}
+            </div>
+            <button
+              onClick={() => setLevelUpModal((m) => ({ ...m, show: false }))}
+              className="mt-6 w-full py-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 rounded-lg font-bold text-white transition-all"
+            >
+              {t('common.continue')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Daily Challenge Celebration Modal */}
+      {dailyChallenge.celebrationActive && dailyChallenge.currentChallenge && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setDailyChallenge((m) => ({ ...m, celebrationActive: false }))}></div>
+          <div className="relative bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 rounded-2xl border-4 border-amber-400 shadow-2xl p-6 max-w-sm w-full animate-bounce">
+            <div className="text-center">
+              <div className="text-6xl mb-3">🎯</div>
+              <div className="text-3xl font-bold bg-gradient-to-r from-amber-300 to-orange-300 bg-clip-text text-transparent mb-2">
+                Challenge Complete!
+              </div>
+              <div className="text-xl font-bold text-white mb-2">
+                {dailyChallenge.currentChallenge.game}
+              </div>
+              <div className="text-amber-200 mb-4">
+                Earned {dailyChallenge.currentChallenge.reward} coins!
+              </div>
+              <div className="bg-black/30 rounded-xl p-3 mb-4 border-2 border-amber-400/50">
+                <div className="text-2xl font-bold text-amber-300 mb-1">
+                  🔥 Streak: {dailyChallenge.streak} days
+                </div>
+              </div>
               <button
-                onClick={() => setLevelUpModal((m) => ({ ...m, show: false }))}
-                className="w-full py-2 bg-purple-600 hover:bg-purple-500 rounded-lg font-bold text-white border border-purple-400"
+                onClick={() => setDailyChallenge((m) => ({ ...m, celebrationActive: false }))}
+                className="mt-4 w-full py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 rounded-lg font-bold text-white transition-all"
               >
-                {t('progression.awesome')}
+                Continue Playing
               </button>
             </div>
           </div>

@@ -212,7 +212,13 @@
         "short": "Challenge",
         "streak": "Streak",
         "completed": "Completed",
-        "pending": "Pending"
+        "pending": "Pending",
+        "playNow": "Play Now",
+        "challenge": "CHALLENGE",
+        "reward": "Reward",
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
       },
       "progression": {
         "level": "Level",
