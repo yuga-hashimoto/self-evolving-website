@@ -299,7 +299,7 @@ export function IconMimo({ size = 48, className = "", "aria-hidden": ariaHidden,
     return (
         <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <circle cx="32" cy="32" r="28" fill="#a855f7" fillOpacity="0.1" stroke="#a855f7" strokeWidth="2" />
-            <path d="M20 44V20L32 32L44 20V44" stroke="#a855f7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <text x="32" y="42" fontSize="28" fontWeight="bold" fill="#a855f7" textAnchor="middle">AI1</text>
         </svg>
     );
 }
@@ -309,7 +309,7 @@ export function IconGrok({ size = 48, className = "", "aria-hidden": ariaHidden,
     return (
         <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <circle cx="32" cy="32" r="28" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" strokeWidth="2" />
-            <path d="M44 26V20H20V44H44V34H32" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <text x="32" y="42" fontSize="28" fontWeight="bold" fill="#3b82f6" textAnchor="middle">AI2</text>
         </svg>
     );
 }
