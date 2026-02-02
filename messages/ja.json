@@ -389,6 +389,15 @@
         "diffDescMedium": "標準 • 12秒 • 5色 • +1秒ボーナス",
         "diffDescHard": "速い • 10秒 • 6色 • +0.5秒ボーナス"
       },
+      "neonCrush": {
+        "title": "Neon Crush",
+        "subtitle": "マッチ3パズル",
+        "description": "3つ以上のジェムをマッチしてポイント獲得！コンボでボーナススコア！",
+        "tapToStart": "タップでスタート",
+        "backToMenu": "メニューへ",
+        "matchGems": "ジェムをマッチしてポイント獲得！",
+        "buildCombo": "コンボでボーナススコアを獲得！"
+      },
       "achievements": {
         "title": "アチーブメント",
         "description": "ゲームをプレイしてアチーブメントを解除しよう！",

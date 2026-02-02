@@ -186,7 +186,7 @@ interface Achievement {
 interface DailyChallenge {
   id: string; // YYYY-MM-DD
   date: string;
-  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush';
+  game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3';
   target: number; // Target score to beat
   description: string;
   completed: boolean;
@@ -1016,26 +1016,6 @@ function getXpForLevel(level: number): number {
   return PROGRESSION_CONFIG.XP_PER_LEVEL(level);
 }
 
-// Calculate tickets earned from a game session
-function calculateTickets(
-  score: number,
-  streak: number,
-  level: number,
-  petBonus: number = 1.0
-): number {
-  if (score < 10) return 0; // Minimum score threshold
-
-  // Base tickets from score (1 per 100 points)
-  let tickets = Math.floor(score / 100) * TICKET_CONFIG.BASE_REWARD;
-
-  // Multipliers
-  const streakBonus = TICKET_CONFIG.STREAK_MULTIPLIER(streak);
-  const levelBonus = TICKET_CONFIG.LEVEL_MULTIPLIER(level);
-
-  tickets *= streakBonus * levelBonus * petBonus;
-
-  return Math.round(tickets);
-}
 
 // Get active pet bonus multiplier
 function getActivePetBonus(petId: string | null, allPets: Pet[]): number {
@@ -1044,33 +1024,6 @@ function getActivePetBonus(petId: string | null, allPets: Pet[]): number {
   return pet ? pet.bonusMultiplier : 1.0;
 }
 
-// Get rarity color
-function getRarityColor(rarity: string): string {
-  switch (rarity) {
-    case 'common': return 'text-gray-400';
-    case 'rare': return 'text-blue-400';
-    case 'epic': return 'text-purple-400';
-    case 'legendary': return 'text-amber-400';
-    default: return 'text-white';
-  }
-}
-
-// Get gacha weights with pity system
-function getGachaWeights(eggsHatched: number, guaranteedLegendary: boolean = false) {
-  // Pity system: After 30 eggs, guarantee a legendary
-  if (guaranteedLegendary || eggsHatched >= 30) {
-    return { common: 0, rare: 0, epic: 0, legendary: 100 };
-  }
-
-  // Normal rates
-  return {
-    common: 40,
-    rare: 25,
-    epic: 10,
-    legendary: 5,
-    pityProgress: eggsHatched, // Track towards pity
-  };
-}
 
 // Render mastery stars
 function renderMasteryStars(stars: number): string {
@@ -1102,6 +1055,48 @@ function generateLevelRewards(level: number): string[] {
   return rewards;
 }
 
+// Match-3 Game Interfaces
+interface Match3Gem {
+  id: number;
+  type: number; // Color/type of gem
+  x: number;
+  y: number;
+  scale: number;
+  rotation: number;
+  alpha: number;
+  isMatched: boolean;
+  isFalling: boolean;
+  fallSpeed: number;
+}
+
+// Particle interface (used by various games)
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  color: string;
+  size: number;
+}
+
+interface Match3State {
+  grid: (Match3Gem | null)[][];
+  score: number;
+  highScore: number;
+  isPlaying: boolean;
+  isGameOver: boolean;
+  selectedGem: { x: number; y: number } | null;
+  isSwapping: boolean;
+  combo: number;
+  movesLeft: number;
+  particles: Particle[];
+  targetScore: number;
+  level: number;
+  gemTypes: number;
+}
+
 // Session tracking interface
 interface SessionState {
   isActive: boolean;
@@ -1113,15 +1108,13 @@ interface SessionState {
   rewardClaimed: boolean; // Track if session reward was claimed
 }
 
-// Sound effect types
-type SoundType = 'click' | 'start' | 'combo' | 'gameover' | 'victory' | 'coin' | 'hit' | 'perfect' | 'good' | 'success' | 'miss';
 
-type GameType = 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush';
+type GameType = 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3';
 
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3'>('menu');
   const [shopOpen, setShopOpen] = useState(false);
 
   // Audio/Sound state
@@ -1129,9 +1122,7 @@ export default function MimoPlayground() {
   const audioContextRef = useRef<AudioContext | null>(null);
 
   // Quick play and tutorial state
-  const [showQuickPlay, setShowQuickPlay] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
-  const [firstTimeUser, setFirstTimeUser] = useState(false);
   const [continueSession, setContinueSession] = useState(false);
 
   // Session tracking state
@@ -1357,6 +1348,75 @@ export default function MimoPlayground() {
     bestStreak: 0,
   });
 
+    // Match-3 game state
+  const [match3State, setMatch3State] = useState<Match3State>({
+    grid: [],
+    score: 0,
+    highScore: 0,
+    isPlaying: false,
+    isGameOver: false,
+    selectedGem: null,
+    isSwapping: false,
+    combo: 0,
+    movesLeft: 30,
+    particles: [],
+    targetScore: 1000,
+    level: 1,
+    gemTypes: 5,
+  });
+
+  // Match-3 game functions
+  const startMatch3Game = useCallback(() => {
+    // Initialize grid
+    const newGrid: (Match3Gem | null)[][] = [];
+    const gemColors = [1, 2, 3, 4, 5]; // 5 types of gems
+
+    for (let y = 0; y < 8; y++) {
+      const row: (Match3Gem | null)[] = [];
+      for (let x = 0; x < 8; x++) {
+        const gemType = gemColors[Math.floor(Math.random() * gemColors.length)];
+        row.push({
+          id: y * 8 + x,
+          type: gemType,
+          x,
+          y,
+          scale: 1,
+          rotation: 0,
+          alpha: 1,
+          isMatched: false,
+          isFalling: false,
+          fallSpeed: 0,
+        });
+      }
+      newGrid.push(row);
+    }
+
+    // Ensure no initial matches
+    setMatch3State({
+      grid: newGrid,
+      score: 0,
+      highScore: match3State.highScore,
+      isPlaying: true,
+      isGameOver: false,
+      selectedGem: null,
+      isSwapping: false,
+      combo: 0,
+      movesLeft: 30,
+      particles: [],
+      targetScore: 1000,
+      level: 1,
+      gemTypes: 5,
+    });
+
+    // First play achievement
+    if (!gameStats.colorRushFirstPlay) {
+      setGameStats((prev) => ({ ...prev, colorRushFirstPlay: true }));
+    }
+
+    storeGameEvent('match3', { type: 'start' });
+    vibrate(30);
+  }, [match3State.highScore]);
+
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallengeState>({
     currentChallenge: null,
     streak: 0,
@@ -1381,14 +1441,7 @@ export default function MimoPlayground() {
 
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
 
-  // Daily Login Bonus State
-  const [dailyBonus, setDailyBonus] = useState<DailyLoginBonus>({
-    lastClaimedDate: null,
-    consecutiveDays: 0,
-    availableBonus: null,
-    showBonusModal: false,
-  });
-
+  
   const [gameStats, setGameStats] = useState<GameStats>({
     infinityFirstPlay: false,
     infinity100Score: false,
@@ -1486,6 +1539,12 @@ export default function MimoPlayground() {
   const neonRequestRef = useRef<number | null>(null);
   const cosmicRequestRef = useRef<number | null>(null);
   const snakeRequestRef = useRef<number | null>(null);
+  const match3RequestRef = useRef<number | null>(null);
+  const rhythmRequestRef = useRef<number | null>(null);
+  const flapRequestRef = useRef<number | null>(null);
+  const brickRequestRef = useRef<number | null>(null);
+  const tetrisRequestRef = useRef<number | null>(null);
+  const colorRushRequestRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const checkAchievementsRef = useRef<() => void>(() => {});
   const updateScoreAchievementsRef = useRef<(gameType: 'infinity' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick', score: number) => void>(() => {});
@@ -1512,7 +1571,7 @@ export default function MimoPlayground() {
     }
     if (soundEnabled) {
       if (typeof window !== 'undefined' && typeof window.AudioContext !== 'undefined') {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         oscillator.connect(gainNode);
@@ -1612,7 +1671,6 @@ export default function MimoPlayground() {
     if (typeof window !== 'undefined') {
       const hasVisited = localStorage.getItem('mimo_hasVisited');
       if (!hasVisited) {
-        setFirstTimeUser(true);
         setShowTutorial(true);
         localStorage.setItem('mimo_hasVisited', 'true');
       }
@@ -1707,6 +1765,24 @@ export default function MimoPlayground() {
     }
   }, [session.isActive, session.startTime]);
 
+  // Cleanup animation frames on unmount or game switch
+  useEffect(() => {
+    return () => {
+      // Cancel all animation frames to prevent memory leaks
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      if (infinityRequestRef.current) cancelAnimationFrame(infinityRequestRef.current);
+      if (neonRequestRef.current) cancelAnimationFrame(neonRequestRef.current);
+      if (cosmicRequestRef.current) cancelAnimationFrame(cosmicRequestRef.current);
+      if (rhythmRequestRef.current) cancelAnimationFrame(rhythmRequestRef.current);
+      if (snakeRequestRef.current) cancelAnimationFrame(snakeRequestRef.current);
+      if (flapRequestRef.current) cancelAnimationFrame(flapRequestRef.current);
+      if (brickRequestRef.current) cancelAnimationFrame(brickRequestRef.current);
+      if (tetrisRequestRef.current) cancelAnimationFrame(tetrisRequestRef.current);
+      if (colorRushRequestRef.current) cancelAnimationFrame(colorRushRequestRef.current);
+      if (match3RequestRef.current) cancelAnimationFrame(match3RequestRef.current);
+    };
+  }, []);
+
   // Get today's date in YYYY-MM-DD format (local time)
   const getTodayDate = useCallback((): string => {
     const now = new Date();
@@ -1722,13 +1798,13 @@ export default function MimoPlayground() {
     const hash = dateStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
     // Cycle through games
-    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris', 'colorRush'];
+    const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3')[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris', 'colorRush', 'match3'];
     const game = games[hash % games.length];
 
     // Generate target based on game type
-    let target: number;
-    let description: string;
-    let reward: number;
+    let target: number = 0;
+    let description: string = '';
+    let reward: number = 0;
 
     switch (game) {
       case 'infinity':
@@ -2182,7 +2258,7 @@ export default function MimoPlayground() {
 
   // Function to update player progress after a game session
   const updatePlayerProgress = useCallback((
-    game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush',
+    game: 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3',
     score: number,
     duration: number,
     isVictory: boolean = false,
@@ -2931,7 +3007,7 @@ export default function MimoPlayground() {
   };
 
   // Check and complete daily challenge if criteria met
-  const checkDailyChallengeCompletion = useCallback((gameType: 'infinity' | '2048' | 'neon' | 'cosmic' | 'tetris' | 'colorRush', score: number, additionalData?: any) => {
+  const checkDailyChallengeCompletion = useCallback((gameType: 'infinity' | '2048' | 'neon' | 'cosmic' | 'tetris' | 'colorRush' | 'match3', score: number, additionalData?: unknown) => {
     if (!dailyChallenge.currentChallenge || dailyChallenge.currentChallenge.completed) return;
     if (dailyChallenge.currentChallenge.game !== gameType) return;
 
@@ -7609,7 +7685,8 @@ useEffect(() => {
                currentGame === 'flap' ? t('neonFlap.title') :
                currentGame === 'brick' ? t('neonBrick.title') :
                currentGame === 'tetris' ? t('neonTetris.title') :
-               currentGame === 'colorRush' ? t('colorRush.title') : ''}
+               currentGame === 'colorRush' ? t('colorRush.title') :
+               currentGame === 'match3' ? 'Neon Crush' : ''}
             </h1>
           </div>
 
@@ -7687,7 +7764,7 @@ useEffect(() => {
                     </div>
                     <button
                       onClick={() => {
-                        setCurrentGame(dailyChallenge.currentChallenge?.game as any);
+                        setCurrentGame(dailyChallenge.currentChallenge?.game as GameType);
                         setDailyChallenge(prev => ({ ...prev, showChallengeModal: false }));
                       }}
                       className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-sm font-bold text-white transition-colors"
@@ -8556,6 +8633,51 @@ useEffect(() => {
                 </div>
                 <div className="text-xs text-slate-400">
                   {tc('highScore')}: {formatScore(colorRushState.highScore)}
+                </div>
+              </button>
+            </div>
+
+            {/* Neon Crush Card (Match-3) */}
+            <div className="p-2">
+              <button
+                onClick={() => {
+                  setCurrentGame('match3');
+                  handleClick();
+                  trackGameSession('match3');
+                  playSound('start');
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
+                }}
+                aria-label="Neon Crush. Match 3 gems to score points!"
+                className={`relative bg-gradient-to-br from-purple-600 to-pink-800 p-6 rounded-xl border-2 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between ${
+                  dailyChallenge.currentChallenge?.game === 'match3'
+                    ? 'border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/50'
+                    : 'border-purple-500 hover:border-purple-400'
+                } active:scale-95 active:bg-purple-700`}
+                style={{ touchAction: 'manipulation' }}
+              >
+                {dailyChallenge.currentChallenge?.game === 'match3' && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                    🎯 Daily
+                  </div>
+                )}
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-purple-200 group-active:text-purple-100 flex items-center gap-2">
+                    Neon Crush
+                    {playerProgress.masteryStars.colorRush > 0 && (
+                      <span className="text-amber-300 text-xs">
+                        {renderMasteryStars(playerProgress.masteryStars.colorRush)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-purple-200 text-sm mb-3">Match-3 Puzzle</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    Match 3 or more gems to score points! Create combos for bonus scores!
+                  </p>
+                </div>
+                <div className="text-xs text-slate-400">
+                  {tc('highScore')}: {formatScore(match3State.highScore)}
                 </div>
               </button>
             </div>
@@ -10054,8 +10176,147 @@ useEffect(() => {
           </>
         )}
 
+        {/* ==================== NEON CRUSH (MATCH-3) ==================== */}
+        {currentGame === 'match3' && (
+          <>
+            {/* Daily Challenge Status for Match-3 */}
+            {dailyChallenge.currentChallenge && dailyChallenge.currentChallenge.game === 'match3' && (
+              <div className="mb-4 w-full max-w-md p-3 rounded-lg border border-amber-500/50 bg-amber-900/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <div className="text-sm">
+                      <span className="text-amber-400 font-bold">{t('dailyChallenge.short')}:</span>{' '}
+                      <span className="text-slate-300">{dailyChallenge.currentChallenge.target}+</span>
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded text-xs font-bold ${
+                    dailyChallenge.currentChallenge.completed
+                      ? 'bg-green-600 text-white'
+                      : 'bg-amber-600/50 text-amber-200'
+                  }`}>
+                    {dailyChallenge.currentChallenge.completed
+                      ? t('dailyChallenge.completed')
+                      : `${dailyChallenge.currentChallenge.reward} 💰`}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div
+              ref={containerRef}
+              className="w-full max-w-md bg-slate-900 rounded-lg border-2 border-slate-800 overflow-hidden shadow-2xl shadow-purple-900/10 relative"
+            >
+              <div className="relative">
+                <canvas
+                  ref={canvasRef}
+                  className="w-full block cursor-pointer touch-none"
+                  style={{
+                    touchAction: 'manipulation',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(15);
+                    }
+                    if (!match3State.isPlaying && !match3State.isGameOver) {
+                      startMatch3Game();
+                    } else if (match3State.isGameOver) {
+                      startMatch3Game();
+                    }
+                  }}
+                />
+
+                {/* Game HUD */}
+                {match3State.isPlaying && !match3State.isGameOver && (
+                  <div className="absolute top-3 left-3 right-3 flex justify-between gap-2">
+                    <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
+                      <span className="text-slate-400">{tc('score')}</span>{' '}
+                      <span className="text-purple-400 font-bold">{formatScore(match3State.score)}</span>
+                    </div>
+                    <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
+                      <span className="text-slate-400">Moves:</span>{' '}
+                      <span className="text-cyan-400 font-bold">{match3State.movesLeft}</span>
+                    </div>
+                    <div className="bg-slate-950/80 px-3 py-1 rounded border border-slate-700 text-xs">
+                      <span className="text-slate-400">Combo:</span>{' '}
+                      <span className="text-yellow-400 font-bold">x{match3State.combo}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Game Over / Start Screen */}
+                {!match3State.isPlaying && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+                    <div className="text-center p-6">
+                      {match3State.isGameOver ? (
+                        <>
+                          <div className="text-4xl mb-2">💜</div>
+                          <div className="text-2xl font-bold text-white mb-2">{t('playground.common.gameOver')}</div>
+                          <div className="text-purple-400 text-xl mb-1">{tc('score')}: {formatScore(match3State.score)}</div>
+                          <div className="text-cyan-400 text-sm mb-4">Level: {match3State.level}</div>
+                          <div className="text-xs text-slate-400 mb-4">
+                            Target: {match3State.targetScore}
+                          </div>
+                          <div className="flex gap-2 justify-center mb-4">
+                            <button
+                              onClick={() => shareScore('Neon Crush', match3State.score, match3State.highScore)}
+                              className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded font-bold text-white"
+                            >
+                              📤 Share
+                            </button>
+                            <button
+                              onClick={() => startMatch3Game()}
+                              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg font-bold text-white border border-purple-400"
+                            >
+                              🔄 Play Again
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-5xl mb-4">💜</div>
+                          <div className="text-2xl font-bold text-white mb-2">Neon Crush</div>
+                          <div className="text-purple-200 text-sm mb-4">Match 3 or more gems!</div>
+                          <div className="text-xs text-slate-300 mb-4 space-y-1">
+                            <p>• Tap two adjacent gems to swap them</p>
+                            <p>• Match 3+ gems to score points</p>
+                            <p>• Create combos for bonus scores</p>
+                            <p>• Reach the target score to advance levels</p>
+                          </div>
+                          <button
+                            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg font-bold text-white shadow-lg shadow-purple-900/50 transition-transform active:scale-95"
+                            onClick={() => startMatch3Game()}
+                          >
+                            🎮 Start Game
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 text-center text-slate-400 text-sm">
+              <p>💜 Match gems to score points! 🔥 Build combos for bonus scores!</p>
+            </div>
+
+            <div className="flex justify-center gap-2 mt-4">
+              <button
+                onClick={() => setCurrentGame('menu')}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+              >
+                ← Back to Menu
+              </button>
+            </div>
+          </>
+        )}
+
         {/* 広告スペース（ゲームプレイ画面のみ） */}
-        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake' || currentGame === 'flap' || currentGame === 'brick' || currentGame === 'tetris' || currentGame === 'colorRush') && (
+        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake' || currentGame === 'flap' || currentGame === 'brick' || currentGame === 'tetris' || currentGame === 'colorRush' || currentGame === 'match3') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
               {t('adArea')}
@@ -10087,6 +10348,7 @@ useEffect(() => {
           <span>{t('neonBrick.title')}: {formatScore(brickState.highScore)}</span>
           <span>{t('neonTetris.title')}: {formatScore(tetrisState.highScore)}</span>
           <span>{t('colorRush.title')}: {formatScore(colorRushState.highScore)}</span>
+          <span>Neon Crush: {formatScore(match3State.highScore)}</span>
         </div>
       </footer>
 
@@ -10855,6 +11117,7 @@ useEffect(() => {
         {cosmicState.isGameOver && `Game over. Score: ${cosmicState.score}`}
         {game2048State.isGameOver && `Game over. Score: ${game2048State.score}`}
         {colorRushState.isGameOver && `Game over. Score: ${colorRushState.score}`}
+        {match3State.isGameOver && `Game over. Score: ${match3State.score}`}
       </div>
     </div>
   );
