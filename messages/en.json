@@ -389,6 +389,15 @@
         "diffDescMedium": "Normal • 12s • 5 colors • +1s bonus",
         "diffDescHard": "Fast • 10s • 6 colors • +0.5s bonus"
       },
+      "neonCrush": {
+        "title": "Neon Crush",
+        "subtitle": "Match-3 Puzzle",
+        "description": "Match 3 or more gems to score points! Create combos for bonus scores!",
+        "tapToStart": "Tap to start",
+        "backToMenu": "Back to Menu",
+        "matchGems": "Match gems to score points!",
+        "buildCombo": "Build combos for bonus scores!"
+      },
       "achievements": {
         "title": "Achievements",
         "description": "Play games to unlock achievements!",
