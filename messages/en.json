@@ -154,7 +154,8 @@
       "time": "Time",
       "victory": "Victory!",
       "finalScore": "Final Score",
-      "timeUp": "Time's Up!"
+      "timeUp": "Time's Up!",
+      "quickRestart": "Quick Restart"
     },
     "grok": {
       "doodleLeap": "Doodle Leap",

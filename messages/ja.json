@@ -154,7 +154,8 @@
       "time": "時間",
       "victory": "勝利！",
       "finalScore": "最終スコア",
-      "timeUp": "時間切れ！"
+      "timeUp": "時間切れ！",
+      "quickRestart": "クイックリスタート"
     },
     "grok": {
       "doodleLeap": "Doodle Leap",
