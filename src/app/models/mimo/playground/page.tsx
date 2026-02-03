@@ -942,24 +942,6 @@ const PET_DATABASE: Pet[] = [
   { id: 'galaxy', name: 'Galaxy Spirit', rarity: 'legendary', icon: '🌌', description: 'From beyond', bonus: '+100% tickets, cosmic effects', bonusMultiplier: 2.00, unlocked: false },
 ];
 
-// ==================== TICKET SYSTEM CONFIG ====================
-
-const TICKET_CONFIG = {
-  BASE_REWARD: 1, // Tickets per 100 score
-  STREAK_MULTIPLIER: (days: number) => 1 + Math.min(days, 10) * 0.05, // Max +50% at day 10
-  LEVEL_MULTIPLIER: (level: number) => 1 + Math.min(level, 50) * 0.02, // Max +100% at level 50
-
-  // Shop prices
-  SHOP: {
-    EGG: 100,
-    SKILL_UPGRADE: 50,
-    PRESTIGE_POINTS: 200,
-    COINS: 25, // 25 tickets = 100 coins
-  },
-
-  // Pet gacha cost
-  GACHA_COST: 50,
-};
 
 // ==================== PROGRESSION SYSTEM HELPERS ====================
 
@@ -1023,6 +1005,160 @@ function getActivePetBonus(petId: string | null, allPets: Pet[]): number {
   const pet = allPets.find(p => p.id === petId);
   return pet ? pet.bonusMultiplier : 1.0;
 }
+
+// Tutorial configurations
+const TUTORIALS: Record<GameType, TutorialStep[]> = {
+  infinity: [
+    {
+      id: 1,
+      title: "Welcome to Infinity Drop!",
+      description: "Stack blocks perfectly to build your tower!",
+      highlight: "Tap/Press Space to drop blocks",
+      action: "Try dropping your first block",
+      visualHint: "🟦"
+    },
+    {
+      id: 2,
+      title: "Perfect Stacks!",
+      description: "Drop blocks when the outline is green for perfect alignment!",
+      highlight: "Green outline = Perfect stack",
+      action: "Aim for green outlines",
+      visualHint: "✅"
+    },
+    {
+      id: 3,
+      title: "Combo Multiplier",
+      description: "Build perfect stacks to increase your combo multiplier!",
+      highlight: "Higher combo = More points",
+      action: "Get 3 perfect stacks in a row",
+      visualHint: "🔥"
+    }
+  ],
+  '2048': [
+    {
+      id: 1,
+      title: "Welcome to Slide 2048!",
+      description: "Combine matching tiles to reach 2048!",
+      highlight: "Swipe/Use arrows to move tiles",
+      action: "Try sliding in any direction",
+      visualHint: "🎯"
+    },
+    {
+      id: 2,
+      title: "Combining Tiles",
+      description: "When two tiles with the same number touch, they merge!",
+      highlight: "Same numbers = Merge",
+      action: "Combine two 2 tiles",
+      visualHint: "➕"
+    },
+    {
+      id: 3,
+      title: "Strategy Tip",
+      description: "Keep your highest tile in a corner and build around it!",
+      highlight: "Corner strategy works best",
+      action: "Try keeping your 32 in a corner",
+      visualHint: "🏁"
+    }
+  ],
+  neon: [
+    {
+      id: 1,
+      title: "Welcome to Neon Dash!",
+      description: "Jump and slide through obstacles in this endless runner!",
+      highlight: "Tap/Space to jump",
+      action: "Tap to jump over the first obstacle",
+      visualHint: "🦘"
+    },
+    {
+      id: 2,
+      title: "Slide Time!",
+      description: "Sometimes you need to slide under obstacles!",
+      highlight: "Down arrow or S to slide",
+      action: "Slide under the tall obstacle",
+      visualHint: "🏃"
+    },
+    {
+      id: 3,
+      title: "Survive as Long as Possible!",
+      description: "The longer you survive, the higher your score!",
+      highlight: "Focus on timing",
+      action: "Get past 5 obstacles",
+      visualHint: "⚡"
+    }
+  ],
+  cosmic: [
+    {
+      id: 1,
+      title: "Welcome to Cosmic Catch!",
+      description: "Control your ship with gravity and catch stars!",
+      highlight: "Space/Up to boost up",
+      action: "Try boosting up once",
+      visualHint: "🚀"
+    },
+    {
+      id: 2,
+      title: "Avoid Obstacles",
+      description: "Watch out for red obstacles - they'll end your game!",
+      highlight: "Red = Danger",
+      action: "Navigate around red obstacles",
+      visualHint: "⚠️"
+    },
+    {
+      id: 3,
+      title: "Collect Stars",
+      description: "Yellow stars give you bonus points and combos!",
+      highlight: "Yellow = Bonus points",
+      action: "Collect a yellow star",
+      visualHint: "⭐"
+    }
+  ],
+  rhythm: [
+    {
+      id: 1,
+      title: "Welcome to Rhythm Tapper!",
+      description: "Tap colored coins when they reach the bottom line!",
+      highlight: "Tap matching colors",
+      action: "Tap a red coin when it reaches the line",
+      visualHint: "🎵"
+    },
+    {
+      id: 2,
+      title: "Perfect vs Good Hits",
+      description: "Perfect hits (close to line) give more points!",
+      highlight: "Closer = More points",
+      action: "Get a perfect hit",
+      visualHint: "💯"
+    },
+    {
+      id: 3,
+      title: "Build Your Combo!",
+      description: "Chain hits together to increase your combo multiplier!",
+      highlight: "Combo = Multiplier",
+      action: "Get a 5x combo",
+      visualHint: "🔥"
+    }
+  ],
+  menu: [],
+  snake: [],
+  flap: [],
+  brick: [],
+  tetris: [],
+  colorRush: [],
+  match3: []
+};
+
+
+// Check if user is playing a game for the first time
+const isFirstTimePlaying = useCallback((gameType: GameType): boolean => {
+  const key = `mimo_first_play_${gameType}`;
+  return !localStorage.getItem(key);
+}, []);
+
+// Mark game as played for the first time
+const markGameAsPlayed = useCallback((gameType: GameType) => {
+  const key = `mimo_first_play_${gameType}`;
+  localStorage.setItem(key, 'true');
+}, []);
 
 
 // Render mastery stars
@@ -1111,6 +1247,23 @@ interface SessionState {
 
 type GameType = 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3';
 
+// Tutorial interfaces
+interface TutorialStep {
+  id: number;
+  title: string;
+  description: string;
+  highlight?: string;
+  action?: string;
+  visualHint?: string;
+}
+
+interface TutorialState {
+  currentStep: number;
+  isActive: boolean;
+  completedSteps: number[];
+  gameType: GameType;
+}
+
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
@@ -1134,6 +1287,14 @@ export default function MimoPlayground() {
     totalScore: 0,
     gamesList: [],
     rewardClaimed: false,
+  });
+
+  // Tutorial state
+  const [tutorial, setTutorial] = useState<TutorialState>({
+    currentStep: 0,
+    isActive: false,
+    completedSteps: [],
+    gameType: 'menu',
   });
 
   const [gameState, setGameState] = useState<InfinityDropState>({
@@ -1665,6 +1826,353 @@ export default function MimoPlayground() {
     }
     setCurrentGame('menu');
   }, [addToSessionScore]);
+
+  // ゲーム開始
+  const startGame = useCallback(() => {
+    if (gameState.isGameOver) {
+      // リセット - 新しいプレイ
+      gameStatsRef.current.playCount += 1;
+      gameStatsRef.current.sessionStartTime = Date.now();
+
+      // Award coins for the completed game
+      const earnedCoins = Math.floor(gameState.score / 10);
+      const newCoins = gameState.coins + earnedCoins;
+
+      // Check if this is first time playing and start tutorial
+      if (isFirstTimePlaying('infinity')) {
+        markGameAsPlayed('infinity');
+        startTutorial('infinity');
+        return; // Don't start game immediately, let tutorial guide
+      }
+
+      setGameState({
+        blocks: [],
+        score: 0,
+        highScore: gameState.highScore,
+        isPlaying: true,
+        isGameOver: false,
+        accuracy: 0,
+        combo: 0,
+        coins: newCoins,
+        difficultyLevel: 1,
+        bestCombo: 0,
+      });
+
+      // Save coins to localStorage
+      localStorage.setItem('infinityDrop_coins', newCoins.toString());
+
+      // 追跡: ゲーム再開
+      trackClick();
+      storeGameEvent('game_restart', { score: gameState.score, coinsEarned: earnedCoins });
+    } else if (!gameState.isPlaying) {
+      // 初回スタート
+      const containerWidth = containerRef.current?.clientWidth || 360;
+
+      // Check for Wide Mode skill ownership
+      const wideOwned = shopItems.find(item => item.key === 'wide')?.owned || false;
+      const widthBonus = wideOwned ? INITIAL_BLOCK_WIDTH * 0.3 : 0;
+
+      const initialBlock: Block = {
+        id: 0,
+        x: (containerWidth - (INITIAL_BLOCK_WIDTH + widthBonus)) / 2,
+        y: 50,
+        width: INITIAL_BLOCK_WIDTH + widthBonus,
+        height: BLOCK_HEIGHT,
+        velocityX: BASE_SPEED,
+        color: '#3b82f6',
+      };
+
+      gameStatsRef.current.playCount += 1;
+      gameStatsRef.current.sessionStartTime = Date.now();
+
+      setGameState((prev) => ({
+        ...prev,
+        blocks: [initialBlock],
+        isPlaying: true,
+      }));
+
+      // Set first play achievement
+      if (!gameStats.infinityFirstPlay) {
+        setGameStats((prev) => {
+          const newStats = { ...prev, infinityFirstPlay: true };
+          localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+          return newStats;
+        });
+      }
+
+      // Wide skill is passive - it applies at game start but stays owned
+      // Player keeps the wide block bonus as long as they have the skill
+      // No need to reset owned status - this is a permanent upgrade
+      if (wideOwned) {
+        playSound('success');
+        createParticles(containerWidth / 2, 50, '#00ff88', 10);
+      }
+
+      // 追跡: ゲーム開始
+      trackClick();
+      storeGameEvent('game_start', { wideModeUsed: wideOwned });
+    }
+  }, [gameState, trackClick, shopItems, gameStats]);
+
+  const start2048Game = useCallback((difficulty?: 'easy' | 'normal' | 'hard') => {
+    const diff = difficulty || game2048State.difficulty;
+    const gridSize = diff === 'easy' ? 4 : diff === 'normal' ? 4 : 5;
+
+    // Check if this is first time playing and start tutorial
+    if (isFirstTimePlaying('2048')) {
+      markGameAsPlayed('2048');
+      startTutorial('2048');
+      return; // Don't start game immediately, let tutorial guide
+    }
+
+    // 初期化
+    const emptyGrid: (Tile2048 | null)[][] = Array.from({ length: gridSize }, () =>
+      Array.from({ length: gridSize }, () => null)
+    );
+
+    // 2つのタイルを配置
+    const gridWithTiles = addRandomTile(addRandomTile(emptyGrid));
+
+    game2048StatsRef.current = {
+      sessionStartTime: Date.now(),
+      playCount: game2048StatsRef.current.playCount + 1,
+      moves: 0,
+      highestValue: 2,
+    };
+
+    setGame2048State({
+      grid: gridWithTiles,
+      score: 0,
+      highScore: game2048State.highScore,
+      bestTile: game2048State.bestTile,
+      isGameOver: false,
+      isWon: false,
+      difficulty: diff,
+      gridSize: gridSize,
+      invalidMoveFlash: false,
+    });
+
+    trackClick();
+    storeGameEvent('game2048_start', { difficulty: diff });
+
+    // Check first play achievement
+    if (!gameStats.game2048_firstPlay) {
+      const newStats = { ...gameStats, game2048_firstPlay: true };
+      setGameStats(newStats);
+      localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
+      setTimeout(() => checkAchievementsRef.current(), 100);
+    }
+  }, [game2048State.difficulty, game2048State.highScore, game2048State.bestTile, trackClick, gameStats]);
+
+  const startNeonDashGame = useCallback(() => {
+    // Check if this is first time playing and start tutorial
+    if (isFirstTimePlaying('neon')) {
+      markGameAsPlayed('neon');
+      startTutorial('neon');
+      return; // Don't start game immediately, let tutorial guide
+    }
+
+    neonStatsRef.current = {
+      sessionStartTime: Date.now(),
+      playCount: neonStatsRef.current.playCount + 1,
+      obstaclesPassed: 0,
+      jumps: 0,
+      slides: 0,
+    };
+
+    const containerHeight = containerRef.current?.clientHeight || 400;
+
+    setNeonState({
+      isPlaying: true,
+      isGameOver: false,
+      score: 0,
+      highScore: neonState.highScore,
+      playerY: containerHeight - 100,
+      playerVelocityY: 0,
+      playerState: 'running',
+      jumpCount: 0,
+      obstacles: [],
+      particles: [],
+      speed: 6,
+      distance: 0,
+      obstacleTimer: 0,
+      slideTimer: 0,
+    });
+
+    trackClick();
+    storeGameEvent('neonDash_start', {});
+  }, [neonState.highScore, trackClick]);
+
+  const startCosmicGame = useCallback(() => {
+    // Check if this is first time playing and start tutorial
+    if (isFirstTimePlaying('cosmic')) {
+      markGameAsPlayed('cosmic');
+      startTutorial('cosmic');
+      return; // Don't start game immediately, let tutorial guide
+    }
+
+    const containerHeight = containerRef.current?.clientHeight || 400;
+    const containerWidth = containerRef.current?.clientWidth || 300;
+    const groundY = containerHeight - 100;
+
+    setCosmicState({
+      isPlaying: true,
+      isGameOver: false,
+      score: 0,
+      highScore: cosmicState.highScore,
+      bestCombo: cosmicState.bestCombo,
+      combo: 0,
+      ship: {
+        x: containerWidth * 0.2,
+        y: groundY,
+        velocityY: 0,
+        isBoosting: false,
+      },
+      obstacles: [],
+      stars: [],
+      particles: [],
+      speed: 5,
+      spawnTimer: 0,
+      starSpawnTimer: 0,
+    });
+
+    // Track session start time for progression
+    cosmicStatsRef.current.sessionStartTime = Date.now();
+    cosmicStatsRef.current.playCount += 1;
+
+    // Track game start
+    trackClick();
+    storeGameEvent('cosmic_game_start', {});
+  }, [cosmicState.highScore, cosmicState.bestCombo, trackClick]);
+
+  // Tutorial helper functions
+  const startTutorial = (gameType: GameType) => {
+    setTutorial({
+      currentStep: 0,
+      isActive: true,
+      completedSteps: [],
+      gameType,
+    });
+  };
+
+  const completeTutorialStep = (stepId: number) => {
+    setTutorial(prev => ({
+      ...prev,
+      completedSteps: [...prev.completedSteps, stepId],
+    }));
+  };
+
+  const nextTutorialStep = () => {
+    setTutorial(prev => {
+      const currentSteps = TUTORIALS[prev.gameType];
+      const nextStep = prev.currentStep + 1;
+
+      if (nextStep >= currentSteps.length) {
+        // Tutorial complete
+        return {
+          ...prev,
+          isActive: false,
+          currentStep: 0,
+          completedSteps: [...prev.completedSteps, ...currentSteps.map(s => s.id)],
+        };
+      }
+
+      return {
+        ...prev,
+        currentStep: nextStep,
+      };
+    });
+  };
+
+  const startRhythmGame = useCallback(() => {
+    // Check if this is first time playing and start tutorial
+    if (isFirstTimePlaying('rhythm')) {
+      markGameAsPlayed('rhythm');
+      startTutorial('rhythm');
+      return; // Don't start game immediately, let tutorial guide
+    }
+
+    setRhythmState({
+      isPlaying: true,
+      isGameOver: false,
+      score: 0,
+      highScore: rhythmState.highScore,
+      combo: 0,
+      bestCombo: 0,
+      lives: 3,
+      notes: [],
+      zones: [],
+      spawnTimer: 0,
+      spawnInterval: 90,
+      speed: 3,
+      perfectHits: 0,
+      goodHits: 0,
+      misses: 0,
+      particles: [],
+    });
+
+    // Initialize zones
+    const containerWidth = containerRef.current?.clientWidth || 300;
+    const zoneColors: RhythmColor[] = ['red', 'blue', 'green', 'yellow'];
+    const zoneWidth = containerWidth / 4;
+    const zones: RhythmZone[] = zoneColors.map((color, index) => ({
+      color,
+      x: index * zoneWidth + zoneWidth / 2,
+      width: zoneWidth,
+      isActive: false,
+    }));
+
+    setRhythmState((prev) => ({ ...prev, zones }));
+
+    // Track session start time for progression
+    rhythmStatsRef.current.sessionStartTime = Date.now();
+    rhythmStatsRef.current.playCount += 1;
+
+    // First play achievement
+    if (!gameStats.rhythmFirstPlay) {
+      setGameStats((prev) => ({ ...prev, rhythmFirstPlay: true }));
+    }
+
+    storeGameEvent('rhythm', { type: 'start' });
+    vibrate(30);
+  }, [gameStats.rhythmFirstPlay, rhythmState.highScore]);
+
+// Quick restart function - restarts the current game without returning to menu
+const quickRestart = useCallback(() => {
+  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+    navigator.vibrate(30);
+  }
+  playSound('start');
+
+  switch (currentGame) {
+    case 'infinity':
+      startGame();
+      break;
+    case '2048':
+      start2048Game(game2048State.difficulty);
+      break;
+    case 'neon':
+      startNeonDashGame();
+      break;
+    case 'cosmic':
+      startCosmicGame();
+      break;
+    case 'rhythm':
+      startRhythmGame();
+      break;
+    default:
+      // For other games, just return to menu
+      setCurrentGame('menu');
+  }
+}, [currentGame, startGame, start2048Game, startNeonDashGame, startCosmicGame, startRhythmGame, game2048State.difficulty]);
+
+  const skipTutorial = () => {
+    setTutorial(prev => ({
+      ...prev,
+      isActive: false,
+      currentStep: 0,
+    }));
+  };
 
   // Initialize first-time user
   useEffect(() => {
@@ -2636,86 +3144,6 @@ export default function MimoPlayground() {
 
   // Neon Dashゲームループ - neonGameLoop is defined later in the file, using requestRef pattern
 
-  // ゲーム開始
-  const startGame = useCallback(() => {
-    if (gameState.isGameOver) {
-      // リセット - 新しいプレイ
-      gameStatsRef.current.playCount += 1;
-      gameStatsRef.current.sessionStartTime = Date.now();
-
-      // Award coins for the completed game
-      const earnedCoins = Math.floor(gameState.score / 10);
-      const newCoins = gameState.coins + earnedCoins;
-
-      setGameState({
-        blocks: [],
-        score: 0,
-        highScore: gameState.highScore,
-        isPlaying: true,
-        isGameOver: false,
-        accuracy: 0,
-        combo: 0,
-        coins: newCoins,
-        difficultyLevel: 1,
-        bestCombo: 0,
-      });
-
-      // Save coins to localStorage
-      localStorage.setItem('infinityDrop_coins', newCoins.toString());
-
-      // 追跡: ゲーム再開
-      trackClick();
-      storeGameEvent('game_restart', { score: gameState.score, coinsEarned: earnedCoins });
-    } else if (!gameState.isPlaying) {
-      // 初回スタート
-      const containerWidth = containerRef.current?.clientWidth || 360;
-
-      // Check for Wide Mode skill ownership
-      const wideOwned = shopItems.find(item => item.key === 'wide')?.owned || false;
-      const widthBonus = wideOwned ? INITIAL_BLOCK_WIDTH * 0.3 : 0;
-
-      const initialBlock: Block = {
-        id: 0,
-        x: (containerWidth - (INITIAL_BLOCK_WIDTH + widthBonus)) / 2,
-        y: 50,
-        width: INITIAL_BLOCK_WIDTH + widthBonus,
-        height: BLOCK_HEIGHT,
-        velocityX: BASE_SPEED,
-        color: '#3b82f6',
-      };
-
-      gameStatsRef.current.playCount += 1;
-      gameStatsRef.current.sessionStartTime = Date.now();
-
-      setGameState((prev) => ({
-        ...prev,
-        blocks: [initialBlock],
-        isPlaying: true,
-      }));
-
-      // Set first play achievement
-      if (!gameStats.infinityFirstPlay) {
-        setGameStats((prev) => {
-          const newStats = { ...prev, infinityFirstPlay: true };
-          localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
-          return newStats;
-        });
-      }
-
-      // Wide skill is passive - it applies at game start but stays owned
-      // Player keeps the wide block bonus as long as they have the skill
-      // No need to reset owned status - this is a permanent upgrade
-      if (wideOwned) {
-        playSound('success');
-        createParticles(containerWidth / 2, 50, '#00ff88', 10);
-      }
-
-      // 追跡: ゲーム開始
-      trackClick();
-      storeGameEvent('game_start', { wideModeUsed: wideOwned });
-    }
-  }, [gameState, trackClick, shopItems, gameStats]);
-
   // ブロックを配置
   const placeBlock = useCallback(() => {
     if (!gameState.isPlaying || gameState.isGameOver) return;
@@ -3321,39 +3749,6 @@ export default function MimoPlayground() {
 
   // ==================== NEON DASH GAME LOGIC ====================
 
-  // Neon Dash: 新しいゲーム開始
-  const startNeonDashGame = useCallback(() => {
-    neonStatsRef.current = {
-      sessionStartTime: Date.now(),
-      playCount: neonStatsRef.current.playCount + 1,
-      obstaclesPassed: 0,
-      jumps: 0,
-      slides: 0,
-    };
-
-    const containerHeight = containerRef.current?.clientHeight || 400;
-
-    setNeonState({
-      isPlaying: true,
-      isGameOver: false,
-      score: 0,
-      highScore: neonState.highScore,
-      playerY: containerHeight - 100,
-      playerVelocityY: 0,
-      playerState: 'running',
-      jumpCount: 0,
-      obstacles: [],
-      particles: [],
-      speed: 6,
-      distance: 0,
-      obstacleTimer: 0,
-      slideTimer: 0,
-    });
-
-    trackClick();
-    storeGameEvent('neonDash_start', {});
-  }, [neonState.highScore, trackClick]);
-
   // Neon Dash: ゲームオーバー
   const gameOverNeonDash = useCallback(() => {
     const sessionDuration = neonStatsRef.current.sessionStartTime > 0
@@ -3813,42 +4208,6 @@ export default function MimoPlayground() {
 
   // ==================== COSMIC CATCH GAME LOGIC ====================
 
-  // Cosmic Catch: 新しいゲーム開始
-  const startCosmicGame = useCallback(() => {
-    const containerHeight = containerRef.current?.clientHeight || 400;
-    const containerWidth = containerRef.current?.clientWidth || 300;
-    const groundY = containerHeight - 100;
-
-    setCosmicState({
-      isPlaying: true,
-      isGameOver: false,
-      score: 0,
-      highScore: cosmicState.highScore,
-      bestCombo: cosmicState.bestCombo,
-      combo: 0,
-      ship: {
-        x: containerWidth * 0.2,
-        y: groundY,
-        velocityY: 0,
-        isBoosting: false,
-      },
-      obstacles: [],
-      stars: [],
-      particles: [],
-      speed: 5,
-      spawnTimer: 0,
-      starSpawnTimer: 0,
-    });
-
-    // Track session start time for progression
-    cosmicStatsRef.current.sessionStartTime = Date.now();
-    cosmicStatsRef.current.playCount += 1;
-
-    // Track game start
-    trackClick();
-    storeGameEvent('cosmic_game_start', {});
-  }, [cosmicState.highScore, cosmicState.bestCombo, trackClick]);
-
   // Cosmic Catch: ゲームオーバー
   const gameOverCosmic = useCallback(() => {
     vibrate(200); // Haptic feedback on game over
@@ -4217,53 +4576,6 @@ export default function MimoPlayground() {
       case 'yellow': return '#eab308';
     }
   };
-
-  // Start Rhythm Tapper game
-  const startRhythmGame = useCallback(() => {
-    setRhythmState({
-      isPlaying: true,
-      isGameOver: false,
-      score: 0,
-      highScore: rhythmState.highScore,
-      combo: 0,
-      bestCombo: 0,
-      lives: 3,
-      notes: [],
-      zones: [],
-      spawnTimer: 0,
-      spawnInterval: 90,
-      speed: 3,
-      perfectHits: 0,
-      goodHits: 0,
-      misses: 0,
-      particles: [],
-    });
-
-    // Initialize zones
-    const containerWidth = containerRef.current?.clientWidth || 300;
-    const zoneColors: RhythmColor[] = ['red', 'blue', 'green', 'yellow'];
-    const zoneWidth = containerWidth / 4;
-    const zones: RhythmZone[] = zoneColors.map((color, index) => ({
-      color,
-      x: index * zoneWidth + zoneWidth / 2,
-      width: zoneWidth,
-      isActive: false,
-    }));
-
-    setRhythmState((prev) => ({ ...prev, zones }));
-
-    // Track session start time for progression
-    rhythmStatsRef.current.sessionStartTime = Date.now();
-    rhythmStatsRef.current.playCount += 1;
-
-    // First play achievement
-    if (!gameStats.rhythmFirstPlay) {
-      setGameStats((prev) => ({ ...prev, rhythmFirstPlay: true }));
-    }
-
-    storeGameEvent('rhythm', { type: 'start' });
-    vibrate(30);
-  }, [gameStats.rhythmFirstPlay, rhythmState.highScore]);
 
   // Handle rhythm tap
   const handleRhythmTap = useCallback((zoneColor: RhythmColor) => {
@@ -7339,50 +7651,6 @@ useEffect(() => {
 
   // ==================== 2048 GAME LOGIC ====================
 
-  // 2048: 新しいゲーム開始
-  const start2048Game = useCallback((difficulty?: 'easy' | 'normal' | 'hard') => {
-    const diff = difficulty || game2048State.difficulty;
-    const gridSize = diff === 'easy' ? 4 : diff === 'normal' ? 4 : 5;
-
-    // 初期化
-    const emptyGrid: (Tile2048 | null)[][] = Array.from({ length: gridSize }, () =>
-      Array.from({ length: gridSize }, () => null)
-    );
-
-    // 2つのタイルを配置
-    const gridWithTiles = addRandomTile(addRandomTile(emptyGrid));
-
-    game2048StatsRef.current = {
-      sessionStartTime: Date.now(),
-      playCount: game2048StatsRef.current.playCount + 1,
-      moves: 0,
-      highestValue: 2,
-    };
-
-    setGame2048State({
-      grid: gridWithTiles,
-      score: 0,
-      highScore: game2048State.highScore,
-      bestTile: game2048State.bestTile,
-      isGameOver: false,
-      isWon: false,
-      difficulty: diff,
-      gridSize: gridSize,
-      invalidMoveFlash: false,
-    });
-
-    trackClick();
-    storeGameEvent('game2048_start', { difficulty: diff });
-
-    // Check first play achievement
-    if (!gameStats.game2048_firstPlay) {
-      const newStats = { ...gameStats, game2048_firstPlay: true };
-      setGameStats(newStats);
-      localStorage.setItem('mimo_gameStats', JSON.stringify(newStats));
-      setTimeout(() => checkAchievementsRef.current(), 100);
-    }
-  }, [game2048State.difficulty, game2048State.highScore, game2048State.bestTile, trackClick, gameStats]);
-
   // 2048: ランダムなタイルを追加
   const addRandomTile = useCallback((grid: (Tile2048 | null)[][]): (Tile2048 | null)[][] => {
     const emptyCells: { x: number; y: number }[] = [];
@@ -8885,13 +9153,22 @@ useEffect(() => {
                   📤 Share
                 </button>
               )}
-              <button
-                onClick={() => returnToMenu(gameState.isGameOver ? gameState.score : 0)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
-                style={{ touchAction: 'manipulation', minHeight: '44px' }}
-              >
-                ← {t('infinityDrop.backToMenu')}
-              </button>
+              <>
+                <button
+                  onClick={quickRestart}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded border border-blue-400 text-sm font-bold text-white"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
+                >
+                  🔄 {t('quickRestart')}
+                </button>
+                <button
+                  onClick={() => returnToMenu(gameState.isGameOver ? gameState.score : 0)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
+                >
+                  ← {t('infinityDrop.backToMenu')}
+                </button>
+              </>
             </div>
           </>
         )}
@@ -9058,6 +9335,15 @@ useEffect(() => {
 
             {/* リセット/戻るボタン */}
             <div className="flex justify-center gap-2 mt-4">
+              {!game2048State.isGameOver && (
+                <button
+                  onClick={quickRestart}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded border border-blue-400 text-sm font-bold text-white"
+                  style={{ touchAction: 'manipulation', minHeight: '44px' }}
+                >
+                  🔄 {t('quickRestart')}
+                </button>
+              )}
               <button
                 onClick={() => returnToMenu(game2048State.isGameOver ? game2048State.score : 0)}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
@@ -11101,6 +11387,108 @@ useEffect(() => {
                 ×
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Screen reader announcements for accessibility */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {dailyChallenge.celebrationActive && `Daily challenge completed! Streak: ${dailyChallenge.streak}`}
+        {gameState.isGameOver && `Game over. Score: ${gameState.score}`}
+        {neonState.isGameOver && `Game over. Score: ${neonState.score}`}
+        {cosmicState.isGameOver && `Game over. Score: ${cosmicState.score}`}
+        {game2048State.isGameOver && `Game over. Score: ${game2048State.score}`}
+        {colorRushState.isGameOver && `Game over. Score: ${colorRushState.score}`}
+        {match3State.isGameOver && `Game over. Score: ${match3State.score}`}
+      </div>
+
+      {/* ==================== TUTORIAL OVERLAY ==================== */}
+      {tutorial.isActive && tutorial.gameType !== 'menu' && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-slate-900 border-2 border-purple-500 rounded-xl p-6 max-w-md mx-4 relative">
+            {/* Close button */}
+            <button
+              onClick={skipTutorial}
+              className="absolute top-3 right-3 text-slate-400 hover:text-white text-2xl"
+              aria-label="Skip tutorial"
+            >
+              ×
+            </button>
+
+            {/* Progress indicator */}
+            <div className="flex justify-center mb-4">
+              <div className="flex gap-1">
+                {TUTORIALS[tutorial.gameType].map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full ${
+                      index <= tutorial.currentStep ? 'bg-purple-500' : 'bg-slate-700'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Tutorial content */}
+            {TUTORIALS[tutorial.gameType].map((step, index) => {
+              if (index !== tutorial.currentStep) return null;
+
+              return (
+                <div key={step.id} className="text-center">
+                  {/* Visual hint */}
+                  <div className="text-6xl mb-4">{step.visualHint}</div>
+
+                  {/* Title */}
+                  <h3 className="text-xl font-bold text-purple-400 mb-2">
+                    {step.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-slate-300 mb-4">{step.description}</p>
+
+                  {/* Action hint */}
+                  {step.action && (
+                    <div className="bg-slate-800 rounded-lg p-3 mb-4">
+                      <p className="text-sm text-slate-400">
+                        💡 <span className="text-white">{step.action}</span>
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Highlight */}
+                  {step.highlight && (
+                    <div className="bg-purple-900/50 border border-purple-700 rounded-lg p-3 mb-6">
+                      <p className="text-sm text-purple-300 font-medium">
+                        {step.highlight}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Navigation buttons */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={skipTutorial}
+                      className="flex-1 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition-colors"
+                    >
+                      Skip
+                    </button>
+                    <button
+                      onClick={() => {
+                        completeTutorialStep(step.id);
+                        nextTutorialStep();
+                      }}
+                      className="flex-1 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg font-bold text-white transition-colors"
+                    >
+                      {index < TUTORIALS[tutorial.gameType].length - 1 ? 'Next' : 'Start Playing!'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
