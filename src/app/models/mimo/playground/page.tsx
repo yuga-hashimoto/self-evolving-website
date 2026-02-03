@@ -4565,6 +4565,162 @@ const quickRestart = useCallback(() => {
     };
   }, [cosmicState.isPlaying, cosmicState.isGameOver, cosmicGameLoop]);
 
+  // Cosmic Catch draw function
+  const drawCosmic = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Clear canvas with gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, '#0f0f23');
+    gradient.addColorStop(1, '#1a1a3e');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw stars background
+    cosmicState.stars.forEach(star => {
+      if (!star.collected) {
+        ctx.fillStyle = '#ffffff';
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Star glow
+        ctx.globalAlpha = 0.3;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+    ctx.globalAlpha = 1;
+
+    // Draw ground
+    const groundY = height - 100;
+    ctx.fillStyle = '#2a2a4e';
+    ctx.fillRect(0, groundY, width, height - groundY);
+
+    // Ground line
+    ctx.strokeStyle = '#4a4a7e';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, groundY);
+    ctx.lineTo(width, groundY);
+    ctx.stroke();
+
+    // Draw ship
+    const ship = cosmicState.ship;
+    ctx.save();
+    ctx.translate(ship.x, ship.y);
+
+    // Ship body
+    ctx.fillStyle = ship.isBoosting ? '#00ffff' : '#0088ff';
+    ctx.beginPath();
+    ctx.moveTo(0, -10);
+    ctx.lineTo(-15, 10);
+    ctx.lineTo(0, 5);
+    ctx.lineTo(15, 10);
+    ctx.closePath();
+    ctx.fill();
+
+    // Ship glow
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = ship.isBoosting ? '#00ffff' : '#0088ff';
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Engine flame when boosting
+    if (ship.isBoosting) {
+      ctx.fillStyle = '#ff6600';
+      ctx.beginPath();
+      ctx.moveTo(-8, 10);
+      ctx.lineTo(0, 20 + Math.random() * 5);
+      ctx.lineTo(8, 10);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    ctx.restore();
+
+    // Draw obstacles
+    cosmicState.obstacles.forEach(obstacle => {
+      ctx.fillStyle = '#ff4444';
+      ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+
+      // Obstacle glow
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#ff4444';
+      ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+      ctx.shadowBlur = 0;
+
+      // Warning stripes
+      ctx.fillStyle = '#ffff00';
+      for (let i = 0; i < obstacle.width; i += 10) {
+        ctx.fillRect(obstacle.x + i, obstacle.y, 5, obstacle.height);
+      }
+    });
+
+    // Draw particles
+    cosmicState.particles.forEach(particle => {
+      const alpha = Math.min(particle.life / 20, 1);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = particle.color;
+      ctx.beginPath();
+      ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+
+    // Draw HUD
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(5, 5, 150, 40);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${cosmicState.score}`, 10, 25);
+
+    if (cosmicState.combo > 0) {
+      ctx.fillStyle = '#ffff00';
+      ctx.fillText(`Combo: x${cosmicState.combo}`, 10, 45);
+    }
+
+    // High score
+    if (cosmicState.highScore > 0) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(width - 110, 5, 105, 25);
+      ctx.fillStyle = '#00ff00';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'right';
+      ctx.fillText(`Best: ${cosmicState.highScore}`, width - 10, 22);
+    }
+  }, [cosmicState]);
+
+  // Cosmic Catch game loop with draw
+  useEffect(() => {
+    if (cosmicState.isPlaying && !cosmicState.isGameOver) {
+      const loop = () => {
+        cosmicGameLoop();
+        drawCosmic();
+        cosmicRequestRef.current = requestAnimationFrame(loop);
+      };
+      cosmicRequestRef.current = requestAnimationFrame(loop);
+    } else {
+      drawCosmic();
+    }
+    return () => {
+      if (cosmicRequestRef.current) {
+        cancelAnimationFrame(cosmicRequestRef.current);
+      }
+    };
+  }, [cosmicState.isPlaying, cosmicState.isGameOver, cosmicGameLoop, drawCosmic]);
+
   // ==================== RHYTHM TAPPER FUNCTIONS ====================
 
   // Color to hex mapping
@@ -5775,318 +5931,146 @@ const quickRestart = useCallback(() => {
   }, []);
 
   // Neon Flap game loop - now using a ref to access current state without stale closure issues
-  const neonFlapGameLoop = useCallback(() => {
-    // Get current state from ref to avoid stale closure
-    const currentFlapState = flapStateRef.current;
-
-    // Draw first
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        // Setup canvas
-        const rect = canvas.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
-        const displayWidth = rect.width;
-        const displayHeight = rect.height;
-
-        if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
-          // Reset transform before changing canvas dimensions
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          canvas.width = displayWidth * dpr;
-          canvas.height = displayHeight * dpr;
-          ctx.scale(dpr, dpr);
-        }
-
-        const width = displayWidth;
-        const height = displayHeight;
-
-        // Background gradient
-        const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, '#0a0a1a');
-        gradient.addColorStop(1, '#1a0a2a');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
-
-        // Grid lines
-        ctx.strokeStyle = 'rgba(100, 100, 255, 0.1)';
-        ctx.lineWidth = 1;
-        for (let i = 0; i < width; i += 40) {
-          ctx.beginPath();
-          ctx.moveTo(i, 0);
-          ctx.lineTo(i, height);
-          ctx.stroke();
-        }
-
-        const PLAYER_X = 30;
-
-        // Draw obstacles
-        currentFlapState.obstacles.forEach((obs) => {
-          const obsLeft = (obs.x / 400) * width;
-          const obsWidth = (obs.width / 400) * width;
-          const gapY = (obs.gapY / 200) * height;
-          const gapHeight = (obs.gapHeight / 200) * height;
-
-          // Glow effect
-          ctx.shadowBlur = 20;
-          ctx.shadowColor = '#ff00ff';
-
-          // Top pipe
-          ctx.fillStyle = '#ff00ff';
-          ctx.fillRect(obsLeft, 0, obsWidth, gapY);
-
-          // Bottom pipe
-          ctx.fillRect(obsLeft, gapY + gapHeight, obsWidth, height - (gapY + gapHeight));
-
-          ctx.shadowBlur = 0;
-        });
-
-        // Draw player
-        const playerY = (currentFlapState.playerY / 200) * height;
-        ctx.shadowBlur = 25;
-        ctx.shadowColor = '#00ffff';
-        ctx.fillStyle = '#00ffff';
-        ctx.beginPath();
-        ctx.arc(PLAYER_X, playerY, 12, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Player trail
-        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
-        ctx.beginPath();
-        ctx.arc(PLAYER_X - 5, playerY + currentFlapState.playerVelocityY * 2, 6, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.shadowBlur = 0;
-
-        // Draw particles
-        currentFlapState.particles.forEach((p) => {
-          const px = p.x / 400 * width;
-          const py = p.y / 200 * height;
-          const alpha = p.life;
-
-          ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('hsl', 'hsla');
-          ctx.beginPath();
-          ctx.arc(px, py, p.size, 0, Math.PI * 2);
-          ctx.fill();
-        });
-
-        // Ground line
-        const groundY = (180 / 200) * height;
-        ctx.strokeStyle = '#ff0088';
-        ctx.lineWidth = 3;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#ff0088';
-        ctx.beginPath();
-        ctx.moveTo(0, groundY);
-        ctx.lineTo(width, groundY);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-
-        // Score
-        if (currentFlapState.score > 0 || currentFlapState.isPlaying || currentFlapState.isGameOver) {
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-          ctx.fillRect(width / 2 - 50, 10, 100, 40);
-          ctx.fillStyle = '#00ff88';
-          ctx.font = 'bold 28px Arial';
-          ctx.textAlign = 'center';
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = '#00ff88';
-          ctx.fillText(currentFlapState.score.toString(), width / 2, 40);
-          ctx.shadowBlur = 0;
-        }
-
-        // High score - now displays in-game at top right
-        if (currentFlapState.highScore > 0) {
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-          ctx.fillRect(width - 95, 10, 90, 25);
-          ctx.fillStyle = '#ffaa00';
-          ctx.font = 'bold 12px Arial';
-          ctx.textAlign = 'right';
-          ctx.fillText(`High: ${currentFlapState.highScore}`, width - 10, 28);
-        }
-
-        // Game over text
-        if (currentFlapState.isGameOver) {
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-          ctx.fillRect(0, 0, width, height);
-          ctx.fillStyle = '#ff0066';
-          ctx.font = 'bold 36px Arial';
-          ctx.textAlign = 'center';
-          ctx.shadowBlur = 20;
-          ctx.shadowColor = '#ff0066';
-          ctx.fillText('GAME OVER', width / 2, height / 2 - 20);
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 18px Arial';
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = '#ffffff';
-          ctx.fillText('Tap to restart', width / 2, height / 2 + 20);
-          ctx.shadowBlur = 0;
-        } else if (!currentFlapState.isPlaying) {
-          // Start screen
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-          ctx.fillRect(0, 0, width, height);
-          ctx.fillStyle = '#00ffff';
-          ctx.font = 'bold 24px Arial';
-          ctx.textAlign = 'center';
-          ctx.shadowBlur = 15;
-          ctx.shadowColor = '#00ffff';
-          ctx.fillText('TAP TO FLAP', width / 2, height / 2);
-          ctx.shadowBlur = 0;
-        }
-      }
-    }
-
-    // Update state
-    setFlapState((prev) => {
-      if (!prev.isPlaying || prev.isGameOver) return prev;
-
-      const GRAVITY = 0.4;
-      const GROUND_Y = 180; // Ground position
-      const PLAYER_X = 30;
-
-      const newState = { ...prev };
-
-      // Apply gravity
-      newState.playerVelocityY += GRAVITY;
-      newState.playerY += newState.playerVelocityY;
-
-      // Check ground collision
-      if (newState.playerY >= GROUND_Y) {
-        newState.playerY = GROUND_Y;
-        newState.playerVelocityY = 0;
-        newState.isGameOver = true;
-        newState.isPlaying = false;
-
-        // Update high score
-        if (newState.score > newState.highScore) {
-          newState.highScore = newState.score;
-          localStorage.setItem('mimo_flap_highscore', newState.score.toString());
-        }
-
-        storeGameEvent('game_over', { game: 'flap', score: newState.score });
-
-        // Trigger achievement check for flap score
-        setTimeout(() => {
-          updateScoreAchievementsRef.current('flap', newState.score);
-        }, 0);
-
-        return newState;
-      }
-
-      // Check ceiling collision
-      if (newState.playerY <= 0) {
-        newState.playerY = 0;
-        newState.playerVelocityY = 0;
-      }
-
-      // Update spawn timer
-      newState.spawnTimer += 1;
-
-      // Spawn obstacles
-      const spawnInterval = Math.max(60, 100 - newState.speed * 5);
-      if (newState.spawnTimer >= spawnInterval) {
-        newState.spawnTimer = 0;
-        const gapHeight = 100 - (newState.score * 2); // Gap gets smaller as score increases
-        const gapY = 50 + Math.random() * (GROUND_Y - gapHeight - 50);
-
-        newState.obstacles.push({
-          id: Date.now(),
-          x: 400,
-          gapY,
-          gapHeight,
-          width: 50,
-          passed: false,
-        });
-
-        // Speed increases with score
-        if (newState.score % 5 === 0) {
-          newState.speed = Math.min(12, newState.speed + 0.2);
-        }
-      }
-
-      // Move obstacles
-      newState.obstacles = newState.obstacles
-        .map((obs) => ({
-          ...obs,
-          x: obs.x - newState.speed,
-        }))
-        .filter((obs) => obs.x > -100);
-
-      // Check collisions
-      const playerTop = newState.playerY - 20;
-      const playerBottom = newState.playerY + 20;
-      const playerLeft = PLAYER_X - 15;
-      const playerRight = PLAYER_X + 15;
-
-      for (const obs of newState.obstacles) {
-        const obsLeft = obs.x;
-        const obsRight = obs.x + obs.width;
-
-        // Check if player is in the gap zone
-        const inGapY = playerTop > obs.gapY && playerBottom < obs.gapY + obs.gapHeight;
-        const inGapX = playerRight > obsLeft && playerLeft < obsRight;
-
-        // Collision if not in gap
-        if (inGapX && !inGapY) {
-          newState.isGameOver = true;
-          newState.isPlaying = false;
-
-          if (newState.score > newState.highScore) {
-            newState.highScore = newState.score;
-            localStorage.setItem('mimo_flap_highscore', newState.score.toString());
-          }
-
-          // Calculate session duration and update player progression
-          const sessionDuration = flapStatsRef.current.sessionStartTime > 0
-            ? Math.floor((Date.now() - flapStatsRef.current.sessionStartTime) / 1000)
-            : 0;
-          // Use setTimeout to avoid state update during render
-          setTimeout(() => {
-            updatePlayerProgress('flap', newState.score, sessionDuration, false);
-          }, 0);
-
-          storeGameEvent('game_over', { game: 'flap', score: newState.score });
-          break;
-        }
-
-        // Score point when passing obstacle
-        if (!obs.passed && obsRight < playerLeft) {
-          obs.passed = true;
-          newState.score += 1;
-
-          // Particle effect on score
-          newState.particles.push({
-            id: Date.now(),
-            x: PLAYER_X,
-            y: newState.playerY,
-            vx: 2,
-            vy: -2,
-            life: 1,
-            color: '#00ff88',
-            size: 4,
-          });
-        }
-      }
-
-      // Update particles
-      newState.particles = newState.particles
-        .map((p) => ({
-          ...p,
-          x: p.x + p.vx,
-          y: p.y + p.vy,
-          life: p.life - 0.02,
-          vy: p.vy + 0.1, // Gravity on particles
-        }))
-        .filter((p) => p.life > 0);
-
-      return newState;
-    });
-  }, [updatePlayerProgress]);
 
   // Update flapStateRef whenever flapState changes (avoids stale closure in game loop)
   useEffect(() => {
     flapStateRef.current = flapState;
   }, [flapState]);
+
+  // Neon Flap game loop
+  const neonFlapGameLoop = useCallback(() => {
+    if (!flapStateRef.current.isPlaying || flapStateRef.current.isGameOver) return;
+
+    // Trigger game state update
+    flap();
+
+    // Continue loop
+    const flapRequestRef = requestAnimationFrame(neonFlapGameLoop);
+    return () => cancelAnimationFrame(flapRequestRef);
+  }, [flap]);
+
+  // Neon Flap draw function
+  const drawFlap = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Sky gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, '#87CEEB');
+    gradient.addColorStop(1, '#98D8E8');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw clouds
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    for (let i = 0; i < 5; i++) {
+      const x = (i * 100 - (flapStateRef.current.score * 2) % 500) % (width + 100);
+      const y = 50 + i * 30;
+      ctx.beginPath();
+      ctx.arc(x, y, 20, 0, Math.PI * 2);
+      ctx.arc(x + 25, y, 25, 0, Math.PI * 2);
+      ctx.arc(x + 50, y, 20, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Ground
+    ctx.fillStyle = '#90EE90';
+    ctx.fillRect(0, height - 20, width, 20);
+
+    // Player (bird)
+    const playerX = 30;
+    const playerY = flapStateRef.current.playerY;
+
+    ctx.save();
+    ctx.translate(playerX, playerY);
+
+    // Rotate based on velocity
+    const rotation = Math.min(Math.max(flapStateRef.current.playerVelocityY * 0.05, -0.5), 0.5);
+    ctx.rotate(rotation);
+
+    // Bird body
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 15, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wing
+    ctx.fillStyle = '#FFA500';
+    ctx.beginPath();
+    ctx.ellipse(-5, 0, 10, 5, Math.sin(Date.now() / 100) * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eye
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(5, -3, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(6, -3, 1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Beak
+    ctx.fillStyle = '#FF6347';
+    ctx.beginPath();
+    ctx.moveTo(12, 0);
+    ctx.lineTo(20, -2);
+    ctx.lineTo(20, 2);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+
+    // Draw obstacles
+    flapStateRef.current.obstacles.forEach(obstacle => {
+      // Top pipe
+      ctx.fillStyle = '#228B22';
+      ctx.fillRect(obstacle.x, 0, obstacle.width, obstacle.gapY);
+
+      // Top pipe cap
+      ctx.fillStyle = '#32CD32';
+      ctx.fillRect(obstacle.x - 5, obstacle.gapY - 30, obstacle.width + 10, 30);
+
+      // Bottom pipe
+      ctx.fillStyle = '#228B22';
+      ctx.fillRect(obstacle.x, obstacle.gapY + obstacle.gapHeight, obstacle.width, height - obstacle.gapY - obstacle.gapHeight);
+
+      // Bottom pipe cap
+      ctx.fillStyle = '#32CD32';
+      ctx.fillRect(obstacle.x - 5, obstacle.gapY + obstacle.gapHeight, obstacle.width + 10, 30);
+
+      // Pipe highlights
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.fillRect(obstacle.x + 5, 0, 5, obstacle.gapY);
+      ctx.fillRect(obstacle.x + 5, obstacle.gapY + obstacle.gapHeight, 5, height - obstacle.gapY - obstacle.gapHeight);
+    });
+
+    // Draw particles
+    flapStateRef.current.particles.forEach(particle => {
+      ctx.globalAlpha = particle.life;
+      ctx.fillStyle = particle.color;
+      ctx.beginPath();
+      ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+
+    // HUD
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(5, 5, 100, 30);
+
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${flapStateRef.current.score}`, 15, 28);
+  }, []);
 
   // Neon Flap game loop useEffect
   useEffect(() => {
@@ -6095,6 +6079,21 @@ const quickRestart = useCallback(() => {
       return () => cancelAnimationFrame(flapRequestRef);
     }
   }, [flapState.isPlaying, flapState.isGameOver, neonFlapGameLoop]);
+
+  // Flap draw loop
+  useEffect(() => {
+    if (flapState.isPlaying || flapState.isGameOver) {
+      const drawLoop = () => {
+        drawFlap();
+        if (flapState.isPlaying || flapState.isGameOver) {
+          requestAnimationFrame(drawLoop);
+        }
+      };
+      drawLoop();
+    } else {
+      drawFlap();
+    }
+  }, [flapState.isPlaying, flapState.isGameOver, drawFlap]);
 
   // ==================== END NEON FLAP ====================
 
@@ -7302,6 +7301,143 @@ useEffect(() => {
     cancelAnimationFrame(brickRequestRef);
   };
 }, [brickState.isPlaying, brickState.isGameOver, brickGameLoop]);
+
+// Brick draw function
+const drawBrick = useCallback(() => {
+  const canvas = canvasRef.current;
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const width = canvas.width;
+  const height = canvas.height;
+
+  // Clear canvas with gradient background
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, '#1a1a2e');
+  gradient.addColorStop(1, '#16213e');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+
+  // Draw bricks
+  brickRef.current.bricks.forEach(brick => {
+    ctx.fillStyle = brick.color;
+    ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
+
+    // Brick highlight
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.fillRect(brick.x, brick.y, brick.width, 3);
+    ctx.fillRect(brick.x, brick.y, 3, brick.height);
+
+    // Brick damage indication
+    if (brick.hits < 2) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.fillRect(brick.x, brick.y + brick.height - 5, brick.width, 5);
+    }
+  });
+
+  // Draw paddle
+  const paddle = brickRef.current.paddle;
+  const paddleGradient = ctx.createLinearGradient(paddle.x, paddle.y, paddle.x, paddle.y + paddle.height);
+  paddleGradient.addColorStop(0, '#00ff88');
+  paddleGradient.addColorStop(1, '#00aa55');
+  ctx.fillStyle = paddleGradient;
+  ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+
+  // Paddle glow
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = '#00ff88';
+  ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+  ctx.shadowBlur = 0;
+
+  // Draw ball
+  const ball = brickRef.current.ball;
+  if (ball) {
+    const ballGradient = ctx.createRadialGradient(ball.x - 2, ball.y - 2, 0, ball.x, ball.y, ball.radius);
+    ballGradient.addColorStop(0, '#ffffff');
+    ballGradient.addColorStop(1, '#ff6b6b');
+    ctx.fillStyle = ballGradient;
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ball trail
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#ff6b6b';
+    ctx.beginPath();
+    ctx.arc(ball.x - ball.vx * 2, ball.y - ball.vy * 2, ball.radius * 0.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // Draw particles
+  brickRef.current.particles.forEach(particle => {
+    const alpha = particle.life / 20;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = particle.color;
+    ctx.fillRect(particle.x, particle.y, 3, 3);
+  });
+  ctx.globalAlpha = 1;
+
+  // Draw power-ups
+  brickRef.current.powerUps.forEach(powerUp => {
+    const powerUpSize = 20;
+    const powerUpColors = { wide: '#00ff88', slow: '#00ffff', multi: '#ff6b6b' };
+    ctx.save();
+    ctx.translate(powerUp.x + powerUpSize / 2, powerUp.y + powerUpSize / 2);
+    ctx.rotate(Date.now() / 500);
+
+    ctx.fillStyle = powerUpColors[powerUp.type];
+    ctx.fillRect(-powerUpSize / 2, -powerUpSize / 2, powerUpSize, powerUpSize);
+
+    // Power-up icon
+    ctx.fillStyle = 'white';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const icons = { wide: '↔', slow: '⏱', multi: '●●' };
+    ctx.fillText(icons[powerUp.type as keyof typeof icons] || '?', 0, 0);
+
+    ctx.restore();
+  });
+
+  // HUD
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+  ctx.fillRect(5, 5, 150, 60);
+
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 16px Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText(`Score: ${brickRef.current.score}`, 10, 25);
+  ctx.fillText(`Level: ${brickRef.current.level}`, 10, 45);
+  ctx.fillText(`Balls: 1`, 10, 65);
+
+  // High score
+  if (brickRef.current.highScore > 0) {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(width - 110, 5, 105, 25);
+    ctx.fillStyle = '#ffff00';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(`Best: ${brickRef.current.highScore}`, width - 10, 22);
+  }
+}, []);
+
+// Brick draw loop
+useEffect(() => {
+  if (brickState.isPlaying || brickState.isGameOver) {
+    const drawLoop = () => {
+      drawBrick();
+      if (brickState.isPlaying || brickState.isGameOver) {
+        requestAnimationFrame(drawLoop);
+      }
+    };
+    drawLoop();
+  } else {
+    drawBrick();
+  }
+}, [brickState.isPlaying, brickState.isGameOver, drawBrick]);
 
 // Load high score on mount
 useEffect(() => {
