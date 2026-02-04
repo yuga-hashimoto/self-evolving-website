@@ -957,6 +957,49 @@ const PROGRESSION_CONFIG = {
   XP_FOR_STREAK: 10, // Bonus XP per daily streak day
 };
 
+// Mastery calculation based on performance
+function calculateMasteryStars(
+  score: number,
+  highScore: number,
+  gameType: string
+): number {
+  // Star thresholds (based on high score percentage)
+  const thresholds = {
+    infinity: [0.3, 0.6, 0.9],    // 30%, 60%, 90% of high score
+    '2048': [100, 500, 1000],     // Fixed tile scores
+    neon: [50, 150, 300],         // Score thresholds
+    cosmic: [30, 100, 250],       // Score thresholds
+    rhythm: [40, 120, 250],       // Score thresholds
+    snake: [50, 200, 400],        // Score thresholds
+    flap: [10, 30, 60],           // Pipe passed thresholds
+    brick: [100, 300, 500],       // Score thresholds
+    tetris: [50, 200, 500],       // Score thresholds
+    colorRush: [80, 150, 300],    // Score thresholds
+    match3: [100, 300, 600],      // Score thresholds
+  };
+
+  const gameThresholds = thresholds[gameType as keyof typeof thresholds] || [50, 150, 300];
+
+  // Calculate score mastery
+  let scoreStars = 0;
+  if (score >= gameThresholds[0]) scoreStars = 1;
+  if (score >= gameThresholds[1]) scoreStars = 2;
+  if (score >= gameThresholds[2]) scoreStars = 3;
+
+  // Bonus for reaching high score
+  if (score >= highScore && highScore > 0 && scoreStars < 3) {
+    scoreStars = Math.min(3, scoreStars + 1);
+  }
+
+  return Math.min(3, scoreStars);
+}
+
+// Format XP display
+function formatXP(xp: number, xpToNext: number): string {
+  if (xpToNext === 0) return `${xp}`;
+  return `${xp} / ${xpToNext}`;
+}
+
 // Calculate XP gained from a game session
 function calculateGameXP(
   score: number,
@@ -981,16 +1024,6 @@ function calculateGameXP(
   xp *= difficultyBonus;
 
   return Math.round(xp);
-}
-
-// Calculate mastery stars based on score
-function calculateMasteryStars(game: string, score: number): number {
-  const thresholds = PROGRESSION_CONFIG.MASTERY_THRESHOLDS;
-
-  if (score >= thresholds[3]) return 3;
-  if (score >= thresholds[2]) return 2;
-  if (score >= thresholds[1]) return 1;
-  return 0;
 }
 
 // Calculate XP needed for next level
@@ -1149,16 +1182,16 @@ const TUTORIALS: Record<GameType, TutorialStep[]> = {
 
 
 // Check if user is playing a game for the first time
-const isFirstTimePlaying = useCallback((gameType: GameType): boolean => {
+const isFirstTimePlaying = (gameType: GameType): boolean => {
   const key = `mimo_first_play_${gameType}`;
   return !localStorage.getItem(key);
-}, []);
+};
 
 // Mark game as played for the first time
-const markGameAsPlayed = useCallback((gameType: GameType) => {
+const markGameAsPlayed = (gameType: GameType) => {
   const key = `mimo_first_play_${gameType}`;
   localStorage.setItem(key, 'true');
-}, []);
+};
 
 
 // Render mastery stars
@@ -1296,6 +1329,17 @@ export default function MimoPlayground() {
     completedSteps: [],
     gameType: 'menu',
   });
+
+  // Progression notification state
+  const [showProgression, setShowProgression] = useState(false);
+  const [progressionData, setProgressionData] = useState<{
+    type: 'level' | 'mastery' | 'streak' | 'achievement';
+    title: string;
+    description: string;
+    icon: string;
+    reward?: number;
+    game?: string;
+  } | null>(null);
 
   const [gameState, setGameState] = useState<InfinityDropState>({
     blocks: [],
@@ -2796,11 +2840,40 @@ const quickRestart = useCallback(() => {
       const newGamesPlayed = new Set(prev.gamesPlayed);
       newGamesPlayed.add(game);
 
+      // Get high score for this game
+      const gameHighScore = {
+        infinity: gameState.highScore,
+        '2048': game2048State.highScore,
+        neon: neonState.highScore,
+        cosmic: cosmicState.highScore,
+        rhythm: rhythmState.highScore,
+        snake: snakeState.highScore,
+        flap: flapState.highScore,
+        brick: brickState.highScore,
+        tetris: tetrisState.highScore,
+        colorRush: colorRushState.highScore,
+        match3: match3State.highScore,
+      }[game];
+
       // Update mastery stars
-      const currentStars = calculateMasteryStars(game, score);
+      const currentStars = calculateMasteryStars(score, gameHighScore, game);
       const newMasteryStars = { ...prev.masteryStars };
       if (currentStars > newMasteryStars[game]) {
         newMasteryStars[game] = currentStars;
+
+        // Show mastery notification
+        const starColors = ['⭐', '🌟', '💫'];
+        setShowProgression(true);
+        setProgressionData({
+          type: 'mastery',
+          title: t('mastery.title'),
+          description: t('mastery.description', { game: t(`${game}.title`), stars: currentStars }),
+          icon: starColors[currentStars - 1],
+          game,
+        });
+
+        // Hide notification after 3 seconds
+        setTimeout(() => setShowProgression(false), 3000);
       }
 
       // Show level up modal if leveled up
@@ -8092,6 +8165,20 @@ useEffect(() => {
                currentGame === 'colorRush' ? t('colorRush.title') :
                currentGame === 'match3' ? 'Neon Crush' : ''}
             </h1>
+
+            {/* Player Progression HUD */}
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2">
+              <div className="bg-gradient-to-r from-purple-600/90 to-blue-600/90 px-3 py-1 rounded-full border border-purple-400 text-white text-xs font-bold shadow-lg">
+                Level {playerProgress.level} • {formatXP(playerProgress.xp, playerProgress.xpToNext)} XP
+              </div>
+              {/* XP Bar */}
+              <div className="w-32 h-1 bg-slate-700 rounded-full mt-1 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300"
+                  style={{ width: `${(playerProgress.xp / playerProgress.xpToNext) * 100}%` }}
+                />
+              </div>
+            </div>
           </div>
 
           {/* スコア表示 */}
@@ -9187,6 +9274,19 @@ useEffect(() => {
                     {dailyChallenge.currentChallenge.completed
                       ? t('dailyChallenge.completed')
                       : `${dailyChallenge.currentChallenge.reward} 💰`}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Progression Notification Overlay */}
+            {showProgression && progressionData && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg shadow-lg animate-bounce">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{progressionData.icon}</span>
+                  <div className="text-white font-bold text-sm">
+                    {progressionData.title}
+                    <div className="text-xs opacity-90">{progressionData.description}</div>
                   </div>
                 </div>
               </div>

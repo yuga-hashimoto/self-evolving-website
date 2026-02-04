@@ -230,6 +230,10 @@
         "rewards": "Rewards Unlocked",
         "awesome": "Awesome!"
       },
+      "mastery": {
+        "title": "Master!",
+        "description": "Achieved {stars} stars mastery in '{game}'!"
+      },
       "session": {
         "title": "Session Stats",
         "continuePlaying": "Continue Playing",
