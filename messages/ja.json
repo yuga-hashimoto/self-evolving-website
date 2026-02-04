@@ -230,6 +230,10 @@
         "rewards": "報酬 unlocked",
         "awesome": "すごい！"
       },
+      "mastery": {
+        "title": "マスター！",
+        "description": "ゲーム '{game}' で{stars}つ星マスターを達成！"
+      },
       "session": {
         "title": "セッション統計",
         "continuePlaying": "続行中のプレイ",
