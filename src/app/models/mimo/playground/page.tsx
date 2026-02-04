@@ -380,6 +380,14 @@ interface ColorRushParticle {
   size: number;
 }
 
+interface TileColorRush {
+  id: string;
+  x: number;
+  y: number;
+  size: number;
+  colors: string[];
+}
+
 interface ColorRushState {
   isPlaying: boolean;
   isGameOver: boolean;
@@ -392,6 +400,7 @@ interface ColorRushState {
   multiplier: number;
   combo: number;
   difficulty: 'easy' | 'medium' | 'hard';
+  tiles: (TileColorRush | null)[][];
   flowState: boolean; // For visual feedback when combo > 5
   particles: ColorRushParticle[];
   activePowerUp: 'time' | 'slow' | 'hint' | null;
@@ -1545,6 +1554,7 @@ export default function MimoPlayground() {
     multiplier: 1,
     combo: 0,
     difficulty: 'medium',
+    tiles: [],
     flowState: false,
     particles: [],
     activePowerUp: null,
@@ -3097,65 +3107,7 @@ const quickRestart = useCallback(() => {
     return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
   };
 
-  // ゲームループ
-  const gameLoop = useCallback(() => {
-    // Check skill timeouts
-    const now = Date.now();
-    if (skillState.boostActive && now >= skillState.boostEndTime) {
-      setSkillState((prev) => ({ ...prev, boostActive: false }));
-    }
-    if (skillState.slowActive && now >= skillState.slowEndTime) {
-      setSkillState((prev) => ({ ...prev, slowActive: false }));
-    }
-    if (skillState.freezeActive && now >= skillState.freezeEndTime) {
-      setSkillState((prev) => ({ ...prev, freezeActive: false }));
-    }
-
-    setGameState((prev) => {
-      if (!prev.isPlaying || prev.isGameOver) return prev;
-
-      const updatedBlocks = prev.blocks.map((block) => {
-        // Skip block movement if freeze is active
-        if (skillState.freezeActive) {
-          return block;
-        }
-
-        if (block.velocityX !== 0) {
-          let newX = block.x + block.velocityX;
-
-          // 壁での跳ね返り
-          if (containerRef.current) {
-            const containerWidth = containerRef.current.clientWidth;
-            if (newX <= 0 || newX + block.width >= containerWidth) {
-              block.velocityX = -block.velocityX;
-              newX = Math.max(0, Math.min(containerWidth - block.width, newX));
-            }
-          }
-          return { ...block, x: newX };
-        }
-        return block;
-      });
-
-      return { ...prev, blocks: updatedBlocks };
-    });
-
-    // Update particles (with stricter limits for performance)
-    setInfinityParticles((prev) =>
-      prev
-        .map((p) => ({
-          ...p,
-          x: p.x + p.vx,
-          y: p.y + p.vy,
-          vy: p.vy + 0.2, // gravity
-          life: p.life - 1,
-        }))
-        .filter((p) => p.life > 0)
-        .slice(-60) // Keep only last 60 particles
-    );
-
-    draw();
-    requestRef.current = requestAnimationFrame(gameLoop);
-  }, [draw, skillState.boostActive, skillState.boostEndTime, skillState.slowActive, skillState.slowEndTime, skillState.freezeActive, skillState.freezeEndTime]);
+  // Note: Tetris and Color Rush functions are now implemented above
 
   // リサイズ時のキャンバス設定（debounced for performance）
   const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -3200,20 +3152,6 @@ const quickRestart = useCallback(() => {
       }
     };
   }, [handleResize]);
-
-  useEffect(() => {
-    if (gameState.isPlaying && !gameState.isGameOver) {
-      if (infinityRequestRef.current) {
-        cancelAnimationFrame(infinityRequestRef.current);
-      }
-      infinityRequestRef.current = requestAnimationFrame(gameLoop);
-    }
-    return () => {
-      if (infinityRequestRef.current) {
-        cancelAnimationFrame(infinityRequestRef.current);
-      }
-    };
-  }, [gameState.isPlaying, gameState.isGameOver, gameLoop]);
 
   // Neon Dashゲームループ - neonGameLoop is defined later in the file, using requestRef pattern
 
@@ -6845,6 +6783,7 @@ const quickRestart = useCallback(() => {
       powerUpEndTime: 0,
       perfectMatches: 0,
       bestStreak: 0,
+      tiles: [],
     });
 
     // Track first play
@@ -8113,6 +8052,252 @@ useEffect(() => {
   }, [start2048Game]);
 
   // 2048: タイル描画用（HTML表示）
+  // Tetris draw function
+  const drawTetris = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Dark background
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw grid
+    const cellSize = 30;
+    const gridX = (width - cellSize * TETRIS_GRID_WIDTH) / 2;
+    const gridY = 50;
+
+    // Grid background
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.fillRect(gridX, gridY, cellSize * TETRIS_GRID_WIDTH, cellSize * TETRIS_GRID_HEIGHT);
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= TETRIS_GRID_WIDTH; x++) {
+      ctx.beginPath();
+      ctx.moveTo(gridX + x * cellSize, gridY);
+      ctx.lineTo(gridX + x * cellSize, gridY + cellSize * TETRIS_GRID_HEIGHT);
+      ctx.stroke();
+    }
+    for (let y = 0; y <= TETRIS_GRID_HEIGHT; y++) {
+      ctx.beginPath();
+      ctx.moveTo(gridX, gridY + y * cellSize);
+      ctx.lineTo(gridX + cellSize * TETRIS_GRID_WIDTH, gridY + y * cellSize);
+      ctx.stroke();
+    }
+
+    // Draw placed blocks
+    tetrisState.board.forEach((row, y) => {
+      row.forEach((cell, x) => {
+        if (cell) {
+          const blockX = gridX + x * cellSize;
+          const blockY = gridY + y * cellSize;
+
+          // Block gradient
+          const gradient = ctx.createLinearGradient(blockX, blockY, blockX + cellSize, blockY + cellSize);
+          gradient.addColorStop(0, cell as unknown as string);
+          gradient.addColorStop(1, adjustColor(cell as unknown as string, -50));
+
+          ctx.fillStyle = gradient;
+          ctx.fillRect(blockX, blockY, cellSize - 2, cellSize - 2);
+
+          // Block highlight
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.fillRect(blockX + 2, blockY + 2, cellSize - 4, 4);
+        }
+      });
+    });
+
+    // Draw current piece
+    if (tetrisState.currentPiece) {
+      const matrix = TETROMINO_SHAPES[tetrisState.currentPiece.shape][tetrisState.currentPiece.rotation];
+      matrix.forEach((row, y) => {
+        row.forEach((cell, x) => {
+          if (cell) {
+            const blockX = gridX + (tetrisState.currentPiece!.x + x) * cellSize;
+            const blockY = gridY + (tetrisState.currentPiece!.y + y) * cellSize;
+
+            // Piece gradient
+            const gradient = ctx.createLinearGradient(blockX, blockY, blockX + cellSize, blockY + cellSize);
+            gradient.addColorStop(0, tetrisState.currentPiece!.color);
+            gradient.addColorStop(1, adjustColor(tetrisState.currentPiece!.color, -50));
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(blockX, blockY, cellSize - 2, cellSize - 2);
+
+            // Piece glow
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = tetrisState.currentPiece!.color;
+            ctx.fillRect(blockX, blockY, cellSize - 2, cellSize - 2);
+            ctx.shadowBlur = 0;
+          }
+        });
+      });
+    }
+
+    // Draw UI
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${tetrisState.score}`, 15, 30);
+    ctx.fillText(`Level: ${tetrisState.level}`, 15, 60);
+    ctx.fillText(`Lines: ${tetrisState.linesCleared}`, 15, 90);
+
+    // Game over screen
+    if (tetrisState.isGameOver) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = '#ff4444';
+      ctx.font = 'bold 48px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('GAME OVER', width / 2, height / 2);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = '24px Arial';
+      ctx.fillText(`Score: ${tetrisState.score}`, width / 2, height / 2 + 40);
+    }
+  }, [tetrisState]);
+
+  // Color Rush draw function
+  const drawColorRush = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Background gradient
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#1a1a2e');
+    gradient.addColorStop(1, '#16213e');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw color tiles
+    const tileSize = 60;
+    const cols = Math.floor(width / tileSize);
+    const rows = Math.floor(height / tileSize);
+    const offsetX = (width - cols * tileSize) / 2;
+    const offsetY = (height - rows * tileSize) / 2;
+
+    colorRushState.tiles.forEach((row, y) => {
+      row.forEach((tile, x) => {
+        if (tile !== null) {
+          const tileX = offsetX + x * tileSize;
+          const tileY = offsetY + y * tileSize;
+
+          // Tile with gradient
+          const tileGradient = ctx.createLinearGradient(tileX, tileY, tileX + tileSize, tileY + tileSize);
+          tileGradient.addColorStop(0, tile.colors[tile.colors.length - 1]);
+          tileGradient.addColorStop(1, adjustColor(tile.colors[tile.colors.length - 1], -30));
+
+          ctx.fillStyle = tileGradient;
+          ctx.fillRect(tileX, tileY, tileSize - 4, tileSize - 4);
+
+          // Tile highlight
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.fillRect(tileX, tileY, tileSize - 4, 8);
+        }
+      });
+    });
+
+    // Draw score
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Score: ${colorRushState.score}`, width / 2, 30);
+
+    // Draw combo
+    if (colorRushState.combo > 1) {
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 20px Arial';
+      ctx.fillText(`Combo x${colorRushState.combo}!`, width / 2, height - 30);
+    }
+
+    // Game over screen
+    if (colorRushState.isGameOver) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = '#ff4444';
+      ctx.font = 'bold 48px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('GAME OVER', width / 2, height / 2);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = '24px Arial';
+      ctx.fillText(`Score: ${colorRushState.score}`, width / 2, height / 2 + 40);
+    }
+  }, [colorRushState]);
+
+  // マスターゲームループ - 現在のゲームに基づいて適切なdraw関数を呼び出す
+  const masterGameLoop = useCallback(() => {
+    // 各ゲームの個別ゲームループはそれぞれのuseEffectで独立して実行されている
+    // このマスターループはキャンバスサイズ変更時の再描画のみを担当
+
+    // 現在のゲームによって呼び出すdraw関数を決定
+    switch (currentGame) {
+      case 'infinity':
+        draw();
+        break;
+      case 'neon':
+        drawNeon();
+        break;
+      case 'cosmic':
+        drawCosmic();
+        break;
+      case 'rhythm':
+        drawRhythm();
+        break;
+      case 'snake':
+        drawNeonSnake();
+        break;
+      case 'flap':
+        drawFlap();
+        break;
+      case 'brick':
+        drawBrick();
+        break;
+      case 'tetris':
+        drawTetris();
+        break;
+      case 'colorRush':
+        drawColorRush();
+        break;
+      case 'match3':
+        // Match3 is not implemented yet
+        break;
+    }
+
+    requestRef.current = requestAnimationFrame(masterGameLoop);
+  }, [currentGame, draw, drawNeon, drawCosmic, drawRhythm, drawNeonSnake, drawFlap, drawBrick, drawTetris, drawColorRush]);
+
+  // マスターゲームループの実行
+  useEffect(() => {
+    // メニュー以外でゲームがアクティブな場合、マスターゲームループを実行
+    if (currentGame !== 'menu') {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+      requestRef.current = requestAnimationFrame(masterGameLoop);
+    }
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, [currentGame, masterGameLoop]);
+
   const render2048Tile = (tile: Tile2048 | null) => {
     if (!tile) return null;
     const color = TILE_COLORS[tile.value] || '#3c3a32';
@@ -8313,8 +8498,8 @@ useEffect(() => {
               <button
                 onClick={() => {
                   // Select random game from available games
-                  const games: ('infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris')[] =
-                    ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris'];
+                  const games: ('infinity' | '2048' | 'neon' | 'snake' | 'flap' | 'tetris' | 'colorRush')[] =
+                    ['infinity', '2048', 'neon', 'snake', 'flap', 'tetris', 'colorRush'];
                   const randomGame = games[Math.floor(Math.random() * games.length)];
 
                   setCurrentGame(randomGame);
@@ -9185,7 +9370,7 @@ useEffect(() => {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {(() => {
-                    const allGames: GameType[] = ['infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris', 'colorRush'];
+                    const allGames: GameType[] = ['infinity', '2048', 'neon', 'snake', 'flap', 'tetris', 'colorRush'];
                     const unplayedGames = allGames.filter(g => !session.gamesList.includes(g));
                     const suggestions = unplayedGames.length > 0
                       ? unplayedGames.slice(0, 3)
@@ -10838,7 +11023,7 @@ useEffect(() => {
         )}
 
         {/* 広告スペース（ゲームプレイ画面のみ） */}
-        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'cosmic' || currentGame === 'rhythm' || currentGame === 'snake' || currentGame === 'flap' || currentGame === 'brick' || currentGame === 'tetris' || currentGame === 'colorRush' || currentGame === 'match3') && (
+        {(currentGame === 'infinity' || currentGame === '2048' || currentGame === 'neon' || currentGame === 'snake' || currentGame === 'flap' || currentGame === 'tetris' || currentGame === 'colorRush') && (
           <div className="mt-6 w-full max-w-md">
             <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 text-center text-slate-500 text-sm">
               {t('adArea')}
@@ -10863,11 +11048,8 @@ useEffect(() => {
           <span>{t('infinityDrop.title')}: {formatScore(gameState.highScore)}</span>
           <span>{t('slide2048.title')}: {formatScore(game2048State.highScore)}</span>
           <span>{t('neonDash.title')}: {formatScore(neonState.highScore)}</span>
-          <span>{t('cosmicCatch.title')}: {formatScore(cosmicState.highScore)}</span>
-          <span>{t('rhythmTapper.title')}: {formatScore(rhythmState.highScore)}</span>
           <span>{t('neonSnake.title')}: {formatScore(snakeState.highScore)}</span>
           <span>{t('neonFlap.title')}: {formatScore(flapState.highScore)}</span>
-          <span>{t('neonBrick.title')}: {formatScore(brickState.highScore)}</span>
           <span>{t('neonTetris.title')}: {formatScore(tetrisState.highScore)}</span>
           <span>{t('colorRush.title')}: {formatScore(colorRushState.highScore)}</span>
           <span>Neon Crush: {formatScore(match3State.highScore)}</span>
