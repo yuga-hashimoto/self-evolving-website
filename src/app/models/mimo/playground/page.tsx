@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl';
 import { useAnalytics } from '@/lib/analytics';
 import type { RhythmTapperState, RhythmColor, RhythmZone, RhythmNote } from './components/RhythmTapper';
 import type { NeonTetrisState } from './components/NeonTetris';
+import InfinityDrop from './components/InfinityDrop';
+import Slide2048 from './components/Slide2048';
 
 // Infinity Drop Interfaces
 interface Block {
@@ -48,6 +50,22 @@ interface ShopItem {
   cost: number;
   owned: boolean;
   key: 'boost' | 'slow' | 'wide' | 'shield' | 'freeze';
+}
+
+// Slide 2048 Interfaces
+interface Tile {
+  value: number;
+  merged: boolean;
+}
+
+interface Slide2048State {
+  board: Tile[][];
+  score: number;
+  best: number;
+  gameOver: boolean;
+  gameWon: boolean;
+  canContinue: boolean;
+  gridSize: 4 | 5 | 6;
 }
 
 interface InfinityParticle {
