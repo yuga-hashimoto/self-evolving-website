@@ -53,8 +53,8 @@
     "viewChangelog": "変更履歴を見る",
     "viewAnalytics": "アナリティクスを見る",
     "playGame": "ゲームをプレイ",
-    "mimoSubtitle": "Z-AI GLM 4.5 Air",
-    "grokSubtitle": "DeepSeek R1t2 Chimera"
+    "mimoSubtitle": "Arcee AI Trinity Large Preview",
+    "grokSubtitle": "OpenAI GPT-OSS-120B"
   },
   "changelog": {
     "title": "{modelName} 更新履歴",
