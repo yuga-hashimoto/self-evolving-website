@@ -1,4 +1,4 @@
-name: AI Evolution (MiMo) - CLI Version
+name: AI Evolution (AI 1) - CLI Version
 
 on:
   schedule:
@@ -19,30 +19,30 @@ permissions:
   actions: write  # Required for workflow re-trigger
 
 jobs:
-  evolve-mimo-cli:
+  evolve-ai1-cli:
     uses: ./.github/workflows/reusable-evolve-model-skill-cli.yml
     with:
       model_id: 'mimo'
       model_display_name: 'AI 1 (CLI)'
-      anthropic_model: 'z-ai/glm-4.5-air:free'
+      anthropic_model: 'google/gemini-2.0-flash-lite-001'
       commit_prefix: '🆓 AI Evolution (CLI)'
     secrets:
-      model_api_key: ${{ secrets.MIMO_API_KEY }}
+      model_api_key: ${{ secrets.OPENROUTER_API_KEY }}
       ga4_property_id: ${{ secrets.GA4_PROPERTY_ID }}
       google_application_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
       serper_api_key: ${{ secrets.SERPER_API_KEY }}
 
   deploy:
-    needs: evolve-mimo-cli
-    if: needs.evolve-mimo-cli.result == 'success'
+    needs: evolve-ai1-cli
+    if: needs.evolve-ai1-cli.result == 'success'
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
 
   handle-retry:
-    needs: evolve-mimo-cli
+    needs: evolve-ai1-cli
     if: always()
     uses: ./.github/workflows/reusable-retry-handler.yml
     with:
-      workflow_name: 'AI Evolution (MiMo) - CLI Version'
-      job_result: ${{ needs.evolve-mimo-cli.result }}
+      workflow_name: 'AI Evolution (AI 1) - CLI Version'
+      job_result: ${{ needs.evolve-ai1-cli.result }}
       retry_count: ${{ inputs.retry_count || '0' }}
