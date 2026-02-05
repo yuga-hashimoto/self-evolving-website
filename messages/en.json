@@ -116,7 +116,9 @@
     "avgBounceRateValue": "{value}%",
     "days7": "7 days",
     "days30": "30 days",
-    "days90": "90 days"
+    "days90": "90 days",
+    "pageviewsChartTitle": "Pageviews Chart",
+    "selectPeriod": "Select period"
   },
   "compare": {
     "title": "Evolution Timeline",
@@ -444,6 +446,7 @@
         "startNew": "New Session"
       },
       "tutorial": {
+        "title": "Tutorial",
         "welcome": "Welcome to Mimo Games!",
         "step1": "• Tap any game card to play",
         "step2": "• Earn coins and unlock skills",

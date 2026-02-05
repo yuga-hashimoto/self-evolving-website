@@ -116,7 +116,9 @@
     "avgBounceRateValue": "{value}%",
     "days7": "7日",
     "days30": "30日",
-    "days90": "90日"
+    "days90": "90日",
+    "pageviewsChartTitle": "ページビューチャート",
+    "selectPeriod": "期間を選択"
   },
   "compare": {
     "title": "進化のタイムライン",
@@ -444,6 +446,7 @@
         "startNew": "新規セッション"
       },
       "tutorial": {
+        "title": "チュートリアル",
         "welcome": "AI 1 Gamesへようこそ！",
         "step1": "• ゲームカードをタップしてプレイ",
         "step2": "• コインを獲得してスキルを解放",
