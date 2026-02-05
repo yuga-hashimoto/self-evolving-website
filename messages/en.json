@@ -230,7 +230,23 @@
         "gamesPlayed": "Games Played",
         "levelUp": "Level Up!",
         "rewards": "Rewards Unlocked",
-        "awesome": "Awesome!"
+        "awesome": "Awesome!",
+        "globalProgression": {
+          "title": "Global Progression",
+          "totalGamesPlayed": "Total Games Played",
+          "totalCoins": "Total Coins Earned",
+          "achievements": "Achievements",
+          "dailyChallenges": "Daily Challenges",
+          "claimReward": "Claim Reward",
+          "rewardAmount": "+{reward} coins earned!",
+          "newAchievement": "New Achievement!",
+          "highScore": "High Score",
+          "masteryLevel": "Mastery Level",
+          "nextLevel": "Next Level: {level}",
+          "levelProgress": "Level {current} ({progress}%)",
+          "playMore": "Play more games to earn rewards!",
+          "amazingSession": "Amazing session! Keep going!"
+        }
       },
       "mastery": {
         "title": "Master!",

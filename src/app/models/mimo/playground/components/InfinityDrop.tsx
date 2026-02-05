@@ -1,8 +1,74 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useLocalStorage } from './hooks';
-import './InfinityDrop.css';
+
+// Helper functions
+const calculateAccuracy = (blocks: Block[]) => {
+  const perfectBlocks = blocks.filter(b => b.perfect).length;
+  return blocks.length > 0 ? Math.round((perfectBlocks / blocks.length) * 100) : 100;
+};
+
+const updateAchievements = (currentAchievements: string[], score: number, accuracy: number, combo: number) => {
+  const newAchievements = [...currentAchievements];
+
+  // High score achievement
+  if (score > 1000 && !newAchievements.includes('high-score-1000')) {
+    newAchievements.push('high-score-1000');
+  }
+  if (score > 5000 && !newAchievements.includes('high-score-5000')) {
+    newAchievements.push('high-score-5000');
+  }
+  if (score > 10000 && !newAchievements.includes('high-score-10000')) {
+    newAchievements.push('high-score-10000');
+  }
+
+  // Accuracy achievements
+  if (accuracy > 90 && !newAchievements.includes('accuracy-90')) {
+    newAchievements.push('accuracy-90');
+  }
+  if (accuracy > 95 && !newAchievements.includes('accuracy-95')) {
+    newAchievements.push('accuracy-95');
+  }
+
+  // Combo achievements
+  if (combo > 5 && !newAchievements.includes('combo-5')) {
+    newAchievements.push('combo-5');
+  }
+  if (combo > 10 && !newAchievements.includes('combo-10')) {
+    newAchievements.push('combo-10');
+  }
+
+  return newAchievements;
+};
+
+const generateDailyChallenges = () => {
+  // Simple daily challenge generation
+  return [
+    { type: 'score', target: 500, reward: 50 },
+    { type: 'accuracy', target: 85, reward: 30 },
+    { type: 'combo', target: 3, reward: 20 }
+  ];
+};
+
+const checkDailyChallenges = (score: number, accuracy: number, combo: number, globalStats: any) => {
+  const currentChallenges = globalStats.dailyChallenges;
+  let completedChallenges = 0;
+
+  currentChallenges.forEach((challenge: any) => {
+    if (challenge.type === 'score' && score >= challenge.target) {
+      completedChallenges++;
+    }
+    if (challenge.type === 'accuracy' && accuracy >= challenge.target) {
+      completedChallenges++;
+    }
+    if (challenge.type === 'combo' && combo >= challenge.target) {
+      completedChallenges++;
+    }
+  });
+
+  return completedChallenges;
+};
 
 interface Block {
   id: number;
@@ -37,6 +103,14 @@ const InfinityDrop: React.FC = () => {
     gameOver: false,
     coins: 0,
     level: 1,
+  });
+
+  // Cross-game progression state
+  const [globalStats, setGlobalStats] = useLocalStorage<any>('mimo-global-stats', {
+    totalGamesPlayed: 0,
+    totalCoins: 0,
+    achievements: [] as string[],
+    dailyChallenges: [] as any[]
   });
 
   const [highScore, setHighScore] = useLocalStorage<number>('infinity-drop-high-score', 0);
@@ -153,6 +227,15 @@ const InfinityDrop: React.FC = () => {
           coins: prev.coins + Math.floor(prev.score / 100)
         }));
 
+        // Update global stats with rewards
+        const newCoins = Math.floor(gameState.score / 100);
+        const dailyChallengesCompleted = checkDailyChallenges(gameState.score, gameState.accuracy, gameState.combo, globalStats);
+        setGlobalStats((prev: any) => ({
+          ...prev,
+          totalCoins: prev.totalCoins + newCoins,
+          achievements: updateAchievements(prev.achievements, gameState.score, gameState.accuracy, gameState.combo)
+        }));
+
         // Update stats
         setStats((prev: { gamesPlayed: number; totalBlocks: number }) => ({
           gamesPlayed: prev.gamesPlayed + 1,
@@ -165,15 +248,73 @@ const InfinityDrop: React.FC = () => {
 
     gameLoop();
 
+    gameLoop();
+
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
     };
   }, [gameState, gameState.playing, gameState.gameOver]);
 
-  const calculateAccuracy = (blocks: Block[]) => {
-    const perfectBlocks = blocks.filter(b => b.perfect).length;
-    return blocks.length > 0 ? Math.round((perfectBlocks / blocks.length) * 100) : 100;
+  const updateAchievements = (currentAchievements: string[], score: number, accuracy: number, combo: number) => {
+    const newAchievements = [...currentAchievements];
+
+    // High score achievement
+    if (score > 1000 && !newAchievements.includes('high-score-1000')) {
+      newAchievements.push('high-score-1000');
+    }
+    if (score > 5000 && !newAchievements.includes('high-score-5000')) {
+      newAchievements.push('high-score-5000');
+    }
+    if (score > 10000 && !newAchievements.includes('high-score-10000')) {
+      newAchievements.push('high-score-10000');
+    }
+
+    // Accuracy achievements
+    if (accuracy > 90 && !newAchievements.includes('accuracy-90')) {
+      newAchievements.push('accuracy-90');
+    }
+    if (accuracy > 95 && !newAchievements.includes('accuracy-95')) {
+      newAchievements.push('accuracy-95');
+    }
+
+    // Combo achievements
+    if (combo > 5 && !newAchievements.includes('combo-5')) {
+      newAchievements.push('combo-5');
+    }
+    if (combo > 10 && !newAchievements.includes('combo-10')) {
+      newAchievements.push('combo-10');
+    }
+
+    return newAchievements;
+  };
+
+  const generateDailyChallenges = () => {
+    // Simple daily challenge generation
+    return [
+      { type: 'score', target: 500, reward: 50 },
+      { type: 'accuracy', target: 85, reward: 30 },
+      { type: 'combo', target: 3, reward: 20 }
+    ];
+  };
+
+  const checkDailyChallenges = (score: number, accuracy: number, combo: number, globalStats: any) => {
+    const currentChallenges = globalStats.dailyChallenges;
+    let completedChallenges = 0;
+
+    currentChallenges.forEach((challenge: any) => {
+      if (challenge.type === 'score' && score >= challenge.target) {
+        completedChallenges++;
+      }
+      if (challenge.type === 'accuracy' && accuracy >= challenge.target) {
+        completedChallenges++;
+      }
+      if (challenge.type === 'combo' && combo >= challenge.target) {
+        completedChallenges++;
+      }
+    });
+
+    return completedChallenges;
   };
 
   const generateBlock = () => {
@@ -195,6 +336,12 @@ const InfinityDrop: React.FC = () => {
       coins: gameState.coins,
       level: 1,
     });
+
+    // Update global stats
+    setGlobalStats((prev: any) => ({
+      ...prev,
+      totalGamesPlayed: prev.totalGamesPlayed + 1
+    }));
   };
 
   const placeBlock = () => {
@@ -259,6 +406,14 @@ const InfinityDrop: React.FC = () => {
           <div className="final-score">Final Score: {gameState.score}</div>
           <div className="final-accuracy">Accuracy: {gameState.accuracy}%</div>
           <div className="final-combo">Max Combo: {gameState.combo}</div>
+          <div className="coins-earned">Coins Earned: {Math.floor(gameState.score / 100)}</div>
+          <div className="total-coins">Total Coins: {globalStats.totalCoins}</div>
+          <div className="achievements">
+            <h4>Achievements Earned:</h4>
+            {updateAchievements(globalStats.achievements, gameState.score, gameState.accuracy, gameState.combo).filter(ach => !globalStats.achievements.includes(ach)).map((ach, index) => (
+              <div key={index} className="achievement-earned">+&nbsp;{ach}</div>
+            ))}
+          </div>
           <button onClick={startGame}>Play Again</button>
           {gameState.score > highScore && (
             <div className="new-high-score">New High Score!</div>
@@ -271,6 +426,7 @@ const InfinityDrop: React.FC = () => {
           <div className="score">Score: {gameState.score}</div>
           <div className="combo">Combo: {gameState.combo}</div>
           <div className="accuracy">Acc: {gameState.accuracy}%</div>
+          <div className="coins">Coins: {gameState.coins}</div>
         </div>
       )}
     </div>

@@ -230,7 +230,23 @@
         "gamesPlayed": "プレイ済みゲーム",
         "levelUp": "レベルアップ！",
         "rewards": "報酬 unlocked",
-        "awesome": "すごい！"
+        "awesome": "すごい！",
+        "globalProgression": {
+          "title": "全体進行状況",
+          "totalGamesPlayed": "総プレイ数",
+          "totalCoins": "総獲得コイン",
+          "achievements": "アチーブメント",
+          "dailyChallenges": "日々の挑戦",
+          "claimReward": "報酬を受け取る",
+          "rewardAmount": "+{reward}コイン獲得！",
+          "newAchievement": "新アチーブメント！",
+          "highScore": "ハイスコア",
+          "masteryLevel": "マスターレベル",
+          "nextLevel": "次のレベル: {level}",
+          "levelProgress": "レベル {current} ({progress}%)",
+          "playMore": "もっとゲームをプレイして報酬を獲得しよう！",
+          "amazingSession": "素晴らしいセッション！続行してください！"
+        }
       },
       "mastery": {
         "title": "マスター！",
