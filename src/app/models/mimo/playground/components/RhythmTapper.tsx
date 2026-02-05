@@ -76,6 +76,9 @@ export interface RhythmTapperProps {
     zoneGreen: string;
     zoneYellow: string;
   };
+  gameSettings?: {
+    touchFeedback?: boolean;
+  };
 }
 
 // Mobile detection
@@ -105,6 +108,9 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
     zoneBlue: 'F',
     zoneGreen: 'J',
     zoneYellow: 'K',
+  },
+  gameSettings = {
+    touchFeedback: true,
   },
 }) => {
   const [state, setState] = useState<RhythmTapperState>({
@@ -148,6 +154,9 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
     }
   }, []);
 
+  // Particle cleanup limits
+  const MAX_PARTICLES = isMobile ? 30 : 60;
+
   // Create particles
   const createParticles = useCallback((x: number, y: number, color: string) => {
     setState((prev) => {
@@ -170,7 +179,7 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
 
       return {
         ...prev,
-        particles: [...(prev.particles || []), ...newParticles],
+        particles: [...(prev.particles || []), ...newParticles].slice(-MAX_PARTICLES),
       };
     });
   }, []);
@@ -340,7 +349,7 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
       good: state.goodHits,
       miss: state.misses,
     });
-  }, [state.score, state.highScore, state.perfectHits, state.goodHits, state.misses, vibrate, onGameOver]);
+  }, [vibrate, onGameOver]);
 
   // Note: handleGameOver is called internally by gameLoop when lives <= 0
 
@@ -459,7 +468,7 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
 
     // HUD with better styling
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.fillRect(5, 5, 140, 85);
+    ctx.fillRect(5, 5, 140, 115);
 
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 16px Arial';
@@ -487,25 +496,27 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
     ctx.font = '16px Arial';
     ctx.fillText('❤️'.repeat(state.lives), 15, 85);
 
-    // High score
-    if (state.highScore > 0) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-      ctx.fillRect(width - 115, 5, 110, 25);
-      ctx.fillStyle = '#f472b6';
-      ctx.font = 'bold 14px Arial';
-      ctx.textAlign = 'right';
-      ctx.fillText(`${languageTexts.best}: ${state.highScore}`, width - 15, 22);
-    }
-
-    // Difficulty indicator with better visibility
-    const difficulty = state.score > 500 ? 'EXPERT' : state.score > 300 ? 'HARD' : state.score > 100 ? 'MEDIUM' : 'EASY';
-    const difficultyColor = difficulty === 'EXPERT' ? '#ef4444' : difficulty === 'HARD' ? '#f97316' : difficulty === 'MEDIUM' ? '#eab308' : '#22c55e';
+    // Sound and pause controls
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.fillRect(width - 85, 35, 80, 20);
-    ctx.fillStyle = difficultyColor;
+    ctx.fillRect(width - 120, 5, 115, 40);
+    ctx.fillStyle = isSoundEnabled ? '#22c55e' : '#ef4444';
     ctx.font = 'bold 12px Arial';
     ctx.textAlign = 'right';
-    ctx.fillText(difficulty, width - 15, 50);
+    ctx.fillText(isSoundEnabled ? '🔊' : '🔈', width - 15, 22);
+    ctx.fillText(isPaused ? '⏸' : '⏯', width - 40, 22);
+
+    // Interactive area for controls (visual feedback)
+    if (state.isPlaying && !state.isGameOver) {
+      // Sound button area
+      const soundBtnX = width - 60;
+      const soundBtnY = 15;
+      const soundBtnSize = 25;
+
+      // Pause button area
+      const pauseBtnX = width - 85;
+      const pauseBtnY = 15;
+      const pauseBtnSize = 25;
+    }
   }, [state, getZoneColor, canvasRef, languageTexts.best, languageTexts.combo, languageTexts.score]);
 
   // Touch event handler
@@ -524,8 +535,11 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
       return;
     }
 
+    if (gameSettings.touchFeedback) {
+      createParticles(touch.clientX, touch.clientY, '#ffffff');
+    }
     handleTap(touch.clientX);
-  }, [state.isPlaying, state.isGameOver, startGame, handleTap]);
+  }, [state.isPlaying, state.isGameOver, startGame, handleTap, gameSettings.touchFeedback, createParticles]);
 
   // Click event handler (for desktop)
   const handleClick = useCallback((e: React.MouseEvent) => {
@@ -542,8 +556,43 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
     handleTap(x);
   }, [state.isPlaying, state.isGameOver, startGame, handleTap]);
 
-  // Keyboard handler
+  // Sound controls
+  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+  const toggleSound = useCallback(() => {
+    setIsSoundEnabled((prev) => !prev);
+  }, []);
+
+  // Pause functionality
+  const [isPaused, setIsPaused] = useState(false);
+  const pauseGame = useCallback(() => {
+    setIsPaused(true);
+    if (requestRef.current) {
+      cancelAnimationFrame(requestRef.current);
+    }
+  }, []);
+
+  const resumeGame = useCallback(() => {
+    setIsPaused(false);
+    if (state.isPlaying && !state.isGameOver) {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+      requestRef.current = requestAnimationFrame(gameLoop);
+    }
+  }, [state.isPlaying, state.isGameOver, gameLoop]);
+
+  // Updated handleKeyDown for pause
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.code === 'KeyP' || e.code === 'Escape') {
+      e.preventDefault();
+      if (isPaused) {
+        resumeGame();
+      } else if (state.isPlaying) {
+        pauseGame();
+      }
+      return;
+    }
+
     if (!state.isPlaying && !state.isGameOver) {
       if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();
@@ -574,7 +623,7 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
         }
       }
     }
-  }, [state.isPlaying, state.isGameOver, startGame, handleTap, containerRef]);
+  }, [state.isPlaying, state.isGameOver, startGame, handleTap, containerRef, isPaused, pauseGame, resumeGame]);
 
   // Game loop
   const gameLoop = useCallback(() => {
@@ -717,19 +766,6 @@ const RhythmTapper: React.FC<RhythmTapperProps> = ({
   }, [handleResize, handleKeyDown]);
 
   // Game loop effect
-  useEffect(() => {
-    if (state.isPlaying && !state.isGameOver) {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
-      }
-      requestRef.current = requestAnimationFrame(gameLoop);
-    }
-    return () => {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
-      }
-    };
-  }, [state.isPlaying, state.isGameOver, gameLoop]);
 
   // Initial resize
   useEffect(() => {
