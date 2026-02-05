@@ -24,10 +24,10 @@ jobs:
     with:
       model_id: 'grok'
       model_display_name: 'AI 2 (CLI)'
-      anthropic_model: 'google/gemini-2.0-flash-001'
+      anthropic_model: 'tngtech/deepseek-r1t2-chimera:free'
       commit_prefix: '🤖 AI Evolution (CLI)'
     secrets:
-      model_api_key: ${{ secrets.OPENROUTER_API_KEY }}
+      model_api_key: ${{ secrets.GROK_API_KEY }}
       ga4_property_id: ${{ secrets.GA4_PROPERTY_ID }}
       google_application_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
       serper_api_key: ${{ secrets.SERPER_API_KEY }}
