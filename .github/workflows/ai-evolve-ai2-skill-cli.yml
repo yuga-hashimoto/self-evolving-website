@@ -24,7 +24,7 @@ jobs:
     with:
       model_id: 'grok'
       model_display_name: 'AI 2 (CLI)'
-      anthropic_model: 'tngtech/deepseek-r1t2-chimera:free'
+      anthropic_model: 'openai/gpt-oss-120b:free'
       commit_prefix: '🤖 AI Evolution (CLI)'
     secrets:
       model_api_key: ${{ secrets.GROK_API_KEY }}

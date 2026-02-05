@@ -24,7 +24,7 @@ jobs:
     with:
       model_id: 'mimo'
       model_display_name: 'AI 1 (CLI)'
-      anthropic_model: 'z-ai/glm-4.5-air:free'
+      anthropic_model: 'arcee-ai/trinity-large-preview:free'
       commit_prefix: '🆓 AI Evolution (CLI)'
     secrets:
       model_api_key: ${{ secrets.MIMO_API_KEY }}
