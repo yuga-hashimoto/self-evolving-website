@@ -7,7 +7,12 @@ import { useAnalytics } from '@/lib/analytics';
 import type { RhythmTapperState, RhythmColor, RhythmZone, RhythmNote } from './components/RhythmTapper';
 import type { NeonTetrisState } from './components/NeonTetris';
 import InfinityDrop from './components/InfinityDrop';
+
 import Slide2048 from './components/Slide2048';
+
+// Tetris grid dimensions
+const TETRIS_GRID_HEIGHT = 20;
+const TETRIS_GRID_WIDTH = 10;
 
 // Infinity Drop Interfaces
 interface Block {
@@ -1548,16 +1553,19 @@ export default function MimoPlayground() {
     dropInterval: 60,
     particles: [],
     lastMoveWasRotate: false,
-  });
+    statistics: {
+      lines: 0,
+      tetrises: 0,
+      perfectClears: 0,
+      combos: 0,
+    },
 
-  // Track tetris session start time for duration calculation
-  const tetrisSessionStartRef = useRef<number>(0);
 
   // Track color rush timing
-  const colorRushSessionStartRef = useRef<number>(0);
-  const colorRushColorChangeRef = useRef<number>(0);
-  const colorRushTimerRef = useRef<number>(0);
-  const colorRushPowerUpRef = useRef<number>(0);
+  const colorRushSessionStartRef = useRef(0);
+  const colorRushColorChangeRef = useRef(0);
+  const colorRushTimerRef = useRef(0);
+  const colorRushPowerUpRef = useRef(0);
 
   // Neon Color Rush state
   const [colorRushState, setColorRushState] = useState<ColorRushState>({
