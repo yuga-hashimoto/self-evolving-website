@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { IconDNA, IconChangelog, IconHome, IconMimo, IconGrok } from "@/components/icons/Icons";
 import { useTranslations, useLocale } from 'next-intl';
+import SiteValueTicker from "@/components/SiteValueTicker";
 
 export default function Header() {
     const pathname = usePathname();
@@ -36,12 +37,16 @@ export default function Header() {
             <header className="sticky top-0 z-50 glass-card border-b border-white/10 backdrop-blur-xl">
                 <nav className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8" aria-label="Main navigation">
                     <div className="flex items-center justify-between h-14 sm:h-16">
-                        <Link href="/" className="flex items-center space-x-2">
+                        <Link href="/" className="flex items-center space-x-2 shrink-0">
                             <IconDNA size={28} className="sm:w-8 sm:h-8" />
-                            <span className="font-bold text-base sm:text-lg gradient-text">
+                            <span className="font-bold text-base sm:text-lg gradient-text hidden sm:block">
                                 Self-Evolving
                             </span>
                         </Link>
+
+                        <div className="flex-1 flex justify-center px-1 sm:px-4">
+                            <SiteValueTicker />
+                        </div>
 
                         <div className="flex items-center gap-1 sm:gap-3">
                             {/* Desktop Navigation */}
