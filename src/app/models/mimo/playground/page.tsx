@@ -5,9 +5,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAnalytics } from '@/lib/analytics';
 import type { RhythmTapperState, RhythmColor, RhythmZone, RhythmNote } from './components/RhythmTapper';
-import type { NeonTetrisState } from './components/NeonTetris';
+import type { NeonTetrisState } from "./components/NeonTetris";
 import InfinityDrop from './components/InfinityDrop';
 import Slide2048 from './components/Slide2048';
+import QuickTap from './components/QuickTap';
 
 // Infinity Drop Interfaces
 interface Block {
@@ -1094,6 +1095,32 @@ const TUTORIALS: Record<GameType, TutorialStep[]> = {
       visualHint: "🔥"
     }
   ],
+  quickTap: [
+    {
+      id: 1,
+      title: "Welcome to Quick Tap!",
+      description: "Test your reaction speed by tapping when the circle turns green!",
+      highlight: "Tap when circle is green",
+      action: "Tap the green circle",
+      visualHint: "🟢"
+    },
+    {
+      id: 2,
+      title: "Reaction Time",
+      description: "The faster you tap, the higher your score and better reaction time!",
+      highlight: "Fast taps = Better score",
+      action: "Get a reaction time under 0.3s",
+      visualHint: "⚡"
+    },
+    {
+      id: 3,
+      title: "Build Your Streak",
+      description: "Get consecutive correct taps to increase your streak multiplier!",
+      highlight: "Streak = Higher scores",
+      action: "Get a 5x streak",
+      visualHint: "🔥"
+    }
+  ],
   '2048': [
     {
       id: 1,
@@ -1305,7 +1332,7 @@ interface SessionState {
 }
 
 
-type GameType = 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3';
+type GameType = 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3' | 'quickTap';
 
 // Tutorial interfaces
 interface TutorialStep {
@@ -1327,7 +1354,7 @@ interface TutorialState {
 export default function MimoPlayground() {
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3' | 'quickTap'>('menu');
   const [shopOpen, setShopOpen] = useState(false);
 
   // Audio/Sound state
@@ -1581,7 +1608,37 @@ export default function MimoPlayground() {
     bestStreak: 0,
   });
 
-    // Match-3 game state
+    // Quick Tap state interface
+interface QuickTapState {
+  isPlaying: boolean;
+  isGameOver: boolean;
+  score: number;
+  highScore: number;
+  reactionTime: number;
+  bestReactionTime: number;
+  currentColor: string;
+  targetColor: string;
+  timer: number;
+  speed: number;
+  streak: number;
+}
+
+// Quick Tap state
+  const [quickTapState, setQuickTapState] = useState<QuickTapState>({
+    isPlaying: false,
+    isGameOver: false,
+    score: 0,
+    highScore: 0,
+    reactionTime: 0,
+    bestReactionTime: Infinity,
+    currentColor: '#ffffff',
+    targetColor: '#00ff00',
+    timer: 0,
+    speed: 2,
+    streak: 0,
+  });
+
+  // Match-3 game state
   const [match3State, setMatch3State] = useState<Match3State>({
     grid: [],
     score: 0,
