@@ -8,6 +8,7 @@ import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
+import AiConcierge from "@/components/AiConcierge";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://self-evolving.vercel.app';
 
@@ -115,6 +116,7 @@ export default async function RootLayout({
             <Header />
             <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
             <Footer />
+            <AiConcierge />
           </AnalyticsProvider>
         </NextIntlClientProvider>
       </body>
