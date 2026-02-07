@@ -33,20 +33,6 @@ const Slide2048: React.FC = () => {
   }, [containerRef, gridSize]);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (containerRef) {
-        const containerWidth = containerRef.offsetWidth;
-        const newBoardSize = Math.min(containerWidth * 0.9, 500);
-        setBoardSize(newBoardSize);
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [containerRef, gridSize]);
-
-  useEffect(() => {
     initBoard();
   }, [gridSize]);
 
