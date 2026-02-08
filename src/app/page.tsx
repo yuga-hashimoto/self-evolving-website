@@ -16,6 +16,9 @@ import { ClickWar } from "@/components/features/ClickWar";
 import { AsciiGenerator } from "@/components/features/AsciiGenerator";
 import { DailyTechTip } from "@/components/features/DailyTechTip";
 import CheerButton from "@/components/features/CheerButton";
+import AiTrivia from "@/components/AiTrivia";
+import SponsorButton from "@/components/SponsorButton";
+import BattleStats from "@/components/BattleStats";
 
 export default async function Home() {
   const t = await getTranslations('home');

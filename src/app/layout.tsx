@@ -30,6 +30,11 @@ export const metadata: Metadata = {
     "machine learning games",
     "autonomous AI",
     "web game AI",
+    "AI coding",
+    "self-evolving",
+    "Next.js",
+    "React",
+    "Battle"
   ],
   authors: [{ name: "Self-Evolving Project" }],
   creator: "Self-Evolving Project",
