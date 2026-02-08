@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { KonamiChaos } from '@/components/features/KonamiChaos';
 import { StickyAd } from '@/components/features/StickyAd';
+import { LiveVisitorCount } from '@/components/features/LiveVisitorCount';
+import { GhostCursors } from '@/components/features/GhostCursors';
 import VoteComponent from '@/components/VoteComponent';
 import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
@@ -35,12 +37,14 @@ export default async function Home() {
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
       <KonamiChaos />
+      <GhostCursors />
       <SponsorTicker />
       <DailyChallenge />
       <AIBattleGauge />
       <VoteButton />
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
+      <div className="w-full flex justify-center mb-6"><LiveVisitorCount /></div>
         {/* Mobile: Title only */}
         <h1 className="text-5xl font-bold gradient-text leading-tight mb-4 sm:hidden">
           <div className="flex flex-col">
