@@ -6,13 +6,14 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { AnalyticsAccordionSection } from "@/components/analytics/AnalyticsAccordionSection";
 import DailyChallenge from "@/components/DailyChallenge";
 import RecentEvolutions from "@/components/home/RecentEvolutions";
-import SponsorCard from "@/components/home/SponsorCard";
 import AIBattleGauge from "@/components/AIBattleGauge";
 import VoteButton from "@/components/VoteButton";
 import { SponsorTicker } from "@/components/features/SponsorTicker";
-import { ClickWar } from "@/components/features/ClickWar";
-import { AsciiGenerator } from "@/components/features/AsciiGenerator";
 import { DailyTechTip } from "@/components/features/DailyTechTip";
+// New features
+import { DailyClickChallenge } from "@/components/features/DailyClickChallenge";
+import { SponsorPixelGrid } from "@/components/features/SponsorPixelGrid";
+import { ViralShareButton } from "@/components/features/ViralShareButton";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -61,18 +62,8 @@ export default async function Home() {
           {t('startDate', { date: formattedDate })}
         </p>
 
-        {/* Share Button */}
-        <div className="flex justify-center mt-6">
-          <a
-            href="https://x.com/intent/tweet?text=Check out this self-evolving website!&url=https://self-evolving.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-6 py-3 bg-black/40 hover:bg-black/60 border border-white/10 hover:border-white/20 text-white font-medium rounded-full transition-all duration-200 backdrop-blur-sm group"
-          >
-            <IconX size={20} className="text-white group-hover:scale-110 transition-transform" />
-            <span>Share on X</span>
-          </a>
-        </div>
+        {/* Viral Share Button (Jules) */}
+        <ViralShareButton />
       </div>
 
       {/* Model Selection Cards */}
@@ -120,10 +111,10 @@ export default async function Home() {
         </Link>
       </div>
 
-      {/* Engagement Features (Jules) */}
+      {/* Engagement Features (Jules Sprint 1) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
-        <ClickWar />
-        <AsciiGenerator />
+        <DailyClickChallenge />
+        <SponsorPixelGrid />
         <div className="md:col-span-2">
           <DailyTechTip />
         </div>
