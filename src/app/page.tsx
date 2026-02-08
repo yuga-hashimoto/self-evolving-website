@@ -1,4 +1,9 @@
 import Link from 'next/link';
+import { KonamiChaos } from '@/components/features/KonamiChaos';
+import { StickyAd } from '@/components/features/StickyAd';
+import { LiveVisitorCount } from '@/components/features/LiveVisitorCount';
+import { GhostCursors } from '@/components/features/GhostCursors';
+import { SponsorTicker } from '@/components/features/SponsorTicker';
 import VoteComponent from '@/components/VoteComponent';
 import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
@@ -37,12 +42,16 @@ export default async function Home() {
   const grokAnalytics = getModelAnalytics('grok');
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
+      <KonamiChaos />
+      <GhostCursors />
+      <SponsorTicker />
       <TrashTalkTicker />
       <DailyChallenge />
       <AIBattleGauge />
       <VoteButton />
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
+      <div className="w-full flex justify-center mb-6"><LiveVisitorCount /></div>
         {/* Mobile: Title only */}
         <h1 className="text-5xl font-bold gradient-text leading-tight mb-4 sm:hidden">
           <div className="flex flex-col">
@@ -370,6 +379,7 @@ export default async function Home() {
         </div>
       </div>
 
+      <StickyAd />
       {/* Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
