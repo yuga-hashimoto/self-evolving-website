@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import VoteComponent from '@/components/VoteComponent';
 import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
 import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
@@ -120,6 +121,7 @@ export default async function Home() {
         </Link>
       </div>
 
+      <VoteComponent />
       {/* Engagement Features (Jules) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
         <ClickWar />
