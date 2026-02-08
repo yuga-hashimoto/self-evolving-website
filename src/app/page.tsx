@@ -206,6 +206,8 @@ export default async function Home() {
 
       <SponsorCard />
 
+      <SponsorCard />
+
       {/* How it Works - Mobile Optimized Timeline */}
       <div className="max-w-3xl w-full mb-4 sm:mb-8 px-4">
         <h3 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-400">
