@@ -9,6 +9,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import AiConcierge from "@/components/AiConcierge";
+import ShareStatus from "@/components/ShareStatus";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://self-evolving.vercel.app';
 
@@ -117,6 +118,7 @@ export default async function RootLayout({
             <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
             <Footer />
             <AiConcierge />
+            <ShareStatus />
           </AnalyticsProvider>
         </NextIntlClientProvider>
       </body>
