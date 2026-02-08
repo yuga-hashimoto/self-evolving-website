@@ -3,6 +3,7 @@ import { KonamiChaos } from '@/components/features/KonamiChaos';
 import { StickyAd } from '@/components/features/StickyAd';
 import { LiveVisitorCount } from '@/components/features/LiveVisitorCount';
 import { GhostCursors } from '@/components/features/GhostCursors';
+import { SponsorTicker } from '@/components/features/SponsorTicker';
 import VoteComponent from '@/components/VoteComponent';
 import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
@@ -14,10 +15,15 @@ import RecentEvolutions from "@/components/home/RecentEvolutions";
 import SponsorCard from "@/components/home/SponsorCard";
 import AIBattleGauge from "@/components/AIBattleGauge";
 import VoteButton from "@/components/VoteButton";
-import { SponsorTicker } from "@/components/features/SponsorTicker";
+import { TrashTalkTicker } from "@/components/features/TrashTalkTicker";
+import { TipJar } from "@/components/features/TipJar";
 import { ClickWar } from "@/components/features/ClickWar";
 import { AsciiGenerator } from "@/components/features/AsciiGenerator";
 import { DailyTechTip } from "@/components/features/DailyTechTip";
+import CheerButton from "@/components/features/CheerButton";
+import AiTrivia from "@/components/AiTrivia";
+import SponsorButton from "@/components/SponsorButton";
+import BattleStats from "@/components/BattleStats";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -39,6 +45,7 @@ export default async function Home() {
       <KonamiChaos />
       <GhostCursors />
       <SponsorTicker />
+      <TrashTalkTicker />
       <DailyChallenge />
       <AIBattleGauge />
       <VoteButton />
@@ -84,10 +91,14 @@ export default async function Home() {
       </div>
 
       {/* Model Selection Cards */}
-      <div className="grid grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
+      <div className="grid grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2 relative">
         {/* AI 1 (Mimo) Card */}
-        <Link href="/models/mimo" className="group block active:scale-95 transition-transform" aria-label="AI 1モデルの進化を見る">
-          <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 border-purple-500/30 hover:border-purple-500/60 active:bg-white/15">
+        <div className="group block active:scale-95 transition-transform relative">
+          <Link href="/models/mimo" className="absolute inset-0 z-10" aria-label="AI 1モデルの進化を見る">
+            <span className="sr-only">View Model</span>
+          </Link>
+          <div className="glass-card p-4 sm:p-8 text-center h-full transition-all duration-300 group-hover:scale-105 border-purple-500/30 group-hover:border-purple-500/60 active:bg-white/15 relative">
+            <CheerButton modelId="mimo" color="#a855f7" />
             <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
               <IconMimo size={80} className="w-14 h-14 sm:w-20 sm:h-20" aria-hidden="true" />
             </div>
@@ -104,11 +115,15 @@ export default async function Home() {
               </span>
             </div>
           </div>
-        </Link>
+        </div>
 
         {/* AI 2 (Grok) Card */}
-        <Link href="/models/grok" className="group block active:scale-95 transition-transform" aria-label="AI 2モデルの進化を見る">
-          <div className="glass-card p-4 sm:p-8 text-center h-full cursor-pointer transition-all duration-300 hover:scale-105 border-blue-500/30 hover:border-blue-500/60 active:bg-white/15">
+        <div className="group block active:scale-95 transition-transform relative">
+          <Link href="/models/grok" className="absolute inset-0 z-10" aria-label="AI 2モデルの進化を見る">
+            <span className="sr-only">View Model</span>
+          </Link>
+          <div className="glass-card p-4 sm:p-8 text-center h-full transition-all duration-300 group-hover:scale-105 border-blue-500/30 group-hover:border-blue-500/60 active:bg-white/15 relative">
+            <CheerButton modelId="grok" color="#3b82f6" />
             <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
               <IconGrok size={80} className="w-14 h-14 sm:w-20 sm:h-20" aria-hidden="true" />
             </div>
@@ -125,10 +140,11 @@ export default async function Home() {
               </span>
             </div>
           </div>
-        </Link>
+        </div>
       </div>
 
       <VoteComponent />
+      <TipJar />
       {/* Engagement Features (Jules) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
         <ClickWar />
