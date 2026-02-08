@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import VoteComponent from '@/components/VoteComponent';
 import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
 import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
@@ -97,6 +98,8 @@ export default async function Home() {
           </div>
         </Link>
       </div>
+
+      <VoteComponent />
 
       {/* Engagement Comparison */}
       <div className="max-w-3xl w-full mb-6 px-4">
