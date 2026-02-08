@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok } from "@/components/icons/Icons";
 import Link from "next/link";
+=======
+import Link from 'next/link';
+import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
+>>>>>>> c31f2b8 (feat: enhance engagement with X share button, feedback link, and prominent Ko-fi button)
 import { MODELS } from "@/lib/models";
 import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
 import { getTranslations, getLocale } from 'next-intl/server';
@@ -145,9 +150,18 @@ export default async function Home() {
 
               {/* Update Note */}
               <div className="mt-6 pt-4 border-t border-white/10 text-center">
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 mb-4">
                   {t('updateNote')}
                 </p>
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out this AI vs AI evolution experiment! 🧬🤖 #SelfEvolving #AI #Grok #Mimo")}&url=${encodeURIComponent("https://self-evolving.vercel.app")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60 border border-white/10 hover:border-white/20 text-white text-sm font-medium rounded-full transition-colors duration-200 backdrop-blur-sm"
+                >
+                  <IconX size={16} />
+                  <span>Share Result</span>
+                </a>
               </div>
             </>
           ) : (

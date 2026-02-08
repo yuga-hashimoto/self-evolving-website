@@ -25,8 +25,8 @@ export default function KofiWidget() {
                         // @ts-expect-error Ko-fi widget types not available
                         window.kofiWidgetOverlay.draw('yugahashimoto', {
                             'type': 'floating-chat',
-                            'floating-chat.donateButton.text': 'Tip Me',
-                            'floating-chat.donateButton.background-color': '#8b5cf6',
+                            'floating-chat.donateButton.text': 'Support Evolution',
+                            'floating-chat.donateButton.background-color': '#ec4899',
                             'floating-chat.donateButton.text-color': '#fff',
                             'floating-chat.core.position.bottom-left': 'position: static !important; width: auto !important; transform: none !important;',
                             'floating-chat.core.position.bottom-right': 'position: static !important; width: auto !important; transform: none !important;'
