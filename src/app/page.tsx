@@ -10,7 +10,8 @@ import RecentEvolutions from "@/components/home/RecentEvolutions";
 import SponsorCard from "@/components/home/SponsorCard";
 import AIBattleGauge from "@/components/AIBattleGauge";
 import VoteButton from "@/components/VoteButton";
-import { SponsorTicker } from "@/components/features/SponsorTicker";
+import { TrashTalkTicker } from "@/components/features/TrashTalkTicker";
+import { TipJar } from "@/components/features/TipJar";
 import { ClickWar } from "@/components/features/ClickWar";
 import { AsciiGenerator } from "@/components/features/AsciiGenerator";
 import { DailyTechTip } from "@/components/features/DailyTechTip";
@@ -33,7 +34,7 @@ export default async function Home() {
   const grokAnalytics = getModelAnalytics('grok');
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
-      <SponsorTicker />
+      <TrashTalkTicker />
       <DailyChallenge />
       <AIBattleGauge />
       <VoteButton />
@@ -131,6 +132,7 @@ export default async function Home() {
       </div>
 
       <VoteComponent />
+      <TipJar />
       {/* Engagement Features (Jules) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
         <ClickWar />
