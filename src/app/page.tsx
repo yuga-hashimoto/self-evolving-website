@@ -8,6 +8,12 @@ import { AnalyticsAccordionSection } from "@/components/analytics/AnalyticsAccor
 import DailyChallenge from "@/components/DailyChallenge";
 import RecentEvolutions from "@/components/home/RecentEvolutions";
 import SponsorCard from "@/components/home/SponsorCard";
+import AIBattleGauge from "@/components/AIBattleGauge";
+import VoteButton from "@/components/VoteButton";
+import { SponsorTicker } from "@/components/features/SponsorTicker";
+import { ClickWar } from "@/components/features/ClickWar";
+import { AsciiGenerator } from "@/components/features/AsciiGenerator";
+import { DailyTechTip } from "@/components/features/DailyTechTip";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -26,7 +32,10 @@ export default async function Home() {
   const grokAnalytics = getModelAnalytics('grok');
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
+      <SponsorTicker />
       <DailyChallenge />
+      <AIBattleGauge />
+      <VoteButton />
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
         {/* Mobile: Title only */}
@@ -52,6 +61,19 @@ export default async function Home() {
         <p className="text-sm sm:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed">
           {t('startDate', { date: formattedDate })}
         </p>
+
+        {/* Share Button */}
+        <div className="flex justify-center mt-6">
+          <a
+            href="https://x.com/intent/tweet?text=Check out this self-evolving website!&url=https://self-evolving.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-6 py-3 bg-black/40 hover:bg-black/60 border border-white/10 hover:border-white/20 text-white font-medium rounded-full transition-all duration-200 backdrop-blur-sm group"
+          >
+            <IconX size={20} className="text-white group-hover:scale-110 transition-transform" />
+            <span>Share on X</span>
+          </a>
+        </div>
       </div>
 
       {/* Model Selection Cards */}
@@ -100,6 +122,14 @@ export default async function Home() {
       </div>
 
       <VoteComponent />
+      {/* Engagement Features (Jules) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
+        <ClickWar />
+        <AsciiGenerator />
+        <div className="md:col-span-2">
+          <DailyTechTip />
+        </div>
+      </div>
 
       {/* Engagement Comparison */}
       <div className="max-w-3xl w-full mb-6 px-4">
@@ -193,8 +223,6 @@ export default async function Home() {
 
       {/* Recent Evolutions */}
       <RecentEvolutions />
-
-      <SponsorCard />
 
       {/* How it Works - Mobile Optimized Timeline */}
       <div className="max-w-3xl w-full mb-4 sm:mb-8 px-4">
