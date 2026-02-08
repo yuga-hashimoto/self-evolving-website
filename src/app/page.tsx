@@ -1,15 +1,11 @@
-<<<<<<< HEAD
-import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok } from "@/components/icons/Icons";
-import Link from "next/link";
-=======
 import Link from 'next/link';
 import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
->>>>>>> c31f2b8 (feat: enhance engagement with X share button, feedback link, and prominent Ko-fi button)
 import { MODELS } from "@/lib/models";
 import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
 import { getTranslations, getLocale } from 'next-intl/server';
 import { AnalyticsAccordionSection } from "@/components/analytics/AnalyticsAccordionSection";
 import DailyChallenge from "@/components/DailyChallenge";
+import RecentEvolutions from "@/components/home/RecentEvolutions";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -190,6 +186,9 @@ export default async function Home() {
           avgSessionDuration: t('avgSessionDuration'),
         }}
       />
+
+      {/* Recent Evolutions */}
+      <RecentEvolutions />
 
       {/* How it Works - Mobile Optimized Timeline */}
       <div className="max-w-3xl w-full mb-4 sm:mb-8 px-4">
