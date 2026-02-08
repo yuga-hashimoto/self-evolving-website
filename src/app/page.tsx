@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { KonamiChaos } from '@/components/features/KonamiChaos';
 import VoteComponent from '@/components/VoteComponent';
 import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
@@ -32,6 +33,7 @@ export default async function Home() {
   const grokAnalytics = getModelAnalytics('grok');
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
+      <KonamiChaos />
       <SponsorTicker />
       <DailyChallenge />
       <AIBattleGauge />
