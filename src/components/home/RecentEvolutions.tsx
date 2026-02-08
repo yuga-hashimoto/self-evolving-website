@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { IconCodeSpark } from '@/components/icons/Icons';
 import { getTranslations } from 'next-intl/server';
+import ReactionButton from '@/components/home/ReactionButton';
 
 interface ChangeLogEntry {
   id: number;
@@ -85,11 +86,14 @@ export default async function RecentEvolutions() {
                  {evo.intent || evo.changes}
                </p>
 
-               {evo.prUrl && (
-                 <a href={evo.prUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 mt-1 inline-block">
-                   View Code &rarr;
-                 </a>
-               )}
+               <div className="flex items-center gap-3 mt-2">
+                 <ReactionButton id={evo.id} model={evo.model} />
+                 {evo.prUrl && (
+                   <a href={evo.prUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300">
+                     View Code &rarr;
+                   </a>
+                 )}
+               </div>
             </div>
           ))}
         </div>
