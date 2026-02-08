@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Zap, CheckCircle2, Trophy, X } from "lucide-react";
+import { Zap, CheckCircle2, Trophy, X, Flame } from "lucide-react";
 import Link from "next/link";
 
 export default function DailyChallenge() {
   const [isVisible, setIsVisible] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [streak, setStreak] = useState(0);
 
   useEffect(() => {
     // Show after a short delay
@@ -15,6 +16,23 @@ export default function DailyChallenge() {
     // Check local storage for completion
     const completed = localStorage.getItem("daily_challenge_completed_2026_02_08");
     if (completed) setIsCompleted(true);
+
+    // Streak Logic
+    const today = new Date().toISOString().split('T')[0];
+    const lastVisit = localStorage.getItem("last_visit_date");
+    let currentStreak = parseInt(localStorage.getItem("daily_streak") || "0");
+
+    if (lastVisit !== today) {
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        if (lastVisit === yesterday) {
+            currentStreak += 1;
+        } else {
+            currentStreak = 1; // Reset if missed a day or first visit
+        }
+        localStorage.setItem("daily_streak", currentStreak.toString());
+        localStorage.setItem("last_visit_date", today);
+    }
+    setStreak(currentStreak);
 
     return () => clearTimeout(timer);
   }, []);
@@ -36,14 +54,22 @@ export default function DailyChallenge() {
         {/* Shine Effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shine pointer-events-none" />
 
-        <button 
-          onClick={() => setIsVisible(false)}
-          className="absolute top-2 right-2 text-white/40 hover:text-white transition-colors"
-        >
-          <X size={16} />
-        </button>
+        <div className="absolute top-2 right-2 flex items-center gap-2">
+           {streak > 0 && (
+             <div className="flex items-center gap-1 text-xs font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
+               <Flame size={12} className="fill-orange-500" />
+               Day {streak}
+             </div>
+           )}
+           <button 
+             onClick={() => setIsVisible(false)}
+             className="text-white/40 hover:text-white transition-colors"
+           >
+             <X size={16} />
+           </button>
+        </div>
 
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-4 pt-2">
           <div className={`
             p-3 rounded-full shrink-0 flex items-center justify-center
             ${isCompleted ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400 animate-pulse"}

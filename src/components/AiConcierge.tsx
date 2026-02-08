@@ -10,6 +10,7 @@ type Message = {
 
 export default function AiConcierge() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showProModal, setShowProModal] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "AIツールをお探しですか？私が最適なツールを提案します。" }
   ]);
@@ -78,7 +79,7 @@ export default function AiConcierge() {
         {/* Chat Window */}
         <div 
           className={`
-            pointer-events-auto transition-all duration-300 origin-bottom-right
+            pointer-events-auto transition-all duration-300 origin-bottom-right relative
             bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden
             flex flex-col mb-4 w-[350px] max-w-[calc(100vw-2rem)]
             ${isOpen ? "scale-100 opacity-100 h-[500px]" : "scale-0 opacity-0 h-0"}
@@ -90,13 +91,56 @@ export default function AiConcierge() {
               <Sparkles className="w-5 h-5 animate-pulse" />
               <span>AI Concierge</span>
             </div>
-            <button 
-              onClick={() => setIsOpen(false)} 
-              className="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-1 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setShowProModal(true)}
+                className="text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded-full text-white font-semibold transition-colors flex items-center gap-1 border border-white/10"
+              >
+                🚀 Pro
+              </button>
+              <button 
+                onClick={() => setIsOpen(false)} 
+                className="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-1 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
+
+          {/* Pro Mode Modal */}
+          {showProModal && (
+            <div className="absolute inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-6 text-center backdrop-blur-sm animate-in fade-in duration-300">
+              <div className="relative w-full">
+                <button 
+                  onClick={() => setShowProModal(false)}
+                  className="absolute -top-12 right-0 text-white/50 hover:text-white transition-colors"
+                >
+                  <X size={24} />
+                </button>
+                <div className="mb-4 flex justify-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg shadow-violet-500/30">
+                    <Sparkles className="w-8 h-8 text-white animate-pulse" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-pink-400 mb-2">
+                  Upgrade to Pro
+                </h3>
+                <p className="text-gray-300 text-sm mb-6 leading-relaxed">
+                  Unlock faster generation, exclusive models, and remove all ads!
+                  <br/>
+                  <span className="text-xs text-gray-500 mt-2 block">(Coming Soon)</span>
+                </p>
+                <a 
+                  href="https://ko-fi.com" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-[#FF5E5B] hover:bg-[#ff4f4c] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:scale-105 hover:shadow-lg hover:shadow-[#FF5E5B]/30"
+                >
+                  ☕ Support on Ko-fi
+                </a>
+              </div>
+            </div>
+          )}
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
