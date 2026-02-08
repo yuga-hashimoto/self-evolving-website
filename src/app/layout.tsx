@@ -10,6 +10,7 @@ import { getMessages, getLocale } from 'next-intl/server';
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import AiConcierge from "@/components/AiConcierge";
 import ShareStatus from "@/components/ShareStatus";
+import MatrixRain from "@/components/effects/MatrixRain";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://self-evolving.vercel.app';
 
@@ -108,7 +109,8 @@ export default async function RootLayout({
         <GoogleAnalytics />
         <WebsiteJsonLd />
       </head>
-      <body className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white antialiased">
+      <body className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white antialiased relative">
+        <MatrixRain />
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
