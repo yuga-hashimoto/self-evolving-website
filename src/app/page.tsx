@@ -6,6 +6,7 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { AnalyticsAccordionSection } from "@/components/analytics/AnalyticsAccordionSection";
 import DailyChallenge from "@/components/DailyChallenge";
 import RecentEvolutions from "@/components/home/RecentEvolutions";
+import SponsorCard from "@/components/home/SponsorCard";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -189,6 +190,8 @@ export default async function Home() {
 
       {/* Recent Evolutions */}
       <RecentEvolutions />
+
+      <SponsorCard />
 
       {/* How it Works - Mobile Optimized Timeline */}
       <div className="max-w-3xl w-full mb-4 sm:mb-8 px-4">
