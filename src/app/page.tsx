@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { KonamiChaos } from '@/components/features/KonamiChaos';
+import { StickyAd } from '@/components/features/StickyAd';
 import VoteComponent from '@/components/VoteComponent';
 import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
@@ -358,6 +359,7 @@ export default async function Home() {
         </div>
       </div>
 
+      <StickyAd />
       {/* Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
