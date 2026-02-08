@@ -7,6 +7,8 @@ import { AnalyticsAccordionSection } from "@/components/analytics/AnalyticsAccor
 import DailyChallenge from "@/components/DailyChallenge";
 import RecentEvolutions from "@/components/home/RecentEvolutions";
 import SponsorCard from "@/components/home/SponsorCard";
+import AIBattleGauge from "@/components/AIBattleGauge";
+import VoteButton from "@/components/VoteButton";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -26,6 +28,8 @@ export default async function Home() {
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
       <DailyChallenge />
+      <AIBattleGauge />
+      <VoteButton />
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
         {/* Mobile: Title only */}
@@ -190,6 +194,15 @@ export default async function Home() {
 
       {/* Recent Evolutions */}
       <RecentEvolutions />
+      
+      <div className="mb-8">
+        <Link 
+          href="/history" 
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-purple-300 font-medium"
+        >
+          <span>📜 View Full Evolution History</span>
+        </Link>
+      </div>
 
       <SponsorCard />
 
