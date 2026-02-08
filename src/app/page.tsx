@@ -4,6 +4,7 @@ import { MODELS } from "@/lib/models";
 import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
 import { getTranslations, getLocale } from 'next-intl/server';
 import { AnalyticsAccordionSection } from "@/components/analytics/AnalyticsAccordionSection";
+import DailyChallenge from "@/components/DailyChallenge";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -22,6 +23,7 @@ export default async function Home() {
   const grokAnalytics = getModelAnalytics('grok');
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
+      <DailyChallenge />
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
         {/* Mobile: Title only */}

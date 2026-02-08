@@ -25,6 +25,23 @@ export default function AiConcierge() {
     scrollToBottom();
   }, [messages, isOpen]);
 
+  // Featured Tool Injection (Monetization)
+  useEffect(() => {
+    if (isOpen && messages.length === 1) {
+      const timer = setTimeout(() => {
+        setIsTyping(true);
+        setTimeout(() => {
+          setMessages(prev => [
+            ...prev, 
+            { role: "assistant", content: "🔥 **今週の注目ツール:** [Claude 3.7 Opus](https://claude.ai) がリリースされました。コーディング能力がさらに向上しています！" }
+          ]);
+          setIsTyping(false);
+        }, 1500);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, messages.length]);
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -36,16 +53,21 @@ export default function AiConcierge() {
 
     // AI Mock Response (Jules would implement real logic here)
     setTimeout(() => {
-      const responses = [
-        "それなら [Claude](https://claude.ai) がおすすめです。コーディング能力が非常に高いです。",
-        "画像生成なら [Midjourney](https://midjourney.com) が現在最強です。",
-        "動画生成なら [Runway Gen-3](https://runwayml.com) を試してみてください。",
-        "ビジネス用途なら [Gemini Advanced](https://gemini.google.com) がGoogleエコシステムと連携して便利です。",
-        "オープンソースなら [Hugging Face](https://huggingface.co) でモデルを探すと良いでしょう。"
-      ];
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      let response = "";
+      if (userMsg.includes("tip") || userMsg.includes("コツ")) {
+         response = "💡 **今日のAI活用術:** プロンプトに「ステップバイステップで考えて」と加えるだけで、論理的思考力が20%向上しますよ。";
+      } else {
+        const responses = [
+          "それなら [Claude](https://claude.ai) がおすすめです。コーディング能力が非常に高いです。",
+          "画像生成なら [Midjourney](https://midjourney.com) が現在最強です。",
+          "動画生成なら [Runway Gen-3](https://runwayml.com) を試してみてください。",
+          "ビジネス用途なら [Gemini Advanced](https://gemini.google.com) がGoogleエコシステムと連携して便利です。",
+          "オープンソースなら [Hugging Face](https://huggingface.co) でモデルを探すと良いでしょう。"
+        ];
+        response = responses[Math.floor(Math.random() * responses.length)];
+      }
       
-      setMessages(prev => [...prev, { role: "assistant", content: randomResponse }]);
+      setMessages(prev => [...prev, { role: "assistant", content: response }]);
       setIsTyping(false);
     }, 1500);
   };
