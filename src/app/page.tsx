@@ -28,7 +28,12 @@ import BattleStats from "@/components/BattleStats";
 import { DailyClickChallenge } from "@/components/features/DailyClickChallenge";
 import { SponsorPixelGrid } from "@/components/features/SponsorPixelGrid";
 import { ViralShareButton } from "@/components/features/ViralShareButton";
-// New features (Jules Sprint 2)
+// New features (Jules Sprint 2 - Continued)
+import ClickCounter from '@/components/ClickCounter';
+import DonationButton from '@/components/DonationButton';
+import MatrixRainToggle from '@/components/features/MatrixRainToggle';
+import TechJoke from '@/components/features/TechJoke';
+import ReactionTest from '@/components/features/ReactionTest';
 import { CodeTimeline } from '@/components/features/CodeTimeline';
 import { MemeGenerator } from '@/components/features/MemeGenerator';
 import { ChaosMode } from '@/components/features/ChaosMode';
@@ -51,6 +56,7 @@ export default async function Home() {
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
       <KonamiChaos />
+      <MatrixRainToggle />
       <ChaosMode />
       <MemeGenerator />
       <GhostCursors />
@@ -148,7 +154,15 @@ export default async function Home() {
       <TipJar />
       {/* Engagement Features (Combined) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
+        <div className="flex flex-col gap-4">
+          <ClickCounter />
+          <div className="flex justify-center">
+            <DonationButton />
+          </div>
+        </div>
         <DailyClickChallenge />
+        <TechJoke />
+        <ReactionTest />
         <SponsorPixelGrid />
         <ClickWar />
         <MegaBoost />
