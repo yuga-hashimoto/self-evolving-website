@@ -25,6 +25,12 @@ const Footer = () => {
         </div>
       </div>
 
+      <div className="flex gap-4 text-sm font-mono text-zinc-500">
+        <a href="/leaderboard" className="hover:text-blue-400 transition">Leaderboard</a>
+        <span>|</span>
+        <a href="/pricing" className="hover:text-purple-400 transition">Pricing (Pro)</a>
+      </div>
+
       <div className="w-full max-w-md h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent"></div>
 
       <p className="text-xs text-zinc-600">

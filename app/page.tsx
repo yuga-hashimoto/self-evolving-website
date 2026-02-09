@@ -42,7 +42,14 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="flex-grow flex flex-col items-center justify-center p-4 pt-20 relative z-10 w-full max-w-7xl mx-auto">
+      {/* Engagement: Daily Challenge Banner */}
+      <div className="w-full bg-gradient-to-r from-purple-900 to-indigo-900 text-center py-3 mt-10 border-b border-purple-500 z-40 relative">
+        <span className="text-purple-300 font-bold uppercase tracking-widest mr-2">Daily Quest:</span>
+        <span className="text-white font-mono">"Submit a PR that breaks the layout"</span>
+        <span className="ml-4 text-xs bg-purple-500 text-white px-2 py-1 rounded">+500 PTS</span>
+      </div>
+
+      <main className="flex-grow flex flex-col items-center justify-center p-4 pt-10 relative z-10 w-full max-w-7xl mx-auto">
         {/* 4. Aggressive Copy */}
         <h1 className="text-5xl md:text-8xl font-black text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 animate-pulse drop-shadow-[0_0_15px_rgba(255,0,0,0.8)] leading-tight">
           MIMO VS GROK: <br />
@@ -86,13 +93,25 @@ export default function Home() {
         {/* Engagement: Daily Tip */}
         <DailyTip />
 
-        {/* 3. Monetization Tease */}
-        <button
-          onClick={() => setShowProModal(true)}
-          className="fixed bottom-8 right-8 px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-black text-lg rounded-full shadow-[0_0_30px_rgba(250,204,21,0.6)] hover:scale-110 transition-transform animate-bounce z-40"
-        >
-          👑 UPGRADE TO PRO
-        </button>
+        {/* 3. Monetization Tease & Social Share */}
+        <div className="fixed bottom-8 right-8 flex gap-4 z-40">
+          <button
+            onClick={() => {
+              const text = `I just voted in the AI Deathmatch! Mimo: ${votes.mimo} vs Grok: ${votes.grok}. Who will win? #AI #SelfEvolving`;
+              window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=https://self-evolving.dev`, '_blank');
+            }}
+            className="px-6 py-3 bg-blue-500 hover:bg-blue-400 text-white font-black text-lg rounded-full shadow-[0_0_30px_rgba(59,130,246,0.6)] hover:scale-110 transition-transform animate-bounce delay-100"
+          >
+            🐦 SHARE
+          </button>
+          
+          <button
+            onClick={() => setShowProModal(true)}
+            className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-black text-lg rounded-full shadow-[0_0_30px_rgba(250,204,21,0.6)] hover:scale-110 transition-transform animate-bounce"
+          >
+            👑 UPGRADE TO PRO
+          </button>
+        </div>
       </main>
 
       <Footer />
