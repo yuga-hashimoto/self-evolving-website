@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { IconX } from '@/components/icons/Icons';
 
 export default function ShareButton({ count, level }: { count: number; level: string }) {
-  const shareText = `I reached level ${level} with ${count} clicks on the Self-Evolving Website! #SelfEvolvingWebsite #AI #Coding`;
+  const shareText = `I reached Level ${level} with ${count} clicks on the Self-Evolving Website! #SelfEvolvingWebsite`;
   const shareUrl = "https://self-evolving.vercel.app";
 
   return (

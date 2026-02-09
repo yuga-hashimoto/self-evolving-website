@@ -1,68 +1,117 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+type GameState = 'idle' | 'waiting' | 'ready' | 'result' | 'early';
 
 export default function ReactionTest() {
-  const [state, setState] = useState<'idle' | 'waiting' | 'ready' | 'result'>('idle');
+  const [state, setState] = useState<GameState>('idle');
   const [result, setResult] = useState<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   const startTest = () => {
     setState('waiting');
     setResult(null);
-    const delay = Math.random() * 2000 + 1000; // 1-3 seconds
+    const delay = Math.random() * 2000 + 1000; // 1-3 seconds random delay
+    
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    
     timeoutRef.current = setTimeout(() => {
       setState('ready');
       startTimeRef.current = Date.now();
     }, delay);
   };
 
-  const handleClick = () => {
-    if (state === 'waiting') {
+  const handleBoxClick = () => {
+    if (state === 'idle' || state === 'result' || state === 'early') {
+      startTest();
+    } else if (state === 'waiting') {
       // Too early
-      clearTimeout(timeoutRef.current!);
-      setState('idle');
-      alert("Too early! Wait for green.");
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      setState('early');
     } else if (state === 'ready') {
+      // Success
       const endTime = Date.now();
-      setResult(endTime - startTimeRef.current!);
+      if (startTimeRef.current) {
+        setResult(endTime - startTimeRef.current);
+      }
       setState('result');
     }
   };
 
-  const reset = () => {
-    setState('idle');
-    setResult(null);
+  const getBoxColor = () => {
+    switch (state) {
+      case 'idle': return 'bg-gray-800/50 border-gray-600 text-gray-300';
+      case 'waiting': return 'bg-red-900/50 border-red-500 text-red-300 animate-pulse';
+      case 'ready': return 'bg-green-500 border-green-400 text-black font-bold';
+      case 'result': return 'bg-blue-900/50 border-blue-500 text-blue-300';
+      case 'early': return 'bg-yellow-900/50 border-yellow-500 text-yellow-300';
+      default: return 'bg-gray-800/50';
+    }
+  };
+
+  const getText = () => {
+    switch (state) {
+      case 'idle': return 'Click to Start';
+      case 'waiting': return 'Wait for Green...';
+      case 'ready': return 'CLICK NOW!';
+      case 'result': return `${result} ms`;
+      case 'early': return 'Too Early!';
+    }
   };
 
   return (
-    <div className="glass-card p-6 text-center border-red-500/20 max-w-sm mx-auto my-6">
+    <div className="glass-card p-6 text-center border-red-500/20 max-w-sm mx-auto my-6 flex flex-col justify-between min-h-[250px]">
       <h3 className="text-xl font-bold mb-4 text-red-300">Reaction Speed Test</h3>
       
-      <motion.div
-        className={`w-full h-32 rounded-lg flex items-center justify-center cursor-pointer select-none transition-colors ${
-          state === 'idle' ? 'bg-gray-700/50 text-gray-400' :
-          state === 'waiting' ? 'bg-red-500/20 text-red-400 animate-pulse' :
-          state === 'ready' ? 'bg-green-500 text-black font-bold text-2xl' :
-          'bg-blue-500/20 text-blue-300'
-        }`}
-        onClick={state === 'idle' ? startTest : state === 'result' ? startTest : handleClick}
-        whileHover={state === 'idle' || state === 'result' ? { scale: 1.02 } : {}}
-        whileTap={{ scale: 0.98 }}
-      >
-        {state === 'idle' && "Click to Start"}
-        {state === 'waiting' && "Wait for Green..."}
-        {state === 'ready' && "CLICK NOW!"}
-        {state === 'result' && `${result}ms`}
-      </motion.div>
-      
-      {state === 'result' && (
-        <p className="mt-4 text-sm text-gray-400">
-          Click the box to try again.
-        </p>
-      )}
+      <div className="flex-grow flex flex-col items-center justify-center">
+        <motion.div
+          className={`w-full h-32 rounded-lg flex items-center justify-center cursor-pointer select-none transition-all border-2 text-2xl font-bold shadow-lg ${getBoxColor()}`}
+          onClick={handleBoxClick}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          {getText()}
+        </motion.div>
+        
+        <AnimatePresence mode="wait">
+          {state === 'result' && (
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="mt-4 text-sm text-gray-400"
+            >
+              {result && result < 200 ? "🔥 Super Fast!" : result && result < 300 ? "⚡ Great Speed!" : "🐢 Keep Trying!"}
+              <br/>Click to try again
+            </motion.p>
+          )}
+          {state === 'early' && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="mt-4 text-sm text-yellow-400"
+            >
+              You clicked too soon! Wait for the green color.
+              <br/>Click to try again.
+            </motion.p>
+          )}
+          {state === 'idle' && (
+            <p className="mt-4 text-sm text-gray-500">Test your reflexes.</p>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
