@@ -7,6 +7,8 @@ import { useTranslations, useLocale } from 'next-intl';
 import SiteValueTicker from "@/components/SiteValueTicker";
 import LiveVisitorCounter from "@/components/LiveVisitorCounter";
 import ChaosModeToggle from "@/components/ChaosModeToggle";
+import ChaosConfettiButton from "@/components/features/ChaosConfettiButton";
+import VelocityMeter from "@/components/features/VelocityMeter";
 
 export default function Header() {
     const pathname = usePathname();
@@ -51,6 +53,9 @@ export default function Header() {
                             <div className="hidden lg:block">
                                 <LiveVisitorCounter />
                             </div>
+                            <div className="hidden xl:block">
+                                <VelocityMeter />
+                            </div>
                         </div>
 
                         <div className="flex items-center gap-1 sm:gap-3">
@@ -72,6 +77,9 @@ export default function Header() {
 
                             <div className="hidden lg:block">
                                 <ChaosModeToggle />
+                            </div>
+                            <div className="hidden lg:block">
+                                <ChaosConfettiButton />
                             </div>
                             {/* Share Battle Button */}
                             <a

@@ -1,7 +1,7 @@
 "use client";
 
 import SponsorGrid from "@/components/features/SponsorGrid";
-import SupportEvolution from "@/components/SupportEvolution";
+import SponsorCardPremium from "@/components/features/SponsorCardPremium";
 import ChaosModeToggle from "@/components/ChaosModeToggle";
 import { useTranslations } from 'next-intl';
 
@@ -13,7 +13,7 @@ export default function Footer() {
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col items-center pt-8 pb-20 sm:pb-8 gap-4">
                     <SponsorGrid />
-                    <SupportEvolution />
+                    <SponsorCardPremium />
                     <div className="flex flex-col items-center gap-4">
                         <ChaosModeToggle />
                         <div className="flex gap-4 text-xs text-gray-400">
