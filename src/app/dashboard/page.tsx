@@ -3,6 +3,7 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { IconAnalytics } from '@/components/icons/Icons';
+import { AdBanner } from '@/components/AdBanner';
 
 const dummyData = [
   { name: 'Sprint 1', mimo: 120, grok: 110, commits: 5 },
@@ -93,6 +94,8 @@ export default function DashboardPage() {
           <p className="text-4xl font-bold text-white">2 (AI)</p>
         </div>
       </div>
+
+      <AdBanner slotId="dashboard-footer" />
     </div>
   );
 }

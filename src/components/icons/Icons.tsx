@@ -379,14 +379,14 @@ export function IconStar({ size = 48, className = "" }: IconProps) {
 }
 
 // Coffee icon
-export function IconCoffee({ size = 24, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
+export function IconCoffee({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
-            <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
-            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
-            <line x1="6" y1="1" x2="6" y2="4" />
-            <line x1="10" y1="1" x2="10" y2="4" />
-            <line x1="14" y1="1" x2="14" y2="4" />
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
+            <path d="M12 20h32v24c0 4.4-3.6 8-8 8H20c-4.4 0-8-3.6-8-8V20z" fill="#78350f" />
+            <path d="M44 20h4c2.2 0 4 1.8 4 4v4c0 2.2-1.8 4-4 4h-4" stroke="#78350f" strokeWidth="4" />
+            <path d="M20 12c0-4 4-4 4-8" stroke="#d6d3d1" strokeWidth="2" strokeLinecap="round" />
+            <path d="M36 12c0-4 4-4 4-8" stroke="#d6d3d1" strokeWidth="2" strokeLinecap="round" />
+            <path d="M28 12c0-4 4-4 4-8" stroke="#d6d3d1" strokeWidth="2" strokeLinecap="round" />
         </svg>
     );
 }

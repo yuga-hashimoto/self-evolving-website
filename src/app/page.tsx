@@ -14,7 +14,6 @@ import { AnalyticsAccordionSection } from "@/components/analytics/AnalyticsAccor
 import DailyChallenge from "@/components/DailyChallenge";
 import RecentEvolutions from "@/components/home/RecentEvolutions";
 import AIBattleGauge from "@/components/AIBattleGauge";
-import VoteButton from "@/components/VoteButton";
 import { TrashTalkTicker } from "@/components/features/TrashTalkTicker";
 import { TipJar } from "@/components/features/TipJar";
 import { ClickWar } from "@/components/features/ClickWar";
@@ -65,7 +64,6 @@ export default async function Home() {
       <TrashTalkTicker />
       <DailyChallenge />
       <AIBattleGauge />
-      <VoteButton />
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
       <div className="w-full flex justify-center mb-6"><LiveVisitorCount /></div>
