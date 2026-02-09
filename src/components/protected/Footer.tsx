@@ -5,6 +5,7 @@ import SponsorCardPremium from "@/components/features/SponsorCardPremium";
 import ChaosModeToggle from "@/components/ChaosModeToggle";
 import SpeedModeToggle from "@/components/features/SpeedModeToggle";
 import { useTranslations } from 'next-intl';
+import { IconX } from "@/components/icons/Icons";
 
 export default function Footer() {
     const t = useTranslations('footer');
@@ -26,6 +27,17 @@ export default function Footer() {
                         <div className="absolute inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 origin-left" />
                         <span className="text-xl">❤️</span>
                         <span>Support the Evolution</span>
+                    </a>
+
+                    {/* Engagement: Share on X Button */}
+                    <a
+                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out this awesome self-evolving website! #SelfEvolvingDev")}&url=${encodeURIComponent("https://self-evolving.vercel.app")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-gray-500/25 border border-gray-700"
+                    >
+                        <IconX size={18} />
+                        <span className="font-medium">Share on X</span>
                     </a>
 
                     <div className="flex flex-col items-center gap-4">

@@ -400,6 +400,21 @@ export function IconX({ size = 24, className = "", "aria-hidden": ariaHidden, "a
     );
 }
 
+
+// Random/Dice icon
+export function IconRandom({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
+             <rect x="12" y="12" width="40" height="40" rx="8" stroke="#a855f7" strokeWidth="3" fill="#a855f7" fillOpacity="0.1" />
+             <circle cx="22" cy="22" r="3" fill="#FFD93D" />
+             <circle cx="42" cy="22" r="3" fill="#FFD93D" />
+             <circle cx="22" cy="42" r="3" fill="#FFD93D" />
+             <circle cx="42" cy="42" r="3" fill="#FFD93D" />
+             <circle cx="32" cy="32" r="3" fill="#FFD93D" />
+        </svg>
+    );
+}
+
 // Icon map for dynamic usage
 export const iconMap = {
     mimo: IconMimo,
@@ -430,6 +445,7 @@ export const iconMap = {
     balance: IconBalance,
     x: IconX,
     coffee: IconCoffee,
+    random: IconRandom,
 } as const;
 
 export type IconName = keyof typeof iconMap;
