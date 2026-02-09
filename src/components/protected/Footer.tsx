@@ -3,6 +3,7 @@
 import SponsorGrid from "@/components/features/SponsorGrid";
 import SponsorCardPremium from "@/components/features/SponsorCardPremium";
 import ChaosModeToggle from "@/components/ChaosModeToggle";
+import SpeedModeToggle from "@/components/features/SpeedModeToggle";
 import { useTranslations } from 'next-intl';
 
 export default function Footer() {
@@ -16,6 +17,7 @@ export default function Footer() {
                     <SponsorCardPremium />
                     <div className="flex flex-col items-center gap-4">
                         <ChaosModeToggle />
+                        <SpeedModeToggle />
                         <div className="flex gap-4 text-xs text-gray-400">
                             <a href="https://x.com/yugahashimoto" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Feedback</a>
                             {/* <span>•</span> */}

@@ -12,6 +12,7 @@ import AiConcierge from "@/components/AiConcierge";
 import BuyMeCoffeeWidget from "@/components/BuyMeCoffeeWidget";
 import ShareStatus from "@/components/ShareStatus";
 import MatrixRain from "@/components/effects/MatrixRain";
+import RoastOMeter from "@/components/features/RoastOMeter";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://self-evolving.vercel.app';
 
@@ -128,6 +129,7 @@ export default async function RootLayout({
             <AiConcierge />
             <BuyMeCoffeeWidget />
             <ShareStatus />
+            <RoastOMeter />
           </AnalyticsProvider>
         </NextIntlClientProvider>
       </body>

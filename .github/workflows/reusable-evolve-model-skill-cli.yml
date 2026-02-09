@@ -279,10 +279,10 @@ jobs:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
           ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
-          ANTHROPIC_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.0-flash-001
+          ANTHROPIC_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
           SERPER_API_KEY: ${{ secrets.serper_api_key }}
           MODEL_ID: ${{ inputs.model_id }}
           SKILL_PROMPT: ${{ steps.prepare-skill.outputs.skill_prompt }}
@@ -494,10 +494,10 @@ jobs:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
           ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
-          ANTHROPIC_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.0-flash-001
+          ANTHROPIC_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
           MODEL_ID: ${{ inputs.model_id }}
           FIX_PROMPT: ${{ steps.prepare_fix_1.outputs.fix_prompt }}
 
@@ -575,10 +575,10 @@ jobs:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
           ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
-          ANTHROPIC_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.0-flash-001
+          ANTHROPIC_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
           MODEL_ID: ${{ inputs.model_id }}
           FIX_PROMPT: ${{ steps.prepare_fix_2.outputs.fix_prompt }}
 
@@ -656,10 +656,10 @@ jobs:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
           ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
-          ANTHROPIC_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.0-flash-001
+          ANTHROPIC_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
           MODEL_ID: ${{ inputs.model_id }}
           FIX_PROMPT: ${{ steps.prepare_fix_3.outputs.fix_prompt }}
 
@@ -772,10 +772,10 @@ jobs:
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
           ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://openrouter.ai/api
-          ANTHROPIC_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.0-flash-001
-          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.0-flash-001
+          ANTHROPIC_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
+          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.0-flash-lite-preview-02-05:free
           MODEL_ID: ${{ inputs.model_id }}
           MOBILE_FIX_PROMPT: ${{ steps.prepare_mobile_fix_1.outputs.mobile_fix_prompt }}
 
