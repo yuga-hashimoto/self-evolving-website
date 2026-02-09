@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { IconDNA, IconChangelog, IconHome, IconMimo, IconGrok } from "@/components/icons/Icons";
 import { useTranslations, useLocale } from 'next-intl';
 import SiteValueTicker from "@/components/SiteValueTicker";
+import LiveVisitorCounter from "@/components/LiveVisitorCounter";
+import ChaosModeToggle from "@/components/ChaosModeToggle";
 
 export default function Header() {
     const pathname = usePathname();
@@ -44,8 +46,11 @@ export default function Header() {
                             </span>
                         </Link>
 
-                        <div className="flex-1 flex justify-center px-1 sm:px-4">
+                        <div className="flex-1 flex justify-center px-1 sm:px-4 items-center gap-4">
                             <SiteValueTicker />
+                            <div className="hidden lg:block">
+                                <LiveVisitorCounter />
+                            </div>
                         </div>
 
                         <div className="flex items-center gap-1 sm:gap-3">
@@ -64,6 +69,10 @@ export default function Header() {
                                     <span>{item.label}</span>
                                 </Link>
                             ))}
+
+                            <div className="hidden lg:block">
+                                <ChaosModeToggle />
+                            </div>
 
                             {/* Language Switcher */}
                             <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1" role="group" aria-label="Language selection">
