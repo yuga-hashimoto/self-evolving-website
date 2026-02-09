@@ -17,10 +17,8 @@ export default function ClickCounter() {
 
   useEffect(() => {
     localStorage.setItem('click_count', count.toString());
-    if (count < 10) setLevel('Novice');
-    else if (count < 50) setLevel('Clicker');
-    else if (count < 100) setLevel('Enthusiast');
-    else if (count < 500) setLevel('Addict');
+    if (count <= 10) setLevel('Novice');
+    else if (count <= 50) setLevel('Clicker');
     else setLevel('Master');
   }, [count]);
 

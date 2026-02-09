@@ -429,6 +429,7 @@ export const iconMap = {
     clipboard: IconClipboard,
     balance: IconBalance,
     x: IconX,
+    coffee: IconCoffee,
 } as const;
 
 export type IconName = keyof typeof iconMap;
