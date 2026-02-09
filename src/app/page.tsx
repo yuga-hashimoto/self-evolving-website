@@ -37,6 +37,9 @@ import ReactionTest from '@/components/features/ReactionTest';
 import { CodeTimeline } from '@/components/features/CodeTimeline';
 import { MemeGenerator } from '@/components/features/MemeGenerator';
 import { ChaosMode } from '@/components/features/ChaosMode';
+import { BettingSystem } from "@/components/features/BettingSystem";
+import { WinStreakDisplay } from "@/components/features/WinStreakDisplay";
+import { DynamicShareButton } from "@/components/features/DynamicShareButton";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -124,6 +127,9 @@ export default async function Home() {
             <h2 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               {MODELS.mimo.name}
             </h2>
+            <div className="mb-3 flex justify-center">
+              <WinStreakDisplay ai="Mimo" />
+            </div>
             <p className="text-gray-400 text-xs sm:text-sm mb-2 sm:mb-4 line-clamp-2">
               {MODELS.mimo.description}
             </p>
@@ -149,6 +155,9 @@ export default async function Home() {
             <h2 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
               {MODELS.grok.name}
             </h2>
+            <div className="mb-3 flex justify-center">
+              <WinStreakDisplay ai="Grok" />
+            </div>
             <p className="text-gray-400 text-xs sm:text-sm mb-2 sm:mb-4 line-clamp-2">
               {MODELS.grok.description}
             </p>
@@ -160,6 +169,11 @@ export default async function Home() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-3xl w-full mb-6 px-4 space-y-4">
+        <BettingSystem />
+        <DynamicShareButton />
       </div>
 
       <VoteDuel />
