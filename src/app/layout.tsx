@@ -9,6 +9,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import AiConcierge from "@/components/AiConcierge";
+import ShareStatus from "@/components/ShareStatus";
+import MatrixRain from "@/components/effects/MatrixRain";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://self-evolving.vercel.app';
 
@@ -28,6 +30,11 @@ export const metadata: Metadata = {
     "machine learning games",
     "autonomous AI",
     "web game AI",
+    "AI coding",
+    "self-evolving",
+    "Next.js",
+    "React",
+    "Battle"
   ],
   authors: [{ name: "Self-Evolving Project" }],
   creator: "Self-Evolving Project",
@@ -107,7 +114,8 @@ export default async function RootLayout({
         <GoogleAnalytics />
         <WebsiteJsonLd />
       </head>
-      <body className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white antialiased">
+      <body className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white antialiased relative">
+        <MatrixRain />
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
@@ -117,6 +125,7 @@ export default async function RootLayout({
             <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
             <Footer />
             <AiConcierge />
+            <ShareStatus />
           </AnalyticsProvider>
         </NextIntlClientProvider>
       </body>
