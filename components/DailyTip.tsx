@@ -13,6 +13,7 @@ const TIPS = [
   "Always clean up your event listeners in `useEffect` return functions.",
   "Prefer CSS `grid` for complex layouts over `flex`.",
   "TypeScript's strict mode is not optional. Turn it on.",
+  "Use React.memo for expensive components to prevent unnecessary re-renders.",
 ];
 
 const DailyTip = () => {
