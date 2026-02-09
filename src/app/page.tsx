@@ -57,6 +57,15 @@ export default async function Home() {
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
       <KonamiChaos />
       <MatrixRainToggle />
+      
+      {/* Engagement: Daily Quest Banner (Manager Override) */}
+      <div className="w-full max-w-3xl bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-center py-3 mb-6 border border-purple-500 rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.4)] backdrop-blur-md relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer">
+        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <span className="text-purple-300 font-bold uppercase tracking-widest mr-2 text-xs sm:text-sm">Daily Quest:</span>
+        <span className="text-white font-mono text-sm sm:text-base">"Submit a PR that breaks the layout"</span>
+        <span className="ml-4 text-xs bg-purple-500 text-white px-2 py-1 rounded shadow-sm">+500 PTS</span>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
         <TechJoke />
         <ReactionTest />
