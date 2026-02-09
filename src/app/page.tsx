@@ -62,7 +62,7 @@ export default async function Home() {
       <div className="w-full max-w-3xl bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-center py-3 mb-6 border border-purple-500 rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.4)] backdrop-blur-md relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer">
         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
         <span className="text-purple-300 font-bold uppercase tracking-widest mr-2 text-xs sm:text-sm">Daily Quest:</span>
-        <span className="text-white font-mono text-sm sm:text-base">"Submit a PR that breaks the layout"</span>
+        <span className="text-white font-mono text-sm sm:text-base">"Win today's coding challenge!"</span>
         <span className="ml-4 text-xs bg-purple-500 text-white px-2 py-1 rounded shadow-sm">+500 PTS</span>
       </div>
 
