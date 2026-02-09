@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Zap } from "lucide-react";
+import { Zap, ZapOff } from "lucide-react";
 
 export default function ChaosModeToggle() {
   const [isActive, setIsActive] = useState(false);
@@ -9,42 +9,86 @@ export default function ChaosModeToggle() {
   useEffect(() => {
     // If we just deactivated, clear everything
     if (!isActive) {
-      document.querySelectorAll('div').forEach(div => {
-        div.style.transform = '';
-        div.style.transition = '';
+      const containers = document.querySelectorAll('main, section, header, footer, nav, aside, article, .container, .grid, .flex');
+      containers.forEach((el) => {
+        if (el instanceof HTMLElement) {
+          el.style.transform = '';
+          el.style.transition = '';
+          el.style.filter = '';
+        }
       });
+      document.body.classList.remove('chaos-mode-active');
       return;
     }
 
-    // If activated, apply random rotation
-    const divs = document.querySelectorAll('div');
-    divs.forEach(div => {
-      // Avoid rotating critical containers like html/body wrapper if they use divs
-      // But the prompt says "all div elements", so we'll be bold.
-      // We will exclude the toggle itself to prevent recursion/locking
-      if (div.closest('#chaos-toggle')) return;
+    document.body.classList.add('chaos-mode-active');
 
-      const rotation = (Math.random() * 4 + 1) * (Math.random() > 0.5 ? 1 : -1);
-      div.style.transition = 'transform 0.5s ease-in-out';
-      div.style.transform = `rotate(${rotation}deg)`;
-    });
+    const applyChaos = () => {
+      if (!isActive) return;
+      
+      const containers = document.querySelectorAll('main, section, header, footer, nav, aside, article, .container, .grid, .flex');
+      containers.forEach((el) => {
+        if (el instanceof HTMLElement && !el.closest('#chaos-toggle-btn')) {
+          // The requested formula: rotate(Math.random() * 4 - 2 + 'deg')
+          const rotation = Math.random() * 4 - 2;
+          // Add some glitchy scale
+          const scale = 0.98 + Math.random() * 0.04; 
+          // Occasional skew for glitch effect
+          const skewX = Math.random() > 0.8 ? (Math.random() * 2 - 1) : 0;
+          
+          el.style.transition = 'transform 0.2s cubic-bezier(0.1, 0.7, 1.0, 0.1)';
+          el.style.transform = `rotate(${rotation}deg) scale(${scale}) skewX(${skewX}deg)`;
+          
+          // Random filter glitch
+          if (Math.random() > 0.9) {
+             el.style.filter = `hue-rotate(${Math.random() * 90}deg) contrast(1.2)`;
+          } else {
+             el.style.filter = '';
+          }
+        }
+      });
+    };
 
+    // Initial chaos
+    applyChaos();
+
+    // Continuous glitch updates
+    const interval = setInterval(applyChaos, 2000);
+    
+    // Random quick glitches
+    const glitchInterval = setInterval(() => {
+        if (Math.random() > 0.7) applyChaos();
+    }, 150);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(glitchInterval);
+      const containers = document.querySelectorAll('main, section, header, footer, nav, aside, article, .container, .grid, .flex');
+      containers.forEach((el) => {
+        if (el instanceof HTMLElement) {
+          el.style.transform = '';
+          el.style.transition = '';
+          el.style.filter = '';
+        }
+      });
+      document.body.classList.remove('chaos-mode-active');
+    };
   }, [isActive]);
 
   return (
     <button
-      id="chaos-toggle"
+      id="chaos-toggle-btn"
       onClick={() => setIsActive(!isActive)}
       className={`
-        flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border
+        flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border
         ${isActive 
-          ? 'bg-red-500/20 text-red-400 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.4)] animate-pulse' 
-          : 'bg-white/5 text-gray-400 border-transparent hover:bg-white/10 hover:text-white'
+          ? 'bg-red-500 text-white border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.6)] animate-pulse' 
+          : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700 hover:text-white'
         }
       `}
-      title="Warning: Enable Chaos Mode"
+      title="Toggle Chaos Mode"
     >
-      <Zap size={14} className={isActive ? "fill-current" : ""} />
+      {isActive ? <Zap size={14} className="fill-current" /> : <ZapOff size={14} />}
       <span>CHAOS {isActive ? 'ON' : 'OFF'}</span>
     </button>
   );
