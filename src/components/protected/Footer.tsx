@@ -15,6 +15,19 @@ export default function Footer() {
                 <div className="flex flex-col items-center pt-8 pb-20 sm:pb-8 gap-4">
                     <SponsorGrid />
                     <SponsorCardPremium />
+                    
+                    {/* Monetization: Support Us Button */}
+                    <a 
+                        href="https://github.com/sponsors/yugahashimoto" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full text-white font-bold shadow-lg hover:shadow-pink-500/25 hover:scale-105 transition-all duration-300 overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 origin-left" />
+                        <span className="text-xl">❤️</span>
+                        <span>Support the Evolution</span>
+                    </a>
+
                     <div className="flex flex-col items-center gap-4">
                         <ChaosModeToggle />
                         <SpeedModeToggle />
