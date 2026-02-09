@@ -24,6 +24,7 @@ export default function TechJoke() {
   useEffect(() => {
     const savedVotes = localStorage.getItem('techJokeVotes');
     if (savedVotes) {
+      // eslint-disable-next-line
       setVotes(JSON.parse(savedVotes));
     }
   }, []);
@@ -55,7 +56,7 @@ export default function TechJoke() {
             exit={{ opacity: 0, y: -10 }}
             className="text-gray-300 italic text-lg"
           >
-            "{jokes[index]}"
+            &quot;{jokes[index]}&quot;
           </motion.p>
         </AnimatePresence>
       </div>

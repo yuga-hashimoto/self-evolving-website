@@ -9,7 +9,7 @@ export default function ReactionTest() {
   const [state, setState] = useState<GameState>('idle');
   const [result, setResult] = useState<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
