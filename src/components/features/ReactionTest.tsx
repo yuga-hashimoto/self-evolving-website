@@ -7,111 +7,74 @@ type GameState = 'idle' | 'waiting' | 'ready' | 'result' | 'early';
 
 export default function ReactionTest() {
   const [state, setState] = useState<GameState>('idle');
-  const [result, setResult] = useState<number | null>(null);
-  const startTimeRef = useRef<number | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
+  const [time, setTime] = useState(0);
+  const startTimeRef = useRef(0);
+  const timeoutRef = useRef<NodeJS.Timeout>(null);
 
   const startTest = () => {
     setState('waiting');
-    setResult(null);
-    const delay = Math.random() * 2000 + 1000; // 1-3 seconds random delay
-    
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    
+    const randomDelay = Math.random() * 3000 + 2000; // 2-5 seconds
     timeoutRef.current = setTimeout(() => {
       setState('ready');
       startTimeRef.current = Date.now();
-    }, delay);
+    }, randomDelay);
   };
 
-  const handleBoxClick = () => {
-    if (state === 'idle' || state === 'result' || state === 'early') {
-      startTest();
-    } else if (state === 'waiting') {
-      // Too early
+  const handleClick = () => {
+    if (state === 'waiting') {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setState('early');
     } else if (state === 'ready') {
-      // Success
-      const endTime = Date.now();
-      if (startTimeRef.current) {
-        setResult(endTime - startTimeRef.current);
-      }
+      const reactionTime = Date.now() - startTimeRef.current;
+      setTime(reactionTime);
       setState('result');
+    } else if (state === 'result' || state === 'early') {
+      setState('idle');
+    } else if (state === 'idle') {
+      startTest();
     }
   };
 
-  const getBoxColor = () => {
-    switch (state) {
-      case 'idle': return 'bg-gray-800/50 border-gray-600 text-gray-300';
-      case 'waiting': return 'bg-red-900/50 border-red-500 text-red-300 animate-pulse';
-      case 'ready': return 'bg-green-500 border-green-400 text-black font-bold';
-      case 'result': return 'bg-blue-900/50 border-blue-500 text-blue-300';
-      case 'early': return 'bg-yellow-900/50 border-yellow-500 text-yellow-300';
-      default: return 'bg-gray-800/50';
-    }
-  };
+  let bgClass = 'bg-gray-800';
+  let text = 'Click to Start';
+  let subtext = '';
 
-  const getText = () => {
-    switch (state) {
-      case 'idle': return 'Click to Start';
-      case 'waiting': return 'Wait for Green...';
-      case 'ready': return 'CLICK NOW!';
-      case 'result': return `${result} ms`;
-      case 'early': return 'Too Early!';
-    }
-  };
+  switch (state) {
+    case 'waiting':
+      bgClass = 'bg-red-900 cursor-wait';
+      text = 'Wait for Green...';
+      break;
+    case 'ready':
+      bgClass = 'bg-green-500 cursor-pointer';
+      text = 'CLICK NOW!';
+      break;
+    case 'result':
+      bgClass = 'bg-blue-900 cursor-pointer';
+      text = `${time} ms`;
+      subtext = 'Click to try again';
+      break;
+    case 'early':
+      bgClass = 'bg-orange-900 cursor-pointer';
+      text = 'Too Early!';
+      subtext = 'Click to try again';
+      break;
+  }
 
   return (
-    <div className="glass-card p-6 text-center border-red-500/20 max-w-sm mx-auto my-6 flex flex-col justify-between min-h-[250px]">
-      <h3 className="text-xl font-bold mb-4 text-red-300">Reaction Speed Test</h3>
-      
-      <div className="flex-grow flex flex-col items-center justify-center">
-        <motion.div
-          className={`w-full h-32 rounded-lg flex items-center justify-center cursor-pointer select-none transition-all border-2 text-2xl font-bold shadow-lg ${getBoxColor()}`}
-          onClick={handleBoxClick}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          {getText()}
-        </motion.div>
-        
-        <AnimatePresence mode="wait">
-          {state === 'result' && (
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="mt-4 text-sm text-gray-400"
-            >
-              {result && result < 200 ? "🔥 Super Fast!" : result && result < 300 ? "⚡ Great Speed!" : "🐢 Keep Trying!"}
-              <br/>Click to try again
-            </motion.p>
-          )}
-          {state === 'early' && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="mt-4 text-sm text-yellow-400"
-            >
-              You clicked too soon! Wait for the green color.
-              <br/>Click to try again.
-            </motion.p>
-          )}
-          {state === 'idle' && (
-            <p className="mt-4 text-sm text-gray-500">Test your reflexes.</p>
-          )}
-        </AnimatePresence>
+    <div 
+      onClick={handleClick}
+      className={`glass-card h-64 flex flex-col items-center justify-center transition-colors duration-200 select-none ${bgClass} border-transparent hover:border-white/20 relative overflow-hidden`}
+    >
+      <div className="text-center z-10">
+        <h3 className="text-3xl font-bold text-white mb-2">{text}</h3>
+        {subtext && <p className="text-white/60 text-sm">{subtext}</p>}
       </div>
+      
+      {state === 'idle' && (
+        <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+          <span className="text-9xl">⚡</span>
+        </div>
+      )}
     </div>
   );
 }

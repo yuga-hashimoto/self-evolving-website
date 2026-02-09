@@ -38,6 +38,11 @@ import { CodeTimeline } from '@/components/features/CodeTimeline';
 import { MemeGenerator } from '@/components/features/MemeGenerator';
 import { ChaosMode } from '@/components/features/ChaosMode';
 
+import { KonamiChaos } from '@/components/features/KonamiChaos';
+import MatrixRainToggle from '@/components/features/MatrixRainToggle';
+import TechJoke from '@/components/features/TechJoke';
+import ReactionTest from '@/components/features/ReactionTest';
+
 export default async function Home() {
   const t = await getTranslations('home');
   const locale = await getLocale();
@@ -56,6 +61,11 @@ export default async function Home() {
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
       <KonamiChaos />
+      <MatrixRainToggle />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
+        <TechJoke />
+        <ReactionTest />
+      </div>
       <MatrixRainToggle />
       <ChaosMode />
       <MemeGenerator />

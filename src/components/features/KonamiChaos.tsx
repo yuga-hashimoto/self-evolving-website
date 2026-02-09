@@ -1,48 +1,50 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import confetti from 'canvas-confetti';
 
 export const KonamiChaos = () => {
-  const [chaos, setChaos] = useState(false);
-  const [input, setInput] = useState<string[]>([]);
-  const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  const [active, setActive] = useState(false);
+  const sequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const newInput = [...input, e.key].slice(-10);
-      setInput(newInput);
-      
-      if (JSON.stringify(newInput) === JSON.stringify(konami)) {
-        setChaos(prev => !prev);
-        // Play success sound if available or just alert visually
-        console.log('Konami Code Activated!');
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === sequence[index]) {
+        if (index === sequence.length - 1) {
+          activateChaos();
+          setIndex(0);
+        } else {
+          setIndex(prev => prev + 1);
+        }
+      } else {
+        setIndex(0);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [input]);
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [index]);
 
-  if (!chaos) return null;
+  const activateChaos = () => {
+    setActive(true);
+    confetti({
+      particleCount: 500,
+      spread: 200,
+      origin: { y: 0.6 }
+    });
+    document.body.style.transform = 'rotate(180deg)';
+    document.body.style.transition = 'transform 1s ease';
+    
+    setTimeout(() => {
+      document.body.style.transform = 'rotate(0deg)';
+      setActive(false);
+    }, 5000);
+  };
 
-  return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-        <style jsx global>{`
-          body { 
-            filter: invert(1) hue-rotate(180deg); 
-            transition: all 0.5s ease;
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite;
-          }
-          @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
-          }
-        `}</style>
-        <div className="absolute top-10 left-1/2 transform -translate-x-1/2 text-4xl font-bold text-red-500 bg-black p-4 rounded border-4 border-red-500 animate-pulse">
-            CHAOS MODE ACTIVATED
-        </div>
+  return active ? (
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+      <h1 className="text-9xl font-black text-red-600 animate-pulse">CHAOS MODE ACTIVATED</h1>
     </div>
-  );
+  ) : null;
 };
