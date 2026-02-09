@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { IconDNA, IconChangelog, IconHome, IconMimo, IconGrok } from "@/components/icons/Icons";
+import { IconDNA, IconChangelog, IconHome, IconMimo, IconGrok, IconRandom } from "@/components/icons/Icons";
 import { useTranslations, useLocale } from 'next-intl';
 import SiteValueTicker from "@/components/SiteValueTicker";
 import LiveVisitorCounter from "@/components/LiveVisitorCounter";
@@ -27,6 +27,7 @@ export default function Header() {
         { href: "/models/mimo", label: t('mimo'), icon: IconMimo },
         { href: "/models/grok", label: t('grok'), icon: IconGrok },
         { href: "/changelogs/compare", label: t('compareHistory'), icon: IconChangelog },
+        { href: "/random", label: "Random", icon: IconRandom },
     ];
 
     // デスクトップ用ナビゲーションアイテム（常にグローバルナビを表示）

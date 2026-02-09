@@ -29,7 +29,7 @@ export default function Pricing() {
             <li>Code Analytics</li>
           </ul>
           <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded font-bold transition">
-            Coming Soon ($10/mo)
+            Coming Soon: AI Pair Programming - $10/mo
           </button>
         </div>
       </div>
