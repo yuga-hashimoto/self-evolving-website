@@ -18,6 +18,7 @@ import VoteButton from "@/components/VoteButton";
 import { TrashTalkTicker } from "@/components/features/TrashTalkTicker";
 import { TipJar } from "@/components/features/TipJar";
 import { ClickWar } from "@/components/features/ClickWar";
+import { MegaBoost } from "@/components/features/MegaBoost";
 import { AsciiGenerator } from "@/components/features/AsciiGenerator";
 import { DailyTechTip } from "@/components/features/DailyTechTip";
 import CheerButton from "@/components/features/CheerButton";
@@ -62,8 +63,9 @@ export default async function Home() {
 
         {/* Desktop: Logo and title */}
         <div className="hidden sm:flex items-center justify-center gap-4 mb-6">
-          <h1 className="text-5xl lg:text-6xl font-bold gradient-text leading-tight">
+          <h1 className="text-5xl lg:text-6xl font-bold gradient-text leading-tight relative">
             {t('heroTitle')}
+            <span className="ml-3 align-top inline-block px-2 py-1 text-xs sm:text-sm font-mono tracking-widest text-red-400 border border-red-500/30 rounded bg-red-500/10 animate-pulse transform -rotate-6">LIVE</span>
           </h1>
           <div className="inline-block animate-float" aria-hidden="true">
             <IconDNA size={96} aria-hidden="true" />
@@ -148,6 +150,7 @@ export default async function Home() {
       {/* Engagement Features (Jules) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
         <ClickWar />
+        <MegaBoost />
         <AsciiGenerator />
         <div className="md:col-span-2">
           <DailyTechTip />
