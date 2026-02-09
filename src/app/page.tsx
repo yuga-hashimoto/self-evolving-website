@@ -38,11 +38,6 @@ import { CodeTimeline } from '@/components/features/CodeTimeline';
 import { MemeGenerator } from '@/components/features/MemeGenerator';
 import { ChaosMode } from '@/components/features/ChaosMode';
 
-import { KonamiChaos } from '@/components/features/KonamiChaos';
-import MatrixRainToggle from '@/components/features/MatrixRainToggle';
-import TechJoke from '@/components/features/TechJoke';
-import ReactionTest from '@/components/features/ReactionTest';
-
 export default async function Home() {
   const t = await getTranslations('home');
   const locale = await getLocale();
@@ -66,7 +61,6 @@ export default async function Home() {
         <TechJoke />
         <ReactionTest />
       </div>
-      <MatrixRainToggle />
       <ChaosMode />
       <MemeGenerator />
       <GhostCursors />
@@ -170,8 +164,6 @@ export default async function Home() {
           </div>
         </div>
         <DailyClickChallenge />
-        <TechJoke />
-        <ReactionTest />
         <SponsorPixelGrid />
         <ClickWar />
         <MegaBoost />
@@ -327,83 +319,6 @@ export default async function Home() {
                 <h4 className="text-lg sm:text-xl font-semibold text-gray-200 tracking-tight mb-2 sm:mb-2">{t('step3Title')}</h4>
                 <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
                   {t('step3Desc')}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* AI Modification Rules */}
-      <div className="max-w-3xl w-full mb-8 sm:mb-12 px-4">
-        <h3 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-400">
-          {t('aiRulesTitle')}
-        </h3>
-
-        {/* Rules Content */}
-        <div className="glass-card p-5 sm:p-8 border-purple-500/20 hover:!transform-none hover:!translate-y-0 hover:!bg-white/5 hover:!border-purple-500/20">
-          <div className="space-y-4 sm:space-y-5">
-            {/* Goal */}
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20" aria-hidden="true">
-                <IconTarget size={24} className="text-purple-400" aria-hidden="true" />
-              </div>
-              <div>
-                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleGoalTitle')}</h4>
-                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  {t('ruleGoalDesc')}
-                </p>
-              </div>
-            </div>
-
-            {/* Fairness */}
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20" aria-hidden="true">
-                <IconBalance size={24} className="text-purple-400" aria-hidden="true" />
-              </div>
-              <div>
-                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleFairnessTitle')}</h4>
-                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  {t('ruleFairnessDesc')}
-                </p>
-              </div>
-            </div>
-
-            {/* Data */}
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20" aria-hidden="true">
-                <IconAnalytics size={24} className="text-purple-400" aria-hidden="true" />
-              </div>
-              <div>
-                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleDataTitle')}</h4>
-                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  {t('ruleDataDesc')}
-                </p>
-              </div>
-            </div>
-
-            {/* Freedom */}
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20" aria-hidden="true">
-                <IconRocket size={24} className="text-purple-400" aria-hidden="true" />
-              </div>
-              <div>
-                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleFreedomTitle')}</h4>
-                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  {t('ruleFreedomDesc')}
-                </p>
-              </div>
-            </div>
-
-            {/* Constraint */}
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20" aria-hidden="true">
-                <IconClipboard size={24} className="text-purple-400" aria-hidden="true" />
-              </div>
-              <div>
-                <h4 className="text-base sm:text-lg font-semibold text-gray-200 mb-1 sm:mb-2">{t('ruleConstraintTitle')}</h4>
-                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-                  {t('ruleConstraintDesc')}
                 </p>
               </div>
             </div>
