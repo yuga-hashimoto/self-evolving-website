@@ -773,7 +773,14 @@ const NeonTetris: React.FC<NeonTetrisProps> = ({
     }
   }, [state.isPlaying, state.isGameOver, startGame, moveHorizontal, softDrop, rotate, hardDrop, hold]);
 
-  // Swipe detection
+  // Haptic feedback helper
+  const provideHapticFeedback = useCallback((duration: number = 10) => {
+    if (typeof window.navigator.vibrate === 'function') {
+      window.navigator.vibrate(duration);
+    }
+  }, []);
+
+  // Swipe detection with haptic feedback
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
@@ -789,15 +796,18 @@ const NeonTetris: React.FC<NeonTetrisProps> = ({
     if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
       if (deltaX > 0) {
         moveHorizontal('right');
+        provideHapticFeedback(10);
       } else {
         moveHorizontal('left');
+        provideHapticFeedback(10);
       }
       touchStartRef.current = null;
     } else if (deltaY > SWIPE_THRESHOLD) {
       softDrop();
+      provideHapticFeedback(10);
       touchStartRef.current = null;
     }
-  }, [state.isPlaying, state.isGameOver, moveHorizontal, softDrop]);
+  }, [state.isPlaying, state.isGameOver, moveHorizontal, softDrop, provideHapticFeedback]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Intentional: touch event is not needed
   const handleTouchEnd = useCallback((_: React.TouchEvent) => {
