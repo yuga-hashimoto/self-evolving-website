@@ -147,7 +147,10 @@ export default function HomeRunDerbyGame() {
       let runValue = 1;
       if (distance < 10) {
         runValue = 4; // Home run
-        setCurrentStubh(prev => prev + 300 + Math.random() * 200); // Distance
+        const velocity = 50 + Math.random() * 10;
+      const gravity = 9.8;
+      const distance = (velocity * velocity) / gravity;
+      setCurrentStubh(distance);
       } else if (distance < 20) {
         runValue = 2; // Double
       } // Else single
