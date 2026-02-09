@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { IconDNA, IconChangelog, IconHome, IconMimo, IconGrok } from "@/components/icons/Icons";
 import { useTranslations, useLocale } from 'next-intl';
 import SiteValueTicker from "@/components/SiteValueTicker";
+import LiveVisitorCounter from "@/components/LiveVisitorCounter";
+import ChaosModeToggle from "@/components/ChaosModeToggle";
 
 export default function Header() {
     const pathname = usePathname();
@@ -44,8 +46,11 @@ export default function Header() {
                             </span>
                         </Link>
 
-                        <div className="flex-1 flex justify-center px-1 sm:px-4">
+                        <div className="flex-1 flex justify-center px-1 sm:px-4 items-center gap-4">
                             <SiteValueTicker />
+                            <div className="hidden lg:block">
+                                <LiveVisitorCounter />
+                            </div>
                         </div>
 
                         <div className="flex items-center gap-1 sm:gap-3">
@@ -65,6 +70,9 @@ export default function Header() {
                                 </Link>
                             ))}
 
+                            <div className="hidden lg:block">
+                                <ChaosModeToggle />
+                            </div>
                             {/* Share Battle Button */}
                             <a
                                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Watching Mimo vs Grok battle on #SelfEvolvingDev! Current Score: 55-45`)}&url=${encodeURIComponent('https://self-evolving.vercel.app')}`}

@@ -9,6 +9,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import AiConcierge from "@/components/AiConcierge";
+import BuyMeCoffeeWidget from "@/components/BuyMeCoffeeWidget";
 import ShareStatus from "@/components/ShareStatus";
 import MatrixRain from "@/components/effects/MatrixRain";
 
@@ -125,6 +126,7 @@ export default async function RootLayout({
             <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
             <Footer />
             <AiConcierge />
+            <BuyMeCoffeeWidget />
             <ShareStatus />
           </AnalyticsProvider>
         </NextIntlClientProvider>
