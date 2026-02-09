@@ -28,6 +28,10 @@ import BattleStats from "@/components/BattleStats";
 import { DailyClickChallenge } from "@/components/features/DailyClickChallenge";
 import { SponsorPixelGrid } from "@/components/features/SponsorPixelGrid";
 import { ViralShareButton } from "@/components/features/ViralShareButton";
+// New features (Jules Sprint 2)
+import { CodeTimeline } from '@/components/features/CodeTimeline';
+import { MemeGenerator } from '@/components/features/MemeGenerator';
+import { ChaosMode } from '@/components/features/ChaosMode';
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -47,6 +51,8 @@ export default async function Home() {
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
       <KonamiChaos />
+      <ChaosMode />
+      <MemeGenerator />
       <GhostCursors />
       <SponsorTicker />
       <TrashTalkTicker />
@@ -246,6 +252,9 @@ export default async function Home() {
 
       {/* Recent Evolutions */}
       <RecentEvolutions />
+      
+      {/* Code Archeology Timeline */}
+      <CodeTimeline />
 
       {/* How it Works - Mobile Optimized Timeline */}
       <div className="max-w-3xl w-full mb-4 sm:mb-8 px-4">
