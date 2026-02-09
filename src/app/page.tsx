@@ -4,7 +4,8 @@ import { StickyAd } from '@/components/features/StickyAd';
 import { LiveVisitorCount } from '@/components/features/LiveVisitorCount';
 import { GhostCursors } from '@/components/features/GhostCursors';
 import { SponsorTicker } from '@/components/features/SponsorTicker';
-import VoteComponent from '@/components/VoteComponent';
+import { VoteDuel } from '@/components/features/VoteDuel';
+import { AdBanner } from '@/components/AdBanner';
 import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
 import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
@@ -150,7 +151,7 @@ export default async function Home() {
         </div>
       </div>
 
-      <VoteComponent />
+      <VoteDuel />
       <TipJar />
       {/* Engagement Features (Combined) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
@@ -402,6 +403,7 @@ export default async function Home() {
         </div>
       </div>
 
+      <AdBanner slotId="home-footer" />
       <StickyAd />
       {/* Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
