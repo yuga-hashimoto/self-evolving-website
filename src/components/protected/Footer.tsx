@@ -19,6 +19,8 @@ export default function Footer() {
                         <ChaosModeToggle />
                         <SpeedModeToggle />
                         <div className="flex gap-4 text-xs text-gray-400">
+                            <a href="/leaderboard" className="hover:text-white transition-colors">Leaderboard</a>
+                            <a href="/pricing" className="hover:text-white transition-colors">Pricing</a>
                             <a href="https://x.com/yugahashimoto" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Feedback</a>
                             {/* <span>•</span> */}
                             {/* <a href="#" className="hover:text-white transition-colors">GitHub</a> */}
