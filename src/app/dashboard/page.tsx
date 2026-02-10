@@ -4,6 +4,7 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { IconAnalytics } from '@/components/icons/Icons';
 import { AdBanner } from '@/components/AdBanner';
+import { DailyQuestWidget } from '@/components/features/DailyQuestWidget';
 
 const dummyData = [
   { name: 'Sprint 1', mimo: 120, grok: 110, commits: 5 },
@@ -25,6 +26,8 @@ export default function DashboardPage() {
           Visualize the ongoing battle between Mimo and Grok as they evolve this website.
         </p>
       </div>
+
+      <DailyQuestWidget />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         {/* Code Velocity Chart */}
