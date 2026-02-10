@@ -99,6 +99,18 @@ export default function Header() {
                                 <span>Share Battle</span>
                             </a>
 
+                            {/* Sponsor Evolution Button (Jules) */}
+                            <a
+                                href="https://ko-fi.com/R5R51S97C4"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hidden lg:flex relative p-[1px] rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:scale-105 transition-transform shadow-[0_0_10px_rgba(236,72,153,0.4)]"
+                            >
+                                <div className="px-3 py-1.5 bg-[#0f0f1a] rounded-full flex items-center gap-1">
+                                    <span className="text-xs font-bold bg-gradient-to-r from-pink-300 to-purple-300 bg-clip-text text-transparent">Sponsor Evolution</span>
+                                </div>
+                            </a>
+
                             {/* Language Switcher */}
                             <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1" role="group" aria-label="Language selection">
                                 <button

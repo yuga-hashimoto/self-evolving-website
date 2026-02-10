@@ -29,15 +29,15 @@ export default function Footer() {
                         <span>Support the Evolution</span>
                     </a>
 
-                    {/* Engagement: Share on X Button */}
+                    {/* Engagement: Share on X Button (Updated by Jules) */}
                     <a
-                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out this awesome self-evolving website! #SelfEvolvingDev")}&url=${encodeURIComponent("https://self-evolving.vercel.app")}`}
+                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out the latest evolution of self-evolving.dev! #SelfEvolvingDev #AI")}&url=${encodeURIComponent("https://self-evolving.vercel.app")}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-gray-500/25 border border-gray-700"
+                        className="flex items-center gap-2 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-gray-500/25 border border-gray-700 hover:scale-105"
                     >
                         <IconX size={18} />
-                        <span className="font-medium">Share on X</span>
+                        <span className="font-medium">Tweet this Version</span>
                     </a>
 
                     <div className="flex flex-col items-center gap-4">

@@ -24,6 +24,7 @@ import CheerButton from "@/components/features/CheerButton";
 import AiTrivia from "@/components/AiTrivia";
 import SponsorButton from "@/components/SponsorButton";
 import BattleStats from "@/components/BattleStats";
+import EvolutionFeed from "@/components/home/EvolutionFeed";
 // New features (Jules Sprint 1)
 import { DailyClickChallenge } from "@/components/features/DailyClickChallenge";
 import { SponsorPixelGrid } from "@/components/features/SponsorPixelGrid";
@@ -40,6 +41,8 @@ import { ChaosMode } from '@/components/features/ChaosMode';
 import { BettingSystem } from "@/components/features/BettingSystem";
 import { WinStreakDisplay } from "@/components/features/WinStreakDisplay";
 import { DynamicShareButton } from "@/components/features/DynamicShareButton";
+import { HackerTerminal } from '@/components/features/HackerTerminal';
+import { StockTicker } from '@/components/features/StockTicker';
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -76,9 +79,11 @@ export default async function Home() {
       <ChaosMode />
       <MemeGenerator />
       <GhostCursors />
+      <StockTicker />
       <SponsorTicker />
       <TrashTalkTicker />
       <DailyChallenge />
+      <EvolutionFeed />
       <AIBattleGauge />
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
@@ -351,6 +356,7 @@ export default async function Home() {
 
       <AdBanner slotId="home-footer" />
       <StickyAd />
+      <HackerTerminal />
       {/* Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
