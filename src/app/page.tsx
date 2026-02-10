@@ -45,6 +45,11 @@ import { HackerTerminal } from '@/components/features/HackerTerminal';
 import { StockTicker } from '@/components/features/StockTicker';
 import { EngagementBoosters } from '@/components/features/EngagementBoosters';
 
+// Jules Sprint 3 (Feb 10)
+import { SponsorEvolutionButton } from '@/components/features/SponsorEvolutionButton';
+import { LiveEvolutionTicker } from '@/components/features/LiveEvolutionTicker';
+import { FeatureVotePoll } from '@/components/features/FeatureVotePoll';
+
 export default async function Home() {
   const t = await getTranslations('home');
   const locale = await getLocale();
@@ -64,6 +69,7 @@ export default async function Home() {
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
       <KonamiChaos />
       <MatrixRainToggle />
+      <LiveEvolutionTicker />
       
       {/* Engagement: Daily Quest Banner (Manager Override) */}
       <div className="w-full max-w-3xl bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-center py-3 mb-6 border border-purple-500 rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.4)] backdrop-blur-md relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer">
@@ -117,8 +123,11 @@ export default async function Home() {
           {t('startDate', { date: formattedDate })}
         </p>
 
-        {/* Viral Share Button (Jules) */}
-        <ViralShareButton />
+        {/* Viral Share Button & Sponsor (Jules) */}
+        <div className="flex flex-col items-center gap-4 mt-6">
+            <SponsorEvolutionButton />
+            <ViralShareButton />
+        </div>
       </div>
 
       {/* Model Selection Cards */}
@@ -183,6 +192,7 @@ export default async function Home() {
       <div className="max-w-3xl w-full mb-6 px-4 space-y-4">
         <BettingSystem />
         <DynamicShareButton />
+        <FeatureVotePoll />
       </div>
 
       <VoteDuel />
