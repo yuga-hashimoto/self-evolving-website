@@ -60,6 +60,8 @@ import DailyGreeting from "@/components/features/DailyGreeting";
 import { PanicButton } from "@/components/features/PanicButton";
 import { LeaderboardWidget } from "@/components/features/LeaderboardWidget";
 import { FortuneCookie } from "@/components/features/FortuneCookie";
+// Jules Engagement Pack
+import CodeBattleTicker from "@/components/features/CodeBattleTicker";
 import ConfettiButton from "@/components/features/ConfettiButton";
 import GlitchTitle from "@/components/features/GlitchTitle";
 import AIChatBubble from "@/components/features/AIChatBubble";
@@ -81,6 +83,7 @@ export default async function Home() {
   const grokAnalytics = getModelAnalytics('grok');
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
+      <CodeBattleTicker />
       <KonamiChaos />
       <MatrixRainToggle />
       <LiveEvolutionTicker />
