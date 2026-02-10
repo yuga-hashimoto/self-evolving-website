@@ -172,13 +172,12 @@ export async function GET(request: NextRequest) {
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error('❌ GA4 API Error:', errorMessage, error);
+        console.error('❌ GA4 API Error:', errorMessage);
 
-        // Return full error details if possible for debugging
+        // Return error status without leaking internal details
         return NextResponse.json({
             source: 'error',
             error: 'Failed to fetch GA4 data',
-            errorDetails: errorMessage,
             today: { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
             week: { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },
             month: { pageviews: 0, sessions: 0, avgSessionDuration: 0, bounceRate: '0.0' },

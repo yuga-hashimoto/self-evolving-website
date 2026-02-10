@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Game events API error:', error);
+    console.error('Game events API error:', error instanceof Error ? error.message : error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Game stats API error:', error);
+    console.error('Game stats API error:', error instanceof Error ? error.message : error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
