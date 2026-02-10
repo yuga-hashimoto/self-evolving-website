@@ -26,7 +26,7 @@ export default function SponsorCard() {
         </div>
 
         <a 
-          href="https://ko-fi.com/R5R51S97C4" 
+          href="https://ko-fi.com/yugahashimoto" 
           target="_blank" 
           rel="noopener noreferrer"
           className="shrink-0 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-6 rounded-full shadow-lg shadow-pink-500/20 transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2"
