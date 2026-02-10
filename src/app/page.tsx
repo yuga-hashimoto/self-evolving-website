@@ -54,6 +54,8 @@ import { FeatureVotePoll } from '@/components/features/FeatureVotePoll';
 import BattleLogTicker from "@/components/BattleLogTicker";
 import VoteWidget from "@/components/VoteWidget";
 import SupportButton from "@/components/SupportButton";
+import RandomQuote from "@/components/features/RandomQuote";
+import DailyGreeting from "@/components/features/DailyGreeting";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -76,6 +78,8 @@ export default async function Home() {
       <MatrixRainToggle />
       <LiveEvolutionTicker />
       <BattleLogTicker />
+      <DailyGreeting />
+      <RandomQuote />
       
       {/* Engagement: Daily Quest Banner (Manager Override) */}
       <div className="w-full max-w-3xl bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-center py-3 mb-6 border border-purple-500 rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.4)] backdrop-blur-md relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer">
