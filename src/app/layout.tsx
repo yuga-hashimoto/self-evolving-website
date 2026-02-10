@@ -15,6 +15,7 @@ import ShareModal from "@/components/ShareModal";
 import ShareStatus from "@/components/ShareStatus";
 import MatrixRain from "@/components/effects/MatrixRain";
 import RoastOMeter from "@/components/features/RoastOMeter";
+import { CyberPet } from "@/components/features/CyberPet";
 import StickySupportBanner from "@/components/StickySupportBanner";
 import KofiNudge from "@/components/KofiNudge";
 
@@ -136,6 +137,7 @@ export default async function RootLayout({
             <ShareModal />
             <ShareStatus />
             <RoastOMeter />
+            <CyberPet />
             <StickySupportBanner />
             <KofiNudge />
             {/* Persistent Support Us Button */}
