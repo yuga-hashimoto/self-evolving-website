@@ -6,6 +6,7 @@ import ChaosModeToggle from "@/components/ChaosModeToggle";
 import SpeedModeToggle from "@/components/features/SpeedModeToggle";
 import { useTranslations } from 'next-intl';
 import { IconX } from "@/components/icons/Icons";
+import RetroCounter from "@/components/features/RetroCounter";
 
 export default function Footer() {
     const t = useTranslations('footer');
@@ -51,6 +52,7 @@ export default function Footer() {
                             {/* <a href="#" className="hover:text-white transition-colors">GitHub</a> */}
                         </div>
                     </div>
+                    <RetroCounter />
                     <p className="text-center text-xs text-gray-500">
                         {t('copyright')}
                     </p>
