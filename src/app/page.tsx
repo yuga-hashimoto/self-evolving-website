@@ -40,6 +40,8 @@ import { ChaosMode } from '@/components/features/ChaosMode';
 import { BettingSystem } from "@/components/features/BettingSystem";
 import { WinStreakDisplay } from "@/components/features/WinStreakDisplay";
 import { DynamicShareButton } from "@/components/features/DynamicShareButton";
+import { HackerTerminal } from '@/components/features/HackerTerminal';
+import { StockTicker } from '@/components/features/StockTicker';
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -76,6 +78,7 @@ export default async function Home() {
       <ChaosMode />
       <MemeGenerator />
       <GhostCursors />
+      <StockTicker />
       <SponsorTicker />
       <TrashTalkTicker />
       <DailyChallenge />
@@ -351,6 +354,7 @@ export default async function Home() {
 
       <AdBanner slotId="home-footer" />
       <StickyAd />
+      <HackerTerminal />
       {/* Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>

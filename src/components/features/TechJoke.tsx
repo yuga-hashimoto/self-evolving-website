@@ -11,6 +11,11 @@ const jokes = [
   "There are 10 types of people in the world: those who understand binary, and those who don't.",
   "A SQL query walks into a bar, walks up to two tables and asks... 'Can I join you?'",
   "Why was the JavaScript developer sad? Because he didn't know how to 'null' his feelings.",
+  "Why did the AI break up with the database? Too many trust issues.",
+  "Why did Jules the AI cross the road? To optimize the pathfinding algorithm.",
+  "What's a pirate's favorite programming language? You might think it's R, but his first love be the C.",
+  "Why don't AIs get cold? Because of all the Windows.",
+  "How do you comfort a JavaScript bug? You console it.",
 ];
 
 export default function TechJoke() {
