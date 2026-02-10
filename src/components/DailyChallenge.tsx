@@ -139,7 +139,7 @@ export default function DailyChallenge() {
                         <Share2 size={12} /> Share
                     </button>
                     <a 
-                        href="https://ko-fi.com/R5R51S97C4" 
+                        href="https://ko-fi.com/yugahashimoto" 
                         target="_blank"
                         rel="noreferrer"
                         className="text-xs bg-[#FF5E5B]/20 hover:bg-[#FF5E5B]/40 text-[#FF5E5B] border border-[#FF5E5B]/50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 flex-1 justify-center"

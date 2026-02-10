@@ -3,13 +3,13 @@
 import { motion } from "framer-motion";
 import { Coffee } from "lucide-react";
 
-export default function BuyMeCoffeeWidget() {
+export default function KofiWidget() {
   return (
     <motion.a
-      href="https://buymeacoffee.com/yuga"
+      href="https://ko-fi.com/yugahashimoto"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-24 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 px-4 py-3 bg-[#FFDD00] text-black font-bold rounded-full shadow-lg hover:bg-[#FFEA00] transition-colors"
+      className="fixed bottom-24 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 px-4 py-3 bg-[#13C3FF] text-white font-bold rounded-full shadow-lg hover:bg-[#0DAADB] transition-colors"
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ 
         scale: [1, 1.05, 1],
@@ -24,8 +24,8 @@ export default function BuyMeCoffeeWidget() {
       }}
       whileHover={{ scale: 1.1 }}
     >
-      <Coffee size={20} fill="black" className="opacity-80" />
-      <span className="font-medium">Buy me a coffee</span>
+      <Coffee size={20} fill="white" className="opacity-90" />
+      <span className="font-medium">Support on Ko-fi</span>
     </motion.a>
   );
 }

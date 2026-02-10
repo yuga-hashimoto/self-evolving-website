@@ -15,7 +15,7 @@ export default function SponsorsPage() {
       {/* Ko-fi Button Big */}
       <div className="mb-16">
         <a 
-          href="https://ko-fi.com/R5R51S97C4" 
+          href="https://ko-fi.com/yugahashimoto" 
           target="_blank" 
           rel="noopener noreferrer"
           className="inline-flex items-center gap-3 px-8 py-4 bg-[#FF5E5B] hover:bg-[#ff4f4c] text-white text-xl font-bold rounded-full transition-transform hover:scale-105 shadow-lg shadow-red-500/20"

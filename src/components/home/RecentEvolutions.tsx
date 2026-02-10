@@ -101,7 +101,7 @@ export default async function RecentEvolutions() {
         <div className="mt-6 text-center border-t border-white/5 pt-4">
             <p className="text-xs text-gray-500 mb-3">Evolution happens automatically twice a day.</p>
              <a 
-               href='https://ko-fi.com/R5R51S97C4' 
+               href='https://ko-fi.com/yugahashimoto' 
                target='_blank' 
                rel="noopener noreferrer"
                className="inline-flex items-center gap-2 px-4 py-2 bg-[#ec4899] hover:bg-[#db2777] text-white text-sm font-medium rounded-full transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
