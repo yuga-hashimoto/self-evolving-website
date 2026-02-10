@@ -120,7 +120,7 @@ export async function GET(request: Request) {
           fullContent = await jinaResponse.text();
         }
       } catch (error) {
-        console.error('Jina Reader error:', error);
+        console.error('Jina Reader error:', error instanceof Error ? error.message : error);
         // Return search results even if fullContent fails
       }
     }
@@ -136,11 +136,10 @@ export async function GET(request: Request) {
       }
     });
   } catch (error) {
-    console.error('Search error:', error);
+    console.error('Search error:', error instanceof Error ? error.message : error);
     return NextResponse.json(
       {
         error: 'Search failed. Please try again later.',
-        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );
