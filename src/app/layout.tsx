@@ -10,6 +10,8 @@ import { getMessages, getLocale } from 'next-intl/server';
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import AiConcierge from "@/components/AiConcierge";
 import BuyMeCoffeeWidget from "@/components/BuyMeCoffeeWidget";
+import TipJar from "@/components/TipJar";
+import ShareModal from "@/components/ShareModal";
 import ShareStatus from "@/components/ShareStatus";
 import MatrixRain from "@/components/effects/MatrixRain";
 import RoastOMeter from "@/components/features/RoastOMeter";
@@ -128,6 +130,8 @@ export default async function RootLayout({
             <Footer />
             <AiConcierge />
             <BuyMeCoffeeWidget />
+            <TipJar />
+            <ShareModal />
             <ShareStatus />
             <RoastOMeter />
           </AnalyticsProvider>
