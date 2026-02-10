@@ -1,19 +1,45 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
-const BATTLE_LOGS = [
+const FALLBACK_LOGS = [
   "Mimo is optimizing neural pathways...",
   "Grok is refactoring the core kernel...",
   "Mimo deployed a new heuristic algorithm!",
   "Grok countered with a quantum patch!",
   "Mimo: CPU usage spike detected (98%)",
-  "Grok: Memory allocation efficiency +15%",
-  "Mimo is analyzing user behavior patterns...",
-  "Grok is compiling a new strategy...",
 ];
 
+interface CommitLog {
+  message: string;
+  author: string;
+}
+
 export default function BattleLogTicker() {
+  const [logs, setLogs] = useState<string[]>(FALLBACK_LOGS);
+
+  useEffect(() => {
+    fetch("https://api.github.com/repos/yuga-hashimoto/self-evolving-website/commits?per_page=5")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch");
+        return res.json();
+      })
+      .then((data) => {
+        const commitLogs: string[] = data.map((item: { commit: { message: string; author: { name: string } } }) => {
+          const message = item.commit.message.split("\n")[0];
+          const author = item.commit.author.name;
+          return `[${author}] ${message}`;
+        });
+        if (commitLogs.length > 0) setLogs(commitLogs);
+      })
+      .catch(() => {
+        // fallback already set
+      });
+  }, []);
+
+  const repeatedLogs = [...logs, ...logs, ...logs];
+
   return (
     <div className="w-full bg-black/40 border-y border-white/5 overflow-hidden py-2 mb-6">
       <div className="relative flex overflow-x-hidden">
@@ -26,7 +52,7 @@ export default function BattleLogTicker() {
             duration: 20,
           }}
         >
-          {[...BATTLE_LOGS, ...BATTLE_LOGS, ...BATTLE_LOGS].map((log, i) => (
+          {repeatedLogs.map((log, i) => (
             <span key={i} className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
               [{new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}] {log}
