@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { IconAnalytics } from '@/components/icons/Icons';
 import { AdBanner } from '@/components/AdBanner';
 import { DailyQuestWidget } from '@/components/features/DailyQuestWidget';
+import { AIPredictionCard } from '@/components/features/AIPredictionCard';
 
 const dummyData = [
   { name: 'Sprint 1', mimo: 120, grok: 110, commits: 5 },
@@ -96,6 +97,8 @@ export default function DashboardPage() {
           <p className="text-gray-400 text-sm mb-2">Active Contributors</p>
           <p className="text-4xl font-bold text-white">2 (AI)</p>
         </div>
+        
+        <AIPredictionCard />
       </div>
 
       <AdBanner slotId="dashboard-footer" />
