@@ -56,6 +56,10 @@ import VoteWidget from "@/components/VoteWidget";
 import SupportButton from "@/components/SupportButton";
 import RandomQuote from "@/components/features/RandomQuote";
 import DailyGreeting from "@/components/features/DailyGreeting";
+// Jules Batch 3
+import { PanicButton } from "@/components/features/PanicButton";
+import { LeaderboardWidget } from "@/components/features/LeaderboardWidget";
+import { FortuneCookie } from "@/components/features/FortuneCookie";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -79,6 +83,9 @@ export default async function Home() {
       <LiveEvolutionTicker />
       <BattleLogTicker />
       <DailyGreeting />
+      <PanicButton />
+      <LeaderboardWidget />
+      <FortuneCookie />
       <RandomQuote />
       
       {/* Engagement: Daily Quest Banner (Manager Override) */}
