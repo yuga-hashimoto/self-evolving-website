@@ -7,6 +7,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import SiteValueTicker from "@/components/SiteValueTicker";
 import LiveVisitorCounter from "@/components/LiveVisitorCounter";
 import ChaosModeToggle from "@/components/ChaosModeToggle";
+import ThemeToggle from "@/components/ThemeToggle";
 import ChaosConfettiButton from "@/components/features/ChaosConfettiButton";
 import VelocityMeter from "@/components/features/VelocityMeter";
 
@@ -81,6 +82,9 @@ export default function Header() {
                             </div>
                             <div className="hidden lg:block">
                                 <ChaosConfettiButton />
+                            </div>
+                            <div className="hidden sm:block">
+                                <ThemeToggle />
                             </div>
                             {/* Share Battle Button */}
                             <a
