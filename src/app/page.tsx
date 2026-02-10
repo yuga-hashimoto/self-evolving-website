@@ -43,6 +43,7 @@ import { WinStreakDisplay } from "@/components/features/WinStreakDisplay";
 import { DynamicShareButton } from "@/components/features/DynamicShareButton";
 import { HackerTerminal } from '@/components/features/HackerTerminal';
 import { StockTicker } from '@/components/features/StockTicker';
+import { EngagementBoosters } from '@/components/features/EngagementBoosters';
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -71,6 +72,9 @@ export default async function Home() {
         <span className="text-white font-mono text-sm sm:text-base">"Win today's coding challenge!"</span>
         <span className="ml-4 text-xs bg-purple-500 text-white px-2 py-1 rounded shadow-sm">+500 PTS</span>
       </div>
+
+      {/* Engagement Features (Jules Feb 10) */}
+      <EngagementBoosters />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2">
         <TechJoke />
