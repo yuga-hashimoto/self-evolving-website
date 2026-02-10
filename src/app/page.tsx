@@ -24,6 +24,7 @@ import CheerButton from "@/components/features/CheerButton";
 import AiTrivia from "@/components/AiTrivia";
 import SponsorButton from "@/components/SponsorButton";
 import BattleStats from "@/components/BattleStats";
+import EvolutionFeed from "@/components/home/EvolutionFeed";
 // New features (Jules Sprint 1)
 import { DailyClickChallenge } from "@/components/features/DailyClickChallenge";
 import { SponsorPixelGrid } from "@/components/features/SponsorPixelGrid";
@@ -82,6 +83,7 @@ export default async function Home() {
       <SponsorTicker />
       <TrashTalkTicker />
       <DailyChallenge />
+      <EvolutionFeed />
       <AIBattleGauge />
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
