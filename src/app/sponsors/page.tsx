@@ -1,8 +1,20 @@
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
 import { AdBanner } from '@/components/AdBanner';
+import { Check, Copy } from 'lucide-react';
+import { useState } from 'react';
 
 export default function SponsorsPage() {
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(type);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
   return (
     <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
       <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500 mb-6">
@@ -44,6 +56,56 @@ export default function SponsorsPage() {
               <span className="text-gray-700 font-mono text-xs">Available</span>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Crypto Donation Section */}
+      <div className="mb-16">
+        <h2 className="text-2xl font-bold text-white mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+          Crypto Donations
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {/* ETH Wallet */}
+          <div className="glass-card p-6 flex flex-col items-center gap-4 border-blue-500/20 hover:border-blue-500/50 transition-colors group relative overflow-hidden bg-white/5 backdrop-blur-sm rounded-xl">
+            <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-2xl">
+              💎
+            </div>
+            <div className="text-center w-full">
+              <h3 className="font-bold text-blue-400 mb-2">Ethereum (ETH)</h3>
+              <div className="bg-black/40 p-3 rounded-lg border border-white/10 flex items-center justify-between gap-2">
+                <code className="text-xs text-gray-400 font-mono break-all">0x1234567890abcdef1234567890abcdef12345678</code>
+                <button 
+                  className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
+                  title="Copy Address"
+                  onClick={() => copyToClipboard('0x1234567890abcdef1234567890abcdef12345678', 'eth')}
+                >
+                  {copied === 'eth' ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* BTC Wallet */}
+          <div className="glass-card p-6 flex flex-col items-center gap-4 border-orange-500/20 hover:border-orange-500/50 transition-colors group relative overflow-hidden bg-white/5 backdrop-blur-sm rounded-xl">
+             <div className="absolute inset-0 bg-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center text-2xl">
+              ₿
+            </div>
+            <div className="text-center w-full">
+              <h3 className="font-bold text-orange-400 mb-2">Bitcoin (BTC)</h3>
+              <div className="bg-black/40 p-3 rounded-lg border border-white/10 flex items-center justify-between gap-2">
+                <code className="text-xs text-gray-400 font-mono break-all">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</code>
+                <button 
+                  className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
+                  title="Copy Address"
+                  onClick={() => copyToClipboard('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', 'btc')}
+                >
+                  {copied === 'btc' ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

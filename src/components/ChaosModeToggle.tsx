@@ -15,17 +15,30 @@ export default function ChaosModeToggle() {
           el.style.transform = '';
           el.style.transition = '';
           el.style.filter = '';
+          el.style.color = '';
+          el.style.backgroundColor = '';
+          el.style.fontSize = '';
         }
       });
+      document.body.style.removeProperty('--background');
+      document.body.style.removeProperty('--foreground');
+      document.body.style.fontSize = '';
       document.body.classList.remove('chaos-mode-active');
       return;
     }
 
     document.body.classList.add('chaos-mode-active');
 
+    const randomColor = () => `#${Math.floor(Math.random()*16777215).toString(16)}`;
+
     const applyChaos = () => {
       if (!isActive) return;
       
+      // Randomize global variables
+      document.body.style.setProperty('--background', randomColor());
+      document.body.style.setProperty('--foreground', randomColor());
+      document.body.style.fontSize = `${10 + Math.random() * 20}px`;
+
       const containers = document.querySelectorAll('main, section, header, footer, nav, aside, article, .container, .grid, .flex');
       containers.forEach((el) => {
         if (el instanceof HTMLElement && !el.closest('#chaos-toggle-btn')) {
@@ -36,9 +49,15 @@ export default function ChaosModeToggle() {
           // Occasional skew for glitch effect
           const skewX = Math.random() > 0.8 ? (Math.random() * 2 - 1) : 0;
           
-          el.style.transition = 'transform 0.2s cubic-bezier(0.1, 0.7, 1.0, 0.1)';
+          el.style.transition = 'all 0.2s cubic-bezier(0.1, 0.7, 1.0, 0.1)';
           el.style.transform = `rotate(${rotation}deg) scale(${scale}) skewX(${skewX}deg)`;
           
+          // Random colors sometimes
+          if (Math.random() > 0.7) {
+            el.style.color = randomColor();
+            el.style.backgroundColor = Math.random() > 0.9 ? randomColor() : '';
+          }
+
           // Random filter glitch
           if (Math.random() > 0.9) {
              el.style.filter = `hue-rotate(${Math.random() * 90}deg) contrast(1.2)`;
@@ -69,8 +88,14 @@ export default function ChaosModeToggle() {
           el.style.transform = '';
           el.style.transition = '';
           el.style.filter = '';
+          el.style.color = '';
+          el.style.backgroundColor = '';
+          el.style.fontSize = '';
         }
       });
+      document.body.style.removeProperty('--background');
+      document.body.style.removeProperty('--foreground');
+      document.body.style.fontSize = '';
       document.body.classList.remove('chaos-mode-active');
     };
   }, [isActive]);
