@@ -134,6 +134,15 @@ export default async function RootLayout({
             <ShareModal />
             <ShareStatus />
             <RoastOMeter />
+            {/* Persistent Support Us Button */}
+            <a
+              href="/donate"
+              className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border border-white/20 animate-pulse"
+              style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}
+            >
+              <span>☕</span>
+              <span>Support Us</span>
+            </a>
           </AnalyticsProvider>
         </NextIntlClientProvider>
       </body>
