@@ -50,6 +50,11 @@ import { SponsorEvolutionButton } from '@/components/features/SponsorEvolutionBu
 import { LiveEvolutionTicker } from '@/components/features/LiveEvolutionTicker';
 import { FeatureVotePoll } from '@/components/features/FeatureVotePoll';
 
+// Engagement & Monetization Boost (Jules)
+import BattleLogTicker from "@/components/BattleLogTicker";
+import VoteWidget from "@/components/VoteWidget";
+import SupportButton from "@/components/SupportButton";
+
 export default async function Home() {
   const t = await getTranslations('home');
   const locale = await getLocale();
@@ -70,6 +75,7 @@ export default async function Home() {
       <KonamiChaos />
       <MatrixRainToggle />
       <LiveEvolutionTicker />
+      <BattleLogTicker />
       
       {/* Engagement: Daily Quest Banner (Manager Override) */}
       <div className="w-full max-w-3xl bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-center py-3 mb-6 border border-purple-500 rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.4)] backdrop-blur-md relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer">
@@ -127,6 +133,7 @@ export default async function Home() {
         <div className="flex flex-col items-center gap-4 mt-6">
             <SponsorEvolutionButton />
             <ViralShareButton />
+            <SupportButton />
         </div>
       </div>
 
@@ -195,6 +202,7 @@ export default async function Home() {
         <FeatureVotePoll />
       </div>
 
+      <VoteWidget />
       <VoteDuel />
       <TipJar />
       {/* Engagement Features (Combined) */}
