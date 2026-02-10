@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import EndlessJumperGame from './components/EndlessJumperGame';
 import Game from './components/Game';
 import Two048Game from './components/Two048Game';
@@ -35,9 +36,16 @@ import HomeRunDerbyGame from './components/HomeRunDerbyGame';
 import ColorChangeGame from './components/ColorChangeGame';
 
 export default function GrokPlayground() {
-
-  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire' | 'infinityLoop' | 'mazeRunner' | 'gravityBall' | 'endlessRunner' | 'hyperTap' | 'labyrinth' | 'flipDash' | 'fruitSlice' | 'homeRunDerby'>('doodle');
+  const searchParams = useSearchParams();
   const t = useTranslations('playground');
+  const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire' | 'infinityLoop' | 'mazeRunner' | 'gravityBall' | 'endlessRunner' | 'hyperTap' | 'labyrinth' | 'flipDash' | 'fruitSlice' | 'homeRunDerby'>('doodle');
+
+  useEffect(() => {
+    const gameParam = searchParams.get('game');
+    if (gameParam) {
+      setSelectedGame(gameParam as any);
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">

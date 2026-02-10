@@ -3,12 +3,14 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { useAnalytics } from '@/lib/analytics';
 import type { RhythmTapperState, RhythmColor, RhythmZone, RhythmNote } from './components/RhythmTapper';
 import type { NeonTetrisState } from "./components/NeonTetris";
 import InfinityDrop from './components/InfinityDrop';
 import Slide2048 from './components/Slide2048';
 import QuickTap from './components/QuickTap';
+import MimoMemory from './components/MimoMemory';
 
 // Infinity Drop Interfaces
 interface Block {
@@ -1225,6 +1227,32 @@ const TUTORIALS: Record<GameType, TutorialStep[]> = {
       visualHint: "🔥"
     }
   ],
+  memory: [
+    {
+      id: 1,
+      title: "Welcome to Neon Memory!",
+      description: "Match pairs of cards to clear the board!",
+      highlight: "Flip cards to find matches",
+      action: "Tap a card to flip it",
+      visualHint: "🃏"
+    },
+    {
+      id: 2,
+      title: "Find Matches",
+      description: "Remember where you saw each symbol!",
+      highlight: "Match 2 symbols",
+      action: "Find a matching pair",
+      visualHint: "✨"
+    },
+    {
+      id: 3,
+      title: "Clear Fast!",
+      description: "Clear the board quickly for bonus points!",
+      highlight: "Speed = Points",
+      action: "Clear all cards",
+      visualHint: "⚡"
+    }
+  ],
   menu: [],
   snake: [],
   flap: [],
@@ -1332,7 +1360,7 @@ interface SessionState {
 }
 
 
-type GameType = 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3' | 'quickTap';
+type GameType = 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3' | 'quickTap' | 'memory';
 
 // Tutorial interfaces
 interface TutorialStep {
@@ -1352,9 +1380,18 @@ interface TutorialState {
 }
 
 export default function MimoPlayground() {
+  const searchParams = useSearchParams();
   const t = useTranslations('playground.mimo');
   const tc = useTranslations('playground.common');
-  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3' | 'quickTap'>('menu');
+  const [currentGame, setCurrentGame] = useState<'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3' | 'quickTap' | 'memory'>('menu');
+  
+  useEffect(() => {
+    const gameParam = searchParams.get('game');
+    if (gameParam) {
+      setCurrentGame(gameParam as any);
+    }
+  }, [searchParams]);
+
   const [shopOpen, setShopOpen] = useState(false);
 
   // Audio/Sound state
@@ -9429,6 +9466,37 @@ useEffect(() => {
                 </div>
                 <div className="text-xs text-slate-400">
                   {tc('highScore')}: {formatScore(match3State.highScore)}
+                </div>
+              </button>
+            </div>
+
+            {/* Neon Memory Card */}
+            <div className="p-2">
+              <button
+                onClick={() => {
+                  setCurrentGame('memory');
+                  handleClick();
+                  trackGameSession('memory');
+                  playSound('start');
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate(15);
+                  }
+                }}
+                aria-label="Neon Memory. Match pairs of cards!"
+                className="relative bg-gradient-to-br from-indigo-600 to-blue-800 p-6 rounded-xl border-2 border-indigo-500 hover:border-indigo-400 transition-all text-left group touch-manipulation min-h-[140px] flex flex-col justify-between active:scale-95 active:bg-indigo-700"
+                style={{ touchAction: 'manipulation' }}
+              >
+                <div>
+                  <div className="text-2xl font-bold mb-2 group-hover:text-indigo-200 group-active:text-indigo-100 flex items-center gap-2">
+                    Neon Memory
+                  </div>
+                  <div className="text-indigo-200 text-sm mb-3">Memory Card Game</div>
+                  <p className="text-slate-300 text-xs mb-3">
+                    Flip cards to find matching pairs! Test your memory in style.
+                  </p>
+                </div>
+                <div className="text-xs text-slate-400">
+                  New Game!
                 </div>
               </button>
             </div>

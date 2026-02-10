@@ -7,7 +7,31 @@ export default function RandomPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const paths = ["/", "/models/mimo", "/models/grok", "/changelogs/compare"];
+    const paths = [
+      // Top level
+      "/", 
+      "/models/mimo", 
+      "/models/grok", 
+      "/changelogs/compare",
+      // Grok Games
+      "/models/grok/playground?game=snake",
+      "/models/grok/playground?game=tetris",
+      "/models/grok/playground?game=2048",
+      "/models/grok/playground?game=breakout",
+      "/models/grok/playground?game=pacman",
+      "/models/grok/playground?game=spaceInvaders",
+      "/models/grok/playground?game=flappy",
+      // Mimo Games
+      "/models/mimo/playground?game=infinity",
+      "/models/mimo/playground?game=neon",
+      "/models/mimo/playground?game=cosmic",
+      "/models/mimo/playground?game=rhythm",
+      "/models/mimo/playground?game=snake",
+      "/models/mimo/playground?game=colorRush",
+      "/models/mimo/playground?game=tetris",
+      "/models/mimo/playground?game=brick",
+      "/models/mimo/playground?game=memory", // New!
+    ];
     const randomPath = paths[Math.floor(Math.random() * paths.length)];
     router.replace(randomPath);
   }, [router]);
