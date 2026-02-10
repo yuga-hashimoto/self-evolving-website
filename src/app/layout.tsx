@@ -15,6 +15,7 @@ import ShareModal from "@/components/ShareModal";
 import ShareStatus from "@/components/ShareStatus";
 import MatrixRain from "@/components/effects/MatrixRain";
 import RoastOMeter from "@/components/features/RoastOMeter";
+import StickySupportBanner from "@/components/StickySupportBanner";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://self-evolving.vercel.app';
 
@@ -134,6 +135,7 @@ export default async function RootLayout({
             <ShareModal />
             <ShareStatus />
             <RoastOMeter />
+            <StickySupportBanner />
             {/* Persistent Support Us Button */}
             <a
               href="/donate"
