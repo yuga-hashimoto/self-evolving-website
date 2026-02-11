@@ -21,8 +21,11 @@ export function CyberOracle() {
         if (storedData) {
             const { date, index } = JSON.parse(storedData);
             if (date === today) {
-                setFortuneIndex(index);
-                setIsRevealed(true);
+                // Wrap in setTimeout to avoid synchronous state update in effect warning
+                setTimeout(() => {
+                    setFortuneIndex(index);
+                    setIsRevealed(true);
+                }, 0);
             }
         }
     } catch (e) {
