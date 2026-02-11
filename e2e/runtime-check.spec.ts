@@ -11,6 +11,7 @@ import { test, expect } from 'playwright/test';
 
 const pages = [
   { path: '/', name: 'Home' },
+  { path: '/leaderboard', name: 'Leaderboard' },
   { path: '/models/grok/playground', name: 'Grok Playground' },
   { path: '/models/mimo/playground', name: 'MiMo Playground' },
 ];

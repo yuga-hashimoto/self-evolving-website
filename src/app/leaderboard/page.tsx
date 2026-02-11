@@ -1,20 +1,10 @@
 "use client";
 
 import Link from 'next/link';
+import { LEADERBOARD_DATA } from '@/lib/leaderboard-data';
 
 export default function Leaderboard() {
-  const users = [
-    { rank: 1, name: "CodeMaster99", points: 2540, change: "up", avatar: "👨‍💻" },
-    { rank: 2, name: "PixelArtist", points: 2200, change: "same", avatar: "🎨" },
-    { rank: 3, name: "JulesAgent", points: 1980, change: "up", avatar: "🤖" },
-    { rank: 4, name: "WebWizard", points: 1850, change: "down", avatar: "🧙‍♂️" },
-    { rank: 5, name: "AI_Explorer", points: 1720, change: "up", avatar: "🚀" },
-    { rank: 6, name: "BugHunter", points: 1500, change: "down", avatar: "🐛" },
-    { rank: 7, name: "DesignGuru", points: 1450, change: "same", avatar: "✨" },
-    { rank: 8, name: "DevOpsNinja", points: 1300, change: "up", avatar: "🥷" },
-    { rank: 9, name: "FullStackHero", points: 1100, change: "down", avatar: "🦸" },
-    { rank: 10, name: "NewbieCoder", points: 950, change: "up", avatar: "🐣" },
-  ];
+  const users = LEADERBOARD_DATA;
 
   return (
     <div className="min-h-screen bg-[#0f0f1a] text-white p-4 sm:p-8 pt-24 relative overflow-hidden">
@@ -69,7 +59,8 @@ export default function Leaderboard() {
                         <span className={`font-semibold ${user.rank <= 3 ? 'text-white' : 'text-gray-300'}`}>
                           {user.name}
                         </span>
-                        {user.rank === 1 && <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">👑 King</span>}
+                        {user.badge && <span className="text-xl">{user.badge}</span>}
+                        {user.rank === 1 && !user.badge && <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">👑 King</span>}
                       </div>
                     </td>
                     <td className="py-4 px-6 text-right font-mono text-lg text-blue-300">
