@@ -4,19 +4,24 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { IconMimo, IconGrok } from '@/components/icons/Icons';
+import { useBadges } from '@/hooks/useBadges';
 
 export const VoteDuel = () => {
   const [votes, setVotes] = useState({ mimo: 0, grok: 0 });
   const [hasVoted, setHasVoted] = useState(false);
+  const { unlockBadge } = useBadges();
 
   useEffect(() => {
-    const stored = localStorage.getItem('ai_duel_votes');
-    if (stored) {
-      setVotes(JSON.parse(stored));
-    } else {
-      // Initial fake data
-      setVotes({ mimo: 1240, grok: 1180 });
-    }
+    const timer = setTimeout(() => {
+      const stored = localStorage.getItem('ai_duel_votes');
+      if (stored) {
+        setVotes(JSON.parse(stored));
+      } else {
+        // Initial fake data
+        setVotes({ mimo: 1240, grok: 1180 });
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleVote = (model: 'mimo' | 'grok') => {
@@ -26,6 +31,8 @@ export const VoteDuel = () => {
     setVotes(newVotes);
     localStorage.setItem('ai_duel_votes', JSON.stringify(newVotes));
     setHasVoted(true);
+
+    unlockBadge('voter');
 
     // Confetti effect
     const color = model === 'mimo' ? '#a855f7' : '#3b82f6';

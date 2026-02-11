@@ -62,6 +62,7 @@ import CodeBattleTicker from "@/components/features/CodeBattleTicker";
 import ConfettiButton from "@/components/features/ConfettiButton";
 import GlitchTitle from "@/components/features/GlitchTitle";
 import AIChatBubble from "@/components/features/AIChatBubble";
+import { UserBadges } from "@/components/features/badges/UserBadges";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -115,6 +116,7 @@ export default async function Home() {
       <DailyChallenge />
       <EvolutionFeed />
       <AIBattleGauge />
+      <UserBadges />
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
       <div className="w-full flex justify-center mb-6"><LiveVisitorCount /></div>

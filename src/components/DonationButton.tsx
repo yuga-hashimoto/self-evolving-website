@@ -4,11 +4,14 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IconCoffee } from '@/components/icons/Icons';
 import confetti from 'canvas-confetti';
+import { useBadges } from '@/hooks/useBadges';
 
 export default function DonationButton() {
   const [showThankYou, setShowThankYou] = useState(false);
+  const { unlockBadge } = useBadges();
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    unlockBadge('supporter');
     // Confetti
     confetti({
       particleCount: 150,

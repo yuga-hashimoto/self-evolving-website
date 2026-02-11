@@ -1,12 +1,15 @@
 "use client";
 import confetti from 'canvas-confetti';
 import { useState } from 'react';
+import { useBadges } from '@/hooks/useBadges';
 
 export default function ConfettiButton() {
   const [clicking, setClicking] = useState(false);
+  const { incrementProgress } = useBadges();
 
   const handleClick = () => {
     setClicking(true);
+    incrementProgress('confetti_fan');
     confetti({
       particleCount: 150,
       spread: 70,

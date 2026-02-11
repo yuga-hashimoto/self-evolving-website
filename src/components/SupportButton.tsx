@@ -1,13 +1,19 @@
+'use client';
+
 import Link from "next/link";
 import { IconRocket } from "@/components/icons/Icons";
+import { useBadges } from "@/hooks/useBadges";
 
 export default function SupportButton() {
+  const { unlockBadge } = useBadges();
+
   return (
     <div className="flex justify-center my-8 w-full">
       <Link
         href="https://ko-fi.com/yugahashimoto"
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => unlockBadge('supporter')}
         className="
           group relative inline-flex items-center gap-3 px-8 py-4 rounded-full
           bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600
@@ -17,7 +23,7 @@ export default function SupportButton() {
         "
       >
         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-        <IconRocket className="w-6 h-6 animate-bounce" />
+        <IconRocket size={24} className="w-6 h-6 animate-bounce" />
         <span className="relative z-10">Fuel the War Effort</span>
         <div className="absolute inset-0 rounded-full ring-2 ring-white/30 animate-ping opacity-20" />
       </Link>

@@ -18,6 +18,8 @@ import RoastOMeter from "@/components/features/RoastOMeter";
 import { CyberPet } from "@/components/features/CyberPet";
 import StickySupportBanner from "@/components/StickySupportBanner";
 import KofiNudge from "@/components/KofiNudge";
+import { BadgeProvider } from "@/components/features/badges/BadgeContext";
+import { BadgeNotification } from "@/components/features/badges/BadgeNotification";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://self-evolving.vercel.app';
 
@@ -142,27 +144,30 @@ export default async function RootLayout({
         </a>
         <NextIntlClientProvider messages={messages}>
           <AnalyticsProvider>
-            <Header />
-            <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
-            <Footer />
-            <AiConcierge />
-            <BuyMeCoffeeWidget />
-            <TipJar />
-            <ShareModal />
-            <ShareStatus />
-            <RoastOMeter />
-            <CyberPet />
-            <StickySupportBanner />
-            <KofiNudge />
-            {/* Persistent Support Us Button */}
-            <a
-              href="/donate"
-              className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border border-white/20 animate-pulse"
-              style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}
-            >
-              <span>☕</span>
-              <span>Support Us</span>
-            </a>
+            <BadgeProvider>
+              <Header />
+              <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
+              <Footer />
+              <BadgeNotification />
+              <AiConcierge />
+              <BuyMeCoffeeWidget />
+              <TipJar />
+              <ShareModal />
+              <ShareStatus />
+              <RoastOMeter />
+              <CyberPet />
+              <StickySupportBanner />
+              <KofiNudge />
+              {/* Persistent Support Us Button */}
+              <a
+                href="/donate"
+                className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border border-white/20 animate-pulse"
+                style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}
+              >
+                <span>☕</span>
+                <span>Support Us</span>
+              </a>
+            </BadgeProvider>
           </AnalyticsProvider>
         </NextIntlClientProvider>
       </body>
