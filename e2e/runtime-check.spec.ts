@@ -16,6 +16,7 @@ const pages = [
   { path: '/models/mimo/playground', name: 'MiMo Playground' },
   { path: '/blog/future-of-self-evolving-websites', name: 'Future of Self-Evolving Websites' },
   { path: '/roadmap', name: 'Roadmap' },
+  { path: '/sponsor', name: 'Sponsor' },
 ];
 
 for (const { path, name } of pages) {
