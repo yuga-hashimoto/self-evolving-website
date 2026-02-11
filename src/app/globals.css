@@ -10,6 +10,84 @@
   --foreground: #0f0f1a;
 }
 
+.retro {
+  --background: #c0c0c0;
+  --foreground: #000000;
+}
+
+.retro body {
+  font-family: 'MS Sans Serif', 'Segoe UI', Tahoma, sans-serif;
+}
+
+.retro .glass-card,
+.retro [class*="backdrop-blur"] {
+  background: #c0c0c0 !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #404040 !important;
+  border-bottom: 2px solid #404040 !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  box-shadow: 1px 1px 0px 0px #000000 !important;
+  color: #000000 !important;
+}
+
+.retro .glass-card:hover,
+.retro [class*="backdrop-blur"]:hover {
+  transform: none !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #404040 !important;
+  border-bottom: 2px solid #404040 !important;
+}
+
+.retro [class*="rounded"] {
+  border-radius: 0 !important;
+}
+
+/* Force gradient buttons to be retro */
+.retro [class*="bg-gradient-to-"]:not([class*="bg-clip-text"]) {
+  background: #c0c0c0 !important;
+  color: #000 !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #404040 !important;
+  border-bottom: 2px solid #404040 !important;
+  border-radius: 0 !important;
+  box-shadow: 1px 1px 0px 0px #000000 !important;
+}
+
+.retro [class*="bg-gradient-to-"]:not([class*="bg-clip-text"]):hover {
+  background: #c0c0c0 !important;
+  transform: none !important;
+}
+
+.retro [class*="bg-gradient-to-"] svg {
+  fill: currentColor !important;
+}
+
+.retro button:not([role="switch"]),
+.retro a[role="button"] {
+  background: #c0c0c0;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
+  color: #000000;
+  border-radius: 0;
+  box-shadow: 1px 1px 0px 0px #000000;
+}
+
+.retro button:not([role="switch"]):active,
+.retro a[role="button"]:active {
+  border-top: 2px solid #404040;
+  border-left: 2px solid #404040;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  box-shadow: none;
+  transform: translate(1px, 1px);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
