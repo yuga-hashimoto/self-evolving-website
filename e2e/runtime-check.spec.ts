@@ -12,8 +12,8 @@ import { test, expect } from 'playwright/test';
 const pages = [
   { path: '/', name: 'Home' },
   { path: '/leaderboard', name: 'Leaderboard' },
-  { path: '/models/grok/playground', name: 'Grok Playground' },
-  { path: '/models/mimo/playground', name: 'MiMo Playground' },
+  { path: '/models/ai2/playground', name: 'AI 2 Playground' },
+  { path: '/models/ai1/playground', name: 'MiMo Playground' },
   { path: '/blog/future-of-self-evolving-websites', name: 'Future of Self-Evolving Websites' },
   { path: '/roadmap', name: 'Roadmap' },
   { path: '/sponsor', name: 'Sponsor' },

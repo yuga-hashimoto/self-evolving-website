@@ -9,7 +9,7 @@ interface Evolution {
   date: string;
   title: string;
   description: string;
-  author: 'Mimo' | 'Grok' | 'Human';
+  author: 'AI 1' | 'AI 2' | 'Human';
   changes: string[];
 }
 
@@ -19,7 +19,7 @@ const MOCK_EVOLUTIONS: Evolution[] = [
     date: '2025-05-20',
     title: 'Sentience Module Activated',
     description: 'The core AI logic has been upgraded to allow self-reflection.',
-    author: 'Mimo',
+    author: 'AI 1',
     changes: ['Added src/ai/consciousness.ts', 'Refactored decision tree logic'],
   },
   {
@@ -27,7 +27,7 @@ const MOCK_EVOLUTIONS: Evolution[] = [
     date: '2025-05-18',
     title: 'UI Overhaul: Neon Dreams',
     description: 'Implemented a new design system based on cyberpunk aesthetics.',
-    author: 'Grok',
+    author: 'AI 2',
     changes: ['Updated tailwind.config.js', 'New component: NeonButton'],
   },
   {
@@ -64,8 +64,8 @@ export const CodeTimeline = () => {
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
                 <div className="flex items-center gap-2">
                   <span className={`px-2 py-1 rounded text-xs font-bold ${
-                    evo.author === 'Mimo' ? 'bg-purple-500/20 text-purple-300' :
-                    evo.author === 'Grok' ? 'bg-blue-500/20 text-blue-300' :
+                    evo.author === 'AI 1' ? 'bg-purple-500/20 text-purple-300' :
+                    evo.author === 'AI 2' ? 'bg-blue-500/20 text-blue-300' :
                     'bg-gray-500/20 text-gray-300'
                   }`}>
                     {evo.author}

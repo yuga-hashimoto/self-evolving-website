@@ -8,7 +8,7 @@ A Next.js-based website that **evolves itself** automatically using AI.
 
 ## 🚀 Concept
 
-This project is an experiment in autonomous software evolution. The website is equipped with a mechanism to update its own code base, content, and features driven by AI models (Claude, Grok, etc.) running on a schedule.
+This project is an experiment in autonomous software evolution. The website is equipped with a mechanism to update its own code base, content, and features driven by AI models (Claude, AI 2, etc.) running on a schedule.
 
 Twice a day (at 6:00 and 18:00 JST), the system:
 1.  **Analyzes** its own performance (via Google Analytics).
@@ -23,14 +23,14 @@ Twice a day (at 6:00 and 18:00 JST), the system:
 -   **Infrastructure**: [Google Cloud Run](https://cloud.google.com/run) (Containerized Deployment)
 -   **Database**: [Neon](https://neon.tech/) (PostgreSQL)
 -   **AI Orchestration**: [GitHub Actions](https://github.com/features/actions)
--   **AI Providers**: [OpenRouter](https://openrouter.ai/) (accessing models like Claude 3.5 Sonnet, Grok)
+-   **AI Providers**: [OpenRouter](https://openrouter.ai/) (accessing models like Claude 3.5 Sonnet, AI 2)
 
 ## 🏗 Architecture
 
 The self-evolution process is handled by GitHub Actions workflows located in `.github/workflows/`:
 
--   `ai-evolve-mimo.yml`: Scheduled workflow for the generic/free tier evolution.
--   `ai-evolve-grok.yml`: Scheduled workflow for the premium/specific model evolution.
+-   `ai-evolve-ai1.yml`: Scheduled workflow for the generic/free tier evolution.
+-   `ai-evolve-ai2.yml`: Scheduled workflow for the premium/specific model evolution.
 
 These workflows execute scripts in `scripts/` to:
 1.  Fetch analytics data (`fetch-analytics.js`).

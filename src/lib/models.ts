@@ -1,17 +1,17 @@
 // Model configuration file
 export const MODELS = {
-    mimo: {
-        id: 'mimo',
+    ai1: {
+        id: 'ai1',
         name: 'AI 1',
-        description: 'Z-AI GLM 4.5 Air',
-        openrouterModel: 'z-ai/glm-4.5-air:free',
+        description: 'Free AI Router',
+        openrouterModel: 'openrouter/free',
         color: 'purple',
     },
-    grok: {
-        id: 'grok',
+    ai2: {
+        id: 'ai2',
         name: 'AI 2',
-        description: 'DeepSeek R1t2 Chimera',
-        openrouterModel: 'tngtech/deepseek-r1t2-chimera:free',
+        description: 'Pony Alpha',
+        openrouterModel: 'openrouter/pony-alpha',
         color: 'blue',
     },
 } as const;

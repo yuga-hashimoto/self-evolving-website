@@ -32,7 +32,7 @@ steps:
       - '--port'
       - '8080'
       - '--update-env-vars'
-      - 'OPENROUTER_MODEL=x-ai/grok-code-fast-1,NEXT_PUBLIC_GA_ID=G-6YRLQEKHW7,NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-6725733161326563'
+      - 'OPENROUTER_MODEL=openrouter/free,NEXT_PUBLIC_GA_ID=G-6YRLQEKHW7,NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-6725733161326563'
 
 images:
   - 'gcr.io/$PROJECT_ID/self-evolving-website:$SHORT_SHA'

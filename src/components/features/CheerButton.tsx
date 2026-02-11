@@ -5,7 +5,7 @@ import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface CheerButtonProps {
-  modelId: 'mimo' | 'grok';
+  modelId: 'ai1' | 'ai2';
   color: string;
 }
 

@@ -151,22 +151,22 @@ export default function DailyChallenge() {
               ) : (
                 <>
                   <p className="text-sm text-gray-300">
-                    <span className="font-semibold text-amber-300">Mission:</span> Check out both Mimo and Grok models to earn XP!
+                    <span className="font-semibold text-amber-300">Mission:</span> Check out both AI 1 and AI 2 models to earn XP!
                   </p>
                   <div className="flex gap-2 mt-3">
                     <Link 
-                      href="/models/mimo" 
+                      href="/models/ai1" 
                       onClick={handleComplete}
                       className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-white transition-colors flex items-center gap-1"
                     >
-                      <Zap size={12} /> Visit Mimo
+                      <Zap size={12} /> Visit AI 1
                     </Link>
                     <Link 
-                      href="/models/grok" 
+                      href="/models/ai2" 
                       onClick={handleComplete}
                       className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-white transition-colors flex items-center gap-1"
                     >
-                      <Zap size={12} /> Visit Grok
+                      <Zap size={12} /> Visit AI 2
                     </Link>
                   </div>
                 </>

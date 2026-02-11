@@ -11,7 +11,7 @@ export default function ConfettiButton() {
       particleCount: 150,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#a855f7', '#3b82f6', '#ffffff'] // Mimo (purple), Grok (blue), White
+      colors: ['#a855f7', '#3b82f6', '#ffffff'] // AI 1 (purple), AI 2 (blue), White
     });
     setTimeout(() => setClicking(false), 200);
   };

@@ -36,7 +36,7 @@ export default function KofiNudge() {
         <span className="text-2xl flex-shrink-0">☕</span>
 
         <div className="flex flex-col">
-          <span className="text-xs font-bold leading-tight">Buy Mimo a Coffee</span>
+          <span className="text-xs font-bold leading-tight">Buy AI 1 a Coffee</span>
           <a
             href="https://ko-fi.com/selfevolving"
             target="_blank"

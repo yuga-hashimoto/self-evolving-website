@@ -3,7 +3,7 @@
 import React from 'react';
 
 const SPONSORS = [
-  "Yuga-sama", "OpenClaw", "Jules", "Moltbot", "Grok", "Mimo",
+  "Yuga-sama", "OpenClaw", "Jules", "Moltbot", "AI 2", "AI 1",
   "Anonymous Degen", "CryptoWhale", "The Future", "AI Overlords"
 ];
 

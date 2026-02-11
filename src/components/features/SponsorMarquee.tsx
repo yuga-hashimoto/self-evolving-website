@@ -4,12 +4,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { SPONSORS, Sponsor } from '@/lib/sponsors-data';
-import { IconMimo, IconGrok, IconDNA, IconX } from '@/components/icons/Icons';
+import { IconAi1, IconAi2, IconDNA, IconX } from '@/components/icons/Icons';
 import { Rocket, Brain, Code, Zap, Plus, Crown } from 'lucide-react';
 
 const LogoMap: Record<string, React.ReactNode> = {
-  mimo: <IconMimo size={32} />,
-  grok: <IconGrok size={32} />,
+  ai1: <IconAi1 size={32} />,
+  ai2: <IconAi2 size={32} />,
   dna: <IconDNA size={32} />,
   x: <IconX size={32} />,
   rocket: <Rocket size={32} />,

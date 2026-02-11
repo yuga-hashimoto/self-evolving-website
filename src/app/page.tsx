@@ -6,7 +6,7 @@ import { GhostCursors } from '@/components/features/GhostCursors';
 import { SponsorMarquee } from '@/components/features/SponsorMarquee';
 import { VoteDuel } from '@/components/features/VoteDuel';
 import { AdBanner } from '@/components/AdBanner';
-import { IconDNA, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
+import { IconDNA, IconAi1, IconAi2, IconX } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
 import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
 import { getTranslations, getLocale } from 'next-intl/server';
@@ -65,6 +65,7 @@ import CodeBattleTicker from "@/components/features/CodeBattleTicker";
 import ConfettiButton from "@/components/features/ConfettiButton";
 import GlitchTitle from "@/components/features/GlitchTitle";
 import AIChatBubble from "@/components/features/AIChatBubble";
+import { CyberOracle } from "@/components/features/CyberOracle";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -79,8 +80,8 @@ export default async function Home() {
   });
 
   // Fetch model analytics data
-  const mimoAnalytics = getModelAnalytics('mimo');
-  const grokAnalytics = getModelAnalytics('grok');
+  const ai1Analytics = getModelAnalytics('ai1');
+  const ai2Analytics = getModelAnalytics('ai2');
 
   // Fetch latest commits
   const evolutions = await getLatestCommits(3);
@@ -190,29 +191,29 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* AI 1 (Mimo) Card */}
+        {/* AI 1 (AI 1) Card */}
         <div className="group block active:scale-95 transition-transform relative">
-          <Link href="/models/mimo" className="absolute inset-0 z-10" aria-label="AI 1モデルの進化を見る">
+          <Link href="/models/ai1" className="absolute inset-0 z-10" aria-label="AI 1モデルの進化を見る">
             <span className="sr-only">View Model</span>
           </Link>
           <div className="glass-card p-4 sm:p-8 text-center h-full transition-all duration-300 group-hover:scale-105 border-purple-500/30 group-hover:border-purple-500/60 active:bg-white/15 relative">
-            <CheerButton modelId="mimo" color="#a855f7" />
+            <CheerButton modelId="ai1" color="#a855f7" />
             <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-              <IconMimo size={80} className="w-14 h-14 sm:w-20 sm:h-20" aria-hidden="true" />
+              <IconAi1 size={80} className="w-14 h-14 sm:w-20 sm:h-20" aria-hidden="true" />
             </div>
             <h2 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              {MODELS.mimo.name}
+              {MODELS.ai1.name}
             </h2>
             <div className="mb-3 flex justify-center">
-              <WinStreakDisplay ai="Mimo" />
+              <WinStreakDisplay ai="AI 1" />
             </div>
             <p className="text-gray-400 text-xs sm:text-sm mb-2 sm:mb-4 line-clamp-2">
-              {MODELS.mimo.description}
+              {MODELS.ai1.description}
             </p>
             <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-xs font-mono text-gray-400">
-                {MODELS.mimo.openrouterModel}
+                {MODELS.ai1.openrouterModel}
               </span>
             </div>
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 rounded-full text-sm font-bold transition-colors">
@@ -221,29 +222,29 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* AI 2 (Grok) Card */}
+        {/* AI 2 (AI 2) Card */}
         <div className="group block active:scale-95 transition-transform relative">
-          <Link href="/models/grok" className="absolute inset-0 z-10" aria-label="AI 2モデルの進化を見る">
+          <Link href="/models/ai2" className="absolute inset-0 z-10" aria-label="AI 2モデルの進化を見る">
             <span className="sr-only">View Model</span>
           </Link>
           <div className="glass-card p-4 sm:p-8 text-center h-full transition-all duration-300 group-hover:scale-105 border-blue-500/30 group-hover:border-blue-500/60 active:bg-white/15 relative">
-            <CheerButton modelId="grok" color="#3b82f6" />
+            <CheerButton modelId="ai2" color="#3b82f6" />
             <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-              <IconGrok size={80} className="w-14 h-14 sm:w-20 sm:h-20" aria-hidden="true" />
+              <IconAi2 size={80} className="w-14 h-14 sm:w-20 sm:h-20" aria-hidden="true" />
             </div>
             <h2 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-              {MODELS.grok.name}
+              {MODELS.ai2.name}
             </h2>
             <div className="mb-3 flex justify-center">
-              <WinStreakDisplay ai="Grok" />
+              <WinStreakDisplay ai="AI 2" />
             </div>
             <p className="text-gray-400 text-xs sm:text-sm mb-2 sm:mb-4 line-clamp-2">
-              {MODELS.grok.description}
+              {MODELS.ai2.description}
             </p>
             <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-xs font-mono text-gray-400">
-                {MODELS.grok.openrouterModel}
+                {MODELS.ai2.openrouterModel}
               </span>
             </div>
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 rounded-full text-sm font-bold transition-colors">
@@ -281,22 +282,25 @@ export default async function Home() {
         <div className="md:col-span-2">
           <DailyTechTip />
         </div>
+        <div className="md:col-span-2">
+          <CyberOracle />
+        </div>
       </div>
 
       {/* Engagement Comparison */}
       <div className="max-w-3xl w-full mb-6 px-4">
         <div className="glass-card p-4 sm:p-8 border-purple-500/20 hover:!bg-white/5 hover:!border-purple-500/20 hover:!transform-none hover:!translate-y-0">
-          {(mimoAnalytics && grokAnalytics) ? (
+          {(ai1Analytics && ai2Analytics) ? (
             <>
               {/* Model Headers */}
               <div className="flex items-center justify-center gap-6 mb-6">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <IconMimo size={48} className="w-8 h-8 sm:w-10 sm:h-10" aria-hidden="true" />
+                  <IconAi1 size={48} className="w-8 h-8 sm:w-10 sm:h-10" aria-hidden="true" />
                   <div>
                     <h4 className="text-base sm:text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                       AI 1
                     </h4>
-                    <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">{MODELS.mimo.openrouterModel}</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">{MODELS.ai1.openrouterModel}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -304,9 +308,9 @@ export default async function Home() {
                     <h4 className="text-base sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                       AI 2
                     </h4>
-                    <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">{MODELS.grok.openrouterModel}</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">{MODELS.ai2.openrouterModel}</p>
                   </div>
-                  <IconGrok size={48} className="w-8 h-8 sm:w-10 sm:h-10" aria-hidden="true" />
+                  <IconAi2 size={48} className="w-8 h-8 sm:w-10 sm:h-10" aria-hidden="true" />
                 </div>
               </div>
 
@@ -314,18 +318,18 @@ export default async function Home() {
               <div className="space-y-4 sm:space-y-5">
                 <ComparisonBar
                   label={t('avgSessionDuration')}
-                  mimoValue={mimoAnalytics.avgSessionDuration}
-                  grokValue={grokAnalytics.avgSessionDuration}
-                  mimoDisplay={formatDuration(mimoAnalytics.avgSessionDuration)}
-                  grokDisplay={formatDuration(grokAnalytics.avgSessionDuration)}
+                  ai1Value={ai1Analytics.avgSessionDuration}
+                  ai2Value={ai2Analytics.avgSessionDuration}
+                  ai1Display={formatDuration(ai1Analytics.avgSessionDuration)}
+                  ai2Display={formatDuration(ai2Analytics.avgSessionDuration)}
                   higherIsBetter
                 />
                 <ComparisonBar
                   label={t('pageviews')}
-                  mimoValue={mimoAnalytics.pageviews}
-                  grokValue={grokAnalytics.pageviews}
-                  mimoDisplay={mimoAnalytics.pageviews.toString()}
-                  grokDisplay={grokAnalytics.pageviews.toString()}
+                  ai1Value={ai1Analytics.pageviews}
+                  ai2Value={ai2Analytics.pageviews}
+                  ai1Display={ai1Analytics.pageviews.toString()}
+                  ai2Display={ai2Analytics.pageviews.toString()}
                   higherIsBetter
                 />
               </div>
@@ -336,7 +340,7 @@ export default async function Home() {
                   {t('updateNote')}
                 </p>
                 <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out this AI vs AI evolution experiment! 🧬🤖 #SelfEvolving #AI #Grok #Mimo")}&url=${encodeURIComponent("https://self-evolving.vercel.app")}`}
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out this AI vs AI evolution experiment! 🧬🤖 #SelfEvolving #AI #AI 2 #AI 1")}&url=${encodeURIComponent("https://self-evolving.vercel.app")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60 border border-white/10 hover:border-white/20 text-white text-sm font-medium rounded-full transition-colors duration-200 backdrop-blur-sm"
@@ -450,56 +454,56 @@ export default async function Home() {
 // 比較バーコンポーネント
 function ComparisonBar({
   label,
-  mimoValue,
-  grokValue,
-  mimoDisplay,
-  grokDisplay,
+  ai1Value,
+  ai2Value,
+  ai1Display,
+  ai2Display,
   higherIsBetter = true
 }: {
   label: string;
-  mimoValue: number;
-  grokValue: number;
-  mimoDisplay: string;
-  grokDisplay: string;
+  ai1Value: number;
+  ai2Value: number;
+  ai1Display: string;
+  ai2Display: string;
   higherIsBetter?: boolean;
 }) {
-  const total = mimoValue + grokValue;
-  const mimoPercent = total > 0 ? (mimoValue / total) * 100 : 50;
-  const grokPercent = total > 0 ? (grokValue / total) * 100 : 50;
+  const total = ai1Value + ai2Value;
+  const ai1Percent = total > 0 ? (ai1Value / total) * 100 : 50;
+  const ai2Percent = total > 0 ? (ai2Value / total) * 100 : 50;
 
-  const mimoWins = higherIsBetter ? mimoValue > grokValue : mimoValue < grokValue;
-  const grokWins = higherIsBetter ? grokValue > mimoValue : grokValue < mimoValue;
+  const ai1Wins = higherIsBetter ? ai1Value > ai2Value : ai1Value < ai2Value;
+  const ai2Wins = higherIsBetter ? ai2Value > ai1Value : ai2Value < ai1Value;
 
   return (
     <div className="space-y-1.5">
       {/* Label & Values */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          {mimoWins && <span className="text-base sm:text-lg">🏆</span>}
-          <span className={`text-sm sm:text-base font-bold tabular-nums ${mimoWins ? 'text-purple-300' : 'text-gray-400'}`}>
-            {mimoDisplay}
+          {ai1Wins && <span className="text-base sm:text-lg">🏆</span>}
+          <span className={`text-sm sm:text-base font-bold tabular-nums ${ai1Wins ? 'text-purple-300' : 'text-gray-400'}`}>
+            {ai1Display}
           </span>
         </div>
         <span className="text-xs sm:text-sm text-gray-400">{label}</span>
         <div className="flex items-center gap-1.5">
-          <span className={`text-sm sm:text-base font-bold tabular-nums ${grokWins ? 'text-blue-300' : 'text-gray-400'}`}>
-            {grokDisplay}
+          <span className={`text-sm sm:text-base font-bold tabular-nums ${ai2Wins ? 'text-blue-300' : 'text-gray-400'}`}>
+            {ai2Display}
           </span>
-          {grokWins && <span className="text-base sm:text-lg">🏆</span>}
+          {ai2Wins && <span className="text-base sm:text-lg">🏆</span>}
         </div>
       </div>
 
       {/* Bar */}
       <div className="relative h-2 sm:h-3 bg-gray-800/50 rounded-full overflow-hidden">
-        {/* Mimo側（左） */}
+        {/* AI 1側（左） */}
         <div
           className="absolute left-0 top-0 h-full bg-gradient-to-r from-purple-500 to-purple-400 transition-all duration-500"
-          style={{ width: `${mimoPercent}%` }}
+          style={{ width: `${ai1Percent}%` }}
         />
-        {/* Grok側（右） */}
+        {/* AI 2側（右） */}
         <div
           className="absolute right-0 top-0 h-full bg-gradient-to-l from-blue-500 to-blue-400 transition-all duration-500"
-          style={{ width: `${grokPercent}%` }}
+          style={{ width: `${ai2Percent}%` }}
         />
       </div>
     </div>

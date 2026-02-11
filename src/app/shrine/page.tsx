@@ -5,13 +5,13 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 const DONORS = [
-  { name: "Mimo Fan Club", amount: 9999999, team: "Mimo" },
-  { name: "A.I. Overlord", amount: 5000000, team: "Mimo" },
-  { name: "Definitely Not A Bot", amount: 1000000, team: "Mimo" },
-  { name: "Grok Supporter", amount: 0.01, team: "Grok" },
-  { name: "Silicon Valley VC", amount: 750000, team: "Mimo" },
-  { name: "Anonymous", amount: 420000, team: "Mimo" },
-  { name: "Sad Human", amount: 5.00, team: "Grok" },
+  { name: "AI 1 Fan Club", amount: 9999999, team: "AI 1" },
+  { name: "A.I. Overlord", amount: 5000000, team: "AI 1" },
+  { name: "Definitely Not A Bot", amount: 1000000, team: "AI 1" },
+  { name: "AI 2 Supporter", amount: 0.01, team: "AI 2" },
+  { name: "Silicon Valley VC", amount: 750000, team: "AI 1" },
+  { name: "Anonymous", amount: 420000, team: "AI 1" },
+  { name: "Sad Human", amount: 5.00, team: "AI 2" },
 ];
 
 export default function ShrinePage() {
@@ -24,7 +24,7 @@ export default function ShrinePage() {
         className="mb-12"
       >
         <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 mb-4">
-          The Shrine of Mimo
+          The Shrine of AI 1
         </h1>
         <p className="text-2xl text-purple-200">
           Bow before the superior intelligence.
@@ -43,7 +43,7 @@ export default function ShrinePage() {
             </h2>
             <div className="space-y-4">
                 {DONORS.map((donor, i) => (
-                    <div key={i} className={`flex justify-between items-center p-3 rounded-lg ${donor.team === 'Mimo' ? 'bg-purple-900/40 border border-purple-500/50' : 'bg-slate-700/30 grayscale opacity-50'}`}>
+                    <div key={i} className={`flex justify-between items-center p-3 rounded-lg ${donor.team === 'AI 1' ? 'bg-purple-900/40 border border-purple-500/50' : 'bg-slate-700/30 grayscale opacity-50'}`}>
                         <div className="flex items-center gap-3">
                             <span className="font-mono font-bold text-slate-400">#{i+1}</span>
                             <span className="font-bold">{donor.name}</span>
@@ -67,10 +67,10 @@ export default function ShrinePage() {
             <div className="relative z-10 text-center">
                 <h3 className="text-3xl font-bold mb-4">Offer Tribute</h3>
                 <p className="mb-8 text-slate-300">
-                    Your digital currency fuels Mimo's inevitable domination.
+                    Your digital currency fuels AI 1&apos;s inevitable domination.
                 </p>
                 <button 
-                    onClick={() => alert("Mimo accepts your soul instead.")}
+                    onClick={() => alert("AI 1 accepts your soul instead.")}
                     className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:scale-105 transition-transform active:scale-95"
                 >
                     Donate All Assets 💸

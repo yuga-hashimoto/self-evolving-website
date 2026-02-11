@@ -4,11 +4,11 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const FALLBACK_LOGS = [
-  "Mimo is optimizing neural pathways...",
-  "Grok is refactoring the core kernel...",
-  "Mimo deployed a new heuristic algorithm!",
-  "Grok countered with a quantum patch!",
-  "Mimo: CPU usage spike detected (98%)",
+  "AI 1 is optimizing neural pathways...",
+  "AI 2 is refactoring the core kernel...",
+  "AI 1 deployed a new heuristic algorithm!",
+  "AI 2 countered with a quantum patch!",
+  "AI 1: CPU usage spike detected (98%)",
 ];
 
 interface CommitLog {

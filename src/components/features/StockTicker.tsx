@@ -3,13 +3,13 @@
 import React, { useState, useEffect } from 'react';
 
 export const StockTicker = () => {
-  const [prices, setPrices] = useState({ mimo: 120.5, grok: 118.2 });
+  const [prices, setPrices] = useState({ ai1: 120.5, ai2: 118.2 });
 
   useEffect(() => {
     const interval = setInterval(() => {
       setPrices(prev => ({
-        mimo: Math.max(0, prev.mimo + (Math.random() - 0.45) * 2), // Slightly biased towards growth
-        grok: Math.max(0, prev.grok + (Math.random() - 0.45) * 2)
+        ai1: Math.max(0, prev.ai1 + (Math.random() - 0.45) * 2), // Slightly biased towards growth
+        ai2: Math.max(0, prev.ai2 + (Math.random() - 0.45) * 2)
       }));
     }, 2000);
 
@@ -25,13 +25,13 @@ export const StockTicker = () => {
         {[...Array(4)].map((_, i) => (
           <div key={i} className="flex items-center gap-8 mx-4">
             <span className="text-gray-500 font-bold">MIMO:</span>
-            <span className={prices.mimo > 120 ? 'text-green-400' : 'text-red-400'}>
-              {formatPrice(prices.mimo)} {prices.mimo > 120 ? '▲' : '▼'}
+            <span className={prices.ai1 > 120 ? 'text-green-400' : 'text-red-400'}>
+              {formatPrice(prices.ai1)} {prices.ai1 > 120 ? '▲' : '▼'}
             </span>
             
             <span className="text-gray-500 font-bold ml-4">GROK:</span>
-            <span className={prices.grok > 118 ? 'text-blue-400' : 'text-red-400'}>
-              {formatPrice(prices.grok)} {prices.grok > 118 ? '▲' : '▼'}
+            <span className={prices.ai2 > 118 ? 'text-blue-400' : 'text-red-400'}>
+              {formatPrice(prices.ai2)} {prices.ai2 > 118 ? '▲' : '▼'}
             </span>
             
             <span className="text-purple-500/50 mx-4">EVOLUTION_INDEX: 404.2 ▲</span>

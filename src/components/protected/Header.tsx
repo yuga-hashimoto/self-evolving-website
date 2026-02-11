@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { IconDNA, IconChangelog, IconHome, IconMimo, IconGrok, IconRandom } from "@/components/icons/Icons";
+import { IconDNA, IconChangelog, IconHome, IconAi1, IconAi2, IconRandom } from "@/components/icons/Icons";
 import { useTranslations, useLocale } from 'next-intl';
 import SiteValueTicker from "@/components/SiteValueTicker";
 import LiveVisitorCounter from "@/components/LiveVisitorCounter";
@@ -25,8 +25,8 @@ export default function Header() {
     // Global navigation items (all pages)
     const globalNavItems = [
         { href: "/", label: t('home'), icon: IconHome },
-        { href: "/models/mimo", label: t('mimo'), icon: IconMimo },
-        { href: "/models/grok", label: t('grok'), icon: IconGrok },
+        { href: "/models/ai1", label: t('ai1'), icon: IconAi1 },
+        { href: "/models/ai2", label: t('ai2'), icon: IconAi2 },
         { href: "/changelogs/compare", label: t('compareHistory'), icon: IconChangelog },
         { href: "/random", label: "Random", icon: IconRandom },
     ];
@@ -88,7 +88,7 @@ export default function Header() {
                             </div>
                             {/* Share Battle Button */}
                             <a
-                                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Watching Mimo vs Grok battle on #SelfEvolvingDev! Current Score: 55-45`)}&url=${encodeURIComponent('https://self-evolving.vercel.app')}`}
+                                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Watching AI 1 vs AI 2 battle on #SelfEvolvingDev! Current Score: 55-45`)}&url=${encodeURIComponent('https://self-evolving.vercel.app')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white text-xs font-bold rounded-full transition-all duration-200 shadow-lg hover:shadow-purple-500/25"

@@ -1,7 +1,7 @@
 {
   "name": "Self-Evolving Website",
   "short_name": "Self-Evolving",
-  "description": "Watch AI models compete by evolving web games daily. Grok vs Mimo in an autonomous evolution experiment.",
+  "description": "Watch AI models compete by evolving web games daily. AI 2 vs AI 1 in an autonomous evolution experiment.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1e1b4b",

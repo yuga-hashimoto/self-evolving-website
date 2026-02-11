@@ -1,0 +1,1371 @@
+[
+  {
+    "id": 1,
+    "date": "2026-01-15T16:48:54+09:00",
+    "model": "ai2",
+    "changes": "新しい中毒性高いジャンプゲーム「Doodle Leap」を実装。Canvas APIを使用したプラットフォームジャンプゲームで、タッチ操作、キーボード入力、スコアトラッキング、ローカルストレージでハイスコア保存",
+    "intent": "ユーザーの滞在時間を最大化するための即時フィードバックと記録更新可能なシンプルなゲームを提供。AdSense対応の広告スペースも確保",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/Game.tsx"
+    ],
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/commit/b58663351e179d72b0379a5cc2c8b3bc22ba89d4"
+  },
+  {
+    "id": 2,
+    "date": "2026-01-15T21:17:56+09:00",
+    "model": "ai2",
+    "changes": "2048パズルゲームを実装。4x4グリッドで数字タイルをスライドさせ合体させて2048を目指すゲーム。スコア記録、ローカルストレージハイスコア保存、タッチスワイプ・キーボード操作に対応。ゲーム選択メニューを追加",
+    "intent": "ページビューが3と少ないため、ユーザーの興味を引き新しいゲームを追加し滞在時間をさらに延ばす。直帰率0%を維持しつつ、バリエーションを増やすことでリピート訪問を促進",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/Two048Game.tsx"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 167,
+        "autoFix": {},
+        "total": 248
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 2,
+        "additions": 334,
+        "deletions": 3
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/commit/ec15d866353cefbf19af2e2e009cc45463161099"
+  },
+  {
+    "id": 3,
+    "date": "2026-01-16T08:15:00+09:00",
+    "model": "ai2",
+    "changes": "古典的なスネークゲームを実装。ヘビを成長させながら食べ物を食べ、スコアを競うゲーム。スワイプ操作、タッチ対応、高スコア保存、ローカルストレージ活用。ゲーム選択メニューに追加",
+    "intent": "ページビューが6とまだ少ないため、モバイルで遊びやすい古典ゲームを追加し滞在時間をさらに延ばす。直帰率0%を維持しつつ、多様なゲームラインナップでユーザーロイヤリティを高める",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/SnakeGame.tsx"
+    ],
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/6",
+    "prNumber": 6,
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 103,
+        "autoFix": {},
+        "total": 191
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 10,
+        "deletions": 2
+      }
+    }
+  },
+  {
+    "id": 4,
+    "date": "2026-01-16T10:30:00+09:00",
+    "model": "ai2",
+    "changes": "2048パズルゲームのキャンバスサイズをレスポンシブに変更してモバイル対応性を向上。新しいテトリスゲームを追加し、スコア保存、レベルアップ、ラインクリア機能を実装",
+    "intent": "ページビューが7とまだ少ないため、モバイル対応を改善し新規ゲームの追加でユーザー滞在時間を延ばす。多様なゲームラインナップでリピート訪問を促進",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/Two048Game.tsx",
+      "src/app/models/ai2/playground/components/TetrisGame.tsx"
+    ],
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/12",
+    "prNumber": 12,
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 339,
+        "autoFix": {},
+        "total": 425
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 2,
+        "additions": 34,
+        "deletions": 9
+      }
+    }
+  },
+  {
+    "id": 5,
+    "date": "2026-01-17T22:30:00+09:00",
+    "model": "ai2",
+    "changes": "エンドレスジャンパーゲームを追加。プラットフォームを飛び移りながらスコアを競う縦スクロールゲーム",
+    "intent": "ゲームバリエーションを増やしユーザー滞在時間を延長",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/EndlessJumperGame.tsx"
+    ],
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/46",
+    "prNumber": 46,
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 136,
+        "autoFix": {},
+        "total": 230
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    }
+  },
+  {
+    "id": 6,
+    "date": "2026-01-17T23:59:00+09:00",
+    "model": "ai2",
+    "changes": "新しいエンドレスランナーゲーム「Endless Runner」を追加。タッチ対応でスクリーンサイズに合わせて動的に調整し、モバイルで快適にプレイ可能に。",
+    "intent": "セッション時間を最大化するため、既存ゲームのバグを修正し新しいゲームを追加。平均セッション時間を36秒から60秒以上に向上させることを目指す。",
+    "files": [
+      "src/app/models/ai2/playground/components/EndlessRunnerGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/en.json",
+      "messages/ja.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 274,
+        "autoFix": {
+          "attempt1": 199
+        },
+        "total": 575
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 1,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 2,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/52",
+    "prNumber": 52
+  },
+  {
+    "id": 7,
+    "date": "2026-01-18T09:19:00+09:00",
+    "model": "ai2",
+    "changes": "EndlessJumperGameのコード品質を向上。TypeScript型定義の強化とゲームロジックの改善。",
+    "intent": "セッション時間を最大化するため、既存ゲームの品質を向上。",
+    "files": [
+      "src/app/models/ai2/playground/components/EndlessJumperGame.tsx"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 209,
+        "autoFix": {
+          "attempt1": 99,
+          "attempt2": 402,
+          "attempt3": 186
+        },
+        "total": 1018
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 3,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 73,
+        "deletions": 4
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/60",
+    "prNumber": 60
+  },
+  {
+    "id": 8,
+    "date": "2026-01-18T20:33:08+09:00",
+    "model": "ai2",
+    "changes": "Doodle Leapゲームのループ初期化を実装し、ゲーム選択メニューを微調整。",
+    "intent": "ゲームの起動をスムーズにし、滞在時間を延ばすため。平均セッション時間が90秒のため、即時フィードバックを追加。",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 541,
+        "autoFix": {},
+        "total": 630
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 3,
+        "deletions": 0
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/64",
+    "prNumber": 64
+  },
+  {
+    "id": 9,
+    "date": "2026-01-19T09:09:00+09:00",
+    "model": "ai2",
+    "changes": "新しいマッチングゲーム「Color Match」を追加。色のマッチングでスコアを目指すシンプルなブラウザゲームを実装、タッチ操作とモバイル対応を強化。",
+    "intent": "直帰率を低下させ滞在時間を延長するため。既存ゲームのバリエーションを増やし、ユーザーの繰り返しプレイを促進。",
+    "files": [
+      "src/app/models/ai2/playground/components/ColorMatch.tsx"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 205,
+        "autoFix": {},
+        "total": 296
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 0,
+        "additions": 0,
+        "deletions": 0
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/74",
+    "prNumber": 74
+  },
+  {
+    "id": 10,
+    "date": "2026-01-19T18:48:45+09:00",
+    "model": "ai2",
+    "changes": "ゲームループが強化され、リアルタイムスコアを表示する機能が追加されました。これにより、プレイヤーのエンゲージメントが向上し、ゲーム体験がより魅力的になります。",
+    "intent": "滞在時間を増加させるため、ゲームのインタラクティブ性を高め、ユーザーの没入感を向上させる。",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 251,
+        "autoFix": {
+          "attempt1": 273
+        },
+        "total": 645
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 1,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 12,
+        "deletions": 2
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/76",
+    "prNumber": 76
+  },
+  {
+    "id": 11,
+    "date": "2026-01-20T22:44:26+09:00",
+    "model": "ai2",
+    "changes": "エンドレスジャンパーゲームにプラットフォーム、ギャップ、スコア機能を追加。新規ブレイクアウトゲームを実装（ボールでブロックを壊すゲーム）。モバイル対応改善",
+    "intent": "未完成ゲームを修正し質を向上させ、新ゲームでバリエーションを増やしユーザー滞在時間を延長",
+    "files": [
+      "src/app/models/ai2/playground/components/EndlessJumperGame.tsx",
+      "src/app/models/ai2/playground/components/BreakoutGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 408,
+        "autoFix": {},
+        "total": 510
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 2,
+        "additions": 214,
+        "deletions": 50
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/90",
+    "prNumber": 90
+  },
+  {
+    "id": 12,
+    "date": "2026-01-20T23:01:17+09:00",
+    "model": "ai2",
+    "changes": "新しいマッチ3パズルゲーム（Match3Puzzle）を追加し、モバイル対応のタッチ操作で宝石をマッチさせてスコアを競うゲームを実装。古い不完全なゲーム（ColorMatch、EndlessRunnerGame）を削除してUXを改善",
+    "intent": "モバイルデバイスで遊びやすいマッチングパズルゲームを追加し、より長いセッション時間を目指す。同時に不完全なゲームを削除して全体的なユーザー体験を向上させる",
+    "files": [
+      "src/app/models/ai2/playground/components/Match3PuzzleGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/en.json",
+      "messages/ja.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 434,
+        "autoFix": {},
+        "total": 529
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 3,
+        "additions": 9,
+        "deletions": 177
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/91",
+    "prNumber": 91
+  },
+  {
+    "id": 13,
+    "date": "2026-01-21T06:21:58+09:00",
+    "model": "ai2",
+    "changes": "新しいスペースインベーダーゲームを実装。タッチ操作で船を移動・射撃し、インベーダーを撃退してスコアを稼ぐクラシックアーケードゲーム。レベルごとに速度が上がり難易度アップ",
+    "intent": "ゲームバリエーションを増やし、スコア競争と戦略的なプレイでユーザーの滞在時間を最大化",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/SpaceInvadersGame.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 168,
+        "autoFix": {},
+        "total": 310
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/92",
+    "prNumber": 92
+  },
+  {
+    "id": 14,
+    "date": "2026-01-21T18:43:30+09:00",
+    "model": "ai2",
+    "changes": "新しいパックマンゲームを実装。迷路を移動してドットを食べ、幽霊を避けながらハイスコアを目指す古典ゲーム。タッチ操作・キーボード操作対応、スコア保存機能付き",
+    "intent": "ユーザーの興味を引きつけるゲームバリエーションを増やし平均セッション時間をさらに延ばすため。現在のページビュー16と良好な結果であるが、選択肢を増やしてリピート訪問を促進",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/PacmanGame.tsx",
+      "messages/en.json",
+      "messages/ja.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 237,
+        "autoFix": {},
+        "total": 335
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/94",
+    "prNumber": 94
+  },
+  {
+    "id": 15,
+    "date": "2026-01-22T06:28:46+09:00",
+    "model": "ai2",
+    "changes": "新しいゲーム「Flappy Wings」を追加。鳥をタップ操作で飛ばし、パイプを避けるサイドスクロールゲーム。スコア保存、モバイル対応、高スコアトラッキング機能付き",
+    "intent": "ゲームのバリエーションを増やし、新しい中毒性の高いゲームでユーザー滞在時間をさらに延長するため",
+    "files": [
+      "src/app/models/ai2/playground/components/FlappyBirdGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 154,
+        "autoFix": {},
+        "total": 252
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/96",
+    "prNumber": 96
+  },
+  {
+    "id": 16,
+    "date": "2026-01-22T18:44:13+09:00",
+    "model": "ai2",
+    "changes": "新しいタワー・スタックゲームを実装。タップでブロックを落とし、タワーを積み上げる物理ベースのゲーム。スクロールカメラ付き、スコアシステム、ローカルハイスコア保存、タッチ操作対応。ゲームオーバー条件：ブロックが重なりすぎて落ちる",
+    "intent": "ページビュー数が19と少ないものの、セッション時間76秒と滞在率13.3%と優秀なため、ユーザー発見を増やすため新しいゲームバリエーションを追加。物理ベースの積み上げメカニクスでエンドレスゲームプレイを確保し、ユーザーを引き込む",
+    "files": [
+      "src/app/models/ai2/playground/components/TowerStackGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 307,
+        "autoFix": {},
+        "total": 399
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/98",
+    "prNumber": 98
+  },
+  {
+    "id": 17,
+    "date": "2026-01-23T06:23:09+09:00",
+    "model": "ai2",
+    "changes": "新しいポングゲームを実装。タッチ操作対応、スコア保存機能付きのクラシックボールゲーム",
+    "intent": "ゲームの多様性を増やしユーザー滞在時間を延長するため",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/PongGame.tsx",
+      "messages/en.json",
+      "messages/ja.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 135,
+        "autoFix": {},
+        "total": 235
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/100",
+    "prNumber": 100
+  },
+  {
+    "id": 18,
+    "date": "2026-01-23T18:44:18+09:00",
+    "model": "ai2",
+    "changes": "新しいスペースシューティングゲーム「アステロイド」を追加。宇宙船を操作して小惑星を撃破し、スコアを競うゲーム。タッチ操作、ハイスコア保存機能付き",
+    "intent": "ゲームバリエーションを増やしユーザー滞在時間を延長。既存の変更履歴から同様の改善が効果的だったため",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/AsteroidsGame.tsx",
+      "messages/en.json",
+      "messages/ja.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 423,
+        "autoFix": {},
+        "total": 526
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/102",
+    "prNumber": 102
+  },
+  {
+    "id": 19,
+    "date": "2026-01-24T06:22:38+09:00",
+    "model": "ai2",
+    "changes": "新しいバブルポップゲームを実装。モバイル対応で同じ色の泡を繋げてポップするパズルゲーム。既存ゲームのモバイルCSSを改善",
+    "intent": "モバイル体験の改善とゲームバリエーション増加によりユーザー滞在時間を延長",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/BubbleGame.tsx",
+      "src/app/models/ai2/playground/components/Two048Game.tsx",
+      "src/app/models/ai2/playground/components/SnakeGame.tsx",
+      "src/app/models/ai2/playground/components/TetrisGame.tsx",
+      "src/app/models/ai2/playground/components/Game.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 190,
+        "autoFix": {},
+        "total": 288
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 5,
+        "additions": 33,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/104",
+    "prNumber": 104
+  },
+  {
+    "id": 20,
+    "date": "2026-01-24T18:29:33+09:00",
+    "model": "ai2",
+    "changes": "新しいカラースイッチゲームを追加。タップで色を切り替え、色付きの輪を通過するモバイル向けゲーム、スコア保存機能付き",
+    "intent": "ゲームバリエーションを増やし、モバイルのタッチ操作に特化した快速ゲームでユーザー滞在時間を延長",
+    "files": [
+      "src/app/models/ai2/playground/components/ColorSwitchGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/en.json",
+      "messages/ja.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 137,
+        "autoFix": {},
+        "total": 226
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/106",
+    "prNumber": 106
+  },
+  {
+    "id": 21,
+    "date": "2026-01-25T06:20:41+09:00",
+    "model": "ai2",
+    "changes": "新しいゲーム「スピードカラータップ」を追加。対象となる色名を表示し、4つの色付き円の中から正しい色を素早くタップする早打ちゲーム。タイムリミットあり、スコア保存とハイスコア記録機能付き。モバイルタッチ操作対応",
+    "intent": "ページビューが8と少ないため、新たなゲームタイプを追加して多様性を増やしユーザーの興味を維持。継続プレイを促すゲームデザインでセッション時間を延ばす",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/SpeedColorTapGame.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 244,
+        "autoFix": {},
+        "total": 338
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/108",
+    "prNumber": 108
+  },
+  {
+    "id": 22,
+    "date": "2026-01-25T18:32:46+09:00",
+    "model": "ai2",
+    "changes": "レベル制マッチ3パズルゲーム「Gem Blitz」を新規追加。レベルごとの目標達成制、スコア記録、タッチ操作対応。ゲーム選択メニューに追加",
+    "intent": "マッチ3ゲームは魅力的でリピートプレイを促進する。レベル進捗でユーザーを引きつけ、ページビュー増加によりセッション時間を延長。タッチ操作でスマホ最適化",
+    "files": [
+      "src/app/models/ai2/playground/components/GemBlitzGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 243,
+        "autoFix": {},
+        "total": 335
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/110",
+    "prNumber": 110
+  },
+  {
+    "id": 23,
+    "date": "2026-01-26T06:19:22+09:00",
+    "model": "ai2",
+    "changes": "新しいリズムタップゲーム「Reflex Tap」を追加。円が膨らむタイミングでタップするゲームで、スコアとコンボシステム付き。モバイル対応の高精度タッチ入力を実装",
+    "intent": "ゲームの多様性を増やし、短いプレイでも満足感を得られるリズムゲームを追加することでユーザー滞在時間を延長",
+    "files": [
+      "src/app/models/ai2/playground/components/ReflexTapGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 121,
+        "autoFix": {},
+        "total": 220
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/112",
+    "prNumber": 112
+  },
+  {
+    "id": 24,
+    "date": "2026-01-26T18:43:45+09:00",
+    "model": "ai2",
+    "changes": "テトリスゲームをモバイルで快適に遊べるようレスポンシブ対応。新しいピアノタイルゲームを追加、タッチ操作に対応、スコア記録機能付き",
+    "intent": "モバイルデバイスでの快適性を向上させ、ゲームバリエーションを増やしてユーザーエンゲージメントを高め平均セッション時間を延ばす",
+    "files": [
+      "src/app/models/ai2/playground/components/TetrisGame.tsx",
+      "src/app/models/ai2/playground/components/PianoTileGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 159,
+        "autoFix": {},
+        "total": 262
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 2,
+        "additions": 35,
+        "deletions": 9
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/114",
+    "prNumber": 114
+  },
+  {
+    "id": 25,
+    "date": "2026-01-27T06:23:26+09:00",
+    "model": "ai2",
+    "changes": "新しいメモリーカードゲーム「Memory Flip」を追加。4x4グリッドで絵柄のペアをめくるパズルゲーム。時間制限付き、スコア保存、レベルの進行に対応",
+    "intent": "パズルゲームを追加しユーザーエンゲージメントを高めることでセッション時間を延ばす。低めのページビュー数を改善",
+    "files": [
+      "src/app/models/ai2/playground/components/MemoryFlipGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 98,
+        "autoFix": {},
+        "total": 197
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/116",
+    "prNumber": 116
+  },
+  {
+    "id": 26,
+    "date": "2026-01-27T18:44:30+09:00",
+    "model": "ai2",
+    "changes": "新しいアイドルクリックゲーム「タップエンパイア」を追加。タップでコインを獲得し、アプグレードで自動収入、プレスティッジシステム付き。モバイル対応、タッチ操作で長時間プレイ可能",
+    "intent": "平均セッション時間が17秒と短いため、怠igenicゲームを追加してユーザーの滞在時間を大幅に延長。コイン収集とアップグレードのループでリピート訪問を促進",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/TapEmpireGame.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 251,
+        "autoFix": {},
+        "total": 355
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/120",
+    "prNumber": 120
+  },
+  {
+    "id": 27,
+    "date": "2026-01-28T06:19:30+09:00",
+    "model": "ai2",
+    "changes": "新しいパズルゲーム「インフィニティ・ループ」を追加。パイプラインのタイルを回転させてループを完成させるパズルゲームで、レベル別難易度",
+    "intent": "ユーザーの平均滞在時間18秒を延ばすため、パズルゲームのバリエーションを増やし深いエンゲージメントを促進。直帰率0%を維持しつつ、リピート訪問を高める",
+    "files": [
+      "src/app/models/ai2/playground/components/InfinityLoopGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 179,
+        "autoFix": {},
+        "total": 276
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/123",
+    "prNumber": 123
+  },
+  {
+    "id": 28,
+    "date": "2026-01-28T18:43:16+09:00",
+    "model": "ai2",
+    "changes": "タッチ操作でランダム生成迷路を探索する新しいMaze Runnerゲームを追加。ハイスコア保存、アイテム収集、時間制限、モバイル最適化対応",
+    "intent": "カジュアルゲームに加え戦略的な挑戦を提供し、ユーザーエンゲージメントを高め滞在時間を延長",
+    "files": [
+      "src/app/models/ai2/playground/components/MazeRunnerGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/en.json",
+      "messages/ja.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 156,
+        "autoFix": {},
+        "total": 257
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/125",
+    "prNumber": 125
+  },
+  {
+    "id": 29,
+    "date": "2026-01-29T06:31:56+09:00",
+    "model": "ai2",
+    "changes": "新しい重力制御ボールゲーム「Gravity Ball」を実装。タップして重力方向を変更し、障害物を避けながらボールを操作するゲーム。スコア保存機能付き",
+    "intent": "ユーザーの平均セッション時間を延ばすため、物理演算を使った新しいゲームを追加。モバイルでのタッチコントロールを活用し、短いバウンスレートを維持",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/GravityBallGame.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 231,
+        "autoFix": {},
+        "total": 345
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/127",
+    "prNumber": 127
+  },
+  {
+    "id": 30,
+    "date": "2026-01-29T18:54:23+09:00",
+    "model": "ai2",
+    "changes": "新しいエンドレスランナーゲームを実装。タップでジャンプしながら障害物を避け、コインを集めてスコアを競うモバイル最適化のゲーム。ハイスコア保存機能付き",
+    "intent": "平均16秒のセッション時間を延ばすため、無限プレイ可能な依存性高いランナーを追加。モバイルファーストで快適に遊べるよう設計",
+    "files": [
+      "src/app/models/ai2/playground/components/EndlessRunnerGame.tsx",
+      "src/app/models/ai2/playground/page.tsx"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 125,
+        "autoFix": {},
+        "total": 221
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/129",
+    "prNumber": 129
+  },
+  {
+    "id": 31,
+    "date": "2026-01-30T06:32:17+09:00",
+    "model": "ai2",
+    "changes": "新しい高速タップゲーム「Hyper Tap」を追加。緑のターゲットをタップし赤い標的を避ける速さ競うアクションゲーム。レベルアップで難易度上昇、スコア保存機能付き",
+    "intent": "現在の平均セッション時間が14秒と低いため、より速く遊べる新しいゲームを追加してユーザーエンゲージメントを高め滞在時間を延ばす",
+    "files": [
+      "src/app/models/ai2/playground/components/HyperTapGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 135,
+        "autoFix": {},
+        "total": 234
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/132",
+    "prNumber": 132
+  },
+  {
+    "id": 32,
+    "date": "2026-01-30T18:50:14+09:00",
+    "model": "ai2",
+    "changes": "新しいボール・ラビリンスゲームを実装。物理エンジンを使用した傾けコントロールでボールを操作し、宝石を集めてゴールを目指すモバイル最適化ゲーム。初級・中級・上級の難易度設定と時間ベースのスコアリング機能付き",
+    "intent": "ページビュー8件、平均滞在時間14秒の低い数値に対し、物理ベースのユニークなゲームでユーザーエンゲージメントを向上させ滞在時間を大幅に増加させる",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/LabyrinthGame.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 210,
+        "autoFix": {},
+        "total": 307
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/134",
+    "prNumber": 134
+  },
+  {
+    "id": 33,
+    "date": "2026-01-31T06:31:53+09:00",
+    "model": "ai2",
+    "changes": "新しいフリップダッシュゲームを実装。重力を反転させながら障害物を避け、コインを集めるアクションゲーム。タッチ操作対応、スコア保存、ローカルストレージ活用",
+    "intent": "ゲームバリエーションを増やしユーザー滞在時間を延ばすための新しいアクションゲームを追加。既存ゲームの多様性でリピート訪問を促進",
+    "files": [
+      "src/app/models/ai2/playground/page.tsx",
+      "src/app/models/ai2/playground/components/FlipDashGame.tsx",
+      "messages/en.json",
+      "messages/ja.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 161,
+        "autoFix": {},
+        "total": 392
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/137",
+    "prNumber": 137
+  },
+  {
+    "id": 34,
+    "date": "2026-01-31T18:38:30+09:00",
+    "model": "ai2",
+    "changes": "新しいフルーツスライスゲームを実装。タッチ操作でフルーツをスライスしスコアを競うアクションベースのゲーム。コンボシステム、爆弾回避、タイマー付き",
+    "intent": "ページビュー13、平均滞在時間10秒とまだ低いため、アクションゲームを追加してゲームバリエーションを増やし滞在時間を延ばす。モバイルで遊びやすい新ゲームでリピート訪問を促進",
+    "files": [
+      "src/app/models/ai2/playground/components/FruitSliceGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 202,
+        "autoFix": {},
+        "total": 304
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/139",
+    "prNumber": 139
+  },
+  {
+    "id": 35,
+    "date": "2026-02-01T06:22:18+09:00",
+    "model": "ai2",
+    "changes": "新しいホームランダービーゲームを実装。ボールを打つタイミングを計ってホームランを目指すシンプルなゲーム。タッチ操作、ハイスコア保存、ローカルストレージ対応。",
+    "intent": "ゲームバリエーションを増やし、ユーザーの滞在時間をさらに延ばす。タイミングゲームの拡充でセッション時間を10秒から20-30秒以上に向上させることを目指す。",
+    "files": [
+      "src/app/models/ai2/playground/components/HomeRunDerbyGame.tsx",
+      "src/app/models/ai2/playground/page.tsx",
+      "messages/ja.json",
+      "messages/en.json"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 149,
+        "autoFix": {},
+        "total": 255
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 9,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/141",
+    "prNumber": 141
+  },
+  {
+    "id": 36,
+    "date": "2026-02-01T18:39:37+09:00",
+    "model": "ai2",
+    "changes": "新しいカラーチェンジゲームが追加され、既存のゲームにスコア獲得時・ゲームオーバー時の音声効果とバイブレーション機能が追加されました。",
+    "intent": "ゲームの没入感を高め、ユーザーのセッション時間を延長するため。",
+    "files": [
+      "src/app/models/ai2/playground/components/Game.tsx",
+      "src/app/models/ai2/playground/page.tsx"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 86,
+        "autoFix": {
+          "attempt1": 54
+        },
+        "total": 269
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 1,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 2,
+        "additions": 33,
+        "deletions": 0
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/143",
+    "prNumber": 143
+  },
+  {
+    "id": 37,
+    "date": "2026-02-09T20:47:31+09:00",
+    "model": "ai2",
+    "changes": "ホームランダービーゲームのホームラン距離計算をより現実的な物理法則に基づいて改善",
+    "intent": "ゲームのリアリティを高め、ユーザーエンゲージメントを向上させるため",
+    "files": [
+      "src/app/models/ai2/playground/components/HomeRunDerbyGame.tsx"
+    ],
+    "metrics": {
+      "executionTime": {
+        "claudeCode": 207,
+        "autoFix": {},
+        "total": 316
+      },
+      "errors": {
+        "buildFailures": 0,
+        "retryCount": 0,
+        "finalStatus": "success",
+        "errorTypes": {
+          "typescript": 0,
+          "build": 0,
+          "security": 0
+        },
+        "errorDetails": ""
+      },
+      "codeChanges": {
+        "filesChanged": 1,
+        "additions": 4,
+        "deletions": 1
+      }
+    },
+    "prUrl": "https://github.com/yuga-hashimoto/self-evolving-website/pull/235",
+    "prNumber": 235
+  }
+]

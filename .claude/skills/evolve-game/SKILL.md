@@ -296,14 +296,14 @@ Example for adding a new game "Space Invaders":
 ```json
 // messages/ja.json
 "playground": {
-  "grok": {
+  "ai2": {
     "spaceInvaders": "スペースインベーダー"
   }
 }
 
 // messages/en.json
 "playground": {
-  "grok": {
+  "ai2": {
     "spaceInvaders": "Space Invaders"
   }
 }
@@ -379,8 +379,8 @@ List the relative paths of all changed files in an array.
   "intent_jp": "ゲームバリエーションを増やしユーザー滞在時間を延長",
   "intent_en": "Increase game variety to extend user session time",
   "files": [
-    "src/app/models/grok/playground/page.tsx",
-    "src/app/models/grok/playground/components/BreakoutGame.tsx"
+    "src/app/models/ai2/playground/page.tsx",
+    "src/app/models/ai2/playground/components/BreakoutGame.tsx"
   ]
 }
 ```

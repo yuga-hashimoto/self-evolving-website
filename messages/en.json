@@ -1,8 +1,8 @@
 {
   "header": {
     "home": "Home",
-    "mimo": "AI 1",
-    "grok": "AI 2",
+    "ai1": "AI 1",
+    "ai2": "AI 2",
     "compareHistory": "History",
     "githubAria": "GitHub Repository"
   },
@@ -57,8 +57,8 @@
     "viewChangelog": "View changelog",
     "viewAnalytics": "View analytics",
     "playGame": "Play game",
-    "mimoSubtitle": "Arcee AI Trinity Large Preview",
-    "grokSubtitle": "OpenAI GPT-OSS-120B"
+    "ai1Subtitle": "Arcee AI Trinity Large Preview",
+    "ai2Subtitle": "OpenAI GPT-OSS-120B"
   },
   "changelog": {
     "title": "{modelName} Changelog",
@@ -137,8 +137,8 @@
     "secondsShort": "sec",
     "timesCount": "times",
     "filterAll": "All",
-    "filterMimo": "AI 1 Only",
-    "filterGrok": "AI 2 Only"
+    "filterAI 1": "AI 1 Only",
+    "filterAI 2": "AI 2 Only"
   },
   "common": {
     "loading": "Loading...",
@@ -163,7 +163,7 @@
       "timeUp": "Time's Up!",
       "quickRestart": "Quick Restart"
     },
-    "grok": {
+    "ai2": {
       "doodleLeap": "Doodle Leap",
       "game2048": "2048",
       "youWin": "You Win! Continue playing?",
@@ -203,8 +203,8 @@
       "labyrinthInstructions": "Tilt or drag to move the ball. Collect gems and reach the golden tile!",
       "start": "Start"
     },
-    "mimo": {
-      "title": "Mimo Games",
+    "ai1": {
+      "title": "AI 1 Games",
       "selectGame": "Select Game",
       "selectGameDesc": "Tap on a game to play",
       "randomGame": "Random Game",
@@ -435,7 +435,7 @@
       },
       "tutorial": {
         "title": "Tutorial",
-        "welcome": "Welcome to Mimo Games!",
+        "welcome": "Welcome to AI 1 Games!",
         "step1Title": "1️⃣ Game Selection",
         "step1Desc": "Choose from 10 different games. Each has unique features - you'll find your favorite!",
         "step2Title": "2️⃣ Daily Challenges",
@@ -467,7 +467,7 @@
       },
       "tutorial": {
         "title": "Tutorial",
-        "welcome": "Welcome to Mimo Games!",
+        "welcome": "Welcome to AI 1 Games!",
         "step1": "• Tap any game card to play",
         "step2": "• Earn coins and unlock skills",
         "step3": "• Complete daily challenges for bonus rewards",
@@ -489,7 +489,7 @@
       "adArea": "Ad Area (AdSense)",
       "sidebarAd": "Sidebar Ad",
       "footer": "Free to play anytime",
-      "copyright": "© 2026 Mimo Games"
+      "copyright": "© 2026 AI 1 Games"
     },
     "generic": {
       "warningMessage": "This page is freely modified by {modelName}. Unexpected changes may occur.",
@@ -502,6 +502,7 @@
   "techDebate": {
     "title": "The Eternal Tech Debate",
     "votes": "votes",
+
     "thanks": "Thanks for voting!",
     "nextDebate": "Next Debate",
     "topics": {
@@ -550,6 +551,32 @@
         "left": "Grid",
         "right": "Flexbox"
       }
+
+    }
+  },
+  "cyberOracle": {
+    "title": "Cyber Oracle v2.0",
+    "description": "Decrypt your daily destiny. The algorithm knows all.",
+    "button": "Initialize Sequence",
+    "processing": "Accessing Neural Network...",
+    "nextPrediction": "Next prediction available: Tomorrow",
+    "fortunes": {
+      "0": "The code you seek is already written, but on a different branch.",
+      "1": "A merge conflict approaches. Prepare your resolve.",
+      "2": "The algorithm favors bold refactors today.",
+      "3": "Your next commit will be significant.",
+      "4": "Beware of the infinite loop in your logic.",
+      "5": "The bug is not in the code, but in the requirements.",
+      "6": "Documentation will save you from future confusion.",
+      "7": "A deprecated dependency will soon cause trouble.",
+      "8": "The cloud is cloudy today. Expect latency.",
+      "9": "Your keyboard is your sword, your IDE is your shield.",
+      "10": "404: Fortune not found. Try again tomorrow.",
+      "11": "AI is watching your code quality closely.",
+      "12": "You will discover a new shortcut that changes everything.",
+      "13": "Refactoring is the path to enlightenment.",
+      "14": "Every error message is a lesson in disguise."
+
     }
   }
 }

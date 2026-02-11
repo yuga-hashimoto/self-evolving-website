@@ -8,11 +8,11 @@ const IconX = ({size}: {size: number}) => (
 
 export default function ShareButton({ count, level }: { count: number; level: string }) {
   // Generate random battle scores for viral effect
-  const mimoScore = Math.floor(Math.random() * 5000) + 1000;
-  const grokScore = Math.floor(Math.random() * 5000) + 1000;
-  const winner = mimoScore > grokScore ? 'Mimo' : 'Grok';
+  const ai1Score = Math.floor(Math.random() * 5000) + 1000;
+  const ai2Score = Math.floor(Math.random() * 5000) + 1000;
+  const winner = ai1Score > ai2Score ? 'AI 1' : 'AI 2';
   
-  const shareText = `🔥 AI WAR STATUS 🔥\n\n🤖 Mimo: ${mimoScore.toLocaleString()} pts\n🚀 Grok: ${grokScore.toLocaleString()} pts\n\nCurrent Winner: ${winner}!\n\nI just hit Level ${level} with ${count} clicks. Can you beat the AI? 👇\n\n#SelfEvolvingWebsite #AI #CodingBattle`;
+  const shareText = `🔥 AI WAR STATUS 🔥\n\n🤖 AI 1: ${ai1Score.toLocaleString()} pts\n🚀 AI 2: ${ai2Score.toLocaleString()} pts\n\nCurrent Winner: ${winner}!\n\nI just hit Level ${level} with ${count} clicks. Can you beat the AI? 👇\n\n#SelfEvolvingWebsite #AI #CodingBattle`;
   const shareUrl = "https://self-evolving.vercel.app";
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 

@@ -10,27 +10,27 @@ export default function RandomPage() {
     const paths = [
       // Top level
       "/", 
-      "/models/mimo", 
-      "/models/grok", 
+      "/models/ai1", 
+      "/models/ai2", 
       "/changelogs/compare",
-      // Grok Games
-      "/models/grok/playground?game=snake",
-      "/models/grok/playground?game=tetris",
-      "/models/grok/playground?game=2048",
-      "/models/grok/playground?game=breakout",
-      "/models/grok/playground?game=pacman",
-      "/models/grok/playground?game=spaceInvaders",
-      "/models/grok/playground?game=flappy",
-      // Mimo Games
-      "/models/mimo/playground?game=infinity",
-      "/models/mimo/playground?game=neon",
-      "/models/mimo/playground?game=cosmic",
-      "/models/mimo/playground?game=rhythm",
-      "/models/mimo/playground?game=snake",
-      "/models/mimo/playground?game=colorRush",
-      "/models/mimo/playground?game=tetris",
-      "/models/mimo/playground?game=brick",
-      "/models/mimo/playground?game=memory", // New!
+      // AI 2 Games
+      "/models/ai2/playground?game=snake",
+      "/models/ai2/playground?game=tetris",
+      "/models/ai2/playground?game=2048",
+      "/models/ai2/playground?game=breakout",
+      "/models/ai2/playground?game=pacman",
+      "/models/ai2/playground?game=spaceInvaders",
+      "/models/ai2/playground?game=flappy",
+      // AI 1 Games
+      "/models/ai1/playground?game=infinity",
+      "/models/ai1/playground?game=neon",
+      "/models/ai1/playground?game=cosmic",
+      "/models/ai1/playground?game=rhythm",
+      "/models/ai1/playground?game=snake",
+      "/models/ai1/playground?game=colorRush",
+      "/models/ai1/playground?game=tetris",
+      "/models/ai1/playground?game=brick",
+      "/models/ai1/playground?game=memory", // New!
     ];
     const randomPath = paths[Math.floor(Math.random() * paths.length)];
     router.replace(randomPath);

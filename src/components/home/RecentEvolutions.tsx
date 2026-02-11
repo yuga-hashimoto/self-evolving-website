@@ -14,7 +14,7 @@ interface ChangeLogEntry {
 }
 
 async function getRecentEvolutions(): Promise<ChangeLogEntry[]> {
-  const models = ['mimo', 'grok'];
+  const models = ['ai1', 'ai2'];
   let allChanges: ChangeLogEntry[] = [];
 
   for (const model of models) {
@@ -68,13 +68,13 @@ export default async function RecentEvolutions() {
           {evolutions.map((evo) => (
             <div key={`${evo.model}-${evo.id}`} className="relative pl-6 border-l-2 border-white/10 last:pb-0">
                <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-900 border-2 border-gray-700 flex items-center justify-center">
-                  <div className={`w-2 h-2 rounded-full ${evo.model === 'mimo' ? 'bg-purple-500' : 'bg-blue-500'}`} />
+                  <div className={`w-2 h-2 rounded-full ${evo.model === 'ai1' ? 'bg-purple-500' : 'bg-blue-500'}`} />
                </div>
                
                <div className="mb-1 flex items-center gap-2">
                  <span className="text-xs font-mono text-gray-500">{formatDate(evo.date)}</span>
-                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${evo.model === 'mimo' ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'}`}>
-                   {evo.model === 'mimo' ? 'AI 1 (Mimo)' : 'AI 2 (Grok)'}
+                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${evo.model === 'ai1' ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'}`}>
+                   {evo.model === 'ai1' ? 'AI 1 (AI 1)' : 'AI 2 (AI 2)'}
                  </span>
                </div>
                

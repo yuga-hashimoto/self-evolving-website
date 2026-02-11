@@ -30,8 +30,8 @@ export default async function CompareChangelogPage() {
     const locale = await getLocale();
     const t = await getTranslations('compare');
     const tChangelog = await getTranslations('changelog');
-    const mimoChangelog = await getChangelog("mimo", locale);
-    const grokChangelog = await getChangelog("grok", locale);
+    const ai1Changelog = await getChangelog("ai1", locale);
+    const ai2Changelog = await getChangelog("ai2", locale);
 
     const translations = {
         noHistory: t('noHistory'),
@@ -42,8 +42,8 @@ export default async function CompareChangelogPage() {
         secondsShort: t('secondsShort'),
         timesCount: t('timesCount'),
         filterAll: t('filterAll'),
-        filterMimo: t('filterMimo'),
-        filterGrok: t('filterGrok'),
+        filterAI1: t('filterAI 1'),
+        filterAI2: t('filterAI 2'),
     };
 
     const changelogTranslations = {
@@ -74,8 +74,8 @@ export default async function CompareChangelogPage() {
                 </div>
 
                 <ChangelogCompareView
-                    mimoChangelog={mimoChangelog}
-                    grokChangelog={grokChangelog}
+                    ai1Changelog={ai1Changelog}
+                    ai2Changelog={ai2Changelog}
                     translations={translations}
                     changelogTranslations={changelogTranslations}
                 />

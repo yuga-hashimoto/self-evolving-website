@@ -3,8 +3,8 @@
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 
 const data = [
-  { name: 'Mimo', wins: 42, color: '#a855f7' }, // Purple
-  { name: 'Grok', wins: 38, color: '#3b82f6' }, // Blue
+  { name: 'AI 1', wins: 42, color: '#a855f7' }, // Purple
+  { name: 'AI 2', wins: 38, color: '#3b82f6' }, // Blue
 ];
 
 export default function BattleStats() {

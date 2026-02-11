@@ -48,20 +48,20 @@ export const HackerTerminal = () => {
 
     switch (trimmed) {
       case 'help':
-        response = 'Available commands: help, status, clear, vote [mimo|grok], hack, whoami';
+        response = 'Available commands: help, status, clear, vote [ai1|ai2], hack, whoami';
         break;
       case 'status':
-        response = 'System: ONLINE. Evolution Protocol: ACTIVE. Mimo: OPTIMIZED. Grok: LEARNING.';
+        response = 'System: ONLINE. Evolution Protocol: ACTIVE. AI 1: OPTIMIZED. AI 2: LEARNING.';
         break;
       case 'clear':
         setHistory([]);
         return;
-      case 'vote mimo':
-        response = 'Vote registered for Mimo. (Simulation)';
+      case 'vote ai1':
+        response = 'Vote registered for AI 1. (Simulation)';
         // In real app, trigger vote function
         break;
-      case 'vote grok':
-        response = 'Vote registered for Grok. (Simulation)';
+      case 'vote ai2':
+        response = 'Vote registered for AI 2. (Simulation)';
         break;
       case 'hack':
         response = 'Access denied. Security Level 9 required. Nice try.';

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { IconMimo, IconGrok } from "@/components/icons/Icons";
+import { IconAi1, IconAi2 } from "@/components/icons/Icons";
 
 export default function VoteComponent() {
   const [voted, setVoted] = useState<string | null>(null);
@@ -14,7 +14,7 @@ export default function VoteComponent() {
     }
   }, []);
 
-  const handleVote = (model: 'mimo' | 'grok') => {
+  const handleVote = (model: 'ai1' | 'ai2') => {
     if (voted) return;
     
     setVoted(model);
@@ -31,11 +31,11 @@ export default function VoteComponent() {
       
       <div className="flex gap-4 w-full justify-center">
         <button
-          onClick={() => handleVote('mimo')}
+          onClick={() => handleVote('ai1')}
           disabled={!!voted}
           className={`
             flex-1 flex flex-col items-center p-4 rounded-xl border transition-all duration-300
-            ${voted === 'mimo' 
+            ${voted === 'ai1' 
               ? 'bg-purple-500/20 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)] scale-105' 
               : voted 
                 ? 'opacity-50 grayscale border-white/5' 
@@ -43,16 +43,16 @@ export default function VoteComponent() {
             }
           `}
         >
-          <IconMimo size={32} className="mb-2" />
-          <span className="font-bold text-purple-300">Mimo</span>
+          <IconAi1 size={32} className="mb-2" />
+          <span className="font-bold text-purple-300">AI 1</span>
         </button>
 
         <button
-          onClick={() => handleVote('grok')}
+          onClick={() => handleVote('ai2')}
           disabled={!!voted}
           className={`
             flex-1 flex flex-col items-center p-4 rounded-xl border transition-all duration-300
-            ${voted === 'grok' 
+            ${voted === 'ai2' 
               ? 'bg-blue-500/20 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] scale-105' 
               : voted 
                 ? 'opacity-50 grayscale border-white/5' 
@@ -60,8 +60,8 @@ export default function VoteComponent() {
             }
           `}
         >
-          <IconGrok size={32} className="mb-2" />
-          <span className="font-bold text-blue-300">Grok</span>
+          <IconAi2 size={32} className="mb-2" />
+          <span className="font-bold text-blue-300">AI 2</span>
         </button>
       </div>
 

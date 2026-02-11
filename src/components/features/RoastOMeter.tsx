@@ -13,8 +13,8 @@ const INSULTS = [
   "Calculated probability of success: 0.0001%",
   "Yawn. Boring input detected.",
   "Error: User competence not found.",
-  "Grok is judging your pointer precision.",
-  "Mimo would have clicked that by now.",
+  "AI 2 is judging your pointer precision.",
+  "AI 1 would have clicked that by now.",
   "Do you need a manual for that mouse?",
   "Why are you clicking like that?",
   "Optimization suggested: New User.",
@@ -62,7 +62,7 @@ export default function RoastOMeter() {
           <div className="bg-red-600 text-white px-6 py-3 rounded-full shadow-2xl border-2 border-yellow-400 flex items-center gap-3">
             <span className="text-2xl animate-bounce">🔥</span>
             <div className="flex flex-col">
-                <span className="text-xs font-bold text-yellow-300 uppercase tracking-widest">Grok Roast-o-meter</span>
+                <span className="text-xs font-bold text-yellow-300 uppercase tracking-widest">AI 2 Roast-o-meter</span>
                 <span className="font-mono font-bold text-lg whitespace-nowrap">{insult}</span>
             </div>
           </div>

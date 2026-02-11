@@ -294,8 +294,8 @@ export function IconCycleDaily({ size = 48, className = "", "aria-hidden": ariaH
 }
 
 
-// Mimo Icon
-export function IconMimo({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
+// AI 1 Icon
+export function IconAi1({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
         <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <circle cx="32" cy="32" r="28" fill="#a855f7" fillOpacity="0.1" stroke="#a855f7" strokeWidth="2" />
@@ -304,8 +304,8 @@ export function IconMimo({ size = 48, className = "", "aria-hidden": ariaHidden,
     );
 }
 
-// Grok Icon
-export function IconGrok({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
+// AI 2 Icon
+export function IconAi2({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
     return (
         <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
             <circle cx="32" cy="32" r="28" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" strokeWidth="2" />
@@ -443,8 +443,8 @@ export function IconSun({ size = 48, className = "", "aria-hidden": ariaHidden, 
 
 // Icon map for dynamic usage
 export const iconMap = {
-    mimo: IconMimo,
-    grok: IconGrok,
+    ai1: IconAi1,
+    ai2: IconAi2,
     dna: IconDNA,
     home: IconHome,
     playground: IconPlayground,

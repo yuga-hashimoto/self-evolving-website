@@ -3,7 +3,7 @@
         "version": "0.0.1",
         "date": "2026-01-13",
         "description": "初期セットアップ完了",
-        "model": "x-ai/grok-code-fast-1",
+        "model": "x-ai/ai2-code-fast-1",
         "changes": [
             "Self-Evolving Website プロジェクト開始",
             "OpenRouter API 統合",

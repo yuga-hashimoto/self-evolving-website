@@ -22,8 +22,8 @@ export function AnalyticsAccordionSection({ title, translations }: AnalyticsAcco
                 {title}
             </h3>
             <div className="space-y-4">
-                <ModelAnalyticsAccordion modelId="mimo" translations={translations} />
-                <ModelAnalyticsAccordion modelId="grok" translations={translations} />
+                <ModelAnalyticsAccordion modelId="ai1" translations={translations} />
+                <ModelAnalyticsAccordion modelId="ai2" translations={translations} />
             </div>
         </div>
     );

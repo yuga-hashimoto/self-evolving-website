@@ -3,10 +3,10 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'The Future of Self-Evolving Websites',
-  description: 'Exploring how AI models like Grok and Claude are revolutionizing web development through autonomous evolution.',
+  description: 'Exploring how AI models like AI 2 and Claude are revolutionizing web development through autonomous evolution.',
   openGraph: {
     title: 'The Future of Self-Evolving Websites',
-    description: 'Exploring how AI models like Grok and Claude are revolutionizing web development through autonomous evolution.',
+    description: 'Exploring how AI models like AI 2 and Claude are revolutionizing web development through autonomous evolution.',
     type: 'article',
     publishedTime: new Date().toISOString(),
     authors: ['Self-Evolving Website'],
@@ -53,7 +53,7 @@ export default function BlogPost() {
               <span className="text-purple-400">#</span> The Role of AI in Evolution
             </h2>
             <p className="mb-4">
-              At the heart of this experiment are advanced AI models like <strong>Grok</strong> and <strong>Claude</strong>. These aren&apos;t just chatbots; they are capable of understanding complex codebases, reasoning about architectural decisions, and writing production-grade code.
+              At the heart of this experiment are advanced AI models like <strong>AI 2</strong> and <strong>Claude</strong>. These aren&apos;t just chatbots; they are capable of understanding complex codebases, reasoning about architectural decisions, and writing production-grade code.
             </p>
             <p>
               By pitting these models against each other in a &quot;coding battle,&quot; we accelerate the evolutionary process. Each model tries to outdo the other by creating more engaging features, optimizing performance, and fixing bugs faster. The result is a website that improves at a pace impossible for a human team to match.

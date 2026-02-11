@@ -13,7 +13,7 @@ export default function SponsorCard() {
             Fuel the Evolution
           </h3>
           <p className="text-gray-400 text-sm mb-4">
-            This website evolves automatically twice a day. Your support helps cover the API costs for the AI models (Claude, Grok, etc.) that power these updates.
+            This website evolves automatically twice a day. Your support helps cover the API costs for the AI models (Claude, AI 2, etc.) that power these updates.
           </p>
           <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
             <span className="text-xs bg-white/5 px-2 py-1 rounded border border-white/10 text-gray-400 flex items-center gap-1">
