@@ -44,7 +44,7 @@ export function CyberPet() {
       <div 
         className="glass-card w-16 h-16 rounded-full flex items-center justify-center text-3xl cursor-pointer hover:scale-110 transition-transform shadow-lg shadow-purple-500/20 border-purple-500/30 bg-black/80 backdrop-blur-md"
         onClick={interact}
-        title={`Mood: ${Object.keys(MOODS).find(k => MOODS[k] === mood)} | Clicks: ${clicks}`}
+        title={`Mood: ${Object.keys(MOODS).find(k => MOODS[k as keyof typeof MOODS] === mood)} | Clicks: ${clicks}`}
       >
         {mood}
       </div>
