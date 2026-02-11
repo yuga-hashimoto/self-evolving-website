@@ -108,23 +108,6 @@ export const TechDebate = () => {
   const [userVote, setUserVote] = useState<'left' | 'right' | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Select a random topic on mount
-    pickRandomTopic();
-  }, []);
-
-  const pickRandomTopic = () => {
-    setLoading(true);
-    // Add a small delay for transition effect
-    setTimeout(() => {
-      const randomIndex = Math.floor(Math.random() * TOPICS.length);
-      const topic = TOPICS[randomIndex];
-      setCurrentTopic(topic);
-      loadTopicData(topic);
-      setLoading(false);
-    }, 300);
-  };
-
   const loadTopicData = (topic: TopicConfig) => {
     const storedVotes = localStorage.getItem(`tech_debate_votes_${topic.id}`);
     const storedUserVote = localStorage.getItem(`tech_debate_user_vote_${topic.id}`);
@@ -185,6 +168,23 @@ export const TechDebate = () => {
       setUserVote(null); // Reset user vote for new topic if not found
     }
   };
+
+  const pickRandomTopic = () => {
+    setLoading(true);
+    // Add a small delay for transition effect
+    setTimeout(() => {
+      const randomIndex = Math.floor(Math.random() * TOPICS.length);
+      const topic = TOPICS[randomIndex];
+      setCurrentTopic(topic);
+      loadTopicData(topic);
+      setLoading(false);
+    }, 300);
+  };
+
+  useEffect(() => {
+    // Select a random topic on mount
+    pickRandomTopic();
+  }, []);
 
   const handleVote = (option: 'left' | 'right') => {
     if (userVote || !currentTopic) return;

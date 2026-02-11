@@ -1,51 +1,84 @@
-import { test, expect } from 'playwright/test';
+import { test, expect } from '@playwright/test';
 
 test('Tech Debate component works correctly', async ({ page }) => {
   // Go to home page
   await page.goto('/');
 
-  // Wait for the component to appear
-  const title = page.getByText('The Eternal Tech Debate');
+  // Wait for the component to appear. The title is "The Eternal Tech Debate" (or translation).
+  const title = page.getByText(/The Eternal Tech Debate/i).first();
   await expect(title).toBeVisible();
 
-  // Check if buttons are present
-  const tabsButton = page.getByRole('button', { name: /Tabs/i });
-  const spacesButton = page.getByRole('button', { name: /Spaces/i });
+  // Scope to the debate component section
+  // We look for a container that has the title and buttons.
+  // The structure is: <h3>Title</h3> <button>Next Debate</button> <AnimatePresence> <motion.div> ... <VoteOption> <VoteOption>
 
-  await expect(tabsButton).toBeVisible();
-  await expect(spacesButton).toBeVisible();
+  // Find the "Next Debate" button.
+  const nextButton = page.getByRole('button', { name: /Next Debate/i }).first();
+  await expect(nextButton).toBeVisible();
 
-  // Initial state: buttons should be enabled (unless already voted in a previous test run, but new context should be clean)
-  // Playwright creates a new context for each test, so localStorage is empty.
+  // Find the voting options. They are buttons but NOT the "Next Debate" button.
+  // We wait for at least 2 other buttons to be visible.
+  const voteButtons = page.locator('button').filter({ hasNotText: /Next Debate/i }).filter({ hasText: /.*/ });
 
-  // Vote for Tabs
-  await tabsButton.click();
+  // Note: VoteOption has text like "Tabs", "Spaces", etc.
+  // We scope the search to the container of the title to avoid picking up other buttons on the page.
+  // The component is wrapped in a .glass-card.
+  const card = page.locator('.glass-card').filter({ has: title });
+  const options = card.locator('button').filter({ hasNotText: /Next Debate/i });
 
-  // Check for success message
-  const successMessage = page.getByText('Thanks for voting!');
+  // Wait for options to load (there is a small delay in component mount)
+  await expect(options).toHaveCount(2, { timeout: 10000 });
+
+  const firstOption = options.first();
+  const secondOption = options.last();
+
+  await expect(firstOption).toBeVisible();
+  await expect(secondOption).toBeVisible();
+
+  // Initial state: buttons should be enabled
+  await expect(firstOption).toBeEnabled();
+  await expect(secondOption).toBeEnabled();
+
+  // Vote for the first option
+  await firstOption.click();
+
+  // Check for success message "Thanks for voting!"
+  const successMessage = card.getByText(/Thanks for voting/i);
   await expect(successMessage).toBeVisible();
+
+  // Verify buttons become disabled after voting
+  await expect(firstOption).toBeDisabled();
+  await expect(secondOption).toBeDisabled();
 
   // Verify localStorage persistence
-  const localStorageVote = await page.evaluate(() => {
-    return localStorage.getItem('tech_debate_user_vote');
+  // Since key is dynamic, we check if *any* relevant key is set.
+  const voteData = await page.evaluate(() => {
+    const keys = Object.keys(localStorage);
+    // Find key like tech_debate_user_vote_tabs_vs_spaces
+    const userVoteKey = keys.find(k => k.startsWith('tech_debate_user_vote_'));
+    const votesKey = keys.find(k => k.startsWith('tech_debate_votes_'));
+
+    return {
+      userVote: userVoteKey ? localStorage.getItem(userVoteKey) : null,
+      votes: votesKey ? JSON.parse(localStorage.getItem(votesKey) || '{}') : null
+    };
   });
-  expect(localStorageVote).toBe('tabs');
 
-  // Verify percentages are shown (buttons become disabled or change state)
-  // My implementation disables the button.
-  await expect(tabsButton).toBeDisabled();
-  await expect(spacesButton).toBeDisabled();
+  // Verify we recorded a vote
+  expect(voteData.userVote).toBeTruthy(); // Should be 'left' or 'right'
+  expect(voteData.votes).toBeTruthy();
+  expect(voteData.votes.left + voteData.votes.right).toBeGreaterThan(0);
 
-  // Reload page to test persistence
-  await page.reload();
+  // Test "Next Debate" functionality
+  await nextButton.click();
 
-  // Wait for component to load again
-  await expect(title).toBeVisible();
+  // Wait for transition (300ms delay in component + animation)
+  await page.waitForTimeout(500);
 
-  // Buttons should still be disabled
-  await expect(tabsButton).toBeDisabled();
-  await expect(spacesButton).toBeDisabled();
-
-  // Success message should still be visible
-  await expect(successMessage).toBeVisible();
+  // After clicking Next, we might get a new topic.
+  // If we get a new topic (statistically likely), the buttons should be enabled again (unless we voted on it too).
+  // If we get the same topic, they remain disabled.
+  // We can't deterministically test "enabled" here without knowing the random seed,
+  // but we can verify the options are still present.
+  await expect(options).toHaveCount(2);
 });
