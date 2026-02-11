@@ -19,34 +19,31 @@ export default function DailyChallenge() {
     const today = new Date().toISOString().split('T')[0];
     const challengeKey = `daily_challenge_completed_${today}`;
     
-    // Check local storage for completion
-    const completed = localStorage.getItem(challengeKey);
-    if (completed) setIsCompleted(true);
-
     // Load XP and Level
-    const storedXp = parseInt(localStorage.getItem("user_xp") || "0");
-    setXp(storedXp);
-    setLevel(Math.floor(storedXp / 100) + 1);
+    const updateStats = () => {
+        const storedXp = parseInt(localStorage.getItem("user_xp") || "0");
+        setXp(storedXp);
+        setLevel(Math.floor(storedXp / 100) + 1);
 
-    // Streak Logic
-    const lastVisit = localStorage.getItem("last_visit_date");
-    let currentStreak = parseInt(localStorage.getItem("daily_streak") || "0");
+        // Load Streak (Read Only - Managed by DailyLoginBonus)
+        const currentStreak = parseInt(localStorage.getItem("daily_streak") || "0");
+        setStreak(currentStreak);
 
-    if (lastVisit !== today) {
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-        if (lastVisit === yesterday) {
-            currentStreak += 1;
-        } else {
-            // Only reset if it's not the first visit ever and not today
-            if (lastVisit) currentStreak = 1;
-            else currentStreak = 1; 
-        }
-        localStorage.setItem("daily_streak", currentStreak.toString());
-        localStorage.setItem("last_visit_date", today);
-    }
-    setStreak(currentStreak);
+        // Check local storage for completion
+        const completed = localStorage.getItem(challengeKey);
+        if (completed) setIsCompleted(true);
+    };
 
-    return () => clearTimeout(timer);
+    // Use timeout to avoid synchronous state updates in effect
+    setTimeout(updateStats, 0);
+
+    // Listen for XP updates from DailyLoginBonus
+    window.addEventListener('user_xp_update', updateStats);
+
+    return () => {
+        clearTimeout(timer);
+        window.removeEventListener('user_xp_update', updateStats);
+    };
   }, []);
 
   const handleComplete = () => {
@@ -62,6 +59,9 @@ export default function DailyChallenge() {
         setXp(newXp);
         setLevel(Math.floor(newXp / 100) + 1);
         localStorage.setItem("user_xp", newXp.toString());
+
+        // Notify other components
+        window.dispatchEvent(new Event('user_xp_update'));
     }
   };
 

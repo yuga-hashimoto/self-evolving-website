@@ -18,6 +18,7 @@ import RoastOMeter from "@/components/features/RoastOMeter";
 import { CyberPet } from "@/components/features/CyberPet";
 import StickySupportBanner from "@/components/StickySupportBanner";
 import KofiNudge from "@/components/KofiNudge";
+import DailyLoginBonus from "@/components/DailyLoginBonus";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://self-evolving.vercel.app';
 
@@ -132,6 +133,7 @@ export default async function RootLayout({
             <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
             <Footer />
             <AiConcierge />
+            <DailyLoginBonus />
             <BuyMeCoffeeWidget />
             <TipJar />
             <ShareModal />

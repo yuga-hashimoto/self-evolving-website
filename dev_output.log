@@ -1,0 +1,13 @@
+
+> self-evolving-website@0.1.0 dev
+> next dev --port 3131
+
+▲ Next.js 16.1.1 (Turbopack)
+- Local:         http://localhost:3131
+- Network:       http://192.168.0.2:3131
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 1224ms
+ GET / 200 in 3.2s (compile: 544ms, proxy.ts: 107ms, render: 2.5s)
+ GET / 200 in 602ms (compile: 10ms, proxy.ts: 27ms, render: 565ms)
