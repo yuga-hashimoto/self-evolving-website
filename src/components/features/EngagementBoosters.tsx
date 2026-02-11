@@ -69,9 +69,9 @@ export function EngagementBoosters() {
         </div>
       </div>
 
-      {/* 2. Daily Wisdom */}
+      {/* 2. Quick Thought */}
       <div className="glass-card p-4 border-yellow-500/30">
-        <h3 className="text-xs font-bold text-yellow-300 mb-2 uppercase tracking-wider">Daily Wisdom</h3>
+        <h3 className="text-xs font-bold text-yellow-300 mb-2 uppercase tracking-wider">Quick Thought</h3>
         <p className="text-sm italic text-gray-300">"{quote}"</p>
       </div>
 

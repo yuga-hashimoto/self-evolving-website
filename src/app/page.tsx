@@ -65,6 +65,7 @@ import CodeBattleTicker from "@/components/features/CodeBattleTicker";
 import ConfettiButton from "@/components/features/ConfettiButton";
 import GlitchTitle from "@/components/features/GlitchTitle";
 import AIChatBubble from "@/components/features/AIChatBubble";
+import { DailyWisdom } from "@/components/features/DailyWisdom";
 
 export default async function Home() {
   const t = await getTranslations('home');
@@ -280,6 +281,9 @@ export default async function Home() {
         </div>
         <div className="md:col-span-2">
           <DailyTechTip />
+        </div>
+        <div className="md:col-span-2">
+          <DailyWisdom />
         </div>
       </div>
 
