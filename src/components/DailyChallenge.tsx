@@ -21,14 +21,9 @@ export default function DailyChallenge() {
     
     // Check local storage for completion
     const completed = localStorage.getItem(challengeKey);
-    if (completed) setTimeout(() => setIsCompleted(true), 0);
 
     // Load XP and Level
     const storedXp = parseInt(localStorage.getItem("user_xp") || "0");
-    setTimeout(() => {
-      setXp(storedXp);
-      setLevel(Math.floor(storedXp / 100) + 1);
-    }, 0);
 
     // Streak Logic
     const lastVisit = localStorage.getItem("last_visit_date");
@@ -46,7 +41,14 @@ export default function DailyChallenge() {
         localStorage.setItem("daily_streak", currentStreak.toString());
         localStorage.setItem("last_visit_date", today);
     }
-    setStreak(currentStreak);
+
+    // Update state in a separate tick to avoid sync warnings and ensure hydration match
+    setTimeout(() => {
+      if (completed) setIsCompleted(true);
+      setXp(storedXp);
+      setLevel(Math.floor(storedXp / 100) + 1);
+      setStreak(currentStreak);
+    }, 0);
 
     return () => clearTimeout(timer);
   }, []);

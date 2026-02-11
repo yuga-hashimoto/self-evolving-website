@@ -2,23 +2,28 @@
 
 import { useState, useEffect } from "react";
 
-export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
-  // State to store our value
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    try {
-      // Get from local storage by key
-      const item = window.localStorage.getItem(key);
-      // Parse stored json or return initialValue
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      // If there's an error, return the initialValue
-      console.error(error);
-      return initialValue;
-    }
-  });
+export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
+  // Initialize with default value to avoid hydration mismatch
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
 
-  // Return a wrapped version of useState's setter function that
-  // persists the new value to localStorage.
+  // Load from local storage after mount
+  useEffect(() => {
+    // Wrap in timeout to avoid "synchronous setState in effect" warning/error
+    const timeout = setTimeout(() => {
+        try {
+          if (typeof window !== "undefined") {
+            const item = window.localStorage.getItem(key);
+            if (item) {
+              setStoredValue(JSON.parse(item));
+            }
+          }
+        } catch (error) {
+          console.error(error);
+        }
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [key]);
+
   const setValue = (value: T | ((val: T) => T)) => {
     try {
       // Allow value to be a function that updates based on existing value
@@ -26,7 +31,9 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
       // Save state
       setStoredValue(valueToStore);
       // Save to local storage
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      }
     } catch (error) {
       // Catch any errors and log them
       console.error(error);

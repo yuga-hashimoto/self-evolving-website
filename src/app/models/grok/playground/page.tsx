@@ -43,7 +43,8 @@ export default function GrokPlayground() {
   useEffect(() => {
     const gameParam = searchParams.get('game');
     if (gameParam) {
-      setSelectedGame(gameParam as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setTimeout(() => setSelectedGame(gameParam as any), 0);
     }
   }, [searchParams]);
 

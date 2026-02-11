@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocalStorage } from './hooks';
 import './Slide2048.css';
 
@@ -13,44 +13,28 @@ const Slide2048: React.FC = () => {
   const [gameWon, setGameWon] = useState(false);
   const [canContinue, setCanContinue] = useState(false);
 
-  const [containerRef, setContainerRef] = useState(null as HTMLElement | null);
+  const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
   const [boardSize, setBoardSize] = useState(400);
   const tileSize = boardSize / gridSize;
   const gapSize = 15;
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (containerRef) {
-        const containerWidth = containerRef.offsetWidth;
-        const newBoardSize = Math.min(containerWidth * 0.9, 500);
-        setBoardSize(newBoardSize);
+  const addRandomTile = useCallback((boardToUpdate: number[][]) => {
+    const emptyCells = [];
+    for (let i = 0; i < gridSize; i++) {
+      for (let j = 0; j < gridSize; j++) {
+        if (boardToUpdate[i][j] === 0) {
+          emptyCells.push({ i, j });
+        }
       }
-    };
+    }
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [containerRef, gridSize]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (containerRef) {
-        const containerWidth = containerRef.offsetWidth;
-        const newBoardSize = Math.min(containerWidth * 0.9, 500);
-        setBoardSize(newBoardSize);
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [containerRef, gridSize]);
-
-  useEffect(() => {
-    initBoard();
+    if (emptyCells.length > 0) {
+      const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      boardToUpdate[randomCell.i][randomCell.j] = Math.random() < 0.9 ? 2 : 4;
+    }
   }, [gridSize]);
 
-  const initBoard = () => {
+  const initBoard = useCallback(() => {
     const newBoard = Array(gridSize).fill(0).map(() => Array(gridSize).fill(0));
     addRandomTile(newBoard);
     addRandomTile(newBoard);
@@ -59,28 +43,23 @@ const Slide2048: React.FC = () => {
     setGameOver(false);
     setGameWon(false);
     setCanContinue(false);
-  };
+  }, [gridSize, addRandomTile]);
 
-  const addRandomTile = (board: number[][]) => {
-    const emptyCells = [];
+  const hasMoves = useCallback((boardToCheck: number[][]) => {
     for (let i = 0; i < gridSize; i++) {
       for (let j = 0; j < gridSize; j++) {
-        if (board[i][j] === 0) {
-          emptyCells.push({ i, j });
-        }
+        if (boardToCheck[i][j] === 0) return true;
+        if (j < gridSize - 1 && boardToCheck[i][j] === boardToCheck[i][j + 1]) return true;
+        if (i < gridSize - 1 && boardToCheck[i][j] === boardToCheck[i + 1][j]) return true;
       }
     }
+    return false;
+  }, [gridSize]);
 
-    if (emptyCells.length > 0) {
-      const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-      board[randomCell.i][randomCell.j] = Math.random() < 0.9 ? 2 : 4;
-    }
-  };
+  const move = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
+    if (gameOver || (gameWon && !canContinue)) return;
 
-  const move = (direction: 'up' | 'down' | 'left' | 'right') => {
-    if (gameOver || gameWon) return;
-
-    let newBoard = board.map(row => [...row]);
+    const newBoard = board.map(row => [...row]);
     let moved = false;
     let scoreToAdd = 0;
 
@@ -229,14 +208,18 @@ const Slide2048: React.FC = () => {
 
       // Check if won
       if (!gameWon) {
+        let won = false;
         for (let i = 0; i < gridSize; i++) {
           for (let j = 0; j < gridSize; j++) {
             if (newBoard[i][j] === 2048) {
-              setGameWon(true);
-              if (scoreToAdd > best) {
-                setBest(scoreToAdd);
-              }
+              won = true;
             }
+          }
+        }
+        if (won) {
+          setGameWon(true);
+          if (score + scoreToAdd > best) {
+            setBest(score + scoreToAdd);
           }
         }
       }
@@ -244,55 +227,78 @@ const Slide2048: React.FC = () => {
       // Check if game over
       if (!hasMoves(newBoard)) {
         setGameOver(true);
-        if (score > best) {
-          setBest(score);
+        if (score + scoreToAdd > best) {
+           setBest(score + scoreToAdd);
+        }
+      } else {
+        // Update best if current score is higher (even if not over)
+        if (score + scoreToAdd > best) {
+           setBest(score + scoreToAdd);
         }
       }
     }
-  };
+  }, [board, gridSize, gameOver, gameWon, canContinue, addRandomTile, hasMoves, best, score, setBest]);
 
-  const hasMoves = (board: number[][]) => {
-    for (let i = 0; i < gridSize; i++) {
-      for (let j = 0; j < gridSize; j++) {
-        if (board[i][j] === 0) return true;
-        if (j < gridSize - 1 && board[i][j] === board[i][j + 1]) return true;
-        if (i < gridSize - 1 && board[i][j] === board[i + 1][j]) return true;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      initBoard();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [initBoard]);
+
+  // Handle keyboard events
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          e.preventDefault();
+          move('up');
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          e.preventDefault();
+          move('down');
+          break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          e.preventDefault();
+          move('left');
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          e.preventDefault();
+          move('right');
+          break;
       }
-    }
-    return false;
-  };
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [move]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case 'ArrowUp':
-      case 'w':
-      case 'W':
-        e.preventDefault();
-        move('up');
-        break;
-      case 'ArrowDown':
-      case 's':
-      case 'S':
-        e.preventDefault();
-        move('down');
-        break;
-      case 'ArrowLeft':
-      case 'a':
-      case 'A':
-        e.preventDefault();
-        move('left');
-        break;
-      case 'ArrowRight':
-      case 'd':
-      case 'D':
-        e.preventDefault();
-        move('right');
-        break;
-    }
-  };
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef) {
+        const containerWidth = containerRef.offsetWidth;
+        const newBoardSize = Math.min(containerWidth * 0.9, 500);
+        setBoardSize(newBoardSize);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [containerRef, gridSize]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
+    // Prevent default to avoid scrolling while swiping
+    // e.preventDefault(); // Commented out to allow scrolling if not swiping?
+    // Usually we want to prevent default if it's a game.
+
     const touch = e.touches[0];
     const startX = touch.clientX;
     const startY = touch.clientY;
@@ -366,7 +372,10 @@ const Slide2048: React.FC = () => {
   };
 
   return (
-    <div className="slide-2048-container">
+    <div
+      className="slide-2048-container"
+      ref={setContainerRef}
+    >
       <div className="game-header">
         <h2>Slide 2048</h2>
         <p>Slide and merge numbers to reach 2048! Multiple difficulty levels!</p>
@@ -402,11 +411,12 @@ const Slide2048: React.FC = () => {
 
       <div
         className="game-board"
+        onTouchStart={handleTouchStart}
         style={{
           width: boardSize,
           height: boardSize,
           gap: `${gapSize}px`,
-          touchAction: 'manipulation',
+          touchAction: 'none', // Changed to none to prevent scrolling
           userSelect: 'none',
           WebkitUserSelect: 'none',
           WebkitTapHighlightColor: 'transparent',

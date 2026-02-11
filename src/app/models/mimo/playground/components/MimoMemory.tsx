@@ -21,11 +21,6 @@ export default function MimoMemory() {
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
 
-  // Initialize game
-  useEffect(() => {
-    initializeGame();
-  }, []);
-
   const initializeGame = () => {
     const shuffledCards = [...EMOJIS, ...EMOJIS]
       .sort(() => Math.random() - 0.5)
@@ -43,6 +38,14 @@ export default function MimoMemory() {
     setGameOver(false);
     setScore(0);
   };
+
+  // Initialize game
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      initializeGame();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCardClick = (id: number) => {
     // Prevent clicking if 2 cards are already flipped or card is already matched/flipped

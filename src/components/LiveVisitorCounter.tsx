@@ -1,25 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users } from "lucide-react";
 
 export default function LiveVisitorCounter() {
   const [count, setCount] = useState<number>(0);
 
   useEffect(() => {
     // Initial random count between 800-1200
+    // Done inside effect to avoid hydration mismatch
     const initialCount = Math.floor(Math.random() * (1200 - 800 + 1)) + 800;
     setTimeout(() => setCount(initialCount), 0);
 
     const interval = setInterval(() => {
+      // Calculate changes outside the updater to keep it pure
+      const change = Math.floor(Math.random() * 21) - 10; // -10 to +10
+      const boundaryCorrection = Math.floor(Math.random() * 20);
+
       setCount((prev) => {
-        // Randomly add or subtract visitors to stay dynamic
-        const change = Math.floor(Math.random() * 21) - 10; // -10 to +10
         let newCount = prev + change;
         
         // Keep within bounds 800-1200
-        if (newCount < 800) newCount = 800 + Math.floor(Math.random() * 20);
-        if (newCount > 1200) newCount = 1200 - Math.floor(Math.random() * 20);
+        if (newCount < 800) newCount = 800 + boundaryCorrection;
+        if (newCount > 1200) newCount = 1200 - boundaryCorrection;
         
         return newCount;
       });

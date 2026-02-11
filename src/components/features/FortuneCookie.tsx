@@ -20,16 +20,6 @@ export const FortuneCookie = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [fortune, setFortune] = useState("");
 
-  const openCookie = () => {
-    if (!isOpen) {
-      const random = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
-      setFortune(random);
-      setIsOpen(true);
-    } else {
-      setIsOpen(false);
-    }
-  };
-
   const [luckyNumbers, setLuckyNumbers] = useState("");
 
   const openCookie = () => {
