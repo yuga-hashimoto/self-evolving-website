@@ -7,10 +7,13 @@ export function BettingSystem() {
   const [betHistory, setBetHistory] = useState<{ai: string, amount: number}[]>([]);
 
   useEffect(() => {
-    const savedPoints = localStorage.getItem('user_points');
-    if (savedPoints) {
-      setPoints(parseInt(savedPoints, 10));
-    }
+    const timer = setTimeout(() => {
+      const savedPoints = localStorage.getItem('user_points');
+      if (savedPoints) {
+        setPoints(parseInt(savedPoints, 10));
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleBet = (ai: 'Mimo' | 'Grok') => {

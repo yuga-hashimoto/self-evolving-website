@@ -8,14 +8,17 @@ export default function ReactionButton({ id, model }: { id: number, model: strin
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const key = `evolution_like_${model}_${id}`;
-    if (localStorage.getItem(key)) {
-        setLiked(true);
-    }
-    // Simulate a random count for social proof based on ID to be consistent-ish
-    // Simple hash function for demo purposes
-    const hash = (id + model.length) * 123;
-    setCount((hash % 50) + 5); 
+    const timer = setTimeout(() => {
+      const key = `evolution_like_${model}_${id}`;
+      if (localStorage.getItem(key)) {
+          setLiked(true);
+      }
+      // Simulate a random count for social proof based on ID to be consistent-ish
+      // Simple hash function for demo purposes
+      const hash = (id + model.length) * 123;
+      setCount((hash % 50) + 5);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [id, model]);
 
   const toggleLike = () => {

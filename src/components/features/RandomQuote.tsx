@@ -21,7 +21,10 @@ export default function RandomQuote() {
   const [quote, setQuote] = useState('');
 
   useEffect(() => {
-    setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+    const timer = setTimeout(() => {
+      setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!quote) return null;
@@ -30,8 +33,8 @@ export default function RandomQuote() {
     <div className="w-full max-w-3xl mx-auto my-4 text-center px-4">
       <div className="bg-white/5 border border-purple-500/20 rounded-lg p-3 backdrop-blur-sm shadow-[0_0_10px_rgba(168,85,247,0.1)] hover:bg-white/10 transition-colors duration-300">
         <p className="text-gray-300 font-mono text-xs sm:text-sm italic">
-          <span className="text-purple-400 mr-2 font-bold">Today's AI Wisdom:</span>
-          "{quote}"
+          <span className="text-purple-400 mr-2 font-bold">Today&apos;s AI Wisdom:</span>
+          &quot;{quote}&quot;
         </p>
       </div>
     </div>

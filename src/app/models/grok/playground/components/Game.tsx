@@ -46,8 +46,9 @@ export default function Game() {
 
   // Initialize audio context
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'AudioContext' in window) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    if (typeof window !== 'undefined') {
+      // @ts-expect-error - webkitAudioContext is not standard
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
       // Resume audio context on user interaction if needed
     }
   }, []);
@@ -66,7 +67,6 @@ export default function Game() {
     oscillator.stop(ctx.currentTime + duration);
   };
 
-  const playJumpSound = () => playSound(440, 0.1); // A note
   const playScoreSound = () => playSound(660, 0.2); // Higher note
   const playGameOverSound = () => playSound(220, 0.5); // Lower note
 

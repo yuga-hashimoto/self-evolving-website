@@ -15,18 +15,21 @@ export const FeatureVotePoll = () => {
   const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
-    const storedVotes = localStorage.getItem('evolution_poll_votes');
-    if (storedVotes) {
-        setVotes(JSON.parse(storedVotes));
-    } else {
-        // Initialize random votes for demo
-        const initial = FEATURES.reduce((acc, f) => ({...acc, [f.id]: Math.floor(Math.random() * 50) + 10}), {});
-        setVotes(initial);
-    }
-    
-    if (localStorage.getItem('evolution_poll_has_voted')) {
-        setHasVoted(true);
-    }
+    const timer = setTimeout(() => {
+      const storedVotes = localStorage.getItem('evolution_poll_votes');
+      if (storedVotes) {
+          setVotes(JSON.parse(storedVotes));
+      } else {
+          // Initialize random votes for demo
+          const initial = FEATURES.reduce((acc, f) => ({...acc, [f.id]: Math.floor(Math.random() * 50) + 10}), {});
+          setVotes(initial);
+      }
+
+      if (localStorage.getItem('evolution_poll_has_voted')) {
+          setHasVoted(true);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleVote = (id: string) => {

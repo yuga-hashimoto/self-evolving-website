@@ -3,6 +3,28 @@
 import { useRef, useState, useEffect } from 'react';
 import { useLocalStorage } from './hooks';
 
+interface Block {
+  id: number;
+  width: number;
+  x: number;
+  y?: number; // Added optional y property for position tracking
+  perfect: boolean;
+  falling: boolean;
+}
+
+interface DailyChallenge {
+  type: string;
+  target: number;
+  reward: number;
+}
+
+interface GlobalStats {
+  totalGamesPlayed: number;
+  totalCoins: number;
+  achievements: string[];
+  dailyChallenges: DailyChallenge[];
+}
+
 // Helper functions
 const calculateAccuracy = (blocks: Block[]) => {
   const perfectBlocks = blocks.filter(b => b.perfect).length;
@@ -51,11 +73,11 @@ const generateDailyChallenges = () => {
   ];
 };
 
-const checkDailyChallenges = (score: number, accuracy: number, combo: number, globalStats: any) => {
+const checkDailyChallenges = (score: number, accuracy: number, combo: number, globalStats: GlobalStats) => {
   const currentChallenges = globalStats.dailyChallenges;
   let completedChallenges = 0;
 
-  currentChallenges.forEach((challenge: any) => {
+  currentChallenges.forEach((challenge) => {
     if (challenge.type === 'score' && score >= challenge.target) {
       completedChallenges++;
     }
@@ -69,15 +91,6 @@ const checkDailyChallenges = (score: number, accuracy: number, combo: number, gl
 
   return completedChallenges;
 };
-
-interface Block {
-  id: number;
-  width: number;
-  x: number;
-  y?: number; // Added optional y property for position tracking
-  perfect: boolean;
-  falling: boolean;
-}
 
 const InfinityDrop: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -106,15 +119,15 @@ const InfinityDrop: React.FC = () => {
   });
 
   // Cross-game progression state
-  const [globalStats, setGlobalStats] = useLocalStorage<any>('mimo-global-stats', {
+  const [globalStats, setGlobalStats] = useLocalStorage<GlobalStats>('mimo-global-stats', {
     totalGamesPlayed: 0,
     totalCoins: 0,
-    achievements: [] as string[],
-    dailyChallenges: [] as any[]
+    achievements: [],
+    dailyChallenges: []
   });
 
   const [highScore, setHighScore] = useLocalStorage<number>('infinity-drop-high-score', 0);
-  const [stats, setStats] = useLocalStorage<any>('infinity-drop-stats', { gamesPlayed: 0, totalBlocks: 0 });
+  const [stats, setStats] = useLocalStorage<{ gamesPlayed: number; totalBlocks: number }>('infinity-drop-stats', { gamesPlayed: 0, totalBlocks: 0 });
 
   const width = 400;
   const height = 600;
@@ -122,6 +135,12 @@ const InfinityDrop: React.FC = () => {
   const minBlockWidth = 50;
   const maxBlockWidth = 150;
   const speed = 2;
+
+  const generateBlock = () => {
+    const width = Math.random() * (maxBlockWidth - minBlockWidth) + minBlockWidth;
+    const x = Math.random() * (400 - width);
+    return { id: Date.now(), width, x, perfect: false, falling: true };
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -230,7 +249,7 @@ const InfinityDrop: React.FC = () => {
         // Update global stats with rewards
         const newCoins = Math.floor(gameState.score / 100);
         const dailyChallengesCompleted = checkDailyChallenges(gameState.score, gameState.accuracy, gameState.combo, globalStats);
-        setGlobalStats((prev: any) => ({
+        setGlobalStats((prev: GlobalStats) => ({
           ...prev,
           totalCoins: prev.totalCoins + newCoins,
           achievements: updateAchievements(prev.achievements, gameState.score, gameState.accuracy, gameState.combo)
@@ -248,80 +267,11 @@ const InfinityDrop: React.FC = () => {
 
     gameLoop();
 
-    gameLoop();
-
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
     };
   }, [gameState, gameState.playing, gameState.gameOver]);
-
-  const updateAchievements = (currentAchievements: string[], score: number, accuracy: number, combo: number) => {
-    const newAchievements = [...currentAchievements];
-
-    // High score achievement
-    if (score > 1000 && !newAchievements.includes('high-score-1000')) {
-      newAchievements.push('high-score-1000');
-    }
-    if (score > 5000 && !newAchievements.includes('high-score-5000')) {
-      newAchievements.push('high-score-5000');
-    }
-    if (score > 10000 && !newAchievements.includes('high-score-10000')) {
-      newAchievements.push('high-score-10000');
-    }
-
-    // Accuracy achievements
-    if (accuracy > 90 && !newAchievements.includes('accuracy-90')) {
-      newAchievements.push('accuracy-90');
-    }
-    if (accuracy > 95 && !newAchievements.includes('accuracy-95')) {
-      newAchievements.push('accuracy-95');
-    }
-
-    // Combo achievements
-    if (combo > 5 && !newAchievements.includes('combo-5')) {
-      newAchievements.push('combo-5');
-    }
-    if (combo > 10 && !newAchievements.includes('combo-10')) {
-      newAchievements.push('combo-10');
-    }
-
-    return newAchievements;
-  };
-
-  const generateDailyChallenges = () => {
-    // Simple daily challenge generation
-    return [
-      { type: 'score', target: 500, reward: 50 },
-      { type: 'accuracy', target: 85, reward: 30 },
-      { type: 'combo', target: 3, reward: 20 }
-    ];
-  };
-
-  const checkDailyChallenges = (score: number, accuracy: number, combo: number, globalStats: any) => {
-    const currentChallenges = globalStats.dailyChallenges;
-    let completedChallenges = 0;
-
-    currentChallenges.forEach((challenge: any) => {
-      if (challenge.type === 'score' && score >= challenge.target) {
-        completedChallenges++;
-      }
-      if (challenge.type === 'accuracy' && accuracy >= challenge.target) {
-        completedChallenges++;
-      }
-      if (challenge.type === 'combo' && combo >= challenge.target) {
-        completedChallenges++;
-      }
-    });
-
-    return completedChallenges;
-  };
-
-  const generateBlock = () => {
-    const width = Math.random() * (maxBlockWidth - minBlockWidth) + minBlockWidth;
-    const x = Math.random() * (400 - width);
-    return { id: Date.now(), width, x, perfect: false, falling: true };
-  };
 
   const startGame = () => {
     setGameState({
@@ -338,7 +288,7 @@ const InfinityDrop: React.FC = () => {
     });
 
     // Update global stats
-    setGlobalStats((prev: any) => ({
+    setGlobalStats((prev: GlobalStats) => ({
       ...prev,
       totalGamesPlayed: prev.totalGamesPlayed + 1
     }));

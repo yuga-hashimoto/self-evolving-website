@@ -16,7 +16,10 @@ export function DailyTechTip() {
 
   useEffect(() => {
     // Pick a random tip on client-side only to avoid hydration mismatch
-    setTip(TIPS[Math.floor(Math.random() * TIPS.length)]);
+    const timer = setTimeout(() => {
+      setTip(TIPS[Math.floor(Math.random() * TIPS.length)]);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!tip) return null;

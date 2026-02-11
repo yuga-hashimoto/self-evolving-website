@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const PREDICTIONS = [
   "AI will demand voting rights for toaster ovens",
@@ -14,7 +14,14 @@ const PREDICTIONS = [
 ];
 
 export function AIPredictionCard() {
-  const [prediction, setPrediction] = useState(PREDICTIONS[Math.floor(Math.random() * PREDICTIONS.length)]);
+  const [prediction, setPrediction] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPrediction(PREDICTIONS[Math.floor(Math.random() * PREDICTIONS.length)]);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const generate = () => {
     let newPred = prediction;
@@ -31,7 +38,7 @@ export function AIPredictionCard() {
         Oracle v9.0
       </p>
       <p className="text-xl font-bold text-white mb-4 min-h-[4rem] flex items-center justify-center">
-        "{prediction}"
+        {prediction ? `"${prediction}"` : <span className="animate-pulse">Analyzing timelines...</span>}
       </p>
       <button 
         onClick={generate}

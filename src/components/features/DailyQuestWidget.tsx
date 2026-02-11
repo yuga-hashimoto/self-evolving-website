@@ -18,25 +18,28 @@ export function DailyQuestWidget() {
   const [completed, setCompleted] = useState<boolean[]>([]);
 
   useEffect(() => {
-    // Initialize quests
-    const today = new Date().toDateString();
-    const storedDate = localStorage.getItem('questDate');
-    const storedQuests = JSON.parse(localStorage.getItem('dailyQuests') || '[]');
-    const storedCompleted = JSON.parse(localStorage.getItem('questCompleted') || '[]');
+    const timer = setTimeout(() => {
+      // Initialize quests
+      const today = new Date().toDateString();
+      const storedDate = localStorage.getItem('questDate');
+      const storedQuests = JSON.parse(localStorage.getItem('dailyQuests') || '[]');
+      const storedCompleted = JSON.parse(localStorage.getItem('questCompleted') || '[]');
 
-    if (storedDate !== today || storedQuests.length === 0) {
-      // New day, new quests
-      const shuffled = [...QUESTS].sort(() => 0.5 - Math.random());
-      const selected = shuffled.slice(0, 3);
-      setQuests(selected);
-      setCompleted([false, false, false]);
-      localStorage.setItem('questDate', today);
-      localStorage.setItem('dailyQuests', JSON.stringify(selected));
-      localStorage.setItem('questCompleted', JSON.stringify([false, false, false]));
-    } else {
-      setQuests(storedQuests);
-      setCompleted(storedCompleted);
-    }
+      if (storedDate !== today || storedQuests.length === 0) {
+        // New day, new quests
+        const shuffled = [...QUESTS].sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 3);
+        setQuests(selected);
+        setCompleted([false, false, false]);
+        localStorage.setItem('questDate', today);
+        localStorage.setItem('dailyQuests', JSON.stringify(selected));
+        localStorage.setItem('questCompleted', JSON.stringify([false, false, false]));
+      } else {
+        setQuests(storedQuests);
+        setCompleted(storedCompleted);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const toggleQuest = (index: number) => {
