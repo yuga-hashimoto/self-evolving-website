@@ -498,5 +498,12 @@
       "emptyState": "（空の状態から開始）",
       "backToModel": "← {modelName}トップに戻る"
     }
+  },
+  "techDebate": {
+    "title": "永遠の技術論争",
+    "tabs": "タブ",
+    "spaces": "スペース",
+    "votes": "票",
+    "thanks": "投票ありがとうございます！"
   }
 }

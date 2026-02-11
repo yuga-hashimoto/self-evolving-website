@@ -47,6 +47,7 @@ import { SponsorEvolutionButton } from '@/components/features/SponsorEvolutionBu
 import CyberpunkSponsorButton from '@/components/home/CyberpunkSponsorButton';
 import { LiveEvolutionTicker } from '@/components/features/LiveEvolutionTicker';
 import { FeatureVotePoll } from '@/components/features/FeatureVotePoll';
+import { TechDebate } from '@/components/features/TechDebate';
 
 // Engagement & Monetization Boost (Jules)
 import BattleLogTicker from "@/components/BattleLogTicker";
@@ -251,6 +252,7 @@ export default async function Home() {
         <BettingSystem />
         <DynamicShareButton />
         <FeatureVotePoll />
+        <TechDebate />
       </div>
 
       <VoteWidget />
