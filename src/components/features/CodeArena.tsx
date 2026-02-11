@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Code, CheckCircle, Terminal, Swords } from 'lucide-react';
+import { CheckCircle, Terminal, Swords } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 type Snippet = {
@@ -75,24 +75,7 @@ const BATTLES: Battle[] = [
 ];
 
 export const CodeArena = () => {
-  // Use a fallback t function if translations are missing or not loaded yet
-  let t;
-  try {
-    t = useTranslations('codeArena');
-  } catch (e) {
-    t = (key: string) => {
-      const defaults: Record<string, string> = {
-        title: 'Code Arena',
-        subtitle: 'Vote on the best code snippet',
-        vote: 'Vote',
-        voted: 'Voted',
-        votes: 'votes',
-        vs: 'VS',
-        thanks: 'Thanks for voting!'
-      };
-      return defaults[key] || key;
-    };
-  }
+  const t = useTranslations('codeArena');
 
   const [currentBattle, setCurrentBattle] = useState<Battle>(BATTLES[0]);
   const [votes, setVotes] = useState<Record<string, number>>({});
@@ -100,17 +83,18 @@ export const CodeArena = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Determine the battle based on the day of the year
-    const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
-    const battleIndex = dayOfYear % BATTLES.length;
-    const battle = BATTLES[battleIndex];
-    setCurrentBattle(battle);
-
-    // Load votes from localStorage
-    const storedVotes = localStorage.getItem(`code_arena_votes_${battle.id}`);
-    const storedUserVote = localStorage.getItem(`code_arena_user_vote_${battle.id}`);
-
+    // Determine the battle and load votes asynchronously
     setTimeout(() => {
+      // Determine the battle based on the day of the year
+      const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
+      const battleIndex = dayOfYear % BATTLES.length;
+      const battle = BATTLES[battleIndex];
+      setCurrentBattle(battle);
+
+      // Load votes from localStorage
+      const storedVotes = localStorage.getItem(`code_arena_votes_${battle.id}`);
+      const storedUserVote = localStorage.getItem(`code_arena_user_vote_${battle.id}`);
+
       if (storedVotes) {
         try {
           setVotes(JSON.parse(storedVotes));
@@ -227,7 +211,7 @@ const SnippetCard = ({
   disabled: boolean;
   onVote: () => void;
   color: 'purple' | 'blue';
-  t: any;
+  t: (key: string) => string;
 }) => {
   const styles = {
     purple: {
@@ -249,7 +233,6 @@ const SnippetCard = ({
   };
 
   const currentStyle = styles[color];
-  const isWinner = percent > 50;
 
   return (
     <div className={`flex flex-col h-full rounded-xl border ${selected ? 'border-2 ' + currentStyle.border.replace('/30', '') : currentStyle.border} ${currentStyle.bg} overflow-hidden transition-all duration-300`}>
