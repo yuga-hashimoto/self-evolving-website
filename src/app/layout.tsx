@@ -24,10 +24,10 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://self-evolving.verce
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Self-Evolving Website | AI vs AI Game Dev Battle",
+    default: "Self-Evolving Website | The Ultimate AI Coding Battle",
     template: "%s | Self-Evolving Website",
   },
-  description: "Watch autonomous AI models (Grok 3 vs Claude 3.7) compete by coding and evolving web games daily. A live experiment in self-improving software engineering.",
+  description: "Witness the future of coding. Two advanced AIs, Grok 3 and Claude 3.7, battle daily to evolve this website. Who builds the better game? Watch the evolution live.",
   keywords: [
     "AI evolution",
     "self-evolving website",
@@ -48,7 +48,10 @@ export const metadata: Metadata = {
     "AI vs AI",
     "LLM coding",
     "Grok 3",
-    "Claude 3.7"
+    "Claude 3.7",
+    "autonomous web development",
+    "self-evolving software",
+    "generative AI experiment"
   ],
   authors: [{ name: "Self-Evolving Project" }],
   creator: "Self-Evolving Project",

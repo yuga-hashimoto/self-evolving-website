@@ -116,39 +116,43 @@ export default async function Home() {
       <EvolutionFeed />
       <AIBattleGauge />
       {/* Hero Section */}
-      <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
-      <div className="w-full flex justify-center mb-6"><LiveVisitorCount /></div>
+      <div className="text-center max-w-4xl mx-auto mb-6 sm:mb-16 relative">
+        {/* Background Glow */}
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.15),transparent_70%)]" aria-hidden="true" />
+
+        <div className="w-full flex justify-center mb-6"><LiveVisitorCount /></div>
+
         {/* Mobile: Title only */}
-        <h1 className="text-5xl font-bold gradient-text leading-tight mb-4 sm:hidden">
+        <h1 className="text-6xl font-black gradient-text leading-none tracking-tight mb-6 sm:hidden drop-shadow-lg">
           <div className="flex flex-col">
-            <span>Self-Evolving</span>
-            <span>Game</span>
+            <span>AI vs AI</span>
+            <span className="text-4xl">Evolution Battle</span>
           </div>
         </h1>
 
         {/* Desktop: Logo and title */}
-        <div className="hidden sm:flex items-center justify-center gap-4 mb-6">
+        <div className="hidden sm:flex items-center justify-center gap-6 mb-8">
           <GlitchTitle>
-            <h1 className="text-5xl lg:text-6xl font-bold gradient-text leading-tight relative">
+            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black gradient-text leading-none tracking-tight relative drop-shadow-2xl">
               {t('heroTitle')}
-              <span className="ml-3 align-top inline-block px-2 py-1 text-xs sm:text-sm font-mono tracking-widest text-red-400 border border-red-500/30 rounded bg-red-500/10 animate-pulse transform -rotate-6">LIVE</span>
+              <span className="ml-4 align-top inline-block px-3 py-1 text-sm sm:text-base font-mono font-bold tracking-widest text-red-400 border border-red-500/50 rounded bg-red-500/20 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)] transform -rotate-6">LIVE</span>
             </h1>
           </GlitchTitle>
           <div className="inline-block animate-float" aria-hidden="true">
-            <IconDNA size={96} aria-hidden="true" />
+            <IconDNA size={112} aria-hidden="true" className="filter drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
           </div>
         </div>
-        <p className="text-base sm:text-xl text-purple-300 mb-3 sm:mb-4 leading-relaxed">
+        <p className="text-lg sm:text-2xl text-purple-200 mb-4 sm:mb-6 leading-relaxed font-medium max-w-3xl mx-auto">
           {t('heroSubtitle')}
         </p>
         <p className="text-sm sm:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed">
           {t('startDate', { date: formattedDate })}
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 sm:mt-8 mb-2">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-8 sm:mt-10 mb-4">
           <a
             href="#models"
-            className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-lg rounded-full shadow-lg hover:shadow-purple-500/50 transform hover:scale-105 transition-all duration-300"
+            className="px-10 py-5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-xl rounded-full shadow-xl hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300 ring-2 ring-white/20"
           >
             {t('ctaStartBattle')}
           </a>
