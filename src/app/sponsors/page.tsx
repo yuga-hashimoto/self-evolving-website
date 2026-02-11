@@ -3,8 +3,10 @@
 import React from 'react';
 import Link from 'next/link';
 import { AdBanner } from '@/components/AdBanner';
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy, Rocket, Brain, Code, Zap } from 'lucide-react';
 import { useState } from 'react';
+import { SPONSORS } from '@/lib/sponsors-data';
+import { IconMimo, IconGrok, IconDNA, IconX } from '@/components/icons/Icons';
 
 export default function SponsorsPage() {
   const [copied, setCopied] = useState<string | null>(null);
@@ -14,6 +16,24 @@ export default function SponsorsPage() {
     setCopied(type);
     setTimeout(() => setCopied(null), 2000);
   };
+
+  const getLogo = (logoId: string, size: number) => {
+    const map: Record<string, React.ReactNode> = {
+      mimo: <IconMimo size={size} />,
+      grok: <IconGrok size={size} />,
+      dna: <IconDNA size={size} />,
+      x: <IconX size={size} />,
+      rocket: <Rocket size={size} />,
+      brain: <Brain size={size} />,
+      code: <Code size={size} />,
+      zap: <Zap size={size} />,
+    };
+    return map[logoId] || <Brain size={size} />;
+  };
+
+  const platinumSponsors = SPONSORS.filter(s => s.tier === 'platinum');
+  const goldSponsors = SPONSORS.filter(s => s.tier === 'gold');
+  const silverSponsors = SPONSORS.filter(s => s.tier === 'silver');
 
   return (
     <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
@@ -40,20 +60,54 @@ export default function SponsorsPage() {
       <div className="mb-16">
         <h2 className="text-2xl font-bold text-white mb-8">Platinum Supporters</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="glass-card p-8 flex items-center justify-center border-yellow-500/20 h-40">
-              <span className="text-gray-600 font-mono text-sm">Your Logo Here</span>
-            </div>
+          {platinumSponsors.map((sponsor) => (
+            <Link href={sponsor.url || '#'} key={sponsor.id} className="glass-card p-8 flex flex-col items-center justify-center border-yellow-500/20 h-48 gap-4 hover:border-yellow-500/50 transition-colors group">
+              <div className="text-yellow-500 group-hover:scale-110 transition-transform duration-300">
+                {getLogo(sponsor.logoId, 64)}
+              </div>
+              <span className="text-white font-bold text-lg">{sponsor.name}</span>
+              <p className="text-gray-400 text-sm">{sponsor.description}</p>
+            </Link>
           ))}
+          <div className="glass-card p-8 flex items-center justify-center border-yellow-500/10 h-48 border-dashed">
+            <span className="text-gray-600 font-mono text-sm">Your Logo Here</span>
+          </div>
         </div>
       </div>
 
       <div className="mb-16">
         <h2 className="text-xl font-bold text-white mb-8">Gold Supporters</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="glass-card p-4 flex items-center justify-center border-white/10 h-24">
+          {goldSponsors.map((sponsor) => (
+            <Link href={sponsor.url || '#'} key={sponsor.id} className="glass-card p-4 flex flex-col items-center justify-center border-white/20 h-32 gap-2 hover:border-white/40 transition-colors group">
+              <div className="text-gray-300 group-hover:text-white transition-colors">
+                 {getLogo(sponsor.logoId, 40)}
+              </div>
+              <span className="text-gray-200 font-bold text-sm">{sponsor.name}</span>
+            </Link>
+          ))}
+          {[1, 2].map((i) => (
+            <div key={`placeholder-${i}`} className="glass-card p-4 flex items-center justify-center border-white/5 h-32 border-dashed">
               <span className="text-gray-700 font-mono text-xs">Available</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+       <div className="mb-16">
+        <h2 className="text-lg font-bold text-gray-400 mb-8">Silver Supporters</h2>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          {silverSponsors.map((sponsor) => (
+            <Link href={sponsor.url || '#'} key={sponsor.id} className="glass-card p-3 flex flex-col items-center justify-center border-white/10 h-24 gap-1 hover:border-white/30 transition-colors">
+               <div className="text-gray-500">
+                 {getLogo(sponsor.logoId, 24)}
+              </div>
+              <span className="text-gray-400 text-xs">{sponsor.name}</span>
+            </Link>
+          ))}
+           {[1, 2, 3].map((i) => (
+            <div key={`placeholder-silver-${i}`} className="glass-card p-3 flex items-center justify-center border-white/5 h-24 border-dashed">
+              <span className="text-gray-800 font-mono text-[10px]">Available</span>
             </div>
           ))}
         </div>
