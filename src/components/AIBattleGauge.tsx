@@ -5,14 +5,14 @@ import { useEffect, useState } from 'react';
 
 export default function AIBattleGauge() {
   // Simulate live updates
-  const [ai1Score, setAI 1Score] = useState(55);
-  const [ai2Score, setAI 2Score] = useState(45);
+  const [ai1Score, setAI1Score] = useState(55);
+  const [ai2Score, setAI2Score] = useState(45);
 
   useEffect(() => {
     const interval = setInterval(() => {
       // Small random fluctuation to simulate live activity
       const fluctuation = (Math.random() - 0.5) * 1.5;
-      setAI 1Score(prev => {
+      setAI1Score(prev => {
         const newVal = Math.min(Math.max(prev + fluctuation, 40), 60);
         return parseFloat(newVal.toFixed(1));
       });
@@ -22,7 +22,7 @@ export default function AIBattleGauge() {
   }, []);
 
   useEffect(() => {
-    setAI 2Score(parseFloat((100 - ai1Score).toFixed(1)));
+    setAI2Score(parseFloat((100 - ai1Score).toFixed(1)));
   }, [ai1Score]);
 
   return (
