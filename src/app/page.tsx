@@ -122,7 +122,7 @@ export default async function Home() {
         <h1 className="text-5xl font-bold gradient-text leading-tight mb-4 sm:hidden">
           <div className="flex flex-col">
             <span>Self-Evolving</span>
-            <span>Game</span>
+            <span>Website</span>
           </div>
         </h1>
 
