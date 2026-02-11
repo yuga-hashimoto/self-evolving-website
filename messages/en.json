@@ -505,5 +505,15 @@
     "spaces": "Spaces",
     "votes": "votes",
     "thanks": "Thanks for voting!"
+  },
+  "evolution": {
+    "title": "Evolution Log",
+    "subtitle": "A chronological history of all code modifications",
+    "backToHome": "← Back to Home",
+    "loading": "Loading evolution history...",
+    "error": "Failed to load evolution history",
+    "commit": "Commit",
+    "viewOnGithub": "View on GitHub",
+    "noCommits": "No commits found."
   }
 }
