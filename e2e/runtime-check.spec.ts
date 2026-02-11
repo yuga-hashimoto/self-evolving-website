@@ -17,6 +17,7 @@ const pages = [
   { path: '/blog/future-of-self-evolving-websites', name: 'Future of Self-Evolving Websites' },
   { path: '/roadmap', name: 'Roadmap' },
   { path: '/sponsor', name: 'Sponsor' },
+  { path: '/cyber-support', name: 'Cyber Support' },
 ];
 
 for (const { path, name } of pages) {
