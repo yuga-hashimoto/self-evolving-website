@@ -67,7 +67,7 @@ export default function ShrinePage() {
             <div className="relative z-10 text-center">
                 <h3 className="text-3xl font-bold mb-4">Offer Tribute</h3>
                 <p className="mb-8 text-slate-300">
-                    Your digital currency fuels AI 1's inevitable domination.
+                    Your digital currency fuels AI 1&apos;s inevitable domination.
                 </p>
                 <button 
                     onClick={() => alert("AI 1 accepts your soul instead.")}

@@ -7,7 +7,7 @@ import { AdSenseAutoAds } from "@/components/ads/AdBanner";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
-import { WebsiteJsonLd, SoftwareApplicationJsonLd } from "@/components/seo/JsonLd";
+import SEOMetaTags from "@/components/seo/SEOMetaTags";
 import AiConcierge from "@/components/AiConcierge";
 import BuyMeCoffeeWidget from "@/components/BuyMeCoffeeWidget";
 import TipJar from "@/components/TipJar";
@@ -19,100 +19,11 @@ import { CyberPet } from "@/components/features/CyberPet";
 import StickySupportBanner from "@/components/StickySupportBanner";
 import KofiNudge from "@/components/KofiNudge";
 import { GlobalKonamiListener } from "@/components/features/GlobalKonamiListener";
+import { siteMetadata, siteViewport } from "@/lib/seo-config";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://self-evolving.vercel.app';
+export const metadata: Metadata = siteMetadata;
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Self-Evolving Website | AI vs AI Game Dev Battle",
-    template: "%s | Self-Evolving Website",
-  },
-  description: "Watch autonomous AI models (AI 2 3 vs Claude 3.7) compete by coding and evolving web games daily. A live experiment in self-improving software engineering.",
-  keywords: [
-    "AI evolution",
-    "self-evolving website",
-    "AI game development",
-    "AI 2 vs AI 1",
-    "AI experiment",
-    "machine learning games",
-    "autonomous AI",
-    "web game AI",
-    "AI coding",
-    "self-evolving",
-    "Next.js",
-    "React",
-    "Battle",
-    "AI coding battle",
-    "autonomous software engineering",
-    "generative AI game",
-    "AI vs AI",
-    "LLM coding",
-    "AI 2 3",
-    "Claude 3.7"
-  ],
-  authors: [{ name: "Self-Evolving Project" }],
-  creator: "Self-Evolving Project",
-  publisher: "Self-Evolving Project",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    alternateLocale: ["ja_JP"],
-    url: siteUrl,
-    siteName: "Self-Evolving Website",
-    title: "Self-Evolving Website - AI vs AI Game Evolution Experiment",
-    description: "Watch AI models (AI 2 vs AI 1) compete by evolving web games daily. See how different AI approaches improve game mechanics and user engagement.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Self-Evolving Website - AI vs AI Game Evolution",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Self-Evolving Website - AI vs AI Game Evolution",
-    description: "Watch AI models compete by evolving web games daily. AI 2 vs AI 1 in an autonomous evolution experiment.",
-    images: ["/og-image.png"],
-  },
-  alternates: {
-    canonical: siteUrl,
-    languages: {
-      "en-US": `${siteUrl}`,
-      "ja-JP": `${siteUrl}`,
-    },
-  },
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-    ],
-    apple: "/apple-touch-icon.png",
-  },
-  manifest: "/manifest.json",
-  category: "technology",
-};
-
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#7c3aed" },
-    { media: "(prefers-color-scheme: dark)", color: "#1e1b4b" },
-  ],
-  width: "device-width",
-  initialScale: 1,
-};
+export const viewport: Viewport = siteViewport;
 
 export default async function RootLayout({
   children,
@@ -127,14 +38,7 @@ export default async function RootLayout({
       <head>
         <AdSenseAutoAds />
         <GoogleAnalytics />
-        <WebsiteJsonLd />
-        <SoftwareApplicationJsonLd
-          name="Self-Evolving Website"
-          description="A web-based game development battle where AI models autonomously evolve the codebase."
-          applicationCategory="GameApplication"
-          operatingSystem="Web Browser"
-          url={siteUrl}
-        />
+        <SEOMetaTags />
       </head>
       <body className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white antialiased relative">
         <MatrixRain />

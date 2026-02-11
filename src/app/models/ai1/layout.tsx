@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AI 1Layout({
+export default function AI1Layout({
   children,
 }: {
   children: React.ReactNode;

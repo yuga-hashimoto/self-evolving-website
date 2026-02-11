@@ -48,12 +48,12 @@ export function ModelAnalyticsAccordion({ modelId, translations: t }: ModelAnaly
     const [hasFetched, setHasFetched] = useState(false);
 
     const model = MODELS[modelId];
-    const isAI 1 = modelId === 'ai1';
-    const Icon = isAI 1 ? IconAi1 : IconAi2;
-    const colorClass = isAI 1 ? 'text-purple-400' : 'text-blue-400';
-    const bgClass = isAI 1 ? 'bg-purple-500/10' : 'bg-blue-500/10';
-    const borderClass = isAI 1 ? 'border-purple-500/30 hover:border-purple-500/50' : 'border-blue-500/30 hover:border-blue-500/50';
-    const gradientClass = isAI 1
+    const isAI1 = modelId === 'ai1';
+    const Icon = isAI1 ? IconAi1 : IconAi2;
+    const colorClass = isAI1 ? 'text-purple-400' : 'text-blue-400';
+    const bgClass = isAI1 ? 'bg-purple-500/10' : 'bg-blue-500/10';
+    const borderClass = isAI1 ? 'border-purple-500/30 hover:border-purple-500/50' : 'border-blue-500/30 hover:border-blue-500/50';
+    const gradientClass = isAI1
         ? 'bg-gradient-to-r from-purple-400 to-pink-400'
         : 'bg-gradient-to-r from-blue-400 to-cyan-400';
 

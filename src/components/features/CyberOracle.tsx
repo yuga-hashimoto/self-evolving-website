@@ -120,7 +120,7 @@ export function CyberOracle() {
                     className="flex flex-col items-center gap-4"
                 >
                      <p className="text-lg md:text-xl font-bold text-white leading-relaxed drop-shadow-[0_0_5px_rgba(6,182,212,0.8)]">
-                        "{t(`fortunes.${fortuneIndex}` as any)}"
+                        &quot;{t(`fortunes.${fortuneIndex}`)}&quot;
                     </p>
                     <div className="flex items-center gap-2 mt-2 text-xs text-cyan-500/50 font-mono">
                          <IconCycleDaily size={14} />

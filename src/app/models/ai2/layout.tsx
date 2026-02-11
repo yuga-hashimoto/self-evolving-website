@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AI 2Layout({
+export default function AI2Layout({
   children,
 }: {
   children: React.ReactNode;
