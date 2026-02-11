@@ -1,0 +1,10 @@
+
+> self-evolving-website@0.1.0 start
+> node .next/standalone/server.js
+
+▲ Next.js 16.1.1
+- Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+
+✓ Starting...
+✓ Ready in 133ms

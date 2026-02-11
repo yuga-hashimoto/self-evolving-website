@@ -1,0 +1,155 @@
+
+> self-evolving-website@0.1.0 start
+> node .next/standalone/server.js
+
+▲ Next.js 16.1.1
+- Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+
+✓ Starting...
+✓ Ready in 131ms
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Error: ENVIRONMENT_FALLBACK
+    at <unknown> (.next/server/chunks/ssr/_f976b1c2._.js:40:4196)
+    at Array.map (<anonymous>)
+    at e (.next/server/chunks/ssr/_f976b1c2._.js:40:3554) {
+  code: 'ENVIRONMENT_FALLBACK'
+}
+Killed

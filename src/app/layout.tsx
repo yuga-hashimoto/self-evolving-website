@@ -120,7 +120,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const messages = await getMessages();
-  const locale = await getLocale();
+  const locale = await getLocale() || 'en';
+  const now = new Date();
 
   return (
     <html lang={locale}>
@@ -141,7 +142,7 @@ export default async function RootLayout({
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider messages={messages} locale={locale} timeZone="UTC" now={now}>
           <AnalyticsProvider>
             <Header />
             <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
