@@ -71,8 +71,8 @@ interface ChangelogCompareViewProps {
         secondsShort: string;
         timesCount: string;
         filterAll: string;
-        filterAI 1: string;
-        filterAI 2: string;
+        filterAI1: string;
+        filterAI2: string;
     };
     changelogTranslations: {
         intent: string;
@@ -252,8 +252,8 @@ export function ChangelogCompareView({
                 onFilterChange={setFilter}
                 labels={{
                     all: t.filterAll,
-                    ai1: t.filterAI 1,
-                    ai2: t.filterAI 2,
+                    ai1: t.filterAI1,
+                    ai2: t.filterAI2,
                 }}
             />
 
@@ -394,12 +394,12 @@ function ModelCard({
     showFullWidth?: boolean;
 }) {
     const model = MODELS[modelId];
-    const isAI 1 = modelId === "ai1";
-    const colorClass = isAI 1 ? "text-purple-400" : "text-blue-400";
-    const bgClass = isAI 1 ? "bg-purple-500/10" : "bg-blue-500/10";
-    const borderClass = isAI 1 ? "border-purple-500/30" : "border-blue-500/30";
+    const isAI1 = modelId === "ai1";
+    const colorClass = isAI1 ? "text-purple-400" : "text-blue-400";
+    const bgClass = isAI1 ? "bg-purple-500/10" : "bg-blue-500/10";
+    const borderClass = isAI1 ? "border-purple-500/30" : "border-blue-500/30";
 
-    const finalAccentBorder = isAI 1
+    const finalAccentBorder = isAI1
         ? "border-l-4 border-l-purple-500 md:border-l-0 md:border-r-4 md:border-r-purple-500"
         : "border-l-4 border-l-blue-500";
 
@@ -408,7 +408,7 @@ function ModelCard({
     return (
         <div className={`w-full glass-card p-5 ${finalAccentBorder} ${bgClass} ${borderClass} shadow-lg transition-transform hover:scale-[1.02] duration-300`}>
             <div className="flex items-center gap-2 mb-3">
-                <span className="text-xl">{isAI 1 ? "🟣" : "🔵"}</span>
+                <span className="text-xl">{isAI1 ? "🟣" : "🔵"}</span>
                 <span className={`text-sm font-bold ${colorClass}`}>{model.name}</span>
                 <span className="text-[10px] text-gray-500 ml-auto">{formatTimeDisplay(entry.date)}</span>
                 {entry.prUrl && (

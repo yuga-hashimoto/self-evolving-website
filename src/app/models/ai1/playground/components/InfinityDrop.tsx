@@ -3,6 +3,28 @@
 import { useRef, useState, useEffect } from 'react';
 import { useLocalStorage } from './hooks';
 
+interface Block {
+  id: number;
+  width: number;
+  x: number;
+  y?: number; // Added optional y property for position tracking
+  perfect: boolean;
+  falling: boolean;
+}
+
+interface DailyChallenge {
+  type: 'score' | 'accuracy' | 'combo';
+  target: number;
+  reward: number;
+}
+
+interface GlobalStats {
+  totalGamesPlayed: number;
+  totalCoins: number;
+  achievements: string[];
+  dailyChallenges: DailyChallenge[];
+}
+
 // Helper functions
 const calculateAccuracy = (blocks: Block[]) => {
   const perfectBlocks = blocks.filter(b => b.perfect).length;
@@ -42,7 +64,7 @@ const updateAchievements = (currentAchievements: string[], score: number, accura
   return newAchievements;
 };
 
-const generateDailyChallenges = () => {
+const generateDailyChallenges = (): DailyChallenge[] => {
   // Simple daily challenge generation
   return [
     { type: 'score', target: 500, reward: 50 },
@@ -51,11 +73,11 @@ const generateDailyChallenges = () => {
   ];
 };
 
-const checkDailyChallenges = (score: number, accuracy: number, combo: number, globalStats: any) => {
+const checkDailyChallenges = (score: number, accuracy: number, combo: number, globalStats: GlobalStats) => {
   const currentChallenges = globalStats.dailyChallenges;
   let completedChallenges = 0;
 
-  currentChallenges.forEach((challenge: any) => {
+  currentChallenges.forEach((challenge) => {
     if (challenge.type === 'score' && score >= challenge.target) {
       completedChallenges++;
     }
@@ -69,15 +91,6 @@ const checkDailyChallenges = (score: number, accuracy: number, combo: number, gl
 
   return completedChallenges;
 };
-
-interface Block {
-  id: number;
-  width: number;
-  x: number;
-  y?: number; // Added optional y property for position tracking
-  perfect: boolean;
-  falling: boolean;
-}
 
 const InfinityDrop: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -106,15 +119,15 @@ const InfinityDrop: React.FC = () => {
   });
 
   // Cross-game progression state
-  const [globalStats, setGlobalStats] = useLocalStorage<any>('ai1-global-stats', {
+  const [globalStats, setGlobalStats] = useLocalStorage<GlobalStats>('ai1-global-stats', {
     totalGamesPlayed: 0,
     totalCoins: 0,
-    achievements: [] as string[],
-    dailyChallenges: [] as any[]
+    achievements: [],
+    dailyChallenges: []
   });
 
-  const [highScore, setHighScore] = useLocalStorage<number>('infinity-drop-high-score', 0);
-  const [stats, setStats] = useLocalStorage<any>('infinity-drop-stats', { gamesPlayed: 0, totalBlocks: 0 });
+  const [highScore] = useLocalStorage<number>('infinity-drop-high-score', 0);
+  const [, setStats] = useLocalStorage<{ gamesPlayed: number; totalBlocks: number }>('infinity-drop-stats', { gamesPlayed: 0, totalBlocks: 0 });
 
   const width = 400;
   const height = 600;
@@ -122,6 +135,12 @@ const InfinityDrop: React.FC = () => {
   const minBlockWidth = 50;
   const maxBlockWidth = 150;
   const speed = 2;
+
+  const generateBlock = () => {
+    const blockWidth = Math.random() * (maxBlockWidth - minBlockWidth) + minBlockWidth;
+    const x = Math.random() * (width - blockWidth);
+    return { id: Date.now(), width: blockWidth, x, perfect: false, falling: true };
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -148,180 +167,122 @@ const InfinityDrop: React.FC = () => {
       ctx.clearRect(0, 0, width, height);
 
       // Draw existing blocks
-      gameState.blocks.forEach((block) => {
+      gameState.blocks.forEach((block, index) => {
         ctx.fillStyle = block.perfect ? '#4CAF50' : '#2196F3';
-        ctx.fillRect(block.x, height - blockHeight * (gameState.blocks.indexOf(block) + 1), block.width, blockHeight);
+        ctx.fillRect(block.x, height - blockHeight * (index + 1), block.width, blockHeight);
       });
 
       // Draw current falling block
       if (gameState.currentBlock) {
         ctx.fillStyle = '#FF9800';
-        ctx.fillRect(gameState.currentBlock.x, 0, gameState.currentBlock.width, blockHeight);
-        gameState.currentBlock.falling = true;
+        ctx.fillRect(gameState.currentBlock.x, gameState.currentBlock.y || 0, gameState.currentBlock.width, blockHeight);
       }
 
       // Move falling block
       if (gameState.currentBlock && gameState.currentBlock.falling) {
-        gameState.currentBlock.y = (gameState.currentBlock.y || 0) + speed;
+        // Create a copy to update
+        const updatedBlock = { ...gameState.currentBlock };
+        updatedBlock.y = (updatedBlock.y || 0) + speed;
 
         // Check collision with existing blocks
         const bottomY = height - blockHeight * gameState.blocks.length;
-        if (gameState.currentBlock.y >= bottomY - blockHeight) {
-          gameState.currentBlock.falling = false;
+        if (updatedBlock.y >= bottomY - blockHeight) {
+          updatedBlock.falling = false;
+          updatedBlock.y = bottomY - blockHeight; // Snap to position
+
           const placedBlock: Block = {
             id: Date.now(),
-            width: gameState.currentBlock.width,
-            x: gameState.currentBlock.x,
-            perfect: Math.abs(gameState.currentBlock.x - (width - gameState.currentBlock.width) / 2) < 10,
+            width: updatedBlock.width,
+            x: updatedBlock.x,
+            y: updatedBlock.y,
+            perfect: Math.abs(updatedBlock.x - (width - updatedBlock.width) / 2) < 10, // Simplified perfect check logic
             falling: false
           };
 
           const newBlocks = [...gameState.blocks, placedBlock];
+
+          // Generate next block immediately to prevent loop issues
+          const nextBlock = generateBlock();
+
           setGameState(prev => ({
             ...prev,
             blocks: newBlocks,
-            currentBlock: null,
+            currentBlock: nextBlock, // Use generated block directly
             score: prev.score + (placedBlock.perfect ? 100 : 50),
             combo: placedBlock.perfect ? prev.combo + 1 : 0,
             accuracy: calculateAccuracy(newBlocks)
           }));
-
-          // Generate next block
-          setTimeout(() => {
-            setGameState((prev: {
-              playing: boolean;
-              score: number;
-              combo: number;
-              accuracy: number;
-              blocks: Block[];
-              currentBlock: Block | null;
-              nextBlock: Block;
-              gameOver: boolean;
-              coins: number;
-              level: number;
-            }) => ({
-              ...prev,
-              nextBlock: generateBlock()
-            }));
-          }, 500);
+        } else {
+           // Update block position state
+           setGameState(prev => ({
+             ...prev,
+             currentBlock: updatedBlock
+           }));
         }
+      } else if (!gameState.currentBlock && gameState.playing && !gameState.gameOver) {
+          // Should not happen with above logic but as failsafe
+          setGameState(prev => ({
+              ...prev,
+              currentBlock: generateBlock()
+          }));
       }
 
       // Check game over
       if (gameState.blocks.length > 20) {
-        setGameState((prev: {
-          playing: boolean;
-          score: number;
-          combo: number;
-          accuracy: number;
-          blocks: Block[];
-          currentBlock: Block | null;
-          nextBlock: Block;
-          gameOver: boolean;
-          coins: number;
-          level: number;
-        }) => ({
-          ...prev,
-          playing: false,
-          gameOver: true,
-          coins: prev.coins + Math.floor(prev.score / 100)
-        }));
+        // Use functional state update to ensure latest state usage
+        setGameState(prev => {
+            // Only trigger game over once
+            if (prev.gameOver) return prev;
 
-        // Update global stats with rewards
-        const newCoins = Math.floor(gameState.score / 100);
-        const dailyChallengesCompleted = checkDailyChallenges(gameState.score, gameState.accuracy, gameState.combo, globalStats);
-        setGlobalStats((prev: any) => ({
-          ...prev,
-          totalCoins: prev.totalCoins + newCoins,
-          achievements: updateAchievements(prev.achievements, gameState.score, gameState.accuracy, gameState.combo)
-        }));
+            const newCoins = Math.floor(prev.score / 100);
 
-        // Update stats
-        setStats((prev: { gamesPlayed: number; totalBlocks: number }) => ({
-          gamesPlayed: prev.gamesPlayed + 1,
-          totalBlocks: prev.totalBlocks + gameState.blocks.length
-        }));
+            // Side effects in render/loop are bad, but typical for game loops in React without refined separation
+            // We should do this outside the state setter ideally, but here we just set state
+            // and use an effect to handle side effects if possible, or just accept it for this simple game.
+
+            // However, we can't update other states (globalStats, stats) synchronously here easily without loops/race conditions
+            // So we'll defer it or do it here if we are careful.
+            // But doing `setGlobalStats` here causes the loop to re-run and potentially trigger again.
+            // Better to just set gameOver state and handle stats update in an effect dependent on gameOver.
+
+            return {
+                ...prev,
+                playing: false,
+                gameOver: true,
+                coins: prev.coins + newCoins
+            };
+        });
       }
 
       requestAnimationFrame(gameLoop);
     };
 
-    gameLoop();
-
-    gameLoop();
+    const animationId = requestAnimationFrame(gameLoop);
 
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
+      cancelAnimationFrame(animationId);
     };
-  }, [gameState, gameState.playing, gameState.gameOver]);
+  }, [gameState.playing, gameState.gameOver, gameState.blocks, gameState.currentBlock, gameState.score, gameState.combo, gameState.accuracy, gameState.coins, globalStats, setGlobalStats, setStats]);
 
-  const updateAchievements = (currentAchievements: string[], score: number, accuracy: number, combo: number) => {
-    const newAchievements = [...currentAchievements];
+  // Effect to handle game over stats update
+  useEffect(() => {
+      if (gameState.gameOver) {
+          checkDailyChallenges(gameState.score, gameState.accuracy, gameState.combo, globalStats);
 
-    // High score achievement
-    if (score > 1000 && !newAchievements.includes('high-score-1000')) {
-      newAchievements.push('high-score-1000');
-    }
-    if (score > 5000 && !newAchievements.includes('high-score-5000')) {
-      newAchievements.push('high-score-5000');
-    }
-    if (score > 10000 && !newAchievements.includes('high-score-10000')) {
-      newAchievements.push('high-score-10000');
-    }
+          setGlobalStats((prev: GlobalStats) => ({
+              ...prev,
+              totalCoins: prev.totalCoins + Math.floor(gameState.score / 100),
+              achievements: updateAchievements(prev.achievements, gameState.score, gameState.accuracy, gameState.combo)
+          }));
 
-    // Accuracy achievements
-    if (accuracy > 90 && !newAchievements.includes('accuracy-90')) {
-      newAchievements.push('accuracy-90');
-    }
-    if (accuracy > 95 && !newAchievements.includes('accuracy-95')) {
-      newAchievements.push('accuracy-95');
-    }
-
-    // Combo achievements
-    if (combo > 5 && !newAchievements.includes('combo-5')) {
-      newAchievements.push('combo-5');
-    }
-    if (combo > 10 && !newAchievements.includes('combo-10')) {
-      newAchievements.push('combo-10');
-    }
-
-    return newAchievements;
-  };
-
-  const generateDailyChallenges = () => {
-    // Simple daily challenge generation
-    return [
-      { type: 'score', target: 500, reward: 50 },
-      { type: 'accuracy', target: 85, reward: 30 },
-      { type: 'combo', target: 3, reward: 20 }
-    ];
-  };
-
-  const checkDailyChallenges = (score: number, accuracy: number, combo: number, globalStats: any) => {
-    const currentChallenges = globalStats.dailyChallenges;
-    let completedChallenges = 0;
-
-    currentChallenges.forEach((challenge: any) => {
-      if (challenge.type === 'score' && score >= challenge.target) {
-        completedChallenges++;
+          setStats((prev: { gamesPlayed: number; totalBlocks: number }) => ({
+              gamesPlayed: prev.gamesPlayed + 1,
+              totalBlocks: prev.totalBlocks + gameState.blocks.length
+          }));
       }
-      if (challenge.type === 'accuracy' && accuracy >= challenge.target) {
-        completedChallenges++;
-      }
-      if (challenge.type === 'combo' && combo >= challenge.target) {
-        completedChallenges++;
-      }
-    });
-
-    return completedChallenges;
-  };
-
-  const generateBlock = () => {
-    const width = Math.random() * (maxBlockWidth - minBlockWidth) + minBlockWidth;
-    const x = Math.random() * (400 - width);
-    return { id: Date.now(), width, x, perfect: false, falling: true };
-  };
+  }, [gameState.gameOver]);
 
   const startGame = () => {
     setGameState({
@@ -338,22 +299,16 @@ const InfinityDrop: React.FC = () => {
     });
 
     // Update global stats
-    setGlobalStats((prev: any) => ({
+    setGlobalStats((prev) => ({
       ...prev,
       totalGamesPlayed: prev.totalGamesPlayed + 1
     }));
   };
 
   const placeBlock = () => {
-    if (gameState.currentBlock && !gameState.currentBlock.falling) {
-      const placedBlock = {
-        ...gameState.currentBlock,
-        falling: true
-      };
-      setGameState(prev => ({
-        ...prev,
-        currentBlock: placedBlock
-      }));
+    if (gameState.currentBlock && gameState.currentBlock.falling) {
+      // Accelerate block or instant place logic could go here
+      // For now, just let it fall
     }
   };
 

@@ -10,7 +10,7 @@ import type { NeonTetrisState } from "./components/NeonTetris";
 import InfinityDrop from './components/InfinityDrop';
 import Slide2048 from './components/Slide2048';
 import QuickTap from './components/QuickTap';
-import AI 1Memory from './components/AI 1Memory';
+import MimoMemory from './components/MimoMemory';
 
 // Infinity Drop Interfaces
 interface Block {
@@ -1379,7 +1379,7 @@ interface TutorialState {
   gameType: GameType;
 }
 
-export default function AI 1Playground() {
+export default function AI1Playground() {
   const searchParams = useSearchParams();
   const t = useTranslations('playground.ai1');
   const tc = useTranslations('playground.common');
@@ -11948,6 +11948,21 @@ useEffect(() => {
                 ×
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ==================== NEON MEMORY ==================== */}
+      {currentGame === 'memory' && (
+        <div className="w-full max-w-md">
+          <MimoMemory />
+          <div className="flex justify-center gap-2 mt-4">
+            <button
+              onClick={() => setCurrentGame('menu')}
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-sm"
+            >
+              ← {t('neonDash.backToMenu')}
+            </button>
           </div>
         </div>
       )}

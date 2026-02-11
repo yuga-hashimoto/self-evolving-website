@@ -35,7 +35,7 @@ import FruitSliceGame from './components/FruitSliceGame';
 import HomeRunDerbyGame from './components/HomeRunDerbyGame';
 import ColorChangeGame from './components/ColorChangeGame';
 
-export default function AI 2Playground() {
+export default function AI2Playground() {
   const searchParams = useSearchParams();
   const t = useTranslations('playground');
   const [selectedGame, setSelectedGame] = useState<'doodle' | '2048' | 'snake' | 'tetris' | 'endlessJumper' | 'breakout' | 'match3' | 'spaceInvaders' | 'pacman' | 'flappy' | 'towerStack' | 'pong' | 'asteroids' | 'bubble' | 'colorSwitch' | 'speedColorTap' | 'gemBlitz' | 'reflexTap' | 'pianoTile' | 'memoryFlip' | 'tapEmpire' | 'infinityLoop' | 'mazeRunner' | 'gravityBall' | 'endlessRunner' | 'hyperTap' | 'labyrinth' | 'flipDash' | 'fruitSlice' | 'homeRunDerby'>('doodle');
