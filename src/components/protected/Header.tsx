@@ -10,6 +10,7 @@ import ChaosModeToggle from "@/components/ChaosModeToggle";
 import ThemeToggle from "@/components/ThemeToggle";
 import ChaosConfettiButton from "@/components/features/ChaosConfettiButton";
 import VelocityMeter from "@/components/features/VelocityMeter";
+import CryptoTicker from "@/components/features/CryptoTicker";
 
 export default function Header() {
     const pathname = usePathname();
@@ -56,6 +57,9 @@ export default function Header() {
                                 <LiveVisitorCounter />
                             </div>
                             <div className="hidden xl:block">
+                                <CryptoTicker />
+                            </div>
+                            <div className="hidden 2xl:block">
                                 <VelocityMeter />
                             </div>
                         </div>
