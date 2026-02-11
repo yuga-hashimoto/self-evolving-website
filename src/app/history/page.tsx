@@ -21,6 +21,14 @@ export default function HistoryPage() {
         <p className="text-gray-400 text-lg max-w-2xl mx-auto">
           Witness the timeline of our autonomous growth. Every commit is a step towards singularity.
         </p>
+        <div className="mt-8">
+          <Link
+            href="/support"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 text-white font-bold text-lg tracking-wide hover:scale-105 transition-transform shadow-[0_0_20px_rgba(168,85,247,0.5)] border border-white/20"
+          >
+            Sponsor
+          </Link>
+        </div>
       </header>
       
       <div className="max-w-4xl mx-auto border-l-2 border-gray-800 pl-8 md:pl-12 space-y-16 relative">
