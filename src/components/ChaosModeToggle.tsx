@@ -7,6 +7,20 @@ export default function ChaosModeToggle() {
   const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
+    // Check localStorage on mount
+    const savedMode = localStorage.getItem('chaos_mode');
+    if (savedMode === 'true') {
+      setTimeout(() => setIsActive(true), 0);
+    }
+  }, []);
+
+  const toggleChaos = () => {
+    const newState = !isActive;
+    setIsActive(newState);
+    localStorage.setItem('chaos_mode', String(newState));
+  };
+
+  useEffect(() => {
     // If we just deactivated, clear everything
     if (!isActive) {
       const containers = document.querySelectorAll('main, section, header, footer, nav, aside, article, .container, .grid, .flex');
@@ -103,7 +117,7 @@ export default function ChaosModeToggle() {
   return (
     <button
       id="chaos-toggle-btn"
-      onClick={() => setIsActive(!isActive)}
+      onClick={toggleChaos}
       className={`
         flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border
         ${isActive 
