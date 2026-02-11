@@ -2,23 +2,8 @@
 
 import { useState, useEffect } from "react";
 
-// Seed a base count so it looks like there have been many visitors
-const BASE_COUNT = 1_337_042;
-
-function getStoredCount(): number {
-  if (typeof window === "undefined") return BASE_COUNT;
-  const stored = localStorage.getItem("retro_visitor_count");
-  if (stored) return parseInt(stored, 10);
-  // First visit: start from base + random offset for variety
-  const initial = BASE_COUNT + Math.floor(Math.random() * 9999);
-  localStorage.setItem("retro_visitor_count", String(initial));
-  return initial;
-}
-
-// Format number with leading zeros to 7 digits
-function formatCount(n: number): string {
-  return String(n).padStart(7, "0");
-}
+const BASE_GLOBAL_COUNT = 1337042; // Fixed base
+const LOCAL_STORAGE_KEY = "visitor_local_hits";
 
 // Pixelated digit display using a monospace retro font simulation
 function PixelDigit({ char }: { char: string }) {
@@ -38,36 +23,48 @@ function PixelDigit({ char }: { char: string }) {
   );
 }
 
+// Format number with leading zeros to 7 digits
+function formatCount(n: number): string {
+  return String(n).padStart(7, "0");
+}
+
 export default function RetroCounter() {
-  const [count, setCount] = useState<number | null>(null);
+  const [localHits, setLocalHits] = useState<number | null>(null);
 
   useEffect(() => {
-    const initial = getStoredCount();
-    setCount(initial);
+    let hits = 0;
+    try {
+      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+      hits = stored ? parseInt(stored, 10) : 0;
+    } catch (e) {
+      console.error("Failed to read local storage", e);
+    }
 
-    // Increment randomly every 4–12 seconds
-    const tick = () => {
-      const increment = Math.floor(Math.random() * 3) + 1; // 1-3
-      setCount((prev) => {
-        const next = (prev ?? initial) + increment;
-        localStorage.setItem("retro_visitor_count", String(next));
-        return next;
-      });
-    };
+    // Increment on mount
+    hits += 1;
 
-    const schedule = () => {
-      const delay = 4000 + Math.random() * 8000;
-      return setTimeout(() => {
-        tick();
-        timeoutRef = schedule();
-      }, delay);
-    };
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, String(hits));
+    } catch (e) {
+       console.error("Failed to write local storage", e);
+    }
 
-    let timeoutRef = schedule();
-    return () => clearTimeout(timeoutRef);
+    setLocalHits(hits);
   }, []);
 
-  const digits = formatCount(count ?? BASE_COUNT).split("");
+  if (localHits === null) {
+      // Return a placeholder or null during server render / initial client render
+      return (
+        <div className="flex flex-col items-center gap-1 mt-2 min-h-[44px]">
+             <span className="text-[10px] text-gray-500 uppercase tracking-widest font-mono opacity-0">
+                Visitors
+             </span>
+        </div>
+      );
+  }
+
+  const totalCount = BASE_GLOBAL_COUNT + localHits;
+  const digits = formatCount(totalCount).split("");
 
   return (
     <div className="flex flex-col items-center gap-1 mt-2">
@@ -75,10 +72,8 @@ export default function RetroCounter() {
         Visitors
       </span>
       <div
-        className="flex items-center gap-[2px] px-3 py-2 rounded"
+        className="flex items-center gap-[2px] px-3 py-2 rounded bg-[#0a0a0a] border-2 border-[#1a1a1a]"
         style={{
-          background: "#0a0a0a",
-          border: "2px solid #1a1a1a",
           boxShadow: "0 0 8px rgba(0,255,65,0.15), inset 0 0 8px rgba(0,0,0,0.8)",
         }}
       >
