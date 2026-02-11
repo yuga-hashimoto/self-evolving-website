@@ -141,7 +141,7 @@ export default async function RootLayout({
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <NextIntlClientProvider messages={messages} timeZone="Asia/Tokyo">
+        <NextIntlClientProvider messages={messages} timeZone="Asia/Tokyo" now={new Date()}>
           <AnalyticsProvider>
             <Header />
             <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
