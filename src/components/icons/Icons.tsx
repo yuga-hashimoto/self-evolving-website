@@ -400,15 +400,6 @@ export function IconX({ size = 24, className = "", "aria-hidden": ariaHidden, "a
     );
 }
 
-// Patreon icon
-export function IconPatreon({ size = 24, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
-    return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
-            <path d="M15.384.5C11.324.5 8.04 3.709 8.04 7.666c0 3.959 3.284 7.168 7.344 7.168 4.058 0 7.344-3.21 7.344-7.168S19.443.5 15.384.5z M0 .5h4.218v23H0z" />
-        </svg>
-    );
-}
-
 
 // Random/Dice icon
 export function IconRandom({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
@@ -479,7 +470,6 @@ export const iconMap = {
     clipboard: IconClipboard,
     balance: IconBalance,
     x: IconX,
-    patreon: IconPatreon,
     coffee: IconCoffee,
     random: IconRandom,
     moon: IconMoon,
