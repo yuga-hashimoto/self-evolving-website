@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Coffee } from "lucide-react";
 
-export default function KofiWidget() {
+export default function BuyMeCoffeeWidget() {
   return (
     <motion.a
       href="https://ko-fi.com/yugahashimoto"
