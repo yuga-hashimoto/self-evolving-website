@@ -3,7 +3,7 @@ import { KonamiChaos } from '@/components/features/KonamiChaos';
 import { StickyAd } from '@/components/features/StickyAd';
 import { LiveVisitorCount } from '@/components/features/LiveVisitorCount';
 import { GhostCursors } from '@/components/features/GhostCursors';
-import { SponsorTicker } from '@/components/features/SponsorTicker';
+import { SponsorMarquee } from '@/components/features/SponsorMarquee';
 import { VoteDuel } from '@/components/features/VoteDuel';
 import { AdBanner } from '@/components/AdBanner';
 import { IconDNA, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
@@ -112,7 +112,7 @@ export default async function Home() {
       <MemeGenerator />
       <GhostCursors />
       <StockTicker />
-      <SponsorTicker />
+      <SponsorMarquee />
       <TrashTalkTicker />
       <DailyChallenge />
       <EvolutionFeed />
