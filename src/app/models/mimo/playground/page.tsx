@@ -1388,6 +1388,7 @@ export default function MimoPlayground() {
   useEffect(() => {
     const gameParam = searchParams.get('game');
     if (gameParam) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setCurrentGame(gameParam as any);
     }
   }, [searchParams]);

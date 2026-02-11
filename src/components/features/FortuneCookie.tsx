@@ -30,6 +30,22 @@ export const FortuneCookie = () => {
     }
   };
 
+  const [luckyNumbers, setLuckyNumbers] = useState("");
+
+  const openCookie = () => {
+    if (!isOpen) {
+      const random = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
+      const num1 = Math.floor(Math.random() * 99);
+      const num2 = Math.floor(Math.random() * 99);
+      const hex = Math.floor(Math.random() * 255).toString(16).toUpperCase();
+      setLuckyNumbers(`${num1} • ${num2} • 0x${hex}`);
+      setFortune(random);
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+  };
+
   return (
     <div className="text-center my-8 cursor-pointer group" onClick={openCookie}>
       <AnimatePresence mode='wait'>
@@ -54,9 +70,9 @@ export const FortuneCookie = () => {
             exit={{ opacity: 0, scale: 0.5 }}
             className="bg-white text-black p-4 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.5)] max-w-xs mx-auto transform rotate-1"
           >
-            <p className="font-serif italic text-lg mb-2">"{fortune}"</p>
+            <p className="font-serif italic text-lg mb-2">&quot;{fortune}&quot;</p>
             <p className="text-xs text-gray-500 font-mono uppercase tracking-widest border-t border-gray-200 pt-2 mt-2">
-              Lucky Numbers: {Math.floor(Math.random() * 99)} • {Math.floor(Math.random() * 99)} • 0x{Math.floor(Math.random() * 255).toString(16).toUpperCase()}
+              Lucky Numbers: {luckyNumbers}
             </p>
             <button className="mt-2 text-xs text-blue-500 hover:text-blue-700 font-bold">
               Click to close

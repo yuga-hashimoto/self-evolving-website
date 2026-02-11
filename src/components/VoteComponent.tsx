@@ -10,7 +10,7 @@ export default function VoteComponent() {
   useEffect(() => {
     const savedVote = localStorage.getItem('evolution-vote');
     if (savedVote) {
-      setVoted(savedVote);
+      setTimeout(() => setVoted(savedVote), 0);
     }
   }, []);
 

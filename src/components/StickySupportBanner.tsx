@@ -12,12 +12,12 @@ export default function StickySupportBanner() {
       // Check if the banner was previously dismissed
       const dismissed = localStorage.getItem('support_evolution_banner_dismissed');
       if (!dismissed) {
-        setIsVisible(true);
+        setTimeout(() => setIsVisible(true), 0);
       }
     } catch (error) {
       console.error("Failed to access localStorage:", error);
       // Fallback to showing the banner if localStorage fails (e.g. privacy mode)
-      setIsVisible(true);
+      setTimeout(() => setIsVisible(true), 0);
     }
   }, []);
 

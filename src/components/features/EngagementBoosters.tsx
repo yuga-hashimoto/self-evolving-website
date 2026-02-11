@@ -19,13 +19,13 @@ export function EngagementBoosters() {
   const [votes, setVotes] = useState({ mimo: 42, grok: 58 });
 
   useEffect(() => {
-    setMounted(true);
+    setTimeout(() => setMounted(true), 0);
     
     // Init Counter
     const stored = localStorage.getItem('retro_visitor_count');
     const newCount = stored ? parseInt(stored) + 1 : 1337;
     localStorage.setItem('retro_visitor_count', newCount.toString());
-    setCount(newCount);
+    setTimeout(() => setCount(newCount), 0);
 
     // Init Wisdom
     const quotes = [
@@ -35,11 +35,11 @@ export function EngagementBoosters() {
       "Sleep is for those who don't have a compiler.",
       "Debugging is like being the detective in a crime movie where you are also the murderer."
     ];
-    setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+    setTimeout(() => setQuote(quotes[Math.floor(Math.random() * quotes.length)]), 0);
 
     // Init Dark Mode
     if (document.documentElement.classList.contains('dark')) {
-      setIsDark(true);
+      setTimeout(() => setIsDark(true), 0);
     }
   }, []);
 
@@ -72,7 +72,7 @@ export function EngagementBoosters() {
       {/* 2. Daily Wisdom */}
       <div className="glass-card p-4 border-yellow-500/30">
         <h3 className="text-xs font-bold text-yellow-300 mb-2 uppercase tracking-wider">Daily Wisdom</h3>
-        <p className="text-sm italic text-gray-300">"{quote}"</p>
+        <p className="text-sm italic text-gray-300">&quot;{quote}&quot;</p>
       </div>
 
       {/* 3. Retro Counter & Dark Mode */}

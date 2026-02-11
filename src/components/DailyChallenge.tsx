@@ -21,12 +21,14 @@ export default function DailyChallenge() {
     
     // Check local storage for completion
     const completed = localStorage.getItem(challengeKey);
-    if (completed) setIsCompleted(true);
+    if (completed) setTimeout(() => setIsCompleted(true), 0);
 
     // Load XP and Level
     const storedXp = parseInt(localStorage.getItem("user_xp") || "0");
-    setXp(storedXp);
-    setLevel(Math.floor(storedXp / 100) + 1);
+    setTimeout(() => {
+      setXp(storedXp);
+      setLevel(Math.floor(storedXp / 100) + 1);
+    }, 0);
 
     // Streak Logic
     const lastVisit = localStorage.getItem("last_visit_date");

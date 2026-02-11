@@ -11,7 +11,7 @@ const ShareModal: React.FC = () => {
     if (typeof window !== 'undefined') {
       const triggered = localStorage.getItem('share-modal-triggered');
       if (triggered) {
-        setHasTriggered(true);
+        setTimeout(() => setHasTriggered(true), 0);
         return;
       }
 

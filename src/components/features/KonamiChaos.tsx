@@ -8,6 +8,22 @@ export const KonamiChaos = () => {
   const sequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
   const [index, setIndex] = useState(0);
 
+  const activateChaos = () => {
+    setActive(true);
+    confetti({
+      particleCount: 500,
+      spread: 200,
+      origin: { y: 0.6 }
+    });
+    document.body.style.transform = 'rotate(180deg)';
+    document.body.style.transition = 'transform 1s ease';
+
+    setTimeout(() => {
+      document.body.style.transform = 'rotate(0deg)';
+      setActive(false);
+    }, 5000);
+  };
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === sequence[index]) {
@@ -25,22 +41,6 @@ export const KonamiChaos = () => {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [index]);
-
-  const activateChaos = () => {
-    setActive(true);
-    confetti({
-      particleCount: 500,
-      spread: 200,
-      origin: { y: 0.6 }
-    });
-    document.body.style.transform = 'rotate(180deg)';
-    document.body.style.transition = 'transform 1s ease';
-    
-    setTimeout(() => {
-      document.body.style.transform = 'rotate(0deg)';
-      setActive(false);
-    }, 5000);
-  };
 
   return active ? (
     <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">

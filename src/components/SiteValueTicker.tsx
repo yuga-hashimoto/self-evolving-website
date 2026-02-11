@@ -10,7 +10,7 @@ export default function SiteValueTicker() {
     useEffect(() => {
         const savedValue = localStorage.getItem("site_value");
         if (savedValue) {
-            setValue(parseFloat(savedValue));
+            setTimeout(() => setValue(parseFloat(savedValue)), 0);
         }
     }, []);
 

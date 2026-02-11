@@ -9,11 +9,11 @@ const ThemeToggle: React.FC = () => {
     // Check localStorage on mount
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
-      setTheme(savedTheme);
+      setTimeout(() => setTheme(savedTheme), 0);
       document.documentElement.classList.remove('light', 'dark', 'cyberpunk', 'retro');
       document.documentElement.classList.add(savedTheme);
     } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
+      setTimeout(() => setTheme('dark'), 0);
       document.documentElement.classList.add('dark');
     }
   }, []);

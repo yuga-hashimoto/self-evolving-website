@@ -17,7 +17,7 @@ export default function VoteWidget() {
   useEffect(() => {
     const stored = localStorage.getItem("engagement-vote-counts");
     if (stored) {
-      setVotes(JSON.parse(stored));
+      setTimeout(() => setVotes(JSON.parse(stored)), 0);
     } else {
       // Initialize with random high numbers
       const initial: VoteState = {
@@ -25,7 +25,7 @@ export default function VoteWidget() {
         grok: Math.floor(Math.random() * 500) + 1200,
         hasVoted: false
       };
-      setVotes(initial);
+      setTimeout(() => setVotes(initial), 0);
       localStorage.setItem("engagement-vote-counts", JSON.stringify(initial));
     }
   }, []);
