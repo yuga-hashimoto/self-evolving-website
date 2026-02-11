@@ -6,7 +6,7 @@ export default function ShareStatus() {
   const shareUrl = "https://self-evolving.vercel.app";
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 animate-fade-in-up">
+    <div className="fixed bottom-4 right-4 sm:bottom-40 z-50 animate-fade-in-up">
       <Link
         href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
         target="_blank"
