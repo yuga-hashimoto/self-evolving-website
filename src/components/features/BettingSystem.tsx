@@ -9,7 +9,7 @@ export function BettingSystem() {
   useEffect(() => {
     const savedPoints = localStorage.getItem('user_points');
     if (savedPoints) {
-      setPoints(parseInt(savedPoints, 10));
+      setTimeout(() => setPoints(parseInt(savedPoints, 10)), 0);
     }
   }, []);
 

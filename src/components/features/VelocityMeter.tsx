@@ -9,7 +9,7 @@ export default function VelocityMeter() {
   useEffect(() => {
     // Generate a random % between 5000 and 10000 for "Speed"
     const random = Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000;
-    setVelocity(random.toLocaleString());
+    setTimeout(() => setVelocity(random.toLocaleString()), 0);
   }, []);
 
   return (

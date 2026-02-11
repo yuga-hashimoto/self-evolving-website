@@ -12,10 +12,10 @@ export const VoteDuel = () => {
   useEffect(() => {
     const stored = localStorage.getItem('ai_duel_votes');
     if (stored) {
-      setVotes(JSON.parse(stored));
+      setTimeout(() => setVotes(JSON.parse(stored)), 0);
     } else {
       // Initial fake data
-      setVotes({ mimo: 1240, grok: 1180 });
+      setTimeout(() => setVotes({ mimo: 1240, grok: 1180 }), 0);
     }
   }, []);
 

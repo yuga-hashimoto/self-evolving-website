@@ -57,7 +57,7 @@ export default function TechJoke() {
             animate={{ opacity: 1, y: 0 }}
             className="text-gray-300 italic text-center font-medium"
           >
-            "{joke}"
+            &quot;{joke}&quot;
           </motion.p>
         )}
       </AnimatePresence>
