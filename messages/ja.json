@@ -4,6 +4,7 @@
     "ai1": "AI 1",
     "ai2": "AI 2",
     "compareHistory": "比較履歴",
+    "roadmap": "ロードマップ",
     "githubAria": "GitHub Repository"
   },
   "footer": {
@@ -137,8 +138,8 @@
     "secondsShort": "秒",
     "timesCount": "回",
     "filterAll": "すべて",
-    "filterAI 1": "AI 1のみ",
-    "filterAI 2": "AI 2のみ"
+    "filterAI1": "AI 1のみ",
+    "filterAI2": "AI 2のみ"
   },
   "common": {
     "loading": "読み込み中...",

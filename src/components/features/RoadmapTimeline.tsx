@@ -74,8 +74,38 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
     date: 'Q4 2025',
     category: 'Web3'
   },
+  {
+    id: 'ai-mini-games',
+    title: 'AI-Generated Mini-Games',
+    description: 'AI will create simple, playable mini-games on the fly based on user prompts.',
+    status: 'planned',
+    date: 'Q3 2025',
+    category: 'AI'
+  },
+  {
+    id: 'auto-bug-fix',
+    title: 'Automated Bug Fixing',
+    description: 'AI detects runtime errors and attempts to self-heal the code.',
+    status: 'planned',
+    date: 'Q4 2025',
+    category: 'AI'
+  },
 
   // Considering
+  {
+    id: 'codebase-chatbot',
+    title: 'Codebase Chatbot',
+    description: 'Chat with the codebase to understand how it works and suggest improvements.',
+    status: 'considering',
+    category: 'AI'
+  },
+  {
+    id: 'predictive-behavior',
+    title: 'Predictive User Behavior',
+    description: 'AI predicts user actions to pre-load content and optimize performance.',
+    status: 'considering',
+    category: 'AI'
+  },
   {
     id: 'vr-visualization',
     title: 'VR/AR Visualization',

@@ -4,6 +4,7 @@
     "ai1": "AI 1",
     "ai2": "AI 2",
     "compareHistory": "History",
+    "roadmap": "Roadmap",
     "githubAria": "GitHub Repository"
   },
   "footer": {
@@ -137,8 +138,8 @@
     "secondsShort": "sec",
     "timesCount": "times",
     "filterAll": "All",
-    "filterAI 1": "AI 1 Only",
-    "filterAI 2": "AI 2 Only"
+    "filterAI1": "AI 1 Only",
+    "filterAI2": "AI 2 Only"
   },
   "common": {
     "loading": "Loading...",
