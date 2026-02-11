@@ -10,7 +10,7 @@ import type { NeonTetrisState } from "./components/NeonTetris";
 import InfinityDrop from './components/InfinityDrop';
 import Slide2048 from './components/Slide2048';
 import QuickTap from './components/QuickTap';
-import AI 1Memory from './components/AI 1Memory';
+import AI1Memory from './components/MimoMemory';
 
 // Infinity Drop Interfaces
 interface Block {
@@ -1379,7 +1379,7 @@ interface TutorialState {
   gameType: GameType;
 }
 
-export default function AI 1Playground() {
+export default function AI1Playground() {
   const searchParams = useSearchParams();
   const t = useTranslations('playground.ai1');
   const tc = useTranslations('playground.common');

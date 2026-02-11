@@ -42,8 +42,8 @@ export default async function CompareChangelogPage() {
         secondsShort: t('secondsShort'),
         timesCount: t('timesCount'),
         filterAll: t('filterAll'),
-        filterAI 1: t('filterAI 1'),
-        filterAI 2: t('filterAI 2'),
+        filterAI1: t('filterAI 1'),
+        filterAI2: t('filterAI 2'),
     };
 
     const changelogTranslations = {

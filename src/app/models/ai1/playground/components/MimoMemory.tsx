@@ -13,7 +13,7 @@ interface Card {
 
 const EMOJIS = ['🚀', '🤖', '👾', '🌈', '⚡', '🔥', '💎', '🎮'];
 
-export default function AI 1Memory() {
+export default function AI1Memory() {
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
