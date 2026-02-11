@@ -8,12 +8,14 @@ import { useTranslations } from 'next-intl';
 import { IconX } from "@/components/icons/Icons";
 import RetroCounter from "@/components/features/RetroCounter";
 import GlitchTrigger from "@/components/effects/GlitchTrigger";
+import { SponsorMarquee } from "@/components/features/SponsorMarquee";
 
 export default function Footer() {
     const t = useTranslations('footer');
 
     return (
         <footer className="border-t border-white/10 relative z-[60] bg-[#0f0f1a]">
+            <SponsorMarquee />
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col items-center pt-8 pb-20 sm:pb-8 gap-4">
                     <SponsorGrid />
