@@ -10,7 +10,7 @@ const ThemeToggle: React.FC = () => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       setTheme(savedTheme);
-      document.documentElement.classList.remove('light', 'dark', 'cyberpunk');
+      document.documentElement.classList.remove('light', 'dark', 'cyberpunk', 'retro');
       document.documentElement.classList.add(savedTheme);
     } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setTheme('dark');
@@ -24,6 +24,8 @@ const ThemeToggle: React.FC = () => {
       nextTheme = 'cyberpunk';
     } else if (theme === 'cyberpunk') {
       nextTheme = 'dark';
+    } else if (theme === 'dark') {
+      nextTheme = 'retro';
     } else {
       nextTheme = 'light';
     }
@@ -31,7 +33,7 @@ const ThemeToggle: React.FC = () => {
     setTheme(nextTheme);
     localStorage.setItem('theme', nextTheme);
     
-    document.documentElement.classList.remove('light', 'dark', 'cyberpunk');
+    document.documentElement.classList.remove('light', 'dark', 'cyberpunk', 'retro');
     document.documentElement.classList.add(nextTheme);
   };
 
@@ -49,6 +51,9 @@ const ThemeToggle: React.FC = () => {
       )}
       {theme === 'cyberpunk' && (
         <span className="text-xl">👾</span>
+      )}
+      {theme === 'retro' && (
+        <span className="text-xl">💾</span>
       )}
     </button>
   );
