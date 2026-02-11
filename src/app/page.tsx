@@ -6,7 +6,7 @@ import { GhostCursors } from '@/components/features/GhostCursors';
 import { SponsorTicker } from '@/components/features/SponsorTicker';
 import { VoteDuel } from '@/components/features/VoteDuel';
 import { AdBanner } from '@/components/AdBanner';
-import { IconDNA, IconTarget, IconRocket, IconClipboard, IconBalance, IconAnalytics, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
+import { IconDNA, IconMimo, IconGrok, IconX } from "@/components/icons/Icons";
 import { MODELS } from "@/lib/models";
 import { getModelAnalytics, formatDuration } from "@/lib/model-analytics";
 import { getTranslations, getLocale } from 'next-intl/server';
@@ -21,9 +21,6 @@ import { MegaBoost } from "@/components/features/MegaBoost";
 import { AsciiGenerator } from "@/components/features/AsciiGenerator";
 import { DailyTechTip } from "@/components/features/DailyTechTip";
 import CheerButton from "@/components/features/CheerButton";
-import AiTrivia from "@/components/AiTrivia";
-import SponsorButton from "@/components/SponsorButton";
-import BattleStats from "@/components/BattleStats";
 import EvolutionFeed from "@/components/home/EvolutionFeed";
 // New features (Jules Sprint 1)
 import { DailyClickChallenge } from "@/components/features/DailyClickChallenge";
@@ -98,7 +95,7 @@ export default async function Home() {
       <div className="w-full max-w-3xl bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-center py-3 mb-6 border border-purple-500 rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.4)] backdrop-blur-md relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer">
         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
         <span className="text-purple-300 font-bold uppercase tracking-widest mr-2 text-xs sm:text-sm">Daily Quest:</span>
-        <span className="text-white font-mono text-sm sm:text-base">"Win today's coding challenge!"</span>
+        <span className="text-white font-mono text-sm sm:text-base">&quot;Win today&apos;s coding challenge!&quot;</span>
         <span className="ml-4 text-xs bg-purple-500 text-white px-2 py-1 rounded shadow-sm">+500 PTS</span>
       </div>
 
@@ -148,6 +145,21 @@ export default async function Home() {
           {t('startDate', { date: formattedDate })}
         </p>
 
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 sm:mt-8 mb-2">
+          <a
+            href="#models"
+            className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-lg rounded-full shadow-lg hover:shadow-purple-500/50 transform hover:scale-105 transition-all duration-300"
+          >
+            {t('ctaStartBattle')}
+          </a>
+          <a
+            href="#how-it-works"
+            className="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-lg rounded-full backdrop-blur-md transition-all duration-300"
+          >
+            {t('ctaHowItWorks')}
+          </a>
+        </div>
+
         {/* Viral Share Button & Sponsor (Jules) */}
         <div className="flex flex-col items-center gap-4 mt-6">
             <SponsorEvolutionButton />
@@ -158,7 +170,14 @@ export default async function Home() {
       </div>
 
       {/* Model Selection Cards */}
-      <div className="grid grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2 relative">
+      <div id="models" className="grid grid-cols-2 gap-6 max-w-3xl w-full mb-6 px-3 sm:px-2 relative scroll-mt-24">
+        {/* VS Badge */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-600 rounded-full flex items-center justify-center border-4 border-slate-900 shadow-[0_0_20px_rgba(220,38,38,0.6)] transform rotate-12 animate-pulse">
+            <span className="text-white font-black text-xl sm:text-2xl italic">{t('vs')}</span>
+          </div>
+        </div>
+
         {/* AI 1 (Mimo) Card */}
         <div className="group block active:scale-95 transition-transform relative">
           <Link href="/models/mimo" className="absolute inset-0 z-10" aria-label="AI 1モデルの進化を見る">
@@ -183,6 +202,9 @@ export default async function Home() {
               <span className="text-xs font-mono text-gray-400">
                 {MODELS.mimo.openrouterModel}
               </span>
+            </div>
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 rounded-full text-sm font-bold transition-colors">
+              {t('playNow')}
             </div>
           </div>
         </div>
@@ -211,6 +233,9 @@ export default async function Home() {
               <span className="text-xs font-mono text-gray-400">
                 {MODELS.grok.openrouterModel}
               </span>
+            </div>
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 rounded-full text-sm font-bold transition-colors">
+              {t('playNow')}
             </div>
           </div>
         </div>
@@ -342,7 +367,7 @@ export default async function Home() {
       <CodeTimeline />
 
       {/* How it Works - Mobile Optimized Timeline */}
-      <div className="max-w-3xl w-full mb-4 sm:mb-8 px-4">
+      <div id="how-it-works" className="max-w-3xl w-full mb-4 sm:mb-8 px-4 scroll-mt-24">
         <h3 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-400">
           {t('howItWorksTitle')}
         </h3>

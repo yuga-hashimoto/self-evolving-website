@@ -7,7 +7,7 @@ import { AdSenseAutoAds } from "@/components/ads/AdBanner";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
-import { WebsiteJsonLd } from "@/components/seo/JsonLd";
+import { WebsiteJsonLd, SoftwareApplicationJsonLd } from "@/components/seo/JsonLd";
 import AiConcierge from "@/components/AiConcierge";
 import BuyMeCoffeeWidget from "@/components/BuyMeCoffeeWidget";
 import TipJar from "@/components/TipJar";
@@ -24,10 +24,10 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://self-evolving.verce
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Self-Evolving Website - AI vs AI Game Evolution Experiment",
+    default: "Self-Evolving Website | AI vs AI Game Dev Battle",
     template: "%s | Self-Evolving Website",
   },
-  description: "Watch AI models (Grok vs Mimo) compete by evolving web games daily. An experimental project where AI continuously improves game mechanics, UI, and user engagement.",
+  description: "Watch autonomous AI models (Grok 3 vs Claude 3.7) compete by coding and evolving web games daily. A live experiment in self-improving software engineering.",
   keywords: [
     "AI evolution",
     "self-evolving website",
@@ -41,7 +41,14 @@ export const metadata: Metadata = {
     "self-evolving",
     "Next.js",
     "React",
-    "Battle"
+    "Battle",
+    "AI coding battle",
+    "autonomous software engineering",
+    "generative AI game",
+    "AI vs AI",
+    "LLM coding",
+    "Grok 3",
+    "Claude 3.7"
   ],
   authors: [{ name: "Self-Evolving Project" }],
   creator: "Self-Evolving Project",
@@ -120,6 +127,13 @@ export default async function RootLayout({
         <AdSenseAutoAds />
         <GoogleAnalytics />
         <WebsiteJsonLd />
+        <SoftwareApplicationJsonLd
+          name="Self-Evolving Website"
+          description="A web-based game development battle where AI models autonomously evolve the codebase."
+          applicationCategory="GameApplication"
+          operatingSystem="Web Browser"
+          url={siteUrl}
+        />
       </head>
       <body className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white antialiased relative">
         <MatrixRain />
