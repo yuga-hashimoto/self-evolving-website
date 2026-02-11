@@ -22,6 +22,7 @@ import { AsciiGenerator } from "@/components/features/AsciiGenerator";
 import { DailyTechTip } from "@/components/features/DailyTechTip";
 import CheerButton from "@/components/features/CheerButton";
 import EvolutionFeed from "@/components/home/EvolutionFeed";
+import { getLatestCommits } from '@/lib/github';
 // New features (Jules Sprint 1)
 import { DailyClickChallenge } from "@/components/features/DailyClickChallenge";
 import { SponsorPixelGrid } from "@/components/features/SponsorPixelGrid";
@@ -78,6 +79,10 @@ export default async function Home() {
   // Fetch model analytics data
   const mimoAnalytics = getModelAnalytics('mimo');
   const grokAnalytics = getModelAnalytics('grok');
+
+  // Fetch latest commits
+  const evolutions = await getLatestCommits(3);
+
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12 sm:py-16">
       <CodeBattleTicker />
@@ -113,7 +118,7 @@ export default async function Home() {
       <SponsorTicker />
       <TrashTalkTicker />
       <DailyChallenge />
-      <EvolutionFeed />
+      <EvolutionFeed evolutions={evolutions} />
       <AIBattleGauge />
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-16">
