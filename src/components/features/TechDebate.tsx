@@ -183,7 +183,10 @@ export const TechDebate = () => {
 
   useEffect(() => {
     // Select a random topic on mount
-    pickRandomTopic();
+    const timer = setTimeout(() => {
+      pickRandomTopic();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleVote = (option: 'left' | 'right') => {

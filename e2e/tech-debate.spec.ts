@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'playwright/test';
 
 test('Tech Debate component works correctly', async ({ page }) => {
   // Go to home page
@@ -18,8 +18,6 @@ test('Tech Debate component works correctly', async ({ page }) => {
 
   // Find the voting options. They are buttons but NOT the "Next Debate" button.
   // We wait for at least 2 other buttons to be visible.
-  const voteButtons = page.locator('button').filter({ hasNotText: /Next Debate/i }).filter({ hasText: /.*/ });
-
   // Note: VoteOption has text like "Tabs", "Spaces", etc.
   // We scope the search to the container of the title to avoid picking up other buttons on the page.
   // The component is wrapped in a .glass-card.
