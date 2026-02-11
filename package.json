@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3131",
     "build": "next build",
-    "start": "next start",
+    "start": "node .next/standalone/server.js",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
     "test:unit": "node --experimental-strip-types --test src/**/*.test.ts",
