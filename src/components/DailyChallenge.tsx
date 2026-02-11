@@ -15,38 +15,43 @@ export default function DailyChallenge() {
     // Show after a short delay
     const timer = setTimeout(() => setIsVisible(true), 1500);
     
-    // Dynamic Date Key
-    const today = new Date().toISOString().split('T')[0];
-    const challengeKey = `daily_challenge_completed_${today}`;
-    
-    // Check local storage for completion
-    const completed = localStorage.getItem(challengeKey);
-    if (completed) setIsCompleted(true);
+    const initTimer = setTimeout(() => {
+        // Dynamic Date Key
+        const today = new Date().toISOString().split('T')[0];
+        const challengeKey = `daily_challenge_completed_${today}`;
 
-    // Load XP and Level
-    const storedXp = parseInt(localStorage.getItem("user_xp") || "0");
-    setXp(storedXp);
-    setLevel(Math.floor(storedXp / 100) + 1);
+        // Check local storage for completion
+        const completed = localStorage.getItem(challengeKey);
+        if (completed) setIsCompleted(true);
 
-    // Streak Logic
-    const lastVisit = localStorage.getItem("last_visit_date");
-    let currentStreak = parseInt(localStorage.getItem("daily_streak") || "0");
+        // Load XP and Level
+        const storedXp = parseInt(localStorage.getItem("user_xp") || "0");
+        setXp(storedXp);
+        setLevel(Math.floor(storedXp / 100) + 1);
 
-    if (lastVisit !== today) {
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-        if (lastVisit === yesterday) {
-            currentStreak += 1;
-        } else {
-            // Only reset if it's not the first visit ever and not today
-            if (lastVisit) currentStreak = 1;
-            else currentStreak = 1; 
+        // Streak Logic
+        const lastVisit = localStorage.getItem("last_visit_date");
+        let currentStreak = parseInt(localStorage.getItem("daily_streak") || "0");
+
+        if (lastVisit !== today) {
+            const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+            if (lastVisit === yesterday) {
+                currentStreak += 1;
+            } else {
+                // Only reset if it's not the first visit ever and not today
+                if (lastVisit) currentStreak = 1;
+                else currentStreak = 1;
+            }
+            localStorage.setItem("daily_streak", currentStreak.toString());
+            localStorage.setItem("last_visit_date", today);
         }
-        localStorage.setItem("daily_streak", currentStreak.toString());
-        localStorage.setItem("last_visit_date", today);
-    }
-    setStreak(currentStreak);
+        setStreak(currentStreak);
+    }, 0);
 
-    return () => clearTimeout(timer);
+    return () => {
+        clearTimeout(timer);
+        clearTimeout(initTimer);
+    };
   }, []);
 
   const handleComplete = () => {

@@ -1388,7 +1388,8 @@ export default function MimoPlayground() {
   useEffect(() => {
     const gameParam = searchParams.get('game');
     if (gameParam) {
-      setCurrentGame(gameParam as any);
+      // Cast to specific type to avoid any
+      setCurrentGame(gameParam as 'menu' | 'infinity' | '2048' | 'neon' | 'cosmic' | 'rhythm' | 'snake' | 'flap' | 'brick' | 'tetris' | 'colorRush' | 'match3' | 'quickTap' | 'memory');
     }
   }, [searchParams]);
 

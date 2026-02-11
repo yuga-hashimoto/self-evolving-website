@@ -9,17 +9,23 @@ export default function ClickCounter() {
   const [level, setLevel] = useState('Novice');
 
   useEffect(() => {
-    const storedCount = localStorage.getItem('click_count');
-    if (storedCount) {
-      setCount(parseInt(storedCount));
-    }
+    const timer = setTimeout(() => {
+      const storedCount = localStorage.getItem('click_count');
+      if (storedCount) {
+        setCount(parseInt(storedCount));
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('click_count', count.toString());
-    if (count <= 10) setLevel('Novice');
-    else if (count <= 50) setLevel('Clicker');
-    else setLevel('Master');
+    const timer = setTimeout(() => {
+      localStorage.setItem('click_count', count.toString());
+      if (count <= 10) setLevel('Novice');
+      else if (count <= 50) setLevel('Clicker');
+      else setLevel('Master');
+    }, 0);
+    return () => clearTimeout(timer);
   }, [count]);
 
   return (

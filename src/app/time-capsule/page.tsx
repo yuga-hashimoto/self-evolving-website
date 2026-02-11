@@ -15,15 +15,18 @@ export default function TimeCapsulePage() {
   const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("timeCapsule");
-    if (stored) {
-      try {
-        const parsed: TimeCapsuleData = JSON.parse(stored);
-        setSavedData(parsed);
-      } catch (e) {
-        console.error("Failed to parse time capsule", e);
+    const timer = setTimeout(() => {
+      const stored = localStorage.getItem("timeCapsule");
+      if (stored) {
+        try {
+          const parsed: TimeCapsuleData = JSON.parse(stored);
+          setSavedData(parsed);
+        } catch (e) {
+          console.error("Failed to parse time capsule", e);
+        }
       }
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {

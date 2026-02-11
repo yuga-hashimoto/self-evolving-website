@@ -8,17 +8,20 @@ export default function StickySupportBanner() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    try {
-      // Check if the banner was previously dismissed
-      const dismissed = localStorage.getItem('support_evolution_banner_dismissed');
-      if (!dismissed) {
+    const timer = setTimeout(() => {
+      try {
+        // Check if the banner was previously dismissed
+        const dismissed = localStorage.getItem('support_evolution_banner_dismissed');
+        if (!dismissed) {
+          setIsVisible(true);
+        }
+      } catch (error) {
+        console.error("Failed to access localStorage:", error);
+        // Fallback to showing the banner if localStorage fails (e.g. privacy mode)
         setIsVisible(true);
       }
-    } catch (error) {
-      console.error("Failed to access localStorage:", error);
-      // Fallback to showing the banner if localStorage fails (e.g. privacy mode)
-      setIsVisible(true);
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleDismiss = () => {

@@ -8,10 +8,13 @@ export default function SiteValueTicker() {
 
     // Load initial value from localStorage
     useEffect(() => {
-        const savedValue = localStorage.getItem("site_value");
-        if (savedValue) {
-            setValue(parseFloat(savedValue));
-        }
+        const timer = setTimeout(() => {
+            const savedValue = localStorage.getItem("site_value");
+            if (savedValue) {
+                setValue(parseFloat(savedValue));
+            }
+        }, 0);
+        return () => clearTimeout(timer);
     }, []);
 
     // Save value to localStorage periodically

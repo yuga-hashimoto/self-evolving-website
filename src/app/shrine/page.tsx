@@ -67,7 +67,7 @@ export default function ShrinePage() {
             <div className="relative z-10 text-center">
                 <h3 className="text-3xl font-bold mb-4">Offer Tribute</h3>
                 <p className="mb-8 text-slate-300">
-                    Your digital currency fuels Mimo's inevitable domination.
+                    Your digital currency fuels Mimo&apos;s inevitable domination.
                 </p>
                 <button 
                     onClick={() => alert("Mimo accepts your soul instead.")}

@@ -17,7 +17,10 @@ export default function SponsorButton() {
       }, 2000);
     } else {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      setShameText(null);
+      const timer = setTimeout(() => {
+        setShameText(null);
+      }, 0);
+      return () => clearTimeout(timer);
     }
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);

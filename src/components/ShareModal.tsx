@@ -9,17 +9,21 @@ const ShareModal: React.FC = () => {
   useEffect(() => {
     // Only run if window is defined (client-side)
     if (typeof window !== 'undefined') {
-      const triggered = localStorage.getItem('share-modal-triggered');
-      if (triggered) {
-        setHasTriggered(true);
-        return;
-      }
-
       const timer = setTimeout(() => {
-        setIsOpen(true);
-        localStorage.setItem('share-modal-triggered', 'true');
-        setHasTriggered(true);
-      }, 30000); // 30 seconds
+        const triggered = localStorage.getItem('share-modal-triggered');
+        if (triggered) {
+          setHasTriggered(true);
+          return;
+        }
+
+        const openTimer = setTimeout(() => {
+          setIsOpen(true);
+          localStorage.setItem('share-modal-triggered', 'true');
+          setHasTriggered(true);
+        }, 30000); // 30 seconds
+
+        return () => clearTimeout(openTimer);
+      }, 0);
 
       return () => clearTimeout(timer);
     }

@@ -32,35 +32,6 @@ const Slide2048: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [containerRef, gridSize]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (containerRef) {
-        const containerWidth = containerRef.offsetWidth;
-        const newBoardSize = Math.min(containerWidth * 0.9, 500);
-        setBoardSize(newBoardSize);
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [containerRef, gridSize]);
-
-  useEffect(() => {
-    initBoard();
-  }, [gridSize]);
-
-  const initBoard = () => {
-    const newBoard = Array(gridSize).fill(0).map(() => Array(gridSize).fill(0));
-    addRandomTile(newBoard);
-    addRandomTile(newBoard);
-    setBoard(newBoard);
-    setScore(0);
-    setGameOver(false);
-    setGameWon(false);
-    setCanContinue(false);
-  };
-
   const addRandomTile = (board: number[][]) => {
     const emptyCells = [];
     for (let i = 0; i < gridSize; i++) {
@@ -77,10 +48,28 @@ const Slide2048: React.FC = () => {
     }
   };
 
+  const initBoard = () => {
+    const newBoard = Array(gridSize).fill(0).map(() => Array(gridSize).fill(0));
+    addRandomTile(newBoard);
+    addRandomTile(newBoard);
+    setBoard(newBoard);
+    setScore(0);
+    setGameOver(false);
+    setGameWon(false);
+    setCanContinue(false);
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      initBoard();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [gridSize]);
+
   const move = (direction: 'up' | 'down' | 'left' | 'right') => {
     if (gameOver || gameWon) return;
 
-    let newBoard = board.map(row => [...row]);
+    const newBoard = board.map(row => [...row]);
     let moved = false;
     let scoreToAdd = 0;
 

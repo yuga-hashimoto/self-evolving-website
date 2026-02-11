@@ -8,8 +8,10 @@ export default function LiveVisitorCounter() {
 
   useEffect(() => {
     // Initial random count between 800-1200
-    const initialCount = Math.floor(Math.random() * (1200 - 800 + 1)) + 800;
-    setCount(initialCount);
+    const timer = setTimeout(() => {
+      const initialCount = Math.floor(Math.random() * (1200 - 800 + 1)) + 800;
+      setCount(initialCount);
+    }, 0);
 
     const interval = setInterval(() => {
       setCount((prev) => {

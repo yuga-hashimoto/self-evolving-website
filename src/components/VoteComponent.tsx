@@ -8,10 +8,13 @@ export default function VoteComponent() {
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
-    const savedVote = localStorage.getItem('evolution-vote');
-    if (savedVote) {
-      setVoted(savedVote);
-    }
+    const timer = setTimeout(() => {
+      const savedVote = localStorage.getItem('evolution-vote');
+      if (savedVote) {
+        setVoted(savedVote);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleVote = (model: 'mimo' | 'grok') => {

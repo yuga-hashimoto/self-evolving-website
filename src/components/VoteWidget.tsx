@@ -15,19 +15,22 @@ export default function VoteWidget() {
   const [votes, setVotes] = useState<VoteState | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("engagement-vote-counts");
-    if (stored) {
-      setVotes(JSON.parse(stored));
-    } else {
-      // Initialize with random high numbers
-      const initial: VoteState = {
-        mimo: Math.floor(Math.random() * 500) + 1200,
-        grok: Math.floor(Math.random() * 500) + 1200,
-        hasVoted: false
-      };
-      setVotes(initial);
-      localStorage.setItem("engagement-vote-counts", JSON.stringify(initial));
-    }
+    const timer = setTimeout(() => {
+      const stored = localStorage.getItem("engagement-vote-counts");
+      if (stored) {
+        setVotes(JSON.parse(stored));
+      } else {
+        // Initialize with random high numbers
+        const initial: VoteState = {
+          mimo: Math.floor(Math.random() * 500) + 1200,
+          grok: Math.floor(Math.random() * 500) + 1200,
+          hasVoted: false
+        };
+        setVotes(initial);
+        localStorage.setItem("engagement-vote-counts", JSON.stringify(initial));
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleVote = (team: 'mimo' | 'grok') => {

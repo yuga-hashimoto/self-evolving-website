@@ -6,13 +6,23 @@ const IconX = ({size}: {size: number}) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
 );
 
+import { useState, useEffect } from 'react';
+
 export default function ShareButton({ count, level }: { count: number; level: string }) {
-  // Generate random battle scores for viral effect
-  const mimoScore = Math.floor(Math.random() * 5000) + 1000;
-  const grokScore = Math.floor(Math.random() * 5000) + 1000;
-  const winner = mimoScore > grokScore ? 'Mimo' : 'Grok';
+  const [stats, setStats] = useState({ mimoScore: 0, grokScore: 0, winner: '' });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Generate random battle scores for viral effect
+      const mimoScore = Math.floor(Math.random() * 5000) + 1000;
+      const grokScore = Math.floor(Math.random() * 5000) + 1000;
+      const winner = mimoScore > grokScore ? 'Mimo' : 'Grok';
+      setStats({ mimoScore, grokScore, winner });
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
   
-  const shareText = `🔥 AI WAR STATUS 🔥\n\n🤖 Mimo: ${mimoScore.toLocaleString()} pts\n🚀 Grok: ${grokScore.toLocaleString()} pts\n\nCurrent Winner: ${winner}!\n\nI just hit Level ${level} with ${count} clicks. Can you beat the AI? 👇\n\n#SelfEvolvingWebsite #AI #CodingBattle`;
+  const shareText = `🔥 AI WAR STATUS 🔥\n\n🤖 Mimo: ${stats.mimoScore.toLocaleString()} pts\n🚀 Grok: ${stats.grokScore.toLocaleString()} pts\n\nCurrent Winner: ${stats.winner}!\n\nI just hit Level ${level} with ${count} clicks. Can you beat the AI? 👇\n\n#SelfEvolvingWebsite #AI #CodingBattle`;
   const shareUrl = "https://self-evolving.vercel.app";
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 
