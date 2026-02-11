@@ -286,3 +286,39 @@ textarea {
   animation: gradient-x 3s ease infinite;
   background-size: 200% 200%;
 }
+
+/* Glitch Mode Effect */
+@keyframes glitch-anim {
+  0% { transform: translate(0) }
+  20% { transform: translate(-3px, 3px) skewX(2deg) }
+  40% { transform: translate(-3px, -3px) skewX(-2deg) }
+  60% { transform: translate(3px, 3px) skewX(2deg) }
+  80% { transform: translate(3px, -3px) skewX(-2deg) }
+  100% { transform: translate(0) }
+}
+
+.glitch-mode {
+  animation: glitch-anim 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
+  filter: hue-rotate(90deg) contrast(1.5) saturate(200%);
+  overflow-x: hidden;
+  position: relative;
+}
+
+.glitch-mode::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: overlay;
+}
