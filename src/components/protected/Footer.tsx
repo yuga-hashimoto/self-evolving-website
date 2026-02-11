@@ -7,6 +7,7 @@ import SpeedModeToggle from "@/components/features/SpeedModeToggle";
 import { useTranslations } from 'next-intl';
 import { IconX } from "@/components/icons/Icons";
 import RetroCounter from "@/components/features/RetroCounter";
+import GlitchTrigger from "@/components/effects/GlitchTrigger";
 
 export default function Footer() {
     const t = useTranslations('footer');
@@ -58,6 +59,7 @@ export default function Footer() {
                     </p>
                 </div>
             </div>
+            <GlitchTrigger />
         </footer>
     );
 }
