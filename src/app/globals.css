@@ -88,6 +88,72 @@
   transform: translate(1px, 1px);
 }
 
+/* Cyberpunk Theme */
+.cyberpunk {
+  --background: #050505;
+  --foreground: #00ff9d;
+}
+
+.cyberpunk body {
+  background: #000000 !important;
+  background-image:
+    linear-gradient(rgba(0, 255, 157, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 157, 0.1) 1px, transparent 1px) !important;
+  background-size: 40px 40px !important;
+  color: #00ff9d !important;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.cyberpunk .glass-card {
+  background: rgba(0, 0, 0, 0.9) !important;
+  border: 1px solid #00ff9d !important;
+  box-shadow: 0 0 10px rgba(0, 255, 157, 0.3), inset 0 0 20px rgba(0, 255, 157, 0.1) !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+}
+
+.cyberpunk .glass-card:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 157, 0.6), inset 0 0 30px rgba(0, 255, 157, 0.2) !important;
+  border-color: #ff00ff !important;
+}
+
+.cyberpunk button:not([role="switch"]),
+.cyberpunk a[role="button"] {
+  border: 1px solid #ff00ff !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  color: #ff00ff !important;
+  box-shadow: 0 0 5px #ff00ff !important;
+  border-radius: 0 !important;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.cyberpunk button:not([role="switch"]):hover,
+.cyberpunk a[role="button"]:hover {
+  background: #ff00ff !important;
+  color: #000000 !important;
+  box-shadow: 0 0 15px #ff00ff !important;
+}
+
+.cyberpunk h1, .cyberpunk h2, .cyberpunk h3, .cyberpunk h4, .cyberpunk h5, .cyberpunk h6 {
+  color: #00f3ff !important;
+  text-shadow: 0 0 5px #00f3ff;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.cyberpunk input, .cyberpunk textarea {
+  background: #000000 !important;
+  border: 1px solid #00ff9d !important;
+  color: #00ff9d !important;
+  border-radius: 0 !important;
+}
+
+.cyberpunk .gradient-text {
+  background: none !important;
+  -webkit-text-fill-color: #00f3ff !important;
+  text-shadow: 0 0 10px #00f3ff;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
