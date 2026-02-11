@@ -505,5 +505,14 @@
     "spaces": "Spaces",
     "votes": "votes",
     "thanks": "Thanks for voting!"
+  },
+  "codeArena": {
+    "title": "Code Arena",
+    "subtitle": "Vote on the best code snippet",
+    "vote": "Vote",
+    "voted": "Voted",
+    "votes": "votes",
+    "vs": "VS",
+    "thanks": "Thanks for voting!"
   }
 }
