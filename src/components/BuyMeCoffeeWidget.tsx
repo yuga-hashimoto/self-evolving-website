@@ -9,7 +9,7 @@ export default function KofiWidget() {
       href="https://ko-fi.com/yugahashimoto"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-24 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 px-4 py-3 bg-[#13C3FF] text-white font-bold rounded-full shadow-lg hover:bg-[#0DAADB] transition-colors"
+      className="fixed bottom-36 right-4 sm:bottom-56 sm:right-6 z-50 flex items-center gap-2 px-4 py-3 bg-[#13C3FF] text-white font-bold rounded-full shadow-lg hover:bg-[#0DAADB] transition-colors"
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ 
         scale: [1, 1.05, 1],
