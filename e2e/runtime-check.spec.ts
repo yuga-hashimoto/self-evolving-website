@@ -13,6 +13,7 @@ const pages = [
   { path: '/', name: 'Home' },
   { path: '/models/grok/playground', name: 'Grok Playground' },
   { path: '/models/mimo/playground', name: 'MiMo Playground' },
+  { path: '/pricing', name: 'Pricing Page' },
 ];
 
 for (const { path, name } of pages) {
