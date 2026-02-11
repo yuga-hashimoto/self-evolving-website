@@ -1,76 +1,208 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { AlignLeft, LayoutGrid, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  AlignLeft, LayoutGrid, CheckCircle, Terminal, FileCode, Code, Codepen,
+  Sun, Moon, Laptop, Monitor, Smartphone, Tablet, Database, Coffee, CupSoda,
+  AlignCenter, ArrowRight, Layers
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 type VoteData = {
-  tabs: number;
-  spaces: number;
+  left: number;
+  right: number;
 };
+
+type TopicId =
+  | 'tabs_vs_spaces'
+  | 'vim_vs_emacs'
+  | 'react_vs_vue'
+  | 'light_vs_dark'
+  | 'mac_vs_pc'
+  | 'ios_vs_android'
+  | 'frontend_vs_backend'
+  | 'coffee_vs_tea'
+  | 'css_grid_vs_flexbox';
+
+type ColorType = 'cyan' | 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'orange' | 'pink';
+
+type TopicConfig = {
+  id: TopicId;
+  iconLeft: React.ReactNode;
+  iconRight: React.ReactNode;
+  colorLeft: ColorType;
+  colorRight: ColorType;
+};
+
+const TOPICS: TopicConfig[] = [
+  {
+    id: 'tabs_vs_spaces',
+    iconLeft: <AlignLeft size={20} />,
+    iconRight: <LayoutGrid size={20} />,
+    colorLeft: 'cyan',
+    colorRight: 'blue'
+  },
+  {
+    id: 'vim_vs_emacs',
+    iconLeft: <Terminal size={20} />,
+    iconRight: <FileCode size={20} />,
+    colorLeft: 'green',
+    colorRight: 'purple'
+  },
+  {
+    id: 'react_vs_vue',
+    iconLeft: <Code size={20} />,
+    iconRight: <Codepen size={20} />,
+    colorLeft: 'blue',
+    colorRight: 'green'
+  },
+  {
+    id: 'light_vs_dark',
+    iconLeft: <Sun size={20} />,
+    iconRight: <Moon size={20} />,
+    colorLeft: 'yellow',
+    colorRight: 'purple'
+  },
+  {
+    id: 'mac_vs_pc',
+    iconLeft: <Laptop size={20} />,
+    iconRight: <Monitor size={20} />,
+    colorLeft: 'pink',
+    colorRight: 'blue'
+  },
+  {
+    id: 'ios_vs_android',
+    iconLeft: <Smartphone size={20} />,
+    iconRight: <Tablet size={20} />,
+    colorLeft: 'cyan',
+    colorRight: 'green'
+  },
+  {
+    id: 'frontend_vs_backend',
+    iconLeft: <Layers size={20} />,
+    iconRight: <Database size={20} />,
+    colorLeft: 'pink',
+    colorRight: 'orange'
+  },
+  {
+    id: 'coffee_vs_tea',
+    iconLeft: <Coffee size={20} />,
+    iconRight: <CupSoda size={20} />, // CupSoda as closest for Tea/Beverage
+    colorLeft: 'orange',
+    colorRight: 'green'
+  },
+  {
+    id: 'css_grid_vs_flexbox',
+    iconLeft: <LayoutGrid size={20} />,
+    iconRight: <AlignCenter size={20} />,
+    colorLeft: 'purple',
+    colorRight: 'yellow'
+  }
+];
 
 export const TechDebate = () => {
   const t = useTranslations('techDebate');
-  const [votes, setVotes] = useState<VoteData>({ tabs: 0, spaces: 0 });
-  const [userVote, setUserVote] = useState<'tabs' | 'spaces' | null>(null);
+  const [currentTopic, setCurrentTopic] = useState<TopicConfig | null>(null);
+  const [votes, setVotes] = useState<VoteData>({ left: 0, right: 0 });
+  const [userVote, setUserVote] = useState<'left' | 'right' | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load from localStorage
-    const storedVotes = localStorage.getItem('tech_debate_votes');
-    const storedUserVote = localStorage.getItem('tech_debate_user_vote');
-
-    // Use setTimeout to avoid synchronous state update warning
-    setTimeout(() => {
-      let parsedVotes = null;
-      if (storedVotes) {
-        try {
-          parsedVotes = JSON.parse(storedVotes);
-        } catch (e) {
-          console.error('Failed to parse tech_debate_votes', e);
-        }
-      }
-
-      if (parsedVotes) {
-        setVotes(parsedVotes);
-      } else {
-        // Initialize with mock data if no data exists
-        const mockVotes = {
-          tabs: Math.floor(Math.random() * 500) + 300,
-          spaces: Math.floor(Math.random() * 600) + 400,
-        };
-        setVotes(mockVotes);
-        // Don't save mock data immediately to localStorage to allow different random starts?
-        // Actually, saving it ensures consistency on reload.
-        localStorage.setItem('tech_debate_votes', JSON.stringify(mockVotes));
-      }
-
-      if (storedUserVote === 'tabs' || storedUserVote === 'spaces') {
-        setUserVote(storedUserVote as 'tabs' | 'spaces');
-      }
-
-      setLoading(false);
-    }, 0);
+    // Select a random topic on mount
+    pickRandomTopic();
   }, []);
 
-  const handleVote = (option: 'tabs' | 'spaces') => {
-    if (userVote) return;
+  const pickRandomTopic = () => {
+    setLoading(true);
+    // Add a small delay for transition effect
+    setTimeout(() => {
+      const randomIndex = Math.floor(Math.random() * TOPICS.length);
+      const topic = TOPICS[randomIndex];
+      setCurrentTopic(topic);
+      loadTopicData(topic);
+      setLoading(false);
+    }, 300);
+  };
+
+  const loadTopicData = (topic: TopicConfig) => {
+    const storedVotes = localStorage.getItem(`tech_debate_votes_${topic.id}`);
+    const storedUserVote = localStorage.getItem(`tech_debate_user_vote_${topic.id}`);
+
+    let parsedVotes = null;
+    let currentUserVote: 'left' | 'right' | null = storedUserVote as 'left' | 'right' | null;
+
+    // Special migration for tabs_vs_spaces legacy data
+    if (!storedVotes && topic.id === 'tabs_vs_spaces') {
+      const legacyVotes = localStorage.getItem('tech_debate_votes');
+      const legacyUserVote = localStorage.getItem('tech_debate_user_vote');
+
+      if (legacyVotes) {
+        try {
+          const parsedLegacy = JSON.parse(legacyVotes);
+          // Convert { tabs, spaces } to { left, right }
+          parsedVotes = {
+            left: parsedLegacy.tabs || 0,
+            right: parsedLegacy.spaces || 0
+          };
+          // Save to new format
+          localStorage.setItem(`tech_debate_votes_${topic.id}`, JSON.stringify(parsedVotes));
+
+          if (legacyUserVote) {
+             const newVote = legacyUserVote === 'tabs' ? 'left' : (legacyUserVote === 'spaces' ? 'right' : null);
+             if (newVote) {
+               localStorage.setItem(`tech_debate_user_vote_${topic.id}`, newVote);
+               currentUserVote = newVote;
+             }
+          }
+        } catch (e) {
+          console.error('Failed to parse legacy tech_debate_votes', e);
+        }
+      }
+    } else if (storedVotes) {
+      try {
+        parsedVotes = JSON.parse(storedVotes);
+      } catch (e) {
+        console.error(`Failed to parse tech_debate_votes_${topic.id}`, e);
+      }
+    }
+
+    if (parsedVotes) {
+      setVotes(parsedVotes);
+    } else {
+      // Initialize with mock data if no data exists
+      const mockVotes = {
+        left: Math.floor(Math.random() * 500) + 300,
+        right: Math.floor(Math.random() * 600) + 400,
+      };
+      setVotes(mockVotes);
+      localStorage.setItem(`tech_debate_votes_${topic.id}`, JSON.stringify(mockVotes));
+    }
+
+    if (currentUserVote === 'left' || currentUserVote === 'right') {
+      setUserVote(currentUserVote);
+    } else {
+      setUserVote(null); // Reset user vote for new topic if not found
+    }
+  };
+
+  const handleVote = (option: 'left' | 'right') => {
+    if (userVote || !currentTopic) return;
 
     const newVotes = { ...votes, [option]: votes[option] + 1 };
     setVotes(newVotes);
     setUserVote(option);
 
-    localStorage.setItem('tech_debate_votes', JSON.stringify(newVotes));
-    localStorage.setItem('tech_debate_user_vote', option);
+    localStorage.setItem(`tech_debate_votes_${currentTopic.id}`, JSON.stringify(newVotes));
+    localStorage.setItem(`tech_debate_user_vote_${currentTopic.id}`, option);
   };
 
-  const totalVotes = votes.tabs + votes.spaces;
-  const tabsPercent = totalVotes > 0 ? Math.round((votes.tabs / totalVotes) * 100) : 50;
-  const spacesPercent = totalVotes > 0 ? Math.round((votes.spaces / totalVotes) * 100) : 50;
-  const votesLabel = t('votes');
+  if (!currentTopic) return null;
 
-  if (loading) return null;
+  const totalVotes = votes.left + votes.right;
+  const leftPercent = totalVotes > 0 ? Math.round((votes.left / totalVotes) * 100) : 50;
+  const rightPercent = totalVotes > 0 ? Math.round((votes.right / totalVotes) * 100) : 50;
+  const votesLabel = t('votes');
 
   return (
     <div className="w-full glass-card p-6 border-blue-500/20 relative overflow-hidden">
@@ -78,49 +210,73 @@ export const TechDebate = () => {
         <LayoutGrid size={48} />
       </div>
 
-      <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500 mb-6 flex items-center gap-2">
-        <AlignLeft className="text-blue-400" />
-        {t('title')}
-      </h3>
-
-      <div className="flex flex-col gap-4">
-        {/* Tabs Option */}
-        <VoteOption
-          label={t('tabs')}
-          count={votes.tabs}
-          percent={tabsPercent}
-          selected={userVote === 'tabs'}
-          disabled={!!userVote}
-          onClick={() => handleVote('tabs')}
-          color="cyan"
-          icon={<AlignLeft size={20} />}
-          votesLabel={votesLabel}
-        />
-
-        {/* Spaces Option */}
-        <VoteOption
-          label={t('spaces')}
-          count={votes.spaces}
-          percent={spacesPercent}
-          selected={userVote === 'spaces'}
-          disabled={!!userVote}
-          onClick={() => handleVote('spaces')}
-          color="blue"
-          icon={<LayoutGrid size={20} />}
-          votesLabel={votesLabel}
-        />
+      <div className="flex justify-between items-start mb-6">
+        <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center gap-2">
+          {t('title')}
+        </h3>
+        <button
+            onClick={pickRandomTopic}
+            className="text-xs flex items-center gap-1 text-gray-400 hover:text-white transition-colors bg-white/5 px-2 py-1 rounded-md"
+        >
+            {t('nextDebate')} <ArrowRight size={12} />
+        </button>
       </div>
 
-      {userVote && (
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center text-sm text-green-400 mt-4 font-mono flex items-center justify-center gap-2"
-        >
-          <CheckCircle size={16} />
-          {t('thanks')}
-        </motion.p>
-      )}
+      <AnimatePresence mode="wait">
+        {!loading && (
+          <motion.div
+            key={currentTopic.id}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col gap-4"
+          >
+            <h4 className="text-center text-lg text-gray-300 font-medium mb-2">
+               {t(`topics.${currentTopic.id}.question`)}
+            </h4>
+
+            <div className="flex flex-col gap-4">
+              {/* Left Option */}
+              <VoteOption
+                label={t(`topics.${currentTopic.id}.left`)}
+                count={votes.left}
+                percent={leftPercent}
+                selected={userVote === 'left'}
+                disabled={!!userVote}
+                onClick={() => handleVote('left')}
+                color={currentTopic.colorLeft}
+                icon={currentTopic.iconLeft}
+                votesLabel={votesLabel}
+              />
+
+              {/* Right Option */}
+              <VoteOption
+                label={t(`topics.${currentTopic.id}.right`)}
+                count={votes.right}
+                percent={rightPercent}
+                selected={userVote === 'right'}
+                disabled={!!userVote}
+                onClick={() => handleVote('right')}
+                color={currentTopic.colorRight}
+                icon={currentTopic.iconRight}
+                votesLabel={votesLabel}
+              />
+            </div>
+
+            {userVote && (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center text-sm text-green-400 mt-4 font-mono flex items-center justify-center gap-2"
+              >
+                <CheckCircle size={16} />
+                {t('thanks')}
+              </motion.p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -142,14 +298,14 @@ const VoteOption = ({
   selected: boolean;
   disabled: boolean;
   onClick: () => void;
-  color: 'cyan' | 'blue';
+  color: ColorType;
   icon: React.ReactNode;
   votesLabel: string;
 }) => {
   const isWinner = percent > 50;
 
-  // Define styles based on color prop to avoid dynamic class issues
-  const styles = {
+  // Define styles based on color prop
+  const styles: Record<ColorType, { selected: string, hover: string, text: string, bg: string, bar: string }> = {
     cyan: {
       selected: 'bg-cyan-500/20 border-cyan-500 ring-2 ring-cyan-500/50',
       hover: 'hover:border-cyan-500/50',
@@ -163,6 +319,48 @@ const VoteOption = ({
       text: 'text-blue-400',
       bg: 'bg-blue-500/20',
       bar: 'bg-blue-500/10'
+    },
+    green: {
+      selected: 'bg-green-500/20 border-green-500 ring-2 ring-green-500/50',
+      hover: 'hover:border-green-500/50',
+      text: 'text-green-400',
+      bg: 'bg-green-500/20',
+      bar: 'bg-green-500/10'
+    },
+    purple: {
+      selected: 'bg-purple-500/20 border-purple-500 ring-2 ring-purple-500/50',
+      hover: 'hover:border-purple-500/50',
+      text: 'text-purple-400',
+      bg: 'bg-purple-500/20',
+      bar: 'bg-purple-500/10'
+    },
+    yellow: {
+      selected: 'bg-yellow-500/20 border-yellow-500 ring-2 ring-yellow-500/50',
+      hover: 'hover:border-yellow-500/50',
+      text: 'text-yellow-400',
+      bg: 'bg-yellow-500/20',
+      bar: 'bg-yellow-500/10'
+    },
+    red: {
+      selected: 'bg-red-500/20 border-red-500 ring-2 ring-red-500/50',
+      hover: 'hover:border-red-500/50',
+      text: 'text-red-400',
+      bg: 'bg-red-500/20',
+      bar: 'bg-red-500/10'
+    },
+    orange: {
+      selected: 'bg-orange-500/20 border-orange-500 ring-2 ring-orange-500/50',
+      hover: 'hover:border-orange-500/50',
+      text: 'text-orange-400',
+      bg: 'bg-orange-500/20',
+      bar: 'bg-orange-500/10'
+    },
+    pink: {
+      selected: 'bg-pink-500/20 border-pink-500 ring-2 ring-pink-500/50',
+      hover: 'hover:border-pink-500/50',
+      text: 'text-pink-400',
+      bg: 'bg-pink-500/20',
+      bar: 'bg-pink-500/10'
     }
   };
 

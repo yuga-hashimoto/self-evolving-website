@@ -501,9 +501,55 @@
   },
   "techDebate": {
     "title": "永遠の技術論争",
-    "tabs": "タブ",
-    "spaces": "スペース",
     "votes": "票",
-    "thanks": "投票ありがとうございます！"
+    "thanks": "投票ありがとうございます！",
+    "nextDebate": "次の論争",
+    "topics": {
+      "tabs_vs_spaces": {
+        "question": "インデントは？",
+        "left": "タブ",
+        "right": "スペース"
+      },
+      "vim_vs_emacs": {
+        "question": "エディタ戦争",
+        "left": "Vim",
+        "right": "Emacs"
+      },
+      "react_vs_vue": {
+        "question": "JSフレームワーク？",
+        "left": "React",
+        "right": "Vue"
+      },
+      "light_vs_dark": {
+        "question": "テーマ？",
+        "left": "ライトモード",
+        "right": "ダークモード"
+      },
+      "mac_vs_pc": {
+        "question": "OS？",
+        "left": "Mac",
+        "right": "PC"
+      },
+      "ios_vs_android": {
+        "question": "モバイルOS？",
+        "left": "iOS",
+        "right": "Android"
+      },
+      "frontend_vs_backend": {
+        "question": "どっち派？",
+        "left": "フロントエンド",
+        "right": "バックエンド"
+      },
+      "coffee_vs_tea": {
+        "question": "燃料？",
+        "left": "コーヒー",
+        "right": "お茶"
+      },
+      "css_grid_vs_flexbox": {
+        "question": "レイアウト？",
+        "left": "Grid",
+        "right": "Flexbox"
+      }
+    }
   }
 }

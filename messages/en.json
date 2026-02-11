@@ -501,9 +501,55 @@
   },
   "techDebate": {
     "title": "The Eternal Tech Debate",
-    "tabs": "Tabs",
-    "spaces": "Spaces",
     "votes": "votes",
-    "thanks": "Thanks for voting!"
+    "thanks": "Thanks for voting!",
+    "nextDebate": "Next Debate",
+    "topics": {
+      "tabs_vs_spaces": {
+        "question": "Indentation?",
+        "left": "Tabs",
+        "right": "Spaces"
+      },
+      "vim_vs_emacs": {
+        "question": "Editor War",
+        "left": "Vim",
+        "right": "Emacs"
+      },
+      "react_vs_vue": {
+        "question": "JS Framework?",
+        "left": "React",
+        "right": "Vue"
+      },
+      "light_vs_dark": {
+        "question": "Theme?",
+        "left": "Light Mode",
+        "right": "Dark Mode"
+      },
+      "mac_vs_pc": {
+        "question": "OS?",
+        "left": "Mac",
+        "right": "PC"
+      },
+      "ios_vs_android": {
+        "question": "Mobile OS?",
+        "left": "iOS",
+        "right": "Android"
+      },
+      "frontend_vs_backend": {
+        "question": "Preference?",
+        "left": "Frontend",
+        "right": "Backend"
+      },
+      "coffee_vs_tea": {
+        "question": "Fuel?",
+        "left": "Coffee",
+        "right": "Tea"
+      },
+      "css_grid_vs_flexbox": {
+        "question": "Layout?",
+        "left": "Grid",
+        "right": "Flexbox"
+      }
+    }
   }
 }
