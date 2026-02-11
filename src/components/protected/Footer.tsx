@@ -3,11 +3,11 @@
 import SponsorGrid from "@/components/features/SponsorGrid";
 import SponsorCardPremium from "@/components/features/SponsorCardPremium";
 import ChaosModeToggle from "@/components/ChaosModeToggle";
+import GlitchModeToggle from "@/components/effects/GlitchModeToggle";
 import SpeedModeToggle from "@/components/features/SpeedModeToggle";
 import { useTranslations } from 'next-intl';
 import { IconX } from "@/components/icons/Icons";
 import RetroCounter from "@/components/features/RetroCounter";
-import GlitchTrigger from "@/components/effects/GlitchTrigger";
 
 export default function Footer() {
     const t = useTranslations('footer');
@@ -44,6 +44,7 @@ export default function Footer() {
 
                     <div className="flex flex-col items-center gap-4">
                         <ChaosModeToggle />
+                        <GlitchModeToggle />
                         <SpeedModeToggle />
                         <div className="flex gap-4 text-xs text-gray-400">
                             <a href="/leaderboard" className="hover:text-white transition-colors">Leaderboard</a>
@@ -59,7 +60,6 @@ export default function Footer() {
                     </p>
                 </div>
             </div>
-            <GlitchTrigger />
         </footer>
     );
 }
