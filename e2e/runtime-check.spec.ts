@@ -14,6 +14,7 @@ const pages = [
   { path: '/leaderboard', name: 'Leaderboard' },
   { path: '/models/grok/playground', name: 'Grok Playground' },
   { path: '/models/mimo/playground', name: 'MiMo Playground' },
+  { path: '/blog/future-of-self-evolving-websites', name: 'Future of Self-Evolving Websites' },
 ];
 
 for (const { path, name } of pages) {
