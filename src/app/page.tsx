@@ -44,6 +44,7 @@ import { EngagementBoosters } from '@/components/features/EngagementBoosters';
 
 // Jules Sprint 3 (Feb 10)
 import { SponsorEvolutionButton } from '@/components/features/SponsorEvolutionButton';
+import CyberpunkSponsorButton from '@/components/home/CyberpunkSponsorButton';
 import { LiveEvolutionTicker } from '@/components/features/LiveEvolutionTicker';
 import { FeatureVotePoll } from '@/components/features/FeatureVotePoll';
 
@@ -145,7 +146,7 @@ export default async function Home() {
           {t('startDate', { date: formattedDate })}
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 sm:mt-8 mb-2">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 sm:mt-8 mb-8">
           <a
             href="#models"
             className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-lg rounded-full shadow-lg hover:shadow-purple-500/50 transform hover:scale-105 transition-all duration-300"
@@ -158,6 +159,11 @@ export default async function Home() {
           >
             {t('ctaHowItWorks')}
           </a>
+        </div>
+
+        {/* Prominent Sponsorship CTA */}
+        <div className="mb-8 w-full flex justify-center z-10 relative">
+          <CyberpunkSponsorButton />
         </div>
 
         {/* Viral Share Button & Sponsor (Jules) */}
