@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef } from 'react';
 
 type GameState = 'idle' | 'waiting' | 'ready' | 'result' | 'early';
 

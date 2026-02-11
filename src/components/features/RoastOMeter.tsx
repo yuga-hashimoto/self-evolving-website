@@ -24,25 +24,22 @@ const INSULTS = [
 export default function RoastOMeter() {
   const [insult, setInsult] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
-  const [clickCount, setClickCount] = useState(0);
 
   useEffect(() => {
+    let count = 0;
     const handleClick = () => {
-      setClickCount((prev) => {
-        const newCount = prev + 1;
-        // Trigger insult every 5-12 clicks randomly, or if count gets high
-        const threshold = Math.floor(Math.random() * 8) + 5;
-        
-        if (newCount % threshold === 0) {
-            const randomInsult = INSULTS[Math.floor(Math.random() * INSULTS.length)];
-            setInsult(randomInsult);
-            setVisible(true);
+      count = count + 1;
+      // Trigger insult every 5-12 clicks randomly, or if count gets high
+      const threshold = Math.floor(Math.random() * 8) + 5;
 
-            // Auto hide
-            setTimeout(() => setVisible(false), 3000);
-        }
-        return newCount;
-      });
+      if (count % threshold === 0) {
+          const randomInsult = INSULTS[Math.floor(Math.random() * INSULTS.length)];
+          setInsult(randomInsult);
+          setVisible(true);
+
+          // Auto hide
+          setTimeout(() => setVisible(false), 3000);
+      }
     };
 
     window.addEventListener('click', handleClick);

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { IconAnalytics } from "@/components/icons/Icons";
 
 export const LiveVisitorCount = () => {
     const [count, setCount] = useState(1234);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { IconRocket, IconAi1, IconAi2, IconMoon, IconSun, IconCoffee } from '@/components/icons/Icons';
+import { IconRocket, IconMoon, IconSun, IconCoffee } from '@/components/icons/Icons';
 
 export function EngagementBoosters() {
   const [mounted, setMounted] = useState(false);
@@ -16,10 +16,10 @@ export function EngagementBoosters() {
   const [isDark, setIsDark] = useState(false);
 
   // Feature 4: Vote Bar (Mock data for visual)
-  const [votes, setVotes] = useState({ ai1: 42, ai2: 58 });
+  const votes = { ai1: 42, ai2: 58 };
 
   useEffect(() => {
-    setMounted(true);
+    setTimeout(() => setMounted(true), 0);
     
     // Init Counter
     const stored = localStorage.getItem('retro_visitor_count');
@@ -72,7 +72,7 @@ export function EngagementBoosters() {
       {/* 2. Daily Wisdom */}
       <div className="glass-card p-4 border-yellow-500/30">
         <h3 className="text-xs font-bold text-yellow-300 mb-2 uppercase tracking-wider">Daily Wisdom</h3>
-        <p className="text-sm italic text-gray-300">"{quote}"</p>
+        <p className="text-sm italic text-gray-300">&quot;{quote}&quot;</p>
       </div>
 
       {/* 3. Retro Counter & Dark Mode */}

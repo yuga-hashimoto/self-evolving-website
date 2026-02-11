@@ -1,5 +1,4 @@
 'use client';
-import { useState } from 'react';
 
 export function SponsorPixelGrid() {
   const GRID_SIZE = 10;

@@ -49,7 +49,7 @@ export default function RetroCounter() {
        console.error("Failed to write local storage", e);
     }
 
-    setLocalHits(hits);
+    setTimeout(() => setLocalHits(hits), 0);
   }, []);
 
   if (localHits === null) {

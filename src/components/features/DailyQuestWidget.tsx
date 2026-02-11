@@ -28,14 +28,18 @@ export function DailyQuestWidget() {
       // New day, new quests
       const shuffled = [...QUESTS].sort(() => 0.5 - Math.random());
       const selected = shuffled.slice(0, 3);
-      setQuests(selected);
-      setCompleted([false, false, false]);
+      setTimeout(() => {
+        setQuests(selected);
+        setCompleted([false, false, false]);
+      }, 0);
       localStorage.setItem('questDate', today);
       localStorage.setItem('dailyQuests', JSON.stringify(selected));
       localStorage.setItem('questCompleted', JSON.stringify([false, false, false]));
     } else {
-      setQuests(storedQuests);
-      setCompleted(storedCompleted);
+      setTimeout(() => {
+        setQuests(storedQuests);
+        setCompleted(storedCompleted);
+      }, 0);
     }
   }, []);
 

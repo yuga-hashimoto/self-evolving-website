@@ -49,7 +49,6 @@ function formatDate(dateString: string) {
 }
 
 export default async function RecentEvolutions() {
-  const t = await getTranslations('home');
   const evolutions = await getRecentEvolutions();
 
   if (evolutions.length === 0) return null;

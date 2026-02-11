@@ -9,7 +9,7 @@ interface CheerButtonProps {
   color: string;
 }
 
-export default function CheerButton({ modelId, color }: CheerButtonProps) {
+export default function CheerButton({ color }: CheerButtonProps) {
   const [combo, setCombo] = useState(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
