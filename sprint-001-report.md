@@ -15,7 +15,7 @@ I have successfully implemented all requested features and created a Pull Reques
 
 ### 3. Vote for AI Component
 - Implemented `VoteDuel` component on the homepage (`/`).
-- Added "Vote for Mimo" and "Vote for Grok" buttons.
+- Added "Vote for AI 1" and "Vote for AI 2" buttons.
 - Integrated `canvas-confetti` for celebration effects.
 - Used `localStorage` to persist vote counts locally (simulated backend).
 

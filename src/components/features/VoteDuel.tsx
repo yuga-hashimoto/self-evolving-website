@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { IconMimo, IconGrok } from '@/components/icons/Icons';
+import { IconAi1, IconAi2 } from '@/components/icons/Icons';
 
 export const VoteDuel = () => {
-  const [votes, setVotes] = useState({ mimo: 0, grok: 0 });
+  const [votes, setVotes] = useState({ ai1: 0, ai2: 0 });
   const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
@@ -15,11 +15,11 @@ export const VoteDuel = () => {
       setVotes(JSON.parse(stored));
     } else {
       // Initial fake data
-      setVotes({ mimo: 1240, grok: 1180 });
+      setVotes({ ai1: 1240, ai2: 1180 });
     }
   }, []);
 
-  const handleVote = (model: 'mimo' | 'grok') => {
+  const handleVote = (model: 'ai1' | 'ai2') => {
     if (hasVoted) return;
 
     const newVotes = { ...votes, [model]: votes[model] + 1 };
@@ -28,7 +28,7 @@ export const VoteDuel = () => {
     setHasVoted(true);
 
     // Confetti effect
-    const color = model === 'mimo' ? '#a855f7' : '#3b82f6';
+    const color = model === 'ai1' ? '#a855f7' : '#3b82f6';
     confetti({
       particleCount: 100,
       spread: 70,
@@ -46,35 +46,35 @@ export const VoteDuel = () => {
       </h3>
 
       <div className="flex justify-between items-center gap-4 sm:gap-8">
-        {/* Mimo Side */}
+        {/* AI 1 Side */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => handleVote('mimo')}
+          onClick={() => handleVote('ai1')}
           disabled={hasVoted}
           className={`flex-1 p-4 rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 transition-all ${hasVoted ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <div className="flex flex-col items-center gap-2">
-            <IconMimo size={48} className="text-purple-400" />
-            <span className="text-lg font-bold text-purple-300">Team Mimo</span>
-            <span className="text-2xl font-mono text-white">{votes.mimo.toLocaleString()}</span>
+            <IconAi1 size={48} className="text-purple-400" />
+            <span className="text-lg font-bold text-purple-300">Team AI 1</span>
+            <span className="text-2xl font-mono text-white">{votes.ai1.toLocaleString()}</span>
           </div>
         </motion.button>
 
         <div className="text-2xl font-bold text-gray-500 italic">VS</div>
 
-        {/* Grok Side */}
+        {/* AI 2 Side */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => handleVote('grok')}
+          onClick={() => handleVote('ai2')}
           disabled={hasVoted}
           className={`flex-1 p-4 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 transition-all ${hasVoted ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <div className="flex flex-col items-center gap-2">
-            <IconGrok size={48} className="text-blue-400" />
-            <span className="text-lg font-bold text-blue-300">Team Grok</span>
-            <span className="text-2xl font-mono text-white">{votes.grok.toLocaleString()}</span>
+            <IconAi2 size={48} className="text-blue-400" />
+            <span className="text-lg font-bold text-blue-300">Team AI 2</span>
+            <span className="text-2xl font-mono text-white">{votes.ai2.toLocaleString()}</span>
           </div>
         </motion.button>
       </div>

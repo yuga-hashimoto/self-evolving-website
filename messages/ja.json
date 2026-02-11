@@ -1,8 +1,8 @@
 {
   "header": {
     "home": "ホーム",
-    "mimo": "AI 1",
-    "grok": "AI 2",
+    "ai1": "AI 1",
+    "ai2": "AI 2",
     "compareHistory": "比較履歴",
     "githubAria": "GitHub Repository"
   },
@@ -57,8 +57,8 @@
     "viewChangelog": "変更履歴を見る",
     "viewAnalytics": "アナリティクスを見る",
     "playGame": "ゲームをプレイ",
-    "mimoSubtitle": "Arcee AI Trinity Large Preview",
-    "grokSubtitle": "OpenAI GPT-OSS-120B"
+    "ai1Subtitle": "Arcee AI Trinity Large Preview",
+    "ai2Subtitle": "OpenAI GPT-OSS-120B"
   },
   "changelog": {
     "title": "{modelName} 更新履歴",
@@ -137,8 +137,8 @@
     "secondsShort": "秒",
     "timesCount": "回",
     "filterAll": "すべて",
-    "filterMimo": "AI 1のみ",
-    "filterGrok": "AI 2のみ"
+    "filterAI 1": "AI 1のみ",
+    "filterAI 2": "AI 2のみ"
   },
   "common": {
     "loading": "読み込み中...",
@@ -163,7 +163,7 @@
       "timeUp": "時間切れ！",
       "quickRestart": "クイックリスタート"
     },
-    "grok": {
+    "ai2": {
       "doodleLeap": "Doodle Leap",
       "game2048": "2048",
       "youWin": "おめでとう！続けますか？",
@@ -203,7 +203,7 @@
       "labyrinthInstructions": "タッチやドラッグでボールを傾けて動かしてください。宝石を集めてゴールタイルを目指そう！",
       "start": "スタート"
     },
-    "mimo": {
+    "ai1": {
       "title": "AI 1 Games",
       "selectGame": "ゲームを選択",
       "selectGameDesc": "遊ぶゲームをタップしてください",

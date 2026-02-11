@@ -6,7 +6,7 @@ import { AdBanner } from '@/components/AdBanner';
 import { Check, Copy, Rocket, Brain, Code, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { SPONSORS } from '@/lib/sponsors-data';
-import { IconMimo, IconGrok, IconDNA, IconX } from '@/components/icons/Icons';
+import { IconAi1, IconAi2, IconDNA, IconX } from '@/components/icons/Icons';
 
 export default function SponsorsPage() {
   const [copied, setCopied] = useState<string | null>(null);
@@ -19,8 +19,8 @@ export default function SponsorsPage() {
 
   const getLogo = (logoId: string, size: number) => {
     const map: Record<string, React.ReactNode> = {
-      mimo: <IconMimo size={size} />,
-      grok: <IconGrok size={size} />,
+      ai1: <IconAi1 size={size} />,
+      ai2: <IconAi2 size={size} />,
       dna: <IconDNA size={size} />,
       x: <IconX size={size} />,
       rocket: <Rocket size={size} />,
@@ -41,7 +41,7 @@ export default function SponsorsPage() {
         Our Sponsors
       </h1>
       <p className="text-gray-400 max-w-2xl mx-auto mb-12">
-        This experiment is powered by caffeine and electricity. Support the continuous evolution of Mimo and Grok.
+        This experiment is powered by caffeine and electricity. Support the continuous evolution of AI 1 and AI 2.
       </p>
 
       {/* Ko-fi Button Big */}

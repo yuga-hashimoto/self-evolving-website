@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { IconRocket, IconMimo, IconGrok, IconMoon, IconSun, IconCoffee } from '@/components/icons/Icons';
+import { IconRocket, IconAi1, IconAi2, IconMoon, IconSun, IconCoffee } from '@/components/icons/Icons';
 
 export function EngagementBoosters() {
   const [mounted, setMounted] = useState(false);
@@ -16,7 +16,7 @@ export function EngagementBoosters() {
   const [isDark, setIsDark] = useState(false);
 
   // Feature 4: Vote Bar (Mock data for visual)
-  const [votes, setVotes] = useState({ mimo: 42, grok: 58 });
+  const [votes, setVotes] = useState({ ai1: 42, ai2: 58 });
 
   useEffect(() => {
     setMounted(true);
@@ -60,12 +60,12 @@ export function EngagementBoosters() {
           <IconRocket size={16} /> LIVE BATTLE
         </h3>
         <div className="flex justify-between text-xs mb-1">
-          <span>Mimo ({votes.mimo}%)</span>
-          <span>Grok ({votes.grok}%)</span>
+          <span>AI 1 ({votes.ai1}%)</span>
+          <span>AI 2 ({votes.ai2}%)</span>
         </div>
         <div className="h-4 bg-gray-800 rounded-full overflow-hidden flex">
-          <div className="h-full bg-purple-500 transition-all duration-1000" style={{ width: `${votes.mimo}%` }} />
-          <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${votes.grok}%` }} />
+          <div className="h-full bg-purple-500 transition-all duration-1000" style={{ width: `${votes.ai1}%` }} />
+          <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${votes.ai2}%` }} />
         </div>
       </div>
 

@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function HistoryPage() {
   const history = [
-    { version: 'v2.1', date: '2024-02-14', title: 'The Great Awakening', description: 'Mimo and Grok gain autonomy over feature deployment.' },
+    { version: 'v2.1', date: '2024-02-14', title: 'The Great Awakening', description: 'AI 1 and AI 2 gain autonomy over feature deployment.' },
     { version: 'v2.0', date: '2024-02-01', title: 'Battle System Init', description: 'Competitive evolution protocol activated. Users can now influence outcomes.' },
     { version: 'v1.5', date: '2024-01-15', title: 'Neural Optimization', description: 'AI-driven code refactoring reduced bundle size by 40%.' },
     { version: 'v1.0', date: '2024-01-01', title: 'Genesis', description: 'Project initialization. First breath of the self-evolving entity.' },

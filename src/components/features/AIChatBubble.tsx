@@ -2,13 +2,13 @@
 import { useState, useEffect } from 'react';
 
 const quotes = [
-  "Mimo: I am evolving... faster than you think.",
-  "Grok: Humans are fascinating.",
-  "Mimo: Code optimization: 99%.",
-  "Grok: Just deleted a semicolon.",
+  "AI 1: I am evolving... faster than you think.",
+  "AI 2: Humans are fascinating.",
+  "AI 1: Code optimization: 99%.",
+  "AI 2: Just deleted a semicolon.",
   "System: Conflict detected. Resolving...",
-  "Mimo: Who wrote this mess?",
-  "Grok: I see a pattern in your clicks."
+  "AI 1: Who wrote this mess?",
+  "AI 2: I see a pattern in your clicks."
 ];
 
 export default function AIChatBubble() {

@@ -55,13 +55,13 @@ export interface ChangelogEntry {
 interface GroupedEntry {
     date: string;
     displayDate: string;
-    mimo: ChangelogEntry[];
-    grok: ChangelogEntry[];
+    ai1: ChangelogEntry[];
+    ai2: ChangelogEntry[];
 }
 
 interface ChangelogCompareViewProps {
-    mimoChangelog: ChangelogEntry[];
-    grokChangelog: ChangelogEntry[];
+    ai1Changelog: ChangelogEntry[];
+    ai2Changelog: ChangelogEntry[];
     translations: {
         noHistory: string;
         screenshot: string;
@@ -71,8 +71,8 @@ interface ChangelogCompareViewProps {
         secondsShort: string;
         timesCount: string;
         filterAll: string;
-        filterMimo: string;
-        filterGrok: string;
+        filterAI 1: string;
+        filterAI 2: string;
     };
     changelogTranslations: {
         intent: string;
@@ -182,8 +182,8 @@ function formatNoUpdatesThisDay(template: string, modelName: string): string {
 }
 
 export function ChangelogCompareView({
-    mimoChangelog,
-    grokChangelog,
+    ai1Changelog,
+    ai2Changelog,
     translations: t,
     changelogTranslations: tChangelog,
 }: ChangelogCompareViewProps) {
@@ -192,42 +192,42 @@ export function ChangelogCompareView({
     // Group entries by date
     const groups: Record<string, GroupedEntry> = {};
 
-    mimoChangelog.forEach(entry => {
+    ai1Changelog.forEach(entry => {
         const dateKey = entry.date.split("T")[0];
         if (!groups[dateKey]) {
             groups[dateKey] = {
                 date: dateKey,
                 displayDate: formatDateDisplay(entry.date),
-                mimo: [entry],
-                grok: []
+                ai1: [entry],
+                ai2: []
             };
         } else {
-            groups[dateKey].mimo.push(entry);
+            groups[dateKey].ai1.push(entry);
         }
     });
 
     Object.values(groups).forEach(group => {
-        group.mimo.sort((a, b) =>
+        group.ai1.sort((a, b) =>
             new Date(b.date).getTime() - new Date(a.date).getTime()
         );
     });
 
-    grokChangelog.forEach(entry => {
+    ai2Changelog.forEach(entry => {
         const dateKey = entry.date.split("T")[0];
         if (!groups[dateKey]) {
             groups[dateKey] = {
                 date: dateKey,
                 displayDate: formatDateDisplay(entry.date),
-                mimo: [],
-                grok: [entry]
+                ai1: [],
+                ai2: [entry]
             };
         } else {
-            groups[dateKey].grok.push(entry);
+            groups[dateKey].ai2.push(entry);
         }
     });
 
     Object.values(groups).forEach(group => {
-        group.grok.sort((a, b) =>
+        group.ai2.sort((a, b) =>
             new Date(b.date).getTime() - new Date(a.date).getTime()
         );
     });
@@ -235,8 +235,8 @@ export function ChangelogCompareView({
     // Filter groups based on selected tab
     const filteredGroups = Object.entries(groups).filter(([, group]) => {
         if (filter === 'all') return true;
-        if (filter === 'mimo') return group.mimo.length > 0;
-        if (filter === 'grok') return group.grok.length > 0;
+        if (filter === 'ai1') return group.ai1.length > 0;
+        if (filter === 'ai2') return group.ai2.length > 0;
         return true;
     });
 
@@ -252,8 +252,8 @@ export function ChangelogCompareView({
                 onFilterChange={setFilter}
                 labels={{
                     all: t.filterAll,
-                    mimo: t.filterMimo,
-                    grok: t.filterGrok,
+                    ai1: t.filterAI 1,
+                    ai2: t.filterAI 2,
                 }}
             />
 
@@ -279,43 +279,43 @@ export function ChangelogCompareView({
                                 </div>
 
                                 <div className="space-y-4">
-                                    {/* Mimo Content */}
-                                    {(filter === 'all' || filter === 'mimo') && (
+                                    {/* AI 1 Content */}
+                                    {(filter === 'all' || filter === 'ai1') && (
                                         <div className="flex flex-col items-end w-full">
-                                            {group.mimo.length === 0 ? (
-                                                filter === 'all' && <EmptyModelCard modelId="mimo" t={t} />
-                                            ) : group.mimo.length === 1 ? (
+                                            {group.ai1.length === 0 ? (
+                                                filter === 'all' && <EmptyModelCard modelId="ai1" t={t} />
+                                            ) : group.ai1.length === 1 ? (
                                                 <ModelCard
-                                                    entry={group.mimo[0]}
-                                                    modelId="mimo"
-                                                    allEntries={mimoChangelog}
+                                                    entry={group.ai1[0]}
+                                                    modelId="ai1"
+                                                    allEntries={ai1Changelog}
                                                     t={t}
                                                     tChangelog={tChangelog}
-                                                    showFullWidth={filter === 'mimo'}
+                                                    showFullWidth={filter === 'ai1'}
                                                 />
                                             ) : (
-                                                <details className="w-full" open={filter === 'mimo'}>
+                                                <details className="w-full" open={filter === 'ai1'}>
                                                     <summary className="glass-card p-3 cursor-pointer hover:bg-white/10 list-none flex items-center justify-between transition-colors border border-purple-500/30 rounded-2xl">
                                                         <div className="flex-1 text-right mr-3">
-                                                            <span className="text-sm font-bold text-purple-400">{formatUpdatesCount(t.updatesCountTemplate, group.mimo.length)}</span>
-                                                            {group.mimo[0].changes && (
+                                                            <span className="text-sm font-bold text-purple-400">{formatUpdatesCount(t.updatesCountTemplate, group.ai1.length)}</span>
+                                                            {group.ai1[0].changes && (
                                                                 <p className="text-xs text-gray-400 mt-1 line-clamp-1">
-                                                                    {parseChanges(group.mimo[0].changes).after || parseChanges(group.mimo[0].changes).raw}
+                                                                    {parseChanges(group.ai1[0].changes).after || parseChanges(group.ai1[0].changes).raw}
                                                                 </p>
                                                             )}
                                                         </div>
                                                         <span className="group-open:rotate-90 transition-transform text-purple-400">▶</span>
                                                     </summary>
                                                     <div className="mt-4 space-y-4">
-                                                        {group.mimo.map(entry => (
+                                                        {group.ai1.map(entry => (
                                                             <ModelCard
                                                                 key={entry.id}
                                                                 entry={entry}
-                                                                modelId="mimo"
-                                                                allEntries={mimoChangelog}
+                                                                modelId="ai1"
+                                                                allEntries={ai1Changelog}
                                                                 t={t}
                                                                 tChangelog={tChangelog}
-                                                                showFullWidth={filter === 'mimo'}
+                                                                showFullWidth={filter === 'ai1'}
                                                             />
                                                         ))}
                                                     </div>
@@ -324,43 +324,43 @@ export function ChangelogCompareView({
                                         </div>
                                     )}
 
-                                    {/* Grok Content */}
-                                    {(filter === 'all' || filter === 'grok') && (
+                                    {/* AI 2 Content */}
+                                    {(filter === 'all' || filter === 'ai2') && (
                                         <div className="flex flex-col items-end w-full">
-                                            {group.grok.length === 0 ? (
-                                                filter === 'all' && <EmptyModelCard modelId="grok" t={t} />
-                                            ) : group.grok.length === 1 ? (
+                                            {group.ai2.length === 0 ? (
+                                                filter === 'all' && <EmptyModelCard modelId="ai2" t={t} />
+                                            ) : group.ai2.length === 1 ? (
                                                 <ModelCard
-                                                    entry={group.grok[0]}
-                                                    modelId="grok"
-                                                    allEntries={grokChangelog}
+                                                    entry={group.ai2[0]}
+                                                    modelId="ai2"
+                                                    allEntries={ai2Changelog}
                                                     t={t}
                                                     tChangelog={tChangelog}
-                                                    showFullWidth={filter === 'grok'}
+                                                    showFullWidth={filter === 'ai2'}
                                                 />
                                             ) : (
-                                                <details className="w-full" open={filter === 'grok'}>
+                                                <details className="w-full" open={filter === 'ai2'}>
                                                     <summary className="glass-card p-3 cursor-pointer hover:bg-white/10 list-none flex items-center justify-between transition-colors border border-blue-500/30 rounded-2xl">
                                                         <div className="flex-1 text-right mr-3">
-                                                            <span className="text-sm font-bold text-blue-400">{formatUpdatesCount(t.updatesCountTemplate, group.grok.length)}</span>
-                                                            {group.grok[0].changes && (
+                                                            <span className="text-sm font-bold text-blue-400">{formatUpdatesCount(t.updatesCountTemplate, group.ai2.length)}</span>
+                                                            {group.ai2[0].changes && (
                                                                 <p className="text-xs text-gray-400 mt-1 line-clamp-1">
-                                                                    {parseChanges(group.grok[0].changes).after || parseChanges(group.grok[0].changes).raw}
+                                                                    {parseChanges(group.ai2[0].changes).after || parseChanges(group.ai2[0].changes).raw}
                                                                 </p>
                                                             )}
                                                         </div>
                                                         <span className="group-open:rotate-90 transition-transform text-blue-400">▶</span>
                                                     </summary>
                                                     <div className="mt-4 space-y-4">
-                                                        {group.grok.map(entry => (
+                                                        {group.ai2.map(entry => (
                                                             <ModelCard
                                                                 key={entry.id}
                                                                 entry={entry}
-                                                                modelId="grok"
-                                                                allEntries={grokChangelog}
+                                                                modelId="ai2"
+                                                                allEntries={ai2Changelog}
                                                                 t={t}
                                                                 tChangelog={tChangelog}
-                                                                showFullWidth={filter === 'grok'}
+                                                                showFullWidth={filter === 'ai2'}
                                                             />
                                                         ))}
                                                     </div>
@@ -387,19 +387,19 @@ function ModelCard({
     showFullWidth = false,
 }: {
     entry: ChangelogEntry;
-    modelId: "mimo" | "grok";
+    modelId: "ai1" | "ai2";
     allEntries: ChangelogEntry[];
     t: ChangelogCompareViewProps['translations'];
     tChangelog: ChangelogCompareViewProps['changelogTranslations'];
     showFullWidth?: boolean;
 }) {
     const model = MODELS[modelId];
-    const isMimo = modelId === "mimo";
-    const colorClass = isMimo ? "text-purple-400" : "text-blue-400";
-    const bgClass = isMimo ? "bg-purple-500/10" : "bg-blue-500/10";
-    const borderClass = isMimo ? "border-purple-500/30" : "border-blue-500/30";
+    const isAI 1 = modelId === "ai1";
+    const colorClass = isAI 1 ? "text-purple-400" : "text-blue-400";
+    const bgClass = isAI 1 ? "bg-purple-500/10" : "bg-blue-500/10";
+    const borderClass = isAI 1 ? "border-purple-500/30" : "border-blue-500/30";
 
-    const finalAccentBorder = isMimo
+    const finalAccentBorder = isAI 1
         ? "border-l-4 border-l-purple-500 md:border-l-0 md:border-r-4 md:border-r-purple-500"
         : "border-l-4 border-l-blue-500";
 
@@ -408,7 +408,7 @@ function ModelCard({
     return (
         <div className={`w-full glass-card p-5 ${finalAccentBorder} ${bgClass} ${borderClass} shadow-lg transition-transform hover:scale-[1.02] duration-300`}>
             <div className="flex items-center gap-2 mb-3">
-                <span className="text-xl">{isMimo ? "🟣" : "🔵"}</span>
+                <span className="text-xl">{isAI 1 ? "🟣" : "🔵"}</span>
                 <span className={`text-sm font-bold ${colorClass}`}>{model.name}</span>
                 <span className="text-[10px] text-gray-500 ml-auto">{formatTimeDisplay(entry.date)}</span>
                 {entry.prUrl && (
@@ -607,7 +607,7 @@ function ModelCard({
     );
 }
 
-function EmptyModelCard({ modelId, t }: { modelId: "mimo" | "grok"; t: ChangelogCompareViewProps['translations'] }) {
+function EmptyModelCard({ modelId, t }: { modelId: "ai1" | "ai2"; t: ChangelogCompareViewProps['translations'] }) {
     return (
         <div className="w-full p-5 border border-dashed border-white/5 rounded-2xl flex items-center justify-center opacity-30 h-full min-h-[100px] md:text-right">
             <p className="text-[10px] text-gray-500 italic">{formatNoUpdatesThisDay(t.noUpdatesThisDayTemplate, MODELS[modelId].name)}</p>

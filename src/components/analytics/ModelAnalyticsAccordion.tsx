@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { IconMimo, IconGrok, IconLoading } from '@/components/icons/Icons';
+import { IconAi1, IconAi2, IconLoading } from '@/components/icons/Icons';
 import { PageviewsChart } from './PageviewsChart';
 import { MODELS } from '@/lib/models';
 
@@ -20,7 +20,7 @@ interface GA4Analytics {
 }
 
 interface ModelAnalyticsAccordionProps {
-    modelId: 'mimo' | 'grok';
+    modelId: 'ai1' | 'ai2';
     translations: {
         detailedAnalytics: string;
         expandAnalytics: string;
@@ -48,12 +48,12 @@ export function ModelAnalyticsAccordion({ modelId, translations: t }: ModelAnaly
     const [hasFetched, setHasFetched] = useState(false);
 
     const model = MODELS[modelId];
-    const isMimo = modelId === 'mimo';
-    const Icon = isMimo ? IconMimo : IconGrok;
-    const colorClass = isMimo ? 'text-purple-400' : 'text-blue-400';
-    const bgClass = isMimo ? 'bg-purple-500/10' : 'bg-blue-500/10';
-    const borderClass = isMimo ? 'border-purple-500/30 hover:border-purple-500/50' : 'border-blue-500/30 hover:border-blue-500/50';
-    const gradientClass = isMimo
+    const isAI 1 = modelId === 'ai1';
+    const Icon = isAI 1 ? IconAi1 : IconAi2;
+    const colorClass = isAI 1 ? 'text-purple-400' : 'text-blue-400';
+    const bgClass = isAI 1 ? 'bg-purple-500/10' : 'bg-blue-500/10';
+    const borderClass = isAI 1 ? 'border-purple-500/30 hover:border-purple-500/50' : 'border-blue-500/30 hover:border-blue-500/50';
+    const gradientClass = isAI 1
         ? 'bg-gradient-to-r from-purple-400 to-pink-400'
         : 'bg-gradient-to-r from-blue-400 to-cyan-400';
 

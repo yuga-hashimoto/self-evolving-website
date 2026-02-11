@@ -6,8 +6,8 @@ This commit includes cleanup of deprecated workflows, enabling scheduled executi
 ## 1. Workflow Cleanup and Migration
 
 ### Deleted Files (Old Workflow System)
-- `.github/workflows/ai-evolve-grok.yml` - Removed old Grok workflow
-- `.github/workflows/ai-evolve-mimo.yml` - Removed old MiMo workflow
+- `.github/workflows/ai-evolve-ai2.yml` - Removed old AI 2 workflow
+- `.github/workflows/ai-evolve-ai1.yml` - Removed old MiMo workflow
 - `.github/workflows/reusable-evolve-model.yml` - Removed old reusable workflow template
 - `.claude/skills/evolve-game.md` - Moved to directory structure
 
@@ -17,7 +17,7 @@ The old workflow system has been replaced with the new Skill-based system (`reus
 ## 2. Enable Scheduled Execution for Skill Workflows
 
 ### Modified Files
-- `.github/workflows/ai-evolve-grok-skill.yml`
+- `.github/workflows/ai-evolve-ai2-skill.yml`
   - **Changed**: Uncommented cron schedule
   - **Before**: Commented out schedule
   - **After**:
@@ -27,7 +27,7 @@ The old workflow system has been replaced with the new Skill-based system (`reus
       - cron: '30 21 * * *'  # UTC 21:30 (JST 6:30)
     ```
 
-- `.github/workflows/ai-evolve-mimo-skill.yml`
+- `.github/workflows/ai-evolve-ai1-skill.yml`
   - **Changed**: Uncommented cron schedule
   - **Before**: Commented out schedule
   - **After**:
@@ -43,14 +43,14 @@ Enable automatic execution of Skill-based workflows on schedule (twice daily).
 ## 3. Fix Changelog Data Inconsistencies
 
 ### Modified Files
-- `public/models/grok/changelog.json`
+- `public/models/ai2/changelog.json`
   - **Fixed date format**: Changed from `"2026-01-15"` to ISO 8601 format with timestamps
     - Entry 1: `"2026-01-15T07:48:54Z"`
     - Entry 2: `"2026-01-15T12:17:56Z"`
   - **Fixed metrics**: Corrected `codeChanges` values
     - Entry 2: `filesChanged: 3 → 2`, `additions: 33 → 334`
 
-- `public/models/mimo/changelog.json`
+- `public/models/ai1/changelog.json`
   - **Fixed metrics**: Corrected `codeChanges` values
     - Entry 3: `filesChanged: 4 → 1`, `additions: 737 → 706`, `deletions: 97 → 78`
 
@@ -66,10 +66,10 @@ Enable automatic execution of Skill-based workflows on schedule (twice daily).
   - **Changed**: `getScreenshotPath()` function now handles same-day multiple updates
   - **Logic**: When multiple changelog entries exist for the same date, append sequence number (`-1`, `-2`, etc.) to screenshot filename
   - **Example**:
-    - First update on 2026-01-15: `/models/grok/screenshots/2026-01-15-1.png`
-    - Second update on 2026-01-15: `/models/grok/screenshots/2026-01-15-2.png`
+    - First update on 2026-01-15: `/models/ai2/screenshots/2026-01-15-1.png`
+    - Second update on 2026-01-15: `/models/ai2/screenshots/2026-01-15-2.png`
   - **Layout change**: Changed from side-by-side (md:grid-cols-2) to vertical stacking (space-y-4) for better mobile experience
-  - **Alignment**: Changed Grok cards from left-aligned to right-aligned for consistency
+  - **Alignment**: Changed AI 2 cards from left-aligned to right-aligned for consistency
 
 - `src/app/models/[modelId]/changelog/page.tsx`
   - **Changed**: Same `getScreenshotPath()` logic as compare page
@@ -91,7 +91,7 @@ Part of the migration from flat file structure to directory-based skill organiza
 ## Summary of Changes
 - ✅ Removed 4 deprecated workflow files (old system cleanup)
 - ✅ Enabled cron schedules for 2 Skill-based workflows (auto-execution)
-- ✅ Fixed changelog date formats and metrics for Grok and MiMo
+- ✅ Fixed changelog date formats and metrics for AI 2 and MiMo
 - ✅ Enhanced screenshot path generation for same-day multiple updates
 - ✅ Improved changelog UI layout and alignment
 - ✅ Completed skill file migration

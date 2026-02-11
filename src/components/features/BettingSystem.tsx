@@ -13,7 +13,7 @@ export function BettingSystem() {
     }
   }, []);
 
-  const handleBet = (ai: 'Mimo' | 'Grok') => {
+  const handleBet = (ai: 'AI 1' | 'AI 2') => {
     if (points >= 100) {
       const newPoints = points - 100;
       setPoints(newPoints);
@@ -38,7 +38,7 @@ export function BettingSystem() {
       
       <div className="grid grid-cols-2 gap-4">
         <button
-          onClick={() => handleBet('Mimo')}
+          onClick={() => handleBet('AI 1')}
           disabled={points < 100}
           className="group relative px-4 py-3 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/50 hover:border-purple-400 rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -48,7 +48,7 @@ export function BettingSystem() {
         </button>
 
         <button
-          onClick={() => handleBet('Grok')}
+          onClick={() => handleBet('AI 2')}
           disabled={points < 100}
           className="group relative px-4 py-3 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/50 hover:border-blue-400 rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         >

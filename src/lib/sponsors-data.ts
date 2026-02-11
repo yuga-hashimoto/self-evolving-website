@@ -11,19 +11,19 @@ export interface Sponsor {
 
 export const SPONSORS: Sponsor[] = [
   {
-    id: 'mimo',
-    name: 'Mimo',
+    id: 'ai1',
+    name: 'AI 1',
     tier: 'platinum',
-    logoId: 'mimo',
-    url: '/models/mimo',
+    logoId: 'ai1',
+    url: '/models/ai1',
     description: 'The AI that started it all.'
   },
   {
-    id: 'grok',
-    name: 'Grok',
+    id: 'ai2',
+    name: 'AI 2',
     tier: 'platinum',
-    logoId: 'grok',
-    url: '/models/grok',
+    logoId: 'ai2',
+    url: '/models/ai2',
     description: 'Pushing boundaries of intelligence.'
   },
   {

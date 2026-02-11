@@ -1,8 +1,8 @@
 {
   "header": {
     "home": "Home",
-    "mimo": "AI 1",
-    "grok": "AI 2",
+    "ai1": "AI 1",
+    "ai2": "AI 2",
     "compareHistory": "History",
     "githubAria": "GitHub Repository"
   },
@@ -57,8 +57,8 @@
     "viewChangelog": "View changelog",
     "viewAnalytics": "View analytics",
     "playGame": "Play game",
-    "mimoSubtitle": "Arcee AI Trinity Large Preview",
-    "grokSubtitle": "OpenAI GPT-OSS-120B"
+    "ai1Subtitle": "Arcee AI Trinity Large Preview",
+    "ai2Subtitle": "OpenAI GPT-OSS-120B"
   },
   "changelog": {
     "title": "{modelName} Changelog",
@@ -137,8 +137,8 @@
     "secondsShort": "sec",
     "timesCount": "times",
     "filterAll": "All",
-    "filterMimo": "AI 1 Only",
-    "filterGrok": "AI 2 Only"
+    "filterAI 1": "AI 1 Only",
+    "filterAI 2": "AI 2 Only"
   },
   "common": {
     "loading": "Loading...",
@@ -163,7 +163,7 @@
       "timeUp": "Time's Up!",
       "quickRestart": "Quick Restart"
     },
-    "grok": {
+    "ai2": {
       "doodleLeap": "Doodle Leap",
       "game2048": "2048",
       "youWin": "You Win! Continue playing?",
@@ -203,8 +203,8 @@
       "labyrinthInstructions": "Tilt or drag to move the ball. Collect gems and reach the golden tile!",
       "start": "Start"
     },
-    "mimo": {
-      "title": "Mimo Games",
+    "ai1": {
+      "title": "AI 1 Games",
       "selectGame": "Select Game",
       "selectGameDesc": "Tap on a game to play",
       "randomGame": "Random Game",
@@ -435,7 +435,7 @@
       },
       "tutorial": {
         "title": "Tutorial",
-        "welcome": "Welcome to Mimo Games!",
+        "welcome": "Welcome to AI 1 Games!",
         "step1Title": "1️⃣ Game Selection",
         "step1Desc": "Choose from 10 different games. Each has unique features - you'll find your favorite!",
         "step2Title": "2️⃣ Daily Challenges",
@@ -467,7 +467,7 @@
       },
       "tutorial": {
         "title": "Tutorial",
-        "welcome": "Welcome to Mimo Games!",
+        "welcome": "Welcome to AI 1 Games!",
         "step1": "• Tap any game card to play",
         "step2": "• Earn coins and unlock skills",
         "step3": "• Complete daily challenges for bonus rewards",
@@ -489,7 +489,7 @@
       "adArea": "Ad Area (AdSense)",
       "sidebarAd": "Sidebar Ad",
       "footer": "Free to play anytime",
-      "copyright": "© 2026 Mimo Games"
+      "copyright": "© 2026 AI 1 Games"
     },
     "generic": {
       "warningMessage": "This page is freely modified by {modelName}. Unexpected changes may occur.",

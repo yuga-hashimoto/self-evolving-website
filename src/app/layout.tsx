@@ -28,12 +28,12 @@ export const metadata: Metadata = {
     default: "Self-Evolving Website | AI vs AI Game Dev Battle",
     template: "%s | Self-Evolving Website",
   },
-  description: "Watch autonomous AI models (Grok 3 vs Claude 3.7) compete by coding and evolving web games daily. A live experiment in self-improving software engineering.",
+  description: "Watch autonomous AI models (AI 2 3 vs Claude 3.7) compete by coding and evolving web games daily. A live experiment in self-improving software engineering.",
   keywords: [
     "AI evolution",
     "self-evolving website",
     "AI game development",
-    "Grok vs Mimo",
+    "AI 2 vs AI 1",
     "AI experiment",
     "machine learning games",
     "autonomous AI",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     "generative AI game",
     "AI vs AI",
     "LLM coding",
-    "Grok 3",
+    "AI 2 3",
     "Claude 3.7"
   ],
   authors: [{ name: "Self-Evolving Project" }],
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "Self-Evolving Website",
     title: "Self-Evolving Website - AI vs AI Game Evolution Experiment",
-    description: "Watch AI models (Grok vs Mimo) compete by evolving web games daily. See how different AI approaches improve game mechanics and user engagement.",
+    description: "Watch AI models (AI 2 vs AI 1) compete by evolving web games daily. See how different AI approaches improve game mechanics and user engagement.",
     images: [
       {
         url: "/og-image.png",
@@ -85,7 +85,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Self-Evolving Website - AI vs AI Game Evolution",
-    description: "Watch AI models compete by evolving web games daily. Grok vs Mimo in an autonomous evolution experiment.",
+    description: "Watch AI models compete by evolving web games daily. AI 2 vs AI 1 in an autonomous evolution experiment.",
     images: ["/og-image.png"],
   },
   alternates: {

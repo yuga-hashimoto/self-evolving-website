@@ -5,7 +5,7 @@ import { execSync } from 'child_process';
 
 const REPO_URL = 'https://github.com/y-c-hashimoto/self-evolving-website';
 
-const models = ['grok', 'mimo'];
+const models = ['ai2', 'ai1'];
 
 for (const modelId of models) {
     const changelogPath = `public/models/${modelId}/changelog-jp.json`;

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Share2 } from 'lucide-react';
 
 export function DynamicShareButton() {
-  const [selectedAI, setSelectedAI] = useState<'Mimo' | 'Grok'>('Mimo');
+  const [selectedAI, setSelectedAI] = useState<'AI 1' | 'AI 2'>('AI 1');
 
   const handleShare = () => {
     const text = `I'm betting on ${selectedAI} to win the next code battle! 🤖⚔️ #SelfEvolvingWebsite`;
@@ -15,16 +15,16 @@ export function DynamicShareButton() {
     <div className="flex flex-col items-center gap-3 mt-4 w-full max-w-md mx-auto">
       <div className="flex bg-black/40 rounded-full p-1 border border-white/10">
         <button
-          onClick={() => setSelectedAI('Mimo')}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${selectedAI === 'Mimo' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'text-gray-400 hover:text-white'}`}
+          onClick={() => setSelectedAI('AI 1')}
+          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${selectedAI === 'AI 1' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'text-gray-400 hover:text-white'}`}
         >
-          Mimo
+          AI 1
         </button>
         <button
-          onClick={() => setSelectedAI('Grok')}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${selectedAI === 'Grok' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-400 hover:text-white'}`}
+          onClick={() => setSelectedAI('AI 2')}
+          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${selectedAI === 'AI 2' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-400 hover:text-white'}`}
         >
-          Grok
+          AI 2
         </button>
       </div>
       

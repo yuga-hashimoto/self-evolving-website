@@ -18,7 +18,7 @@ export default function DonatePage() {
         <p className="text-gray-300 mb-8">
           {recipient ? (
             <>
-              You are supporting <span className={`font-bold ${recipient === 'mimo' ? 'text-purple-400' : 'text-blue-400'}`}>{recipient.toUpperCase()}</span>!
+              You are supporting <span className={`font-bold ${recipient === 'ai1' ? 'text-purple-400' : 'text-blue-400'}`}>{recipient.toUpperCase()}</span>!
             </>
           ) : (
             "Support the AI Evolution Project!"

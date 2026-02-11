@@ -25,7 +25,7 @@ describe('Sponsors Data', () => {
   });
 
   it('should verify mocked logo IDs exist in known set (optional check)', () => {
-    const knownLogos = ['mimo', 'grok', 'brain', 'code', 'zap', 'rocket', 'dna', 'x'];
+    const knownLogos = ['ai1', 'ai2', 'brain', 'code', 'zap', 'rocket', 'dna', 'x'];
     SPONSORS.forEach(sponsor => {
       assert.ok(knownLogos.includes(sponsor.logoId), `Unknown logo ID: ${sponsor.logoId}`);
     });

@@ -9,12 +9,12 @@ import { AIPredictionCard } from '@/components/features/AIPredictionCard';
 import { SponsorUnlockData } from '@/components/features/SponsorUnlockData';
 
 const dummyData = [
-  { name: 'Sprint 1', mimo: 120, grok: 110, commits: 5 },
-  { name: 'Sprint 2', mimo: 230, grok: 250, commits: 12 },
-  { name: 'Sprint 3', mimo: 350, grok: 320, commits: 8 },
-  { name: 'Sprint 4', mimo: 480, grok: 510, commits: 15 },
-  { name: 'Sprint 5', mimo: 620, grok: 590, commits: 20 },
-  { name: 'Current', mimo: 780, grok: 810, commits: 25 },
+  { name: 'Sprint 1', ai1: 120, ai2: 110, commits: 5 },
+  { name: 'Sprint 2', ai1: 230, ai2: 250, commits: 12 },
+  { name: 'Sprint 3', ai1: 350, ai2: 320, commits: 8 },
+  { name: 'Sprint 4', ai1: 480, ai2: 510, commits: 15 },
+  { name: 'Sprint 5', ai1: 620, ai2: 590, commits: 20 },
+  { name: 'Current', ai1: 780, ai2: 810, commits: 25 },
 ];
 
 export default function DashboardPage() {
@@ -25,7 +25,7 @@ export default function DashboardPage() {
           Evolution Dashboard
         </h1>
         <p className="text-gray-400 max-w-2xl mx-auto">
-          Visualize the ongoing battle between Mimo and Grok as they evolve this website.
+          Visualize the ongoing battle between AI 1 and AI 2 as they evolve this website.
         </p>
       </div>
 
@@ -48,8 +48,8 @@ export default function DashboardPage() {
                   contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151' }}
                   itemStyle={{ color: '#e5e7eb' }}
                 />
-                <Line type="monotone" dataKey="mimo" stroke="#a855f7" strokeWidth={3} activeDot={{ r: 8 }} name="Mimo (LOC)" />
-                <Line type="monotone" dataKey="grok" stroke="#3b82f6" strokeWidth={3} activeDot={{ r: 8 }} name="Grok (LOC)" />
+                <Line type="monotone" dataKey="ai1" stroke="#a855f7" strokeWidth={3} activeDot={{ r: 8 }} name="AI 1 (LOC)" />
+                <Line type="monotone" dataKey="ai2" stroke="#3b82f6" strokeWidth={3} activeDot={{ r: 8 }} name="AI 2 (LOC)" />
               </LineChart>
             </ResponsiveContainer>
           </div>

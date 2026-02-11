@@ -27,7 +27,7 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
   {
     id: 'initial-launch',
     title: 'Project Genesis',
-    description: 'Initial launch of the self-evolving website experiment with Mimo and Grok models.',
+    description: 'Initial launch of the self-evolving website experiment with AI 1 and AI 2 models.',
     status: 'completed',
     date: '2025-05-15',
     category: 'Core'

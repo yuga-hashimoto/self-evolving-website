@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { IconMimo, IconGrok } from "@/components/icons/Icons";
+import { IconAi1, IconAi2 } from "@/components/icons/Icons";
 
 type VoteState = {
-  mimo: number;
-  grok: number;
+  ai1: number;
+  ai2: number;
   hasVoted: boolean;
-  selected?: 'mimo' | 'grok';
+  selected?: 'ai1' | 'ai2';
 };
 
 export default function VoteWidget() {
@@ -21,8 +21,8 @@ export default function VoteWidget() {
     } else {
       // Initialize with random high numbers
       const initial: VoteState = {
-        mimo: Math.floor(Math.random() * 500) + 1200,
-        grok: Math.floor(Math.random() * 500) + 1200,
+        ai1: Math.floor(Math.random() * 500) + 1200,
+        ai2: Math.floor(Math.random() * 500) + 1200,
         hasVoted: false
       };
       setVotes(initial);
@@ -30,7 +30,7 @@ export default function VoteWidget() {
     }
   }, []);
 
-  const handleVote = (team: 'mimo' | 'grok') => {
+  const handleVote = (team: 'ai1' | 'ai2') => {
     if (!votes || votes.hasVoted) return;
 
     const newVotes = {
@@ -46,8 +46,8 @@ export default function VoteWidget() {
 
   if (!votes) return <div className="h-32 animate-pulse bg-white/5 rounded-xl my-6" />;
 
-  const total = votes.mimo + votes.grok;
-  const mimoPercent = (votes.mimo / total) * 100;
+  const total = votes.ai1 + votes.ai2;
+  const ai1Percent = (votes.ai1 / total) * 100;
 
   return (
     <div className="w-full max-w-lg mx-auto bg-black/20 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 my-8 relative overflow-hidden">
@@ -59,18 +59,18 @@ export default function VoteWidget() {
 
       <div className="flex justify-between items-center mb-4 px-2">
         <button
-          onClick={() => handleVote('mimo')}
+          onClick={() => handleVote('ai1')}
           disabled={votes.hasVoted}
           className={`flex flex-col items-center gap-2 transition-all duration-300 ${
-            votes.selected === 'mimo' ? 'scale-110 drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]' : 
+            votes.selected === 'ai1' ? 'scale-110 drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]' : 
             votes.hasVoted ? 'opacity-50 grayscale' : 'hover:scale-105 hover:drop-shadow-[0_0_10px_rgba(168,85,247,0.4)]'
           }`}
         >
           <div className="w-16 h-16 rounded-full bg-purple-900/40 border-2 border-purple-500/50 flex items-center justify-center">
-             <IconMimo size={32} />
+             <IconAi1 size={32} />
           </div>
           <span className="font-bold text-purple-400">TEAM MIMO</span>
-          <span className="text-xs font-mono text-purple-300/60">{votes.mimo.toLocaleString()}</span>
+          <span className="text-xs font-mono text-purple-300/60">{votes.ai1.toLocaleString()}</span>
         </button>
 
         <div className="flex flex-col items-center gap-1">
@@ -78,18 +78,18 @@ export default function VoteWidget() {
         </div>
 
         <button
-          onClick={() => handleVote('grok')}
+          onClick={() => handleVote('ai2')}
           disabled={votes.hasVoted}
           className={`flex flex-col items-center gap-2 transition-all duration-300 ${
-            votes.selected === 'grok' ? 'scale-110 drop-shadow-[0_0_15px_rgba(59,130,246,0.6)]' : 
+            votes.selected === 'ai2' ? 'scale-110 drop-shadow-[0_0_15px_rgba(59,130,246,0.6)]' : 
             votes.hasVoted ? 'opacity-50 grayscale' : 'hover:scale-105 hover:drop-shadow-[0_0_10px_rgba(59,130,246,0.4)]'
           }`}
         >
           <div className="w-16 h-16 rounded-full bg-blue-900/40 border-2 border-blue-500/50 flex items-center justify-center">
-             <IconGrok size={32} />
+             <IconAi2 size={32} />
           </div>
           <span className="font-bold text-blue-400">TEAM GROK</span>
-          <span className="text-xs font-mono text-blue-300/60">{votes.grok.toLocaleString()}</span>
+          <span className="text-xs font-mono text-blue-300/60">{votes.ai2.toLocaleString()}</span>
         </button>
       </div>
 
@@ -98,7 +98,7 @@ export default function VoteWidget() {
         <motion.div 
           className="absolute left-0 top-0 h-full bg-gradient-to-r from-purple-600 to-purple-400"
           initial={{ width: "50%" }}
-          animate={{ width: `${mimoPercent}%` }}
+          animate={{ width: `${ai1Percent}%` }}
           transition={{ duration: 1, type: "spring" }}
         />
         <div className="absolute inset-0 flex items-center justify-center">
