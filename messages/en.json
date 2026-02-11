@@ -498,5 +498,12 @@
       "emptyState": "(Starting from empty state)",
       "backToModel": "← Back to {modelName} top"
     }
+  },
+  "techDebate": {
+    "title": "The Eternal Tech Debate",
+    "tabs": "Tabs",
+    "spaces": "Spaces",
+    "votes": "votes",
+    "thanks": "Thanks for voting!"
   }
 }
