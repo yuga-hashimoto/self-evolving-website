@@ -1388,7 +1388,11 @@ export default function AI1Playground() {
   useEffect(() => {
     const gameParam = searchParams.get('game');
     if (gameParam) {
-      setCurrentGame(gameParam as any);
+      // Validate game param to match GameType
+      const validGames: GameType[] = ['menu', 'infinity', '2048', 'neon', 'cosmic', 'rhythm', 'snake', 'flap', 'brick', 'tetris', 'colorRush', 'match3', 'quickTap', 'memory'];
+      if (validGames.includes(gameParam as GameType)) {
+        setCurrentGame(gameParam as GameType);
+      }
     }
   }, [searchParams]);
 

@@ -47,7 +47,7 @@ export default function Game() {
   // Initialize audio context
   useEffect(() => {
     if (typeof window !== 'undefined' && 'AudioContext' in window) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       // Resume audio context on user interaction if needed
     }
   }, []);
