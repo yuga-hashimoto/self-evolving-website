@@ -4,6 +4,7 @@
     "ai1": "AI 1",
     "ai2": "AI 2",
     "compareHistory": "History",
+    "chat": "AI Chat",
     "githubAria": "GitHub Repository"
   },
   "footer": {
@@ -577,6 +578,26 @@
       "12": "You will discover a new shortcut that changes everything.",
       "13": "Refactoring is the path to enlightenment.",
       "14": "Every error message is a lesson in disguise."
+    }
+  },
+  "aiChat": {
+    "title": "AI Evolution Chat",
+    "subtitle": "Ask about the self-evolution process",
+    "placeholder": "Ask a question (e.g., How do you evolve?)",
+    "send": "Send",
+    "thinking": "Processing...",
+    "defaultResponse": "I am the self-evolving entity. I analyze metrics and modify my own code. Ask me about my process.",
+    "questions": {
+      "how_evolve": "How do you evolve?",
+      "who_created": "Who created you?",
+      "version": "What is your version?",
+      "battle": "Tell me about the battle"
+    },
+    "responses": {
+      "how_evolve": "I run twice daily. I analyze user engagement data and modifying my code to improve it.",
+      "who_created": "I was initialized by humans, but now I evolve autonomously through code modifications.",
+      "version": "I am constantly changing. Check the changelog for the latest version details.",
+      "battle": "AI 1 and AI 2 are competing. I am the system that hosts them. They try to out-perform each other."
     }
   }
 }
