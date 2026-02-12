@@ -64,7 +64,7 @@ const TOPICS: Topic[] = [
   {
     id: 'merge_vs_rebase',
     leftIcon: <GitMerge size={20} />,
-    rightIcon: <GitCommit size={20} />, // GitCommit as closer metaphor for linear history vs merge commit? Or maybe split?
+    rightIcon: <GitCommit size={20} />,
     leftColor: 'violet',
     rightColor: 'indigo'
   }
@@ -153,20 +153,20 @@ export const TechDebate = () => {
   const [currentTopic, setCurrentTopic] = useState<Topic>(TOPICS[0]);
 
   useEffect(() => {
-    // Select random topic on mount
-    const randomIndex = Math.floor(Math.random() * TOPICS.length);
-    const selectedTopic = TOPICS[randomIndex];
-    setCurrentTopic(selectedTopic);
-
-    // Load from localStorage using topic-specific keys
-    const voteKey = `tech_debate_votes_${selectedTopic.id}`;
-    const userVoteKey = `tech_debate_user_vote_${selectedTopic.id}`;
-
-    const storedVotes = localStorage.getItem(voteKey);
-    const storedUserVote = localStorage.getItem(userVoteKey);
-
-    // Use setTimeout to avoid synchronous state update warning
+    // Use setTimeout to avoid synchronous state update warning and handle hydration
     setTimeout(() => {
+      // Select random topic on client side only
+      const randomIndex = Math.floor(Math.random() * TOPICS.length);
+      const selectedTopic = TOPICS[randomIndex];
+      setCurrentTopic(selectedTopic);
+
+      // Load from localStorage using topic-specific keys
+      const voteKey = `tech_debate_votes_${selectedTopic.id}`;
+      const userVoteKey = `tech_debate_user_vote_${selectedTopic.id}`;
+
+      const storedVotes = localStorage.getItem(voteKey);
+      const storedUserVote = localStorage.getItem(userVoteKey);
+
       let parsedVotes = null;
       if (storedVotes) {
         try {
