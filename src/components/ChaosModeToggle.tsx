@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Zap, ZapOff } from "lucide-react";
+import { useAchievements } from "@/components/features/achievements/AchievementsContext";
 
 export default function ChaosModeToggle() {
   const [isActive, setIsActive] = useState(false);
+  const { unlockAchievement } = useAchievements();
 
   useEffect(() => {
     // If we just deactivated, clear everything
@@ -27,6 +29,7 @@ export default function ChaosModeToggle() {
       return;
     }
 
+    unlockAchievement('chaos_agent');
     document.body.classList.add('chaos-mode-active');
 
     const randomColor = () => `#${Math.floor(Math.random()*16777215).toString(16)}`;

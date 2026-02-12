@@ -19,6 +19,10 @@ import { CyberPet } from "@/components/features/CyberPet";
 import StickySupportBanner from "@/components/StickySupportBanner";
 import KofiNudge from "@/components/KofiNudge";
 import { GlobalKonamiListener } from "@/components/features/GlobalKonamiListener";
+import { AchievementsProvider } from "@/components/features/achievements/AchievementsContext";
+import GlobalAchievementListener from "@/components/features/achievements/GlobalAchievementListener";
+import AchievementToast from "@/components/features/achievements/AchievementToast";
+import AchievementModal from "@/components/features/achievements/AchievementModal";
 import { siteMetadata, siteViewport } from "@/lib/seo-config";
 
 export const metadata: Metadata = siteMetadata;
@@ -46,21 +50,27 @@ export default async function RootLayout({
           Skip to main content
         </a>
         <NextIntlClientProvider messages={messages} timeZone="Asia/Tokyo" now={new Date()}>
-          <AnalyticsProvider>
-            <Header />
-            <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
-            <Footer />
-            <AiConcierge />
-            <BuyMeCoffeeWidget />
-            <TipJar />
-            <ShareModal />
-            <ShareStatus />
-            <RoastOMeter />
-            <CyberPet />
-            <StickySupportBanner />
-            <KofiNudge />
-            <GlobalKonamiListener />
-            {/* Persistent Support Us Button - Commented out in favor of StickySupportBanner */}
+          <AchievementsProvider>
+            <AnalyticsProvider>
+              <Header />
+              <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
+              <Footer />
+              <AiConcierge />
+              <BuyMeCoffeeWidget />
+              <TipJar />
+              <ShareModal />
+              <ShareStatus />
+              <RoastOMeter />
+              <CyberPet />
+              <StickySupportBanner />
+              <KofiNudge />
+              <GlobalKonamiListener />
+              <GlobalAchievementListener />
+              <AchievementToast />
+              <AchievementModal />
+              {/* Persistent Support Us Button - Commented out in favor of StickySupportBanner */}
+            </AnalyticsProvider>
+          </AchievementsProvider>
             {/* <a
               href="/donate"
               className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border border-white/20 animate-pulse"
@@ -69,7 +79,6 @@ export default async function RootLayout({
               <span>☕</span>
               <span>Support Us</span>
             </a> */}
-          </AnalyticsProvider>
         </NextIntlClientProvider>
       </body>
     </html>

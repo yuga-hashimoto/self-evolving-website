@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useAchievements } from '@/components/features/achievements/AchievementsContext';
 
 const ThemeToggle: React.FC = () => {
   const [theme, setTheme] = useState('light'); // Default to light
+  const { unlockAchievement } = useAchievements();
 
   useEffect(() => {
     // Check localStorage on mount
@@ -35,6 +37,8 @@ const ThemeToggle: React.FC = () => {
     
     document.documentElement.classList.remove('light', 'dark', 'cyberpunk', 'retro');
     document.documentElement.classList.add(nextTheme);
+
+    unlockAchievement('theme_explorer');
   };
 
   return (

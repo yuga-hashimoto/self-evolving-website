@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
+import { useAchievements } from './achievements/AchievementsContext';
 
 const KONAMI_CODE = [
   'ArrowUp',
@@ -18,6 +19,7 @@ const KONAMI_CODE = [
 
 export const GlobalKonamiListener = () => {
   const indexRef = useRef(0);
+  const { unlockAchievement } = useAchievements();
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -33,6 +35,7 @@ export const GlobalKonamiListener = () => {
         indexRef.current += 1;
         if (indexRef.current === KONAMI_CODE.length) {
           triggerConfetti();
+          unlockAchievement('konami_master');
           indexRef.current = 0;
         }
       } else {

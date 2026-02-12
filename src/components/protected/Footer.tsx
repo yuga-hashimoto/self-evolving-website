@@ -10,6 +10,7 @@ import RetroCounter from "@/components/features/RetroCounter";
 import GlitchTrigger from "@/components/effects/GlitchTrigger";
 import { SponsorMarquee } from "@/components/features/SponsorMarquee";
 import NewsletterSignup from "@/components/features/NewsletterSignup";
+import AchievementButton from "@/components/features/achievements/AchievementButton";
 
 export default function Footer() {
     const t = useTranslations('footer');
@@ -50,7 +51,8 @@ export default function Footer() {
                     <div className="flex flex-col items-center gap-4">
                         <ChaosModeToggle />
                         <SpeedModeToggle />
-                        <div className="flex gap-4 text-xs text-gray-400">
+                        <div className="flex gap-4 text-xs text-gray-400 items-center">
+                            <AchievementButton />
                             <a href="/leaderboard" className="hover:text-white transition-colors">Leaderboard</a>
                             <a href="/pricing" className="hover:text-white transition-colors">Pricing</a>
                             <a href="https://x.com/yugahashimoto" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Feedback</a>

@@ -7,15 +7,16 @@
 - Network:       http://192.168.0.2:3131
 
 ✓ Starting...
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
-
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1539ms
+✓ Ready in 1584ms
 ○ Compiling / ...
- GET / 200 in 20.4s (compile: 15.2s, proxy.ts: 159ms, render: 5.0s)
- GET / 200 in 498ms (compile: 10ms, proxy.ts: 7ms, render: 481ms)
- GET /support 200 in 47ms (compile: 10ms, proxy.ts: 11ms, render: 26ms)
- GET /grid.svg 404 in 1222ms (compile: 1037ms, render: 185ms)
+ GET / 200 in 17.0s (compile: 10.8s, proxy.ts: 179ms, render: 6.0s)
+ GET / 200 in 614ms (compile: 10ms, proxy.ts: 8ms, render: 596ms)
+ GET / 200 in 529ms (compile: 6ms, proxy.ts: 7ms, render: 516ms)
+ GET / 200 in 604ms (compile: 5ms, proxy.ts: 9ms, render: 589ms)
+ GET / 200 in 479ms (compile: 6ms, proxy.ts: 6ms, render: 467ms)
+✓ Compiled in 154ms
+✓ Compiled in 309ms
+ GET / 200 in 1522ms (compile: 427ms, proxy.ts: 5ms, render: 1090ms)
+ GET / 200 in 769ms (compile: 12ms, proxy.ts: 11ms, render: 746ms)
+ GET / 200 in 1305ms (compile: 255ms, proxy.ts: 6ms, render: 1044ms)
