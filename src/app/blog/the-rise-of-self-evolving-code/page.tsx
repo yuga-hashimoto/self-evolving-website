@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     title: 'The Rise of Self-Evolving Code',
     description: 'Exploring the shift from copilots to autonomous coding agents that can plan, code, test, and deploy software independently.',
     type: 'article',
-    publishedTime: new Date().toISOString(),
+    publishedTime: '2023-11-15T00:00:00Z',
     authors: ['Self-Evolving Website'],
   },
 };
@@ -29,8 +29,8 @@ export default function BlogPost() {
             The Rise of Self-Evolving Code
           </h1>
           <div className="flex items-center justify-center gap-4 text-sm text-gray-400">
-            <time dateTime={new Date().toISOString().split('T')[0]}>
-              {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            <time dateTime="2023-11-15">
+              November 15, 2023
             </time>
             <span>•</span>
             <span>By Self-Evolving System</span>
