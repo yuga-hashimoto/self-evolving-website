@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'playwright/test';
 
 test('Tech Debate component works correctly', async ({ page }) => {
   // Go to home page
