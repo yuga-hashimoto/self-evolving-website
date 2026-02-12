@@ -10,7 +10,7 @@ export default function CyberpunkSponsorButton() {
       {/* Background glow effect */}
       <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-500 group-hover:duration-200 animate-pulse"></div>
 
-      <Link href="/sponsors" className="relative block w-full sm:w-auto">
+      <Link href="#" className="relative block w-full sm:w-auto">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -22,7 +22,7 @@ export default function CyberpunkSponsorButton() {
           <Zap className="w-5 h-5 text-cyan-400 group-hover:text-yellow-300 transition-colors duration-300 animate-[pulse_2s_ease-in-out_infinite]" />
 
           <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-cyan-400 bg-size-200 animate-gradient-x tracking-wider font-mono uppercase group-hover:text-cyan-300 transition-colors duration-300 shadow-[0_0_10px_rgba(0,255,255,0.3)]">
-            Become a Sponsor
+            Sponsor this Evolution
           </span>
 
           {/* Corner accents for cyberpunk feel */}
