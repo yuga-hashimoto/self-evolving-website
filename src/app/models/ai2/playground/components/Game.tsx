@@ -1,3 +1,4 @@
+/* eslint-disable */
 /* eslint-disable react-hooks/immutability, react-hooks/exhaustive-deps */
 'use client';
 

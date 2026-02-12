@@ -10,6 +10,7 @@ import RetroCounter from "@/components/features/RetroCounter";
 import GlitchTrigger from "@/components/effects/GlitchTrigger";
 import { SponsorMarquee } from "@/components/features/SponsorMarquee";
 import NewsletterSignup from "@/components/features/NewsletterSignup";
+import CarbonFootprintTracker from "@/components/features/CarbonFootprintTracker";
 
 export default function Footer() {
     const t = useTranslations('footer');
@@ -59,6 +60,7 @@ export default function Footer() {
                         </div>
                     </div>
                     <RetroCounter />
+                    <CarbonFootprintTracker />
                     <p className="text-center text-xs text-gray-500">
                         {t('copyright')}
                     </p>
