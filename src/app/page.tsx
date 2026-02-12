@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { KonamiChaos } from '@/components/features/KonamiChaos';
 import { StickyAd } from '@/components/features/StickyAd';
 import { LiveVisitorCount } from '@/components/features/LiveVisitorCount';
@@ -52,8 +53,11 @@ import { TechDebate } from '@/components/features/TechDebate';
 
 // Engagement & Monetization Boost (Jules)
 import BattleLogTicker from "@/components/BattleLogTicker";
-import VoteWidget from "@/components/VoteWidget";
 import SupportButton from "@/components/SupportButton";
+
+const VoteWidget = dynamic(() => import('@/components/VoteWidget'), {
+  loading: () => <div className="h-32 animate-pulse bg-white/5 rounded-xl my-6" />
+});
 import RandomQuote from "@/components/features/RandomQuote";
 import DailyGreeting from "@/components/features/DailyGreeting";
 // Jules Batch 3
