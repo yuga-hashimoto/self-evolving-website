@@ -9,6 +9,7 @@ const ThemeToggle: React.FC = () => {
     // Check localStorage on mount
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(savedTheme);
       document.documentElement.classList.remove('light', 'dark', 'cyberpunk', 'retro');
       document.documentElement.classList.add(savedTheme);

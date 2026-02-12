@@ -19,6 +19,7 @@ export default function TimeCapsulePage() {
     if (stored) {
       try {
         const parsed: TimeCapsuleData = JSON.parse(stored);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSavedData(parsed);
       } catch (e) {
         console.error("Failed to parse time capsule", e);

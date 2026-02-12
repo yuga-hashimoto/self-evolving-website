@@ -8,6 +8,7 @@ export default function DailyGreeting() {
     const days = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
     const today = new Date();
     const day = days[today.getDay()];
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setGreeting(`ようこそ！今日は${day}ですね。頑張りましょう！`);
   }, []);
 

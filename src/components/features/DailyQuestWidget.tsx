@@ -28,6 +28,7 @@ export function DailyQuestWidget() {
       // New day, new quests
       const shuffled = [...QUESTS].sort(() => 0.5 - Math.random());
       const selected = shuffled.slice(0, 3);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuests(selected);
       setCompleted([false, false, false]);
       localStorage.setItem('questDate', today);

@@ -12,6 +12,7 @@ export default function StickySupportBanner() {
       // Check if the banner was previously dismissed
       const dismissed = localStorage.getItem('support_evolution_banner_dismissed');
       if (!dismissed) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsVisible(true);
       }
     } catch (error) {

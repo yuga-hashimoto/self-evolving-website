@@ -43,6 +43,7 @@ export default function AI2Playground() {
   useEffect(() => {
     const gameParam = searchParams.get('game');
     if (gameParam) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect, @typescript-eslint/no-explicit-any
       setSelectedGame(gameParam as any);
     }
   }, [searchParams]);

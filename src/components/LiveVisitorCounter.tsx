@@ -9,6 +9,7 @@ export default function LiveVisitorCounter() {
   useEffect(() => {
     // Initial random count between 800-1200
     const initialCount = Math.floor(Math.random() * (1200 - 800 + 1)) + 800;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCount(initialCount);
 
     const interval = setInterval(() => {

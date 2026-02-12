@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -32,6 +33,7 @@ const Ghost = ({ id }: { id: number }) => {
                 <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path>
             </svg>
             <span className="bg-purple-600 text-white text-[10px] px-1 rounded ml-4">
+
                 User #{Math.floor(Math.random() * 9999)}
             </span>
         </div>

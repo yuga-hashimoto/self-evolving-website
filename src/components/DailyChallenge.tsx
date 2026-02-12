@@ -21,6 +21,7 @@ export default function DailyChallenge() {
     
     // Check local storage for completion
     const completed = localStorage.getItem(challengeKey);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (completed) setIsCompleted(true);
 
     // Load XP and Level

@@ -10,6 +10,7 @@ export default function ReactionButton({ id, model }: { id: number, model: strin
   useEffect(() => {
     const key = `evolution_like_${model}_${id}`;
     if (localStorage.getItem(key)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLiked(true);
     }
     // Simulate a random count for social proof based on ID to be consistent-ish

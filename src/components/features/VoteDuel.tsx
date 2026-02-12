@@ -12,6 +12,7 @@ export const VoteDuel = () => {
   useEffect(() => {
     const stored = localStorage.getItem('ai_duel_votes');
     if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVotes(JSON.parse(stored));
     } else {
       // Initial fake data

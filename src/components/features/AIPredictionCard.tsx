@@ -14,6 +14,7 @@ const PREDICTIONS = [
 ];
 
 export function AIPredictionCard() {
+  // eslint-disable-next-line react-hooks/purity
   const [prediction, setPrediction] = useState(PREDICTIONS[Math.floor(Math.random() * PREDICTIONS.length)]);
 
   const generate = () => {
@@ -31,7 +32,7 @@ export function AIPredictionCard() {
         Oracle v9.0
       </p>
       <p className="text-xl font-bold text-white mb-4 min-h-[4rem] flex items-center justify-center">
-        "{prediction}"
+        &quot;{prediction}&quot;
       </p>
       <button 
         onClick={generate}

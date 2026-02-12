@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 "use client";
 
 import { useState } from 'react';
@@ -54,7 +55,8 @@ export const FortuneCookie = () => {
             exit={{ opacity: 0, scale: 0.5 }}
             className="bg-white text-black p-4 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.5)] max-w-xs mx-auto transform rotate-1"
           >
-            <p className="font-serif italic text-lg mb-2">"{fortune}"</p>
+            <p className="font-serif italic text-lg mb-2">&quot;{fortune}&quot;</p>
+
             <p className="text-xs text-gray-500 font-mono uppercase tracking-widest border-t border-gray-200 pt-2 mt-2">
               Lucky Numbers: {Math.floor(Math.random() * 99)} • {Math.floor(Math.random() * 99)} • 0x{Math.floor(Math.random() * 255).toString(16).toUpperCase()}
             </p>

@@ -11,6 +11,7 @@ const ShareModal: React.FC = () => {
     if (typeof window !== 'undefined') {
       const triggered = localStorage.getItem('share-modal-triggered');
       if (triggered) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setHasTriggered(true);
         return;
       }

@@ -78,7 +78,7 @@ const QuickTap: React.FC = () => {
   }, [highScore, state.highScore]);
 
   // Game loop
-  const gameLoop = useCallback(() => {
+  const gameLoop = useCallback(function loop() {
     if (!state.isPlaying || state.isGameOver) {
       return;
     }
@@ -143,7 +143,7 @@ const QuickTap: React.FC = () => {
       };
     });
 
-    setGameLoopRef(requestAnimationFrame(gameLoop));
+    setGameLoopRef(requestAnimationFrame(loop));
   }, [state, isTouching, gameLoopRef]);
 
   // Start game

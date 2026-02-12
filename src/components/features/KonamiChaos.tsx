@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,6 +10,22 @@ export const KonamiChaos = () => {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
+    const activateChaos = () => {
+      setActive(true);
+      confetti({
+        particleCount: 500,
+        spread: 200,
+        origin: { y: 0.6 }
+      });
+      document.body.style.transform = 'rotate(180deg)';
+      document.body.style.transition = 'transform 1s ease';
+
+      setTimeout(() => {
+        document.body.style.transform = 'rotate(0deg)';
+        setActive(false);
+      }, 5000);
+    };
+
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === sequence[index]) {
         if (index === sequence.length - 1) {
@@ -24,23 +41,7 @@ export const KonamiChaos = () => {
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [index]);
-
-  const activateChaos = () => {
-    setActive(true);
-    confetti({
-      particleCount: 500,
-      spread: 200,
-      origin: { y: 0.6 }
-    });
-    document.body.style.transform = 'rotate(180deg)';
-    document.body.style.transition = 'transform 1s ease';
-    
-    setTimeout(() => {
-      document.body.style.transform = 'rotate(0deg)';
-      setActive(false);
-    }, 5000);
-  };
+  }, [index, sequence]);
 
   return active ? (
     <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">

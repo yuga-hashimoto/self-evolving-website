@@ -19,6 +19,7 @@ export function EngagementBoosters() {
   const [votes, setVotes] = useState({ ai1: 42, ai2: 58 });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     
     // Init Counter
@@ -72,7 +73,7 @@ export function EngagementBoosters() {
       {/* 2. Daily Wisdom */}
       <div className="glass-card p-4 border-yellow-500/30">
         <h3 className="text-xs font-bold text-yellow-300 mb-2 uppercase tracking-wider">Daily Wisdom</h3>
-        <p className="text-sm italic text-gray-300">"{quote}"</p>
+        <p className="text-sm italic text-gray-300">&quot;{quote}&quot;</p>
       </div>
 
       {/* 3. Retro Counter & Dark Mode */}

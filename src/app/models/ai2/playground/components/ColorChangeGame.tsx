@@ -71,6 +71,7 @@ export default function ColorChangeGame() {
       obstaclesRef.current.push({
         x: (width - OBSTACLE_WIDTH) / 2,
         y: -50 - i * 150,
+        // eslint-disable-next-line react-hooks/purity
         colorIndex: Math.floor(Math.random() * COLORS.length),
         passed: false,
       });

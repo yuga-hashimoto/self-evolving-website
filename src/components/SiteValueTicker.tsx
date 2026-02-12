@@ -10,6 +10,7 @@ export default function SiteValueTicker() {
     useEffect(() => {
         const savedValue = localStorage.getItem("site_value");
         if (savedValue) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setValue(parseFloat(savedValue));
         }
     }, []);

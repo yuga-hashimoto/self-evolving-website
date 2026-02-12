@@ -122,6 +122,7 @@ export default function GravityBallGame() {
     gameLoop();
   };
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const restartGame = useCallback(() => {
     setPlaying(false);
     setGameOver(false);

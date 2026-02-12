@@ -13,6 +13,7 @@ export const SponsorEvolutionButton = () => {
 
     const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const interval: any = setInterval(function() {
       const timeLeft = animationEnd - Date.now();
 

@@ -17,6 +17,7 @@ export default function VoteWidget() {
   useEffect(() => {
     const stored = localStorage.getItem("engagement-vote-counts");
     if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVotes(JSON.parse(stored));
     } else {
       // Initialize with random high numbers

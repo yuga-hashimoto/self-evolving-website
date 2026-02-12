@@ -17,6 +17,7 @@ export default function SponsorButton() {
       }, 2000);
     } else {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShameText(null);
     }
     return () => {

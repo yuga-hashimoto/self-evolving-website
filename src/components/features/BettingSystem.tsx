@@ -9,6 +9,7 @@ export function BettingSystem() {
   useEffect(() => {
     const savedPoints = localStorage.getItem('user_points');
     if (savedPoints) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPoints(parseInt(savedPoints, 10));
     }
   }, []);

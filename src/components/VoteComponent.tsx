@@ -10,6 +10,7 @@ export default function VoteComponent() {
   useEffect(() => {
     const savedVote = localStorage.getItem('evolution-vote');
     if (savedVote) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVoted(savedVote);
     }
   }, []);

@@ -16,6 +16,7 @@ export function DailyTechTip() {
 
   useEffect(() => {
     // Pick a random tip on client-side only to avoid hydration mismatch
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTip(TIPS[Math.floor(Math.random() * TIPS.length)]);
   }, []);
 

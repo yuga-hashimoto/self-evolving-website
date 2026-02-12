@@ -11,12 +11,14 @@ export default function ClickCounter() {
   useEffect(() => {
     const storedCount = localStorage.getItem('click_count');
     if (storedCount) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCount(parseInt(storedCount));
     }
   }, []);
 
   useEffect(() => {
     localStorage.setItem('click_count', count.toString());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (count <= 10) setLevel('Novice');
     else if (count <= 50) setLevel('Clicker');
     else setLevel('Master');

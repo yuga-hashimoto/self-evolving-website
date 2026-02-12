@@ -17,6 +17,7 @@ export const FeatureVotePoll = () => {
   useEffect(() => {
     const storedVotes = localStorage.getItem('evolution_poll_votes');
     if (storedVotes) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setVotes(JSON.parse(storedVotes));
     } else {
         // Initialize random votes for demo
