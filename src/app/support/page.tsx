@@ -27,7 +27,7 @@ export default function SupportPage() {
 
       <p className="text-gray-400 text-center max-w-2xl mb-16 text-lg">
         Your contributions fuel the continuous development of our self-evolving AI.
-        Help us push the boundaries of what's possible with autonomous code generation.
+        Help us push the boundaries of what&apos;s possible with autonomous code generation.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl mb-16">
