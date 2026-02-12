@@ -5,6 +5,7 @@ import { StickyAd } from '@/components/features/StickyAd';
 import { LiveVisitorCount } from '@/components/features/LiveVisitorCount';
 import { GhostCursors } from '@/components/features/GhostCursors';
 import { SponsorMarquee } from '@/components/features/SponsorMarquee';
+import { SponsorSpotlight } from '@/components/features/SponsorSpotlight';
 import { VoteDuel } from '@/components/features/VoteDuel';
 import { AdBanner } from '@/components/AdBanner';
 import { IconDNA, IconAi1, IconAi2, IconX } from "@/components/icons/Icons";
@@ -122,6 +123,7 @@ export default async function Home() {
       <MemeGenerator />
       <GhostCursors />
       <StockTicker />
+      <SponsorSpotlight />
       <SponsorMarquee />
       <TrashTalkTicker />
       <DailyChallenge />

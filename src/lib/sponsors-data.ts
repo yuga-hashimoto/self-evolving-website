@@ -7,6 +7,7 @@ export interface Sponsor {
   logoId: string;
   url?: string;
   description?: string;
+  isSpotlight?: boolean;
 }
 
 export const SPONSORS: Sponsor[] = [
@@ -72,6 +73,7 @@ export const SPONSORS: Sponsor[] = [
     tier: 'platinum',
     logoId: 'x',
     url: 'https://twitter.com',
-    description: 'The everything app.'
+    description: 'The everything app.',
+    isSpotlight: true
   }
 ];
