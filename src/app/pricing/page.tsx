@@ -21,7 +21,7 @@ export default function PricingPage() {
             isRecommended: false,
             ctaText: "Start Free",
             ctaLink: "/login",
-            tierColor: "blue"
+            tierColor: "blue" as const
         },
         {
             title: "Cyber",
@@ -39,7 +39,7 @@ export default function PricingPage() {
             isRecommended: true,
             ctaText: "Upgrade to Cyber",
             ctaLink: "/sponsor",
-            tierColor: "purple"
+            tierColor: "purple" as const
         },
         {
             title: "Legend",
@@ -56,7 +56,7 @@ export default function PricingPage() {
             isRecommended: false,
             ctaText: "Become a Legend",
             ctaLink: "/sponsor",
-            tierColor: "pink"
+            tierColor: "pink" as const
         }
     ];
 

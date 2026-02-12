@@ -4,8 +4,8 @@ import Link from 'next/link';
 
 interface PricingCardProps {
   title: string;
-  price: string;
-  originalPrice?: string;
+  price: string | number;
+  originalPrice?: string | number;
   description: string;
   features: string[];
   isRecommended?: boolean;
@@ -15,28 +15,56 @@ interface PricingCardProps {
   billingCycle: 'monthly' | 'yearly';
 }
 
-const colorMap: Record<string, string> = {
-  blue: 'border-blue-500/30 hover:border-blue-500 shadow-blue-500/20 text-blue-400',
-  purple: 'border-purple-500/30 hover:border-purple-500 shadow-purple-500/20 text-purple-400',
-  pink: 'border-pink-500/30 hover:border-pink-500 shadow-pink-500/20 text-pink-400',
-  orange: 'border-orange-500/30 hover:border-orange-500 shadow-orange-500/20 text-orange-400',
-  cyan: 'border-cyan-500/30 hover:border-cyan-500 shadow-cyan-500/20 text-cyan-400',
-};
+interface ColorScheme {
+  border: string;
+  hoverBorder: string;
+  shadow: string;
+  text: string;
+  button: string;
+  glow: string;
+}
 
-const buttonColorMap: Record<string, string> = {
-  blue: 'bg-blue-500 hover:bg-blue-400 shadow-blue-500/50',
-  purple: 'bg-purple-500 hover:bg-purple-400 shadow-purple-500/50',
-  pink: 'bg-pink-500 hover:bg-pink-400 shadow-pink-500/50',
-  orange: 'bg-orange-500 hover:bg-orange-400 shadow-orange-500/50',
-  cyan: 'bg-cyan-500 hover:bg-cyan-400 shadow-cyan-500/50',
-};
-
-const glowMap: Record<string, string> = {
-  blue: 'shadow-[0_0_30px_-5px_rgba(59,130,246,0.3)] hover:shadow-[0_0_40px_0px_rgba(59,130,246,0.5)]',
-  purple: 'shadow-[0_0_30px_-5px_rgba(168,85,247,0.3)] hover:shadow-[0_0_40px_0px_rgba(168,85,247,0.5)]',
-  pink: 'shadow-[0_0_30px_-5px_rgba(236,72,153,0.3)] hover:shadow-[0_0_40px_0px_rgba(236,72,153,0.5)]',
-  orange: 'shadow-[0_0_30px_-5px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_0px_rgba(249,115,22,0.5)]',
-  cyan: 'shadow-[0_0_30px_-5px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_0px_rgba(6,182,212,0.5)]',
+const colorMap: Record<string, ColorScheme> = {
+  blue: {
+    border: 'border-blue-500/30',
+    hoverBorder: 'hover:border-blue-500',
+    shadow: 'shadow-blue-500/20',
+    text: 'text-blue-400',
+    button: 'bg-blue-500 hover:bg-blue-400 shadow-blue-500/50',
+    glow: 'shadow-[0_0_30px_-5px_rgba(59,130,246,0.3)] hover:shadow-[0_0_40px_0px_rgba(59,130,246,0.5)]',
+  },
+  purple: {
+    border: 'border-purple-500/30',
+    hoverBorder: 'hover:border-purple-500',
+    shadow: 'shadow-purple-500/20',
+    text: 'text-purple-400',
+    button: 'bg-purple-500 hover:bg-purple-400 shadow-purple-500/50',
+    glow: 'shadow-[0_0_30px_-5px_rgba(168,85,247,0.3)] hover:shadow-[0_0_40px_0px_rgba(168,85,247,0.5)]',
+  },
+  pink: {
+    border: 'border-pink-500/30',
+    hoverBorder: 'hover:border-pink-500',
+    shadow: 'shadow-pink-500/20',
+    text: 'text-pink-400',
+    button: 'bg-pink-500 hover:bg-pink-400 shadow-pink-500/50',
+    glow: 'shadow-[0_0_30px_-5px_rgba(236,72,153,0.3)] hover:shadow-[0_0_40px_0px_rgba(236,72,153,0.5)]',
+  },
+  orange: {
+    border: 'border-orange-500/30',
+    hoverBorder: 'hover:border-orange-500',
+    shadow: 'shadow-orange-500/20',
+    text: 'text-orange-400',
+    button: 'bg-orange-500 hover:bg-orange-400 shadow-orange-500/50',
+    glow: 'shadow-[0_0_30px_-5px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_0px_rgba(249,115,22,0.5)]',
+  },
+  cyan: {
+    border: 'border-cyan-500/30',
+    hoverBorder: 'hover:border-cyan-500',
+    shadow: 'shadow-cyan-500/20',
+    text: 'text-cyan-400',
+    button: 'bg-cyan-500 hover:bg-cyan-400 shadow-cyan-500/50',
+    glow: 'shadow-[0_0_30px_-5px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_0px_rgba(6,182,212,0.5)]',
+  },
 };
 
 export default function PricingCard({
@@ -52,17 +80,14 @@ export default function PricingCard({
   billingCycle
 }: PricingCardProps) {
 
-  const borderColor = colorMap[tierColor].split(' ')[0];
-  const hoverBorderColor = colorMap[tierColor].split(' ')[1];
-  const textColor = colorMap[tierColor].split(' ').pop();
-  const buttonClass = buttonColorMap[tierColor];
-  const glowClass = glowMap[tierColor];
+  const colors = colorMap[tierColor];
 
   return (
     <div
       className={`
         relative flex flex-col p-8 rounded-2xl glass-card border transition-all duration-300 transform hover:-translate-y-2
-        ${borderColor} ${hoverBorderColor} ${isRecommended ? glowClass : 'hover:shadow-lg'}
+        ${colors.border} ${colors.hoverBorder}
+        ${isRecommended ? colors.glow : `${colors.shadow} hover:shadow-lg`}
         ${isRecommended ? 'scale-105 z-10' : 'scale-100 z-0'}
       `}
     >
@@ -79,7 +104,7 @@ export default function PricingCard({
       )}
 
       <div className="mb-6">
-        <h3 className={`text-xl font-bold uppercase tracking-widest mb-2 ${textColor}`}>
+        <h3 className={`text-xl font-bold uppercase tracking-widest mb-2 ${colors.text}`}>
           {title}
         </h3>
         <p className="text-gray-400 text-sm min-h-[40px]">{description}</p>
@@ -101,7 +126,7 @@ export default function PricingCard({
         {features.map((feature, index) => (
           <li key={index} className="flex items-start gap-3 text-sm text-gray-300 group">
             <div className={`mt-0.5 p-0.5 rounded-full bg-white/5 group-hover:bg-white/10 transition-colors`}>
-              <Check size={14} className={textColor} />
+              <Check size={14} className={colors.text} />
             </div>
             <span>{feature}</span>
           </li>
@@ -112,7 +137,7 @@ export default function PricingCard({
         href={ctaLink}
         className={`
           w-full py-3 px-6 rounded-lg font-bold text-center text-white transition-all duration-300
-          ${buttonClass} hover:shadow-lg active:scale-95 flex items-center justify-center gap-2
+          ${colors.button} hover:shadow-lg active:scale-95 flex items-center justify-center gap-2
         `}
       >
         {isRecommended && <Zap size={18} className="fill-current" />}
@@ -120,10 +145,10 @@ export default function PricingCard({
       </Link>
 
       {/* Futuristic corner accents */}
-      <div className={`absolute top-0 left-0 w-2 h-2 border-t border-l ${textColor} opacity-50 rounded-tl-lg`} />
-      <div className={`absolute top-0 right-0 w-2 h-2 border-t border-r ${textColor} opacity-50 rounded-tr-lg`} />
-      <div className={`absolute bottom-0 left-0 w-2 h-2 border-b border-l ${textColor} opacity-50 rounded-bl-lg`} />
-      <div className={`absolute bottom-0 right-0 w-2 h-2 border-b border-r ${textColor} opacity-50 rounded-br-lg`} />
+      <div className={`absolute top-0 left-0 w-2 h-2 border-t border-l ${colors.text} opacity-50 rounded-tl-lg`} />
+      <div className={`absolute top-0 right-0 w-2 h-2 border-t border-r ${colors.text} opacity-50 rounded-tr-lg`} />
+      <div className={`absolute bottom-0 left-0 w-2 h-2 border-b border-l ${colors.text} opacity-50 rounded-bl-lg`} />
+      <div className={`absolute bottom-0 right-0 w-2 h-2 border-b border-r ${colors.text} opacity-50 rounded-br-lg`} />
     </div>
   );
 }

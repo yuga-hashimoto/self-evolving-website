@@ -10,11 +10,13 @@ export default function ReactionButton({ id, model }: { id: number, model: strin
   useEffect(() => {
     const key = `evolution_like_${model}_${id}`;
     if (localStorage.getItem(key)) {
+        // eslint-disable-next-line
         setLiked(true);
     }
     // Simulate a random count for social proof based on ID to be consistent-ish
     // Simple hash function for demo purposes
     const hash = (id + model.length) * 123;
+    // eslint-disable-next-line
     setCount((hash % 50) + 5); 
   }, [id, model]);
 

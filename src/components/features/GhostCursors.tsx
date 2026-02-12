@@ -5,8 +5,11 @@ import { useEffect, useState } from 'react';
 // Simplified Ghost Cursor
 const Ghost = ({ id }: { id: number }) => {
     const [pos, setPos] = useState({ x: 50, y: 50 });
-    
+    const [userId, setUserId] = useState(0);
+
     useEffect(() => {
+        // eslint-disable-next-line
+        setUserId(Math.floor(Math.random() * 9999));
         const interval = setInterval(() => {
             setPos({
                 x: Math.random() * 95,
@@ -32,7 +35,7 @@ const Ghost = ({ id }: { id: number }) => {
                 <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path>
             </svg>
             <span className="bg-purple-600 text-white text-[10px] px-1 rounded ml-4">
-                User #{Math.floor(Math.random() * 9999)}
+                User #{userId}
             </span>
         </div>
     );

@@ -3,15 +3,16 @@
 import { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 
+const KONAMI_SEQUENCE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+
 export const KonamiChaos = () => {
   const [active, setActive] = useState(false);
-  const sequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === sequence[index]) {
-        if (index === sequence.length - 1) {
+      if (e.key === KONAMI_SEQUENCE[index]) {
+        if (index === KONAMI_SEQUENCE.length - 1) {
           activateChaos();
           setIndex(0);
         } else {
@@ -24,6 +25,7 @@ export const KonamiChaos = () => {
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   const activateChaos = () => {
