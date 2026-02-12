@@ -2,10 +2,16 @@
 
 import { Check, X, Crown } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import CheckoutModal from "@/components/pricing/CheckoutModal";
 
 export default function Pricing() {
-  const handleCheckout = () => {
-    alert("This is a fake checkout button, but your spirit is appreciated! 🚀");
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState(0);
+
+  const handleCheckout = (amount: number) => {
+    setSelectedAmount(amount);
+    setIsCheckoutOpen(true);
   };
 
   return (
@@ -80,7 +86,7 @@ export default function Pricing() {
             </li>
           </ul>
           <button
-            onClick={handleCheckout}
+            onClick={() => handleCheckout(1000)}
             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white py-3 rounded-lg font-bold shadow-lg transition-all"
           >
             Upgrade to Pro
@@ -151,6 +157,12 @@ export default function Pricing() {
           <span className="mr-2">←</span> Back to Home
         </Link>
       </div>
+
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        amount={selectedAmount}
+      />
     </div>
   );
 }
