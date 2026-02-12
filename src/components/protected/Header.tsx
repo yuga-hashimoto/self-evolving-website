@@ -6,6 +6,7 @@ import { IconDNA, IconChangelog, IconHome, IconAi1, IconAi2, IconRandom, IconAna
 import { useTranslations, useLocale } from 'next-intl';
 import SiteValueTicker from "@/components/SiteValueTicker";
 import LiveVisitorCounter from "@/components/LiveVisitorCounter";
+import EvolutionPointsDisplay from "@/components/features/EvolutionPointsDisplay";
 import ChaosModeToggle from "@/components/ChaosModeToggle";
 import ThemeToggle from "@/components/ThemeToggle";
 import ChaosConfettiButton from "@/components/features/ChaosConfettiButton";
@@ -54,6 +55,9 @@ export default function Header() {
 
                         <div className="flex-1 flex justify-center px-1 sm:px-4 items-center gap-4">
                             <SiteValueTicker />
+                            <div className="hidden sm:block">
+                                <EvolutionPointsDisplay />
+                            </div>
                             <div className="hidden lg:block">
                                 <LiveVisitorCounter />
                             </div>
