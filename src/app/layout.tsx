@@ -9,7 +9,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
 import SEOMetaTags from "@/components/seo/SEOMetaTags";
 import AiConcierge from "@/components/AiConcierge";
-import BuyMeCoffeeWidget from "@/components/BuyMeCoffeeWidget";
+import BuyMeACoffeeWidget from "@/components/BuyMeACoffeeWidget";
+import KofiFloatingButton from "@/components/KofiFloatingButton";
 import TipJar from "@/components/TipJar";
 import ShareModal from "@/components/ShareModal";
 import ShareStatus from "@/components/ShareStatus";
@@ -51,7 +52,8 @@ export default async function RootLayout({
             <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
             <Footer />
             <AiConcierge />
-            <BuyMeCoffeeWidget />
+            <BuyMeACoffeeWidget />
+            <KofiFloatingButton />
             <TipJar />
             <ShareModal />
             <ShareStatus />
