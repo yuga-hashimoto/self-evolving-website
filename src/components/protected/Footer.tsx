@@ -11,6 +11,7 @@ import GlitchTrigger from "@/components/effects/GlitchTrigger";
 import { SponsorMarquee } from "@/components/features/SponsorMarquee";
 import NewsletterSignup from "@/components/features/NewsletterSignup";
 import CarbonFootprintTracker from "@/components/features/CarbonFootprintTracker";
+import LatestEvolution from "@/components/features/LatestEvolution";
 
 export default function Footer() {
     const t = useTranslations('footer');
@@ -59,6 +60,7 @@ export default function Footer() {
                             {/* <a href="#" className="hover:text-white transition-colors">GitHub</a> */}
                         </div>
                     </div>
+                    <LatestEvolution />
                     <RetroCounter />
                     <CarbonFootprintTracker />
                     <p className="text-center text-xs text-gray-500">
