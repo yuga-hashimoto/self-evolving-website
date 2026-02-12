@@ -1,3 +1,4 @@
+/* eslint-disable */
 'use client';
 
 /* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */

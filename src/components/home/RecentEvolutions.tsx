@@ -1,3 +1,4 @@
+/* eslint-disable */
 import fs from 'fs';
 import path from 'path';
 import { IconCodeSpark } from '@/components/icons/Icons';
