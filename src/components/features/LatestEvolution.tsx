@@ -7,7 +7,7 @@ export default function LatestEvolution() {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
+        setTimeout(() => setMounted(true), 0);
     }, []);
 
     // Mock Data - Replaceable later
