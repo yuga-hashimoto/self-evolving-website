@@ -7,6 +7,7 @@ import { Check, Copy, Rocket, Brain, Code, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { SPONSORS } from '@/lib/sponsors-data';
 import { IconAi1, IconAi2, IconDNA, IconX } from '@/components/icons/Icons';
+import { SponsorSpotlight } from '@/components/features/SponsorSpotlight';
 
 export default function SponsorsPage() {
   const [copied, setCopied] = useState<string | null>(null);
@@ -43,6 +44,8 @@ export default function SponsorsPage() {
       <p className="text-gray-400 max-w-2xl mx-auto mb-12">
         This experiment is powered by caffeine and electricity. Support the continuous evolution of AI 1 and AI 2.
       </p>
+
+      <SponsorSpotlight />
 
       {/* Ko-fi Button Big */}
       <div className="mb-16">
