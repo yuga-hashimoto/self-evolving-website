@@ -1,8 +1,25 @@
-import { test, expect } from 'playwright/test';
+import { test, expect, Page } from 'playwright/test';
+
+async function handleDailyBonus(page: Page) {
+  const modal = page.getByTestId('daily-bonus-modal');
+  try {
+    await modal.waitFor({ state: 'visible', timeout: 3000 });
+    const claimButton = page.getByTestId('daily-bonus-claim-button');
+    if (await claimButton.isVisible()) {
+      await claimButton.click();
+      await modal.waitFor({ state: 'hidden', timeout: 3000 });
+    }
+  } catch {
+    // Modal did not appear, proceed
+  }
+}
 
 test('Tech Debate component works correctly', async ({ page }) => {
   // Go to home page
   await page.goto('/');
+
+  // Handle Daily Bonus Modal if present
+  await handleDailyBonus(page);
 
   // Wait for the component to appear.
   // The title "The Eternal Tech Debate" is no longer rendered as an h3 directly.
@@ -69,6 +86,14 @@ test('Tech Debate component works correctly', async ({ page }) => {
 
   // Reload page to test persistence
   await page.reload();
+
+  // Handle Daily Bonus Modal if present (it shouldn't reappear if we claimed it, but storage might be cleared or persisted depending on context)
+  // Playwright context persists storage within a test unless cleared.
+  // But checking again is safer.
+  // However, reloading the page might re-trigger the modal check logic?
+  // UserStatsProvider runs on mount. If lastVisitDate is set, it shouldn't show.
+  // But let's handle it just in case.
+  await handleDailyBonus(page);
 
   // Wait for component to load again
   await expect(debateCard).toBeVisible();

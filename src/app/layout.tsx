@@ -21,6 +21,7 @@ import KofiNudge from "@/components/KofiNudge";
 import { GlobalKonamiListener } from "@/components/features/GlobalKonamiListener";
 import { UserStatsProvider } from "@/components/features/UserStatsProvider";
 import AchievementNotification from "@/components/features/AchievementNotification";
+import DailyLoginBonus from "@/components/features/DailyLoginBonus";
 import { siteMetadata, siteViewport } from "@/lib/seo-config";
 
 export const metadata: Metadata = siteMetadata;
@@ -64,6 +65,7 @@ export default async function RootLayout({
               <KofiNudge />
               <GlobalKonamiListener />
               <AchievementNotification />
+              <DailyLoginBonus />
             </UserStatsProvider>
             {/* Persistent Support Us Button - Commented out in favor of StickySupportBanner */}
             {/* <a
