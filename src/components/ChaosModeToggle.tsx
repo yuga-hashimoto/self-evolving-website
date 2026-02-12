@@ -2,11 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { Zap, ZapOff } from "lucide-react";
+import { useUserStats } from "@/components/features/UserStatsProvider";
 
 export default function ChaosModeToggle() {
   const [isActive, setIsActive] = useState(false);
+  const { unlockAchievement } = useUserStats();
 
   useEffect(() => {
+    if (isActive) {
+      unlockAchievement('chaos_agent');
+    }
+
     // If we just deactivated, clear everything
     if (!isActive) {
       const containers = document.querySelectorAll('main, section, header, footer, nav, aside, article, .container, .grid, .flex');
@@ -98,7 +104,7 @@ export default function ChaosModeToggle() {
       document.body.style.fontSize = '';
       document.body.classList.remove('chaos-mode-active');
     };
-  }, [isActive]);
+  }, [isActive, unlockAchievement]);
 
   return (
     <button

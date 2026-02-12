@@ -19,6 +19,8 @@ import { CyberPet } from "@/components/features/CyberPet";
 import StickySupportBanner from "@/components/StickySupportBanner";
 import KofiNudge from "@/components/KofiNudge";
 import { GlobalKonamiListener } from "@/components/features/GlobalKonamiListener";
+import { UserStatsProvider } from "@/components/features/UserStatsProvider";
+import AchievementNotification from "@/components/features/AchievementNotification";
 import { siteMetadata, siteViewport } from "@/lib/seo-config";
 
 export const metadata: Metadata = siteMetadata;
@@ -47,19 +49,22 @@ export default async function RootLayout({
         </a>
         <NextIntlClientProvider messages={messages} timeZone="Asia/Tokyo" now={new Date()}>
           <AnalyticsProvider>
-            <Header />
-            <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
-            <Footer />
-            <AiConcierge />
-            <BuyMeCoffeeWidget />
-            <TipJar />
-            <ShareModal />
-            <ShareStatus />
-            <RoastOMeter />
-            <CyberPet />
-            <StickySupportBanner />
-            <KofiNudge />
-            <GlobalKonamiListener />
+            <UserStatsProvider>
+              <Header />
+              <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
+              <Footer />
+              <AiConcierge />
+              <BuyMeCoffeeWidget />
+              <TipJar />
+              <ShareModal />
+              <ShareStatus />
+              <RoastOMeter />
+              <CyberPet />
+              <StickySupportBanner />
+              <KofiNudge />
+              <GlobalKonamiListener />
+              <AchievementNotification />
+            </UserStatsProvider>
             {/* Persistent Support Us Button - Commented out in favor of StickySupportBanner */}
             {/* <a
               href="/donate"

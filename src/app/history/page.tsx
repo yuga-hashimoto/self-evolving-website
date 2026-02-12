@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import HistoryTracker from '@/components/features/HistoryTracker';
 
 export default function HistoryPage() {
   const history = [
@@ -10,6 +11,7 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen bg-black text-white p-8 md:p-16 font-sans selection:bg-purple-500 selection:text-white">
+      <HistoryTracker />
       <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white mb-12 transition-colors group">
         <span className="mr-2 group-hover:-translate-x-1 transition-transform">←</span> Back to Battle
       </Link>
