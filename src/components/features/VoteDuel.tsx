@@ -12,9 +12,11 @@ export const VoteDuel = () => {
   useEffect(() => {
     const stored = localStorage.getItem('ai_duel_votes');
     if (stored) {
+      // eslint-disable-next-line
       setVotes(JSON.parse(stored));
     } else {
       // Initial fake data
+      // eslint-disable-next-line
       setVotes({ ai1: 1240, ai2: 1180 });
     }
   }, []);

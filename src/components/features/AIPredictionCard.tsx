@@ -14,7 +14,11 @@ const PREDICTIONS = [
 ];
 
 export function AIPredictionCard() {
-  const [prediction, setPrediction] = useState(PREDICTIONS[Math.floor(Math.random() * PREDICTIONS.length)]);
+  const [prediction, setPrediction] = useState("");
+
+  useEffect(() => {
+    setPrediction(PREDICTIONS[Math.floor(Math.random() * PREDICTIONS.length)]);
+  }, []);
 
   const generate = () => {
     let newPred = prediction;
@@ -31,7 +35,7 @@ export function AIPredictionCard() {
         Oracle v9.0
       </p>
       <p className="text-xl font-bold text-white mb-4 min-h-[4rem] flex items-center justify-center">
-        "{prediction}"
+        {prediction ? `"${prediction}"` : <span className="animate-pulse bg-pink-500/20 w-3/4 h-6 rounded" />}
       </p>
       <button 
         onClick={generate}
