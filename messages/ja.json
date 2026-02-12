@@ -9,8 +9,8 @@
   "footer": {
     "copyright": "© 2026 Self-Evolving Website Experiment. AIが自動生成したコードを含みます。",
     "newsletter": {
-      "title": "最新情報を受け取る",
-      "description": "進化の最新アップデートをメールでお届けします。",
+      "title": "AI生成の日次サマリー",
+      "description": "AIの進化の様子をまとめた日次サマリーをメールでお届けします。",
       "placeholder": "メールアドレスを入力",
       "button": "登録",
       "success": "登録ありがとうございます！",

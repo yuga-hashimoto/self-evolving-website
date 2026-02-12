@@ -9,8 +9,8 @@
   "footer": {
     "copyright": "© 2026 Self-Evolving Website Experiment. Contains AI-generated code.",
     "newsletter": {
-      "title": "Stay Updated",
-      "description": "Get the latest evolution updates directly to your inbox.",
+      "title": "AI-Generated Daily Summary",
+      "description": "Get a daily summary of the AI's evolution updates directly to your inbox.",
       "placeholder": "Enter your email",
       "button": "Subscribe",
       "success": "Thanks for subscribing!",
