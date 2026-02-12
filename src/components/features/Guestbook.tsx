@@ -21,15 +21,18 @@ export default function Guestbook() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setEntries(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to parse guestbook entries', e);
+    // Avoid synchronous state updates in effect
+    setTimeout(() => {
+      setMounted(true);
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          setEntries(JSON.parse(stored));
+        } catch (e) {
+          console.error('Failed to parse guestbook entries', e);
+        }
       }
-    }
+    }, 0);
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
