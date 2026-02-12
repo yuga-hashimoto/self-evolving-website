@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Leaf } from "lucide-react";
+import { useUserStats } from "@/components/features/UserStatsProvider";
 
 export default function CarbonFootprintTracker() {
   const [watts, setWatts] = useState(25);
-  const [co2, setCo2] = useState(0.5);
+  const { stats, addCo2 } = useUserStats();
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
@@ -20,11 +21,11 @@ export default function CarbonFootprintTracker() {
       // Per second: (Watts / 1000) * (1 / 3600) * 475
       const increment = (currentWatts / 1000) * (1 / 3600) * 475;
 
-      setCo2(prev => prev + increment);
+      addCo2(increment);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [addCo2]);
 
   return (
     <div
@@ -46,7 +47,7 @@ export default function CarbonFootprintTracker() {
         </span>
         <span className="w-px h-3 bg-zinc-700/50 mx-1"></span>
         <span className="tabular-nums">
-            {co2.toFixed(3)}g CO₂
+            {stats.co2.toFixed(3)}g CO₂
         </span>
       </div>
 
