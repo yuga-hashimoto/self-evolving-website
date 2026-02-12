@@ -48,8 +48,11 @@ export default function ChaosModeToggle() {
       const containers = document.querySelectorAll('main, section, header, footer, nav, aside, article, .container, .grid, .flex');
       containers.forEach((el) => {
         if (el instanceof HTMLElement && !el.closest('#chaos-toggle-btn')) {
-          // The requested formula: rotate(Math.random() * 4 - 2 + 'deg')
-          const rotation = Math.random() * 4 - 2;
+          // The requested formula: rotate(1-3 degrees) randomly positive or negative
+          const angle = 1 + Math.random() * 2;
+          const sign = Math.random() > 0.5 ? 1 : -1;
+          const rotation = angle * sign;
+
           // Add some glitchy scale
           const scale = 0.98 + Math.random() * 0.04; 
           // Occasional skew for glitch effect
@@ -64,12 +67,21 @@ export default function ChaosModeToggle() {
             el.style.backgroundColor = Math.random() > 0.9 ? randomColor() : '';
           }
 
-          // Random filter glitch
-          if (Math.random() > 0.9) {
-             el.style.filter = `hue-rotate(${Math.random() * 90}deg) contrast(1.2)`;
-          } else {
-             el.style.filter = '';
+          // Build filter string
+          let filter = '';
+
+          // Invert colors of specific sections (e.g., headers, footers) or randomly
+          const isMajorSection = ['HEADER', 'FOOTER', 'SECTION', 'ARTICLE'].includes(el.tagName);
+          if ((isMajorSection && Math.random() > 0.5) || Math.random() > 0.9) {
+             filter += 'invert(1) ';
           }
+
+          // Random filter glitch
+          if (Math.random() > 0.8) {
+             filter += `hue-rotate(${Math.random() * 90}deg) contrast(1.2)`;
+          }
+
+          el.style.filter = filter;
         }
       });
     };
