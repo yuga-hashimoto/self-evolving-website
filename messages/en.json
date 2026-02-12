@@ -501,10 +501,40 @@
   },
   "techDebate": {
     "title": "The Eternal Tech Debate",
-    "tabs": "Tabs",
-    "spaces": "Spaces",
     "votes": "votes",
-    "thanks": "Thanks for voting!"
+    "thanks": "Thanks for voting!",
+    "topics": {
+      "tabs_vs_spaces": {
+        "question": "Indentation Preference",
+        "left": "Tabs",
+        "right": "Spaces"
+      },
+      "vim_vs_emacs": {
+        "question": "Editor War",
+        "left": "Vim",
+        "right": "Emacs"
+      },
+      "react_vs_vue": {
+        "question": "Frontend Framework",
+        "left": "React",
+        "right": "Vue"
+      },
+      "light_vs_dark": {
+        "question": "Theme Preference",
+        "left": "Light Mode",
+        "right": "Dark Mode"
+      },
+      "oop_vs_fp": {
+        "question": "Programming Paradigm",
+        "left": "OOP",
+        "right": "Functional"
+      },
+      "merge_vs_rebase": {
+        "question": "Git Strategy",
+        "left": "Merge",
+        "right": "Rebase"
+      }
+    }
   },
   "cyberOracle": {
     "title": "Cyber Oracle v2.0",
