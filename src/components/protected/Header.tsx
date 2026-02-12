@@ -103,6 +103,14 @@ export default function Header() {
                                 <span>Share Battle</span>
                             </a>
 
+                            {/* Sponsor Project Button */}
+                            <Link
+                                href="/support"
+                                className="hidden lg:flex items-center px-4 py-1.5 rounded-full border border-yellow-500 text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200 font-bold text-xs shadow-[0_0_10px_rgba(234,179,8,0.3)] hover:shadow-[0_0_20px_rgba(234,179,8,0.5)]"
+                            >
+                                Sponsor Project
+                            </Link>
+
                             {/* Sponsor Evolution Button (Jules) */}
                             <a
                                 href="https://ko-fi.com/R5R51S97C4"
