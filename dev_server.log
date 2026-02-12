@@ -13,9 +13,6 @@ You can learn more, including how to opt-out if you'd not like to participate in
 https://nextjs.org/telemetry
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1539ms
-○ Compiling / ...
- GET / 200 in 20.4s (compile: 15.2s, proxy.ts: 159ms, render: 5.0s)
- GET / 200 in 498ms (compile: 10ms, proxy.ts: 7ms, render: 481ms)
- GET /support 200 in 47ms (compile: 10ms, proxy.ts: 11ms, render: 26ms)
- GET /grid.svg 404 in 1222ms (compile: 1037ms, render: 185ms)
+✓ Ready in 1499ms
+○ Compiling /pricing ...
+ GET /pricing 200 in 9.2s (compile: 7.7s, proxy.ts: 104ms, render: 1432ms)
