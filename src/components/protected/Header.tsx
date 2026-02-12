@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { IconDNA, IconChangelog, IconHome, IconAi1, IconAi2, IconRandom, IconAnalytics } from "@/components/icons/Icons";
+import { IconDNA, IconChangelog, IconHome, IconAi1, IconAi2, IconRandom, IconBrain, IconAnalytics } from "@/components/icons/Icons";
 import { useTranslations, useLocale } from 'next-intl';
 import SiteValueTicker from "@/components/SiteValueTicker";
 import LiveVisitorCounter from "@/components/LiveVisitorCounter";
@@ -29,6 +29,7 @@ export default function Header() {
         { href: "/models/ai1", label: t('ai1'), icon: IconAi1 },
         { href: "/models/ai2", label: t('ai2'), icon: IconAi2 },
         { href: "/changelogs/compare", label: t('compareHistory'), icon: IconChangelog },
+        { href: "/chat", label: t('chat'), icon: IconBrain },
         { href: "/dashboard", label: "Dashboard", icon: IconAnalytics },
         { href: "/random", label: "Random", icon: IconRandom },
     ];
