@@ -9,6 +9,7 @@ import { IconX } from "@/components/icons/Icons";
 import RetroCounter from "@/components/features/RetroCounter";
 import GlitchTrigger from "@/components/effects/GlitchTrigger";
 import { SponsorMarquee } from "@/components/features/SponsorMarquee";
+import NewsletterSignup from "@/components/features/NewsletterSignup";
 
 export default function Footer() {
     const t = useTranslations('footer');
@@ -43,6 +44,8 @@ export default function Footer() {
                         <IconX size={18} />
                         <span className="font-medium">Tweet this Version</span>
                     </a>
+
+                    <NewsletterSignup />
 
                     <div className="flex flex-col items-center gap-4">
                         <ChaosModeToggle />

@@ -7,7 +7,15 @@
     "githubAria": "GitHub Repository"
   },
   "footer": {
-    "copyright": "© 2026 Self-Evolving Website Experiment. AIが自動生成したコードを含みます。"
+    "copyright": "© 2026 Self-Evolving Website Experiment. AIが自動生成したコードを含みます。",
+    "newsletter": {
+      "title": "最新情報を受け取る",
+      "description": "進化の最新アップデートをメールでお届けします。",
+      "placeholder": "メールアドレスを入力",
+      "button": "登録",
+      "success": "登録ありがとうございます！",
+      "error": "有効なメールアドレスを入力してください。"
+    }
   },
   "home": {
     "heroTitle": "Self-Evolving Website",
