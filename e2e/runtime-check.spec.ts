@@ -1,4 +1,4 @@
-import { test, expect } from 'playwright/test';
+import { test, expect, Page } from 'playwright/test';
 
 /**
  * Runtime Error Detection Test
@@ -18,6 +18,21 @@ const pages = [
   { path: '/roadmap', name: 'Roadmap' },
   { path: '/sponsor', name: 'Sponsor' },
 ];
+
+async function handleDailyBonus(page: Page) {
+  const modal = page.getByTestId('daily-bonus-modal');
+  try {
+    // Short wait to see if modal appears (it's triggered by useEffect)
+    await modal.waitFor({ state: 'visible', timeout: 3000 });
+    const claimButton = page.getByTestId('daily-bonus-claim-button');
+    if (await claimButton.isVisible()) {
+      await claimButton.click();
+      await modal.waitFor({ state: 'hidden', timeout: 3000 });
+    }
+  } catch {
+    // Modal did not appear, proceed
+  }
+}
 
 for (const { path, name } of pages) {
   test(`${name} (${path}) has no console errors`, async ({ page }) => {
@@ -41,6 +56,9 @@ for (const { path, name } of pages) {
 
     // Wait for hydration to complete
     await page.waitForTimeout(1000);
+
+    // Handle Daily Bonus Modal if present
+    await handleDailyBonus(page);
 
     // Test interactive elements (accordions)
     const accordionButtons = page.locator('button[aria-expanded]');
@@ -74,6 +92,9 @@ test('Home page analytics accordion works without errors', async ({ page }) => {
 
   await page.goto('/');
   await page.waitForLoadState('networkidle');
+
+  // Handle Daily Bonus Modal if present
+  await handleDailyBonus(page);
 
   // Find and click the analytics accordion
   const detailsButton = page.locator('text=詳細').or(page.locator('text=Details'));
