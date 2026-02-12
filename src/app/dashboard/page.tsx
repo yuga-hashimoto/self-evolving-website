@@ -21,12 +21,16 @@ const dummyData = [
   { name: 'Current', ai1: 780, ai2: 810, commits: 25 },
 ];
 
+type IconComponentType = React.ComponentType<{ size?: number; className?: string }>;
+
 export default function DashboardPage() {
   const { stats, unlockAchievement } = useUserStats();
 
   useEffect(() => {
     unlockAchievement('self_aware');
   }, [unlockAchievement]);
+
+  const icons = LucideIcons as unknown as Record<string, IconComponentType>;
 
   return (
     <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -95,7 +99,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {ACHIEVEMENTS.map((achievement) => {
                     const isUnlocked = stats.unlockedAchievements.includes(achievement.id);
-                    const IconComponent = (LucideIcons as any)[achievement.icon] || LucideIcons.Trophy;
+                    const IconComponent = icons[achievement.icon] || LucideIcons.Trophy;
 
                     return (
                         <div

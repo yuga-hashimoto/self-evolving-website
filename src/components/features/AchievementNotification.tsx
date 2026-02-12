@@ -5,6 +5,8 @@ import { useUserStats } from "@/components/features/UserStatsProvider";
 import * as LucideIcons from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+type IconComponentType = React.ComponentType<{ size?: number; className?: string }>;
+
 export default function AchievementNotification() {
   const { lastUnlocked, clearLastUnlocked } = useUserStats();
 
@@ -18,7 +20,8 @@ export default function AchievementNotification() {
   }, [lastUnlocked, clearLastUnlocked]);
 
   // Dynamic icon
-  const IconComponent = lastUnlocked ? (LucideIcons as any)[lastUnlocked.icon] || LucideIcons.Trophy : LucideIcons.Trophy;
+  const icons = LucideIcons as unknown as Record<string, IconComponentType>;
+  const IconComponent = lastUnlocked ? icons[lastUnlocked.icon] || LucideIcons.Trophy : LucideIcons.Trophy;
 
   return (
     <AnimatePresence>

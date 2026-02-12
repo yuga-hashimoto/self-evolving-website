@@ -1,13 +1,19 @@
-import { LucideIcon } from 'lucide-react';
+
 // We store icon names as strings to easily map them in the component
 export type IconName = 'Footprints' | 'Leaf' | 'Zap' | 'Clock' | 'Brain' | 'Heart' | 'Terminal' | 'Rocket';
+
+export interface AchievementStats {
+  co2: number;
+  visits: number;
+  unlockedAchievements: string[];
+}
 
 export interface Achievement {
   id: string;
   title: string;
   description: string;
   icon: IconName;
-  condition?: (stats: any) => boolean;
+  condition?: (stats: AchievementStats) => boolean;
 }
 
 export const ACHIEVEMENTS: Achievement[] = [
