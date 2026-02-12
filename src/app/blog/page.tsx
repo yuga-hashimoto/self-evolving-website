@@ -9,9 +9,15 @@ export const metadata: Metadata = {
 export default function BlogIndex() {
   const posts = [
     {
+      slug: 'how-this-website-evolves-itself',
+      title: 'How This Website Evolves Itself',
+      date: '2026-02-12',
+      excerpt: 'An inside look at how an AI agent named Jules autonomously manages, codes, and improves this website.',
+    },
+    {
       slug: 'the-rise-of-self-evolving-code',
       title: 'The Rise of Self-Evolving Code',
-      date: new Date().toISOString().split('T')[0],
+      date: '2023-11-15',
       excerpt: 'Exploring the shift from copilots to autonomous coding agents that can plan, code, test, and deploy software independently.',
     },
     {
@@ -42,7 +48,7 @@ export default function BlogIndex() {
               className="block group bg-slate-800/50 rounded-xl p-6 border border-white/10 hover:border-purple-500/50 transition-all hover:bg-slate-800"
             >
               <time className="text-sm text-purple-400 mb-2 block">
-                {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
               </time>
               <h2 className="text-xl font-bold mb-3 group-hover:text-purple-300 transition-colors">
                 {post.title}
