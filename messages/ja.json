@@ -501,9 +501,39 @@
   },
   "techDebate": {
     "title": "永遠の技術論争",
-    "tabs": "タブ",
-    "spaces": "スペース",
     "votes": "票",
-    "thanks": "投票ありがとうございます！"
+    "thanks": "投票ありがとうございます！",
+    "topics": {
+      "tabs_vs_spaces": {
+        "question": "インデントの好み",
+        "left": "タブ",
+        "right": "スペース"
+      },
+      "vim_vs_emacs": {
+        "question": "エディタ戦争",
+        "left": "Vim",
+        "right": "Emacs"
+      },
+      "react_vs_vue": {
+        "question": "フロントエンドフレームワーク",
+        "left": "React",
+        "right": "Vue"
+      },
+      "light_vs_dark": {
+        "question": "テーマ設定",
+        "left": "ライトモード",
+        "right": "ダークモード"
+      },
+      "oop_vs_fp": {
+        "question": "プログラミングパラダイム",
+        "left": "オブジェクト指向",
+        "right": "関数型"
+      },
+      "merge_vs_rebase": {
+        "question": "Git戦略",
+        "left": "マージ",
+        "right": "リベース"
+      }
+    }
   }
 }
