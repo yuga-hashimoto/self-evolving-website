@@ -74,7 +74,7 @@ export default function DailyLoginBonus() {
                 </div>
 
                 {/* Background Glitch Effects (Optional) */}
-                <div className="absolute inset-0 pointer-events-none opacity-20 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,transparent)]" />
+                <div className="absolute inset-0 pointer-events-none opacity-20 bg-center [mask-image:linear-gradient(180deg,white,transparent)]" />
             </div>
         </div>
     );
