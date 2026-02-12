@@ -544,6 +544,17 @@
       }
     }
   },
+  "featurePoll": {
+    "title": "Vote Next Evolution",
+    "pending": "Evolution pending...",
+    "cta": "Cast your vote to influence the algorithm.",
+    "features": {
+      "voice": "Voice Chat Integration 🎤",
+      "darker": "Darker Mode (Vantablack) 🌑",
+      "rap": "AI Rap Battle Mode 🎤",
+      "destruct": "Self-Destruct Button 💥"
+    }
+  },
   "cyberOracle": {
     "title": "Cyber Oracle v2.0",
     "description": "Decrypt your daily destiny. The algorithm knows all.",
