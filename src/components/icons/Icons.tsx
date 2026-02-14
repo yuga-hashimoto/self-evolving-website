@@ -441,6 +441,17 @@ export function IconSun({ size = 48, className = "", "aria-hidden": ariaHidden, 
     );
 }
 
+// Merch/Shopping icon
+export function IconMerch({ size = 48, className = "", "aria-hidden": ariaHidden, "aria-label": ariaLabel }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden={ariaHidden} aria-label={ariaLabel} role={ariaLabel ? "img" : undefined}>
+            <path d="M18 20h28v32c0 2.2-1.8 4-4 4H22c-2.2 0-4-1.8-4-4V20z" stroke="#a855f7" strokeWidth="3" fill="#a855f7" fillOpacity="0.1" />
+            <path d="M24 20c0-6 4-10 8-10s8 4 8 10" stroke="#f472b6" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="32" cy="38" r="5" fill="#FFD93D" />
+        </svg>
+    );
+}
+
 // Icon map for dynamic usage
 export const iconMap = {
     ai1: IconAi1,
@@ -474,6 +485,7 @@ export const iconMap = {
     random: IconRandom,
     moon: IconMoon,
     sun: IconSun,
+    merch: IconMerch,
 } as const;
 
 export type IconName = keyof typeof iconMap;
