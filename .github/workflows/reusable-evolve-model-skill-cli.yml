@@ -276,13 +276,13 @@ jobs:
             -p "$SKILL_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Claude Code CLI execution completed"
         env:
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           ANTHROPIC_API_KEY: ""
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api
-          ANTHROPIC_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.5-flash-preview-05-20:free
+          ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
+          ANTHROPIC_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_SONNET_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_OPUS_MODEL: nvidia/moonshotai/kimi-k2.5
           SERPER_API_KEY: ${{ secrets.serper_api_key }}
           MODEL_ID: ${{ inputs.model_id }}
           SKILL_PROMPT: ${{ steps.prepare-skill.outputs.skill_prompt }}
@@ -367,9 +367,9 @@ jobs:
         env:
           MODEL_ID: ${{ inputs.model_id }}
           # OpenRouter経由で同じモデルを使用（フォールバック用）
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           ANTHROPIC_API_KEY: ""
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api
+          ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ inputs.anthropic_model }}
           ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ inputs.anthropic_model }}
@@ -491,13 +491,13 @@ jobs:
             -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 1 completed"
         env:
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           ANTHROPIC_API_KEY: ""
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api
-          ANTHROPIC_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.5-flash-preview-05-20:free
+          ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
+          ANTHROPIC_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_SONNET_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_OPUS_MODEL: nvidia/moonshotai/kimi-k2.5
           MODEL_ID: ${{ inputs.model_id }}
           FIX_PROMPT: ${{ steps.prepare_fix_1.outputs.fix_prompt }}
 
@@ -572,13 +572,13 @@ jobs:
             -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 2 completed"
         env:
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           ANTHROPIC_API_KEY: ""
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api
-          ANTHROPIC_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.5-flash-preview-05-20:free
+          ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
+          ANTHROPIC_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_SONNET_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_OPUS_MODEL: nvidia/moonshotai/kimi-k2.5
           MODEL_ID: ${{ inputs.model_id }}
           FIX_PROMPT: ${{ steps.prepare_fix_2.outputs.fix_prompt }}
 
@@ -653,13 +653,13 @@ jobs:
             -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 3 completed"
         env:
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           ANTHROPIC_API_KEY: ""
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api
-          ANTHROPIC_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.5-flash-preview-05-20:free
+          ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
+          ANTHROPIC_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_SONNET_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_OPUS_MODEL: nvidia/moonshotai/kimi-k2.5
           MODEL_ID: ${{ inputs.model_id }}
           FIX_PROMPT: ${{ steps.prepare_fix_3.outputs.fix_prompt }}
 
@@ -769,13 +769,13 @@ jobs:
             -p "$MOBILE_FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Mobile Fix Attempt 1 completed"
         env:
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.model_api_key }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           ANTHROPIC_API_KEY: ""
-          ANTHROPIC_BASE_URL: https://openrouter.ai/api
-          ANTHROPIC_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_SONNET_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: google/gemini-2.5-flash-preview-05-20:free
-          ANTHROPIC_DEFAULT_OPUS_MODEL: google/gemini-2.5-flash-preview-05-20:free
+          ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
+          ANTHROPIC_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_SONNET_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: nvidia/moonshotai/kimi-k2.5
+          ANTHROPIC_DEFAULT_OPUS_MODEL: nvidia/moonshotai/kimi-k2.5
           MODEL_ID: ${{ inputs.model_id }}
           MOBILE_FIX_PROMPT: ${{ steps.prepare_mobile_fix_1.outputs.mobile_fix_prompt }}
 
