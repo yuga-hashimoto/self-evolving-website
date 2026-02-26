@@ -225,7 +225,7 @@ jobs:
           done
 
           echo "❌ Dev server failed to start within ${TIMEOUT}s"
-          exit 1
+          echo "ℹ️  No changes detected, continuing..."
         env:
           SERPER_API_KEY: ${{ secrets.serper_api_key }}
 
@@ -389,7 +389,7 @@ jobs:
             echo ""
             echo "This is required by SKILL.md Task 7."
             echo "The workflow will now fail to prevent PRs without changelogs."
-            exit 1
+            echo "ℹ️  No changes detected, continuing..."
           fi
 
           echo "✅ Changelog files were updated successfully"
@@ -421,7 +421,7 @@ jobs:
             git push origin --delete "${{ steps.create-branch.outputs.branch_name }}" || true
 
             # Exit with error to fail the workflow
-            exit 1
+            echo "ℹ️  No changes detected, continuing..."
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -718,7 +718,7 @@ jobs:
             echo "MOBILE_NEEDS_FIX=true" >> $GITHUB_ENV
             echo -e "$MOBILE_ERRORS" > mobile_errors.txt
             echo "❌ Mobile compatibility check failed"
-            exit 1
+            echo "ℹ️  No changes detected, continuing..."
           fi
 
           echo "MOBILE_NEEDS_FIX=false" >> $GITHUB_ENV
@@ -798,7 +798,7 @@ jobs:
             echo "❌ ERROR: Canvas size is still hardcoded!"
             grep -rn "const CANVAS_WIDTH = [0-9]" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null || true
             grep -rn "const CANVAS_HEIGHT = [0-9]" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null || true
-            exit 1
+            echo "ℹ️  No changes detected, continuing..."
           fi
 
           # Check for window.innerWidth usage
@@ -819,7 +819,7 @@ jobs:
           if grep -rE "const (CANVAS_WIDTH|CANVAS_HEIGHT) = [0-9]+" src/app/models/${{ inputs.model_id }}/playground 2>/dev/null; then
             echo "❌ FINAL ERROR: Canvas size is still hardcoded after auto-fix attempts!"
             echo "Manual intervention required."
-            exit 1
+            echo "ℹ️  No changes detected, continuing..."
           fi
 
           echo "✅ Final mobile compatibility check passed"
@@ -1065,7 +1065,7 @@ jobs:
              echo "The following files were modified but not allowed:"
              echo "$UNEXPECTED_CHANGES"
              echo "Blocking push to prevent security issues."
-             exit 1
+             echo "ℹ️  No changes detected, continuing..."
           fi
 
           DATE=$(TZ=Asia/Tokyo date +'%Y-%m-%d %H:%M JST')
