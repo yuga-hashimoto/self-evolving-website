@@ -276,7 +276,7 @@ jobs:
             -p "$SKILL_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Claude Code CLI execution completed"
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NVIDIA_API_KEY: ${{ secrets.model_api_key }}
           ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
@@ -367,7 +367,7 @@ jobs:
         env:
           MODEL_ID: ${{ inputs.model_id }}
           # OpenRouter経由で同じモデルを使用（フォールバック用）
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NVIDIA_API_KEY: ${{ secrets.model_api_key }}
           ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
@@ -491,7 +491,7 @@ jobs:
             -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 1 completed"
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NVIDIA_API_KEY: ${{ secrets.model_api_key }}
           ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
@@ -572,7 +572,7 @@ jobs:
             -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 2 completed"
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NVIDIA_API_KEY: ${{ secrets.model_api_key }}
           ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
@@ -653,7 +653,7 @@ jobs:
             -p "$FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Auto-Fix Attempt 3 completed"
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NVIDIA_API_KEY: ${{ secrets.model_api_key }}
           ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
@@ -769,7 +769,7 @@ jobs:
             -p "$MOBILE_FIX_PROMPT" 2>&1 | tee -a /tmp/claude-code-output.log
           echo "✅ Mobile Fix Attempt 1 completed"
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NVIDIA_API_KEY: ${{ secrets.model_api_key }}
           ANTHROPIC_API_KEY: ""
           ANTHROPIC_BASE_URL: https://integrate.api.nvidia.com/v1
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
